@@ -3,6 +3,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import dotenv from 'dotenv'
 import authRoutes from './routes/auth'
+import profileRoutes from './routes/profile'
 import { authErrorHandler } from './middleware/auth'
 
 // Load environment variables
@@ -22,6 +23,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
 
+// Static file serving for uploads
+app.use('/uploads', express.static('uploads'))
+
 // Request ID middleware for tracking
 app.use((req, res, next) => {
   req.headers['x-request-id'] = req.headers['x-request-id'] || 
@@ -40,6 +44,7 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes)
+app.use('/api/profile', profileRoutes)
 
 // Error handling middleware
 app.use(authErrorHandler)
@@ -59,7 +64,7 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 })
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     error: {
       code: 'NOT_FOUND',
@@ -76,6 +81,7 @@ if (require.main === module) {
     console.log(`User service running on port ${PORT}`)
     console.log(`Health check: http://localhost:${PORT}/health`)
     console.log(`Auth endpoints: http://localhost:${PORT}/api/auth`)
+    console.log(`Profile endpoints: http://localhost:${PORT}/api/profile`)
   })
 }
 

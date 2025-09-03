@@ -50,6 +50,13 @@ export const userFixtures = {
       rating: 4.8,
       reviewsCount: 50,
       verificationStatus: VerificationStatus.VERIFIED,
+      location: {
+        latitude: 34.0522,
+        longitude: -118.2437,
+        address: '789 Business Ave',
+        city: 'Los Angeles',
+        country: 'USA',
+      },
     },
     isActive: true,
     createdAt: new Date('2023-01-02T00:00:00Z'),
@@ -61,6 +68,8 @@ export const userFixtures = {
     id: '789e0123-e89b-12d3-a456-426614174002',
     email: 'manager@example.com',
     passwordHash: '$2a$12$hashedpassword789',
+    phone: undefined,
+    telegramId: undefined,
     role: UserRole.MANAGER,
     profile: {
       firstName: 'Site',
@@ -79,6 +88,8 @@ export const userFixtures = {
     id: '012e3456-e89b-12d3-a456-426614174003',
     email: 'admin@example.com',
     passwordHash: '$2a$12$hashedpasswordabc',
+    phone: undefined,
+    telegramId: undefined,
     role: UserRole.ADMIN,
     profile: {
       firstName: 'System',
@@ -97,6 +108,8 @@ export const userFixtures = {
     id: '345e6789-e89b-12d3-a456-426614174004',
     email: 'unverified@example.com',
     passwordHash: '$2a$12$hashedpassworddef',
+    phone: undefined,
+    telegramId: undefined,
     role: UserRole.USER,
     profile: {
       firstName: 'Unverified',
@@ -115,6 +128,8 @@ export const userFixtures = {
     id: '678e9012-e89b-12d3-a456-426614174005',
     email: 'inactive@example.com',
     passwordHash: '$2a$12$hashedpasswordghi',
+    phone: undefined,
+    telegramId: undefined,
     role: UserRole.USER,
     profile: {
       firstName: 'Inactive',
@@ -134,7 +149,7 @@ export const userFixtures = {
  */
 export const createUserEntities = () => {
   const entities: Record<string, UserEntity> = {}
-  
+
   Object.entries(userFixtures).forEach(([key, fixture]) => {
     entities[key] = new UserEntity(
       fixture.id,
@@ -149,7 +164,7 @@ export const createUserEntities = () => {
       fixture.updatedAt
     )
   })
-  
+
   return entities
 }
 
@@ -169,7 +184,7 @@ export const databaseRowFixtures = {
     created_at: userFixtures.standardUser.createdAt,
     updated_at: userFixtures.standardUser.updatedAt,
   },
-  
+
   agencyUser: {
     id: userFixtures.agencyUser.id,
     email: userFixtures.agencyUser.email,
@@ -194,9 +209,12 @@ export const createUserTestData = {
     profile: {
       firstName: 'New',
       lastName: 'User',
+      rating: 0,
+      reviewsCount: 0,
+      verificationStatus: VerificationStatus.UNVERIFIED,
     },
   },
-  
+
   validWithOptionalFields: {
     email: 'fulluser@example.com',
     password: 'securepassword123',
@@ -206,6 +224,9 @@ export const createUserTestData = {
     profile: {
       firstName: 'Full',
       lastName: 'User',
+      rating: 0,
+      reviewsCount: 0,
+      verificationStatus: VerificationStatus.UNVERIFIED,
       location: {
         latitude: 37.7749,
         longitude: -122.4194,
@@ -215,13 +236,16 @@ export const createUserTestData = {
       },
     },
   },
-  
+
   invalid: {
     email: 'invalid-email',
     password: '123', // Too short
     profile: {
       firstName: '', // Empty
       lastName: 'User',
+      rating: 0,
+      reviewsCount: 0,
+      verificationStatus: VerificationStatus.UNVERIFIED,
     },
   },
 }
@@ -243,15 +267,15 @@ export const updateUserTestData = {
       },
     },
   },
-  
+
   emailUpdate: {
     email: 'newemail@example.com',
   },
-  
+
   roleUpdate: {
     role: UserRole.AGENCY,
   },
-  
+
   statusUpdate: {
     isActive: false,
   },
@@ -283,7 +307,7 @@ export async function setupTestDatabase(): Promise<void> {
   try {
     // Run database migrations
     await runMigrations()
-    
+
     // Clear any existing test data
     await cleanupTestDatabase()
   } catch (error) {
@@ -312,7 +336,7 @@ export async function cleanupTestDatabase(): Promise<void> {
  */
 export async function insertUserFixtures(): Promise<void> {
   const fixtures = Object.values(userFixtures)
-  
+
   for (const fixture of fixtures) {
     await query(
       `INSERT INTO users (id, email, password_hash, phone, telegram_id, role, profile, is_active, created_at, updated_at)

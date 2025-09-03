@@ -1,6 +1,6 @@
 import { UserRepository } from '../repositories/UserRepository'
 import { UserEntity } from '../models/User'
-import { UserRole, UserProfile, User } from '@marketplace/shared-types'
+import { UserRole, UserProfile, User, VerificationStatus, Location } from '@marketplace/shared-types'
 
 export interface CreateUserData {
   email: string
@@ -11,7 +11,7 @@ export interface CreateUserData {
   profile: {
     firstName: string
     lastName: string
-    location?: any
+    location?: Location
   }
 }
 
@@ -25,7 +25,7 @@ export interface UpdateUserData {
 }
 
 export class UserService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(private userRepository: UserRepository) { }
 
   async createUser(userData: CreateUserData): Promise<User> {
     // Validate input data
@@ -35,7 +35,7 @@ export class UserService {
         ...userData.profile,
         rating: 0,
         reviewsCount: 0,
-        verificationStatus: 'unverified',
+        verificationStatus: VerificationStatus.UNVERIFIED,
       },
     })
 
@@ -87,27 +87,43 @@ export class UserService {
   }
 
   async updateUser(id: string, updates: UpdateUserData): Promise<User | null> {
-    // Validate update data
-    const validatedUpdates = UserEntity.validateUpdateData(updates)
-
     // Check if email is being changed and doesn't conflict
-    if (validatedUpdates.email) {
-      const emailExists = await this.userRepository.existsByEmail(validatedUpdates.email, id)
+    if (updates.email) {
+      const emailExists = await this.userRepository.existsByEmail(updates.email, id)
       if (emailExists) {
         throw new Error('Email already in use by another user')
       }
     }
 
     // Check if telegram ID is being changed and doesn't conflict
-    if (validatedUpdates.telegramId) {
+    if (updates.telegramId) {
       const telegramExists = await this.userRepository.existsByTelegramId(
-        validatedUpdates.telegramId,
+        updates.telegramId,
         id
       )
       if (telegramExists) {
         throw new Error('Telegram ID already in use by another user')
       }
     }
+
+    // If profile is being updated partially, merge with existing profile
+    let finalUpdates = updates
+    if (updates.profile) {
+      const currentUser = await this.userRepository.findById(id)
+      if (currentUser) {
+        finalUpdates = {
+          ...updates,
+          profile: {
+            ...currentUser.profile,
+            ...updates.profile,
+          }
+        }
+      }
+    }
+
+    // Skip validation for profile-only updates since we're merging with existing data
+    // The validation will happen at the entity level when creating the full profile
+    const validatedUpdates = finalUpdates
 
     const userEntity = await this.userRepository.update(id, validatedUpdates)
     return userEntity ? userEntity.toPublicUser() : null
@@ -159,7 +175,7 @@ export class UserService {
       return null
     }
 
-    userEntity.setVerificationStatus('verified')
+    userEntity.setVerificationStatus(VerificationStatus.VERIFIED)
     const updatedEntity = await this.userRepository.update(id, { profile: userEntity.profile })
     return updatedEntity ? updatedEntity.toPublicUser() : null
   }

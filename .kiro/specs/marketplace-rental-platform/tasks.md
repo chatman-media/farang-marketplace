@@ -35,7 +35,7 @@
   - Write integration tests for authentication flows
   - _Requirements: 7.1, 3.4_
 
-- [ ] 2.5 Create user profile management endpoints
+- [x] 2.5 Create user profile management endpoints
   - Implement CRUD operations for user profiles
   - Add profile image upload functionality with file validation
   - Create user verification system for trusted users

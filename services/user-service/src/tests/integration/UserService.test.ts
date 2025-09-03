@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { UserService } from '../../services/UserService'
-import { UserRepository } from '../../repositories/UserRepository'
 import { UserEntity } from '../../models/User'
 import { UserRole, VerificationStatus } from '@marketplace/shared-types'
 import { testUserData } from '../setup'
