@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: marketplace-postgres
+    environment:
+      POSTGRES_DB: marketplace
+      POSTGRES_USER: marketplace_user
+      POSTGRES_PASSWORD: marketplace_pass
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketplace_user -d marketplace"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: marketplace-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: marketplace-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+
+  # Development tools
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: marketplace-mailhog
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
+    restart: unless-stopped
+
+  # Optional: Database admin tool
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: marketplace-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@marketplace.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    profiles:
+      - tools
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  pgadmin_data:

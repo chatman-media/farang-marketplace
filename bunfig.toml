@@ -1,0 +1,13 @@
+[install]
+# Configure package manager behavior
+cache = true
+exact = false
+production = false
+
+[install.scopes]
+# Workspace configuration
+"@marketplace" = { path = "./packages" }
+
+[test]
+# Test configuration
+preload = ["./test/setup.ts"]

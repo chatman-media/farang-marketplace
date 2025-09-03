@@ -1,0 +1,50 @@
+{
+  "name": "marketplace-rental-platform",
+  "version": "1.0.0",
+  "description": "Marketplace for vehicle and equipment rental/sales",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:reset": "docker-compose down -v && docker-compose up -d",
+    "setup": "bun install && bun run docker:up && bun run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.34.0",
+    "@types/node": "24.3.0",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
+    "@typescript-eslint/eslint-plugin": "8.42.0",
+    "@typescript-eslint/parser": "8.42.0",
+    "@vitejs/plugin-react": "5.0.2",
+    "eslint": "9.34.0",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "^3.6.2",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "turbo": "2.5.6",
+    "typescript": "^5.9.2",
+    "vite": "7.1.4"
+  },
+  "engines": {
+    "bun": ">=1.2.0"
+  },
+  "packageManager": "bun@1.2.1"
+}

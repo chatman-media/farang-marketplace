@@ -1,0 +1,61 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local", "**/.env"],
+  "globalEnv": ["NODE_ENV", "DATABASE_URL", "REDIS_URL", "MINIO_ENDPOINT"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.js",
+        "src/**/*.jsx",
+        "package.json",
+        "tsconfig.json",
+        "vite.config.ts"
+      ],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "build/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", ".eslintrc.js", "package.json"],
+      "outputs": []
+    },
+    "lint:fix": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", ".eslintrc.js", "package.json"],
+      "outputs": [],
+      "cache": false
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json", "package.json"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "src/**/*.spec.ts",
+        "vitest.config.ts",
+        "package.json"
+      ],
+      "outputs": ["coverage/**"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

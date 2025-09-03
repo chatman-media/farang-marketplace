@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@marketplace/shared-types": ["../../packages/shared-types/src"]
+    }
+  },
+  "include": ["src/**/*"]
+}
