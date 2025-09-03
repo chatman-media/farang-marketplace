@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "server": "tsx watch src/server.ts",
     "build": "tsc",
     "test": "vitest --run",
     "test:watch": "vitest",
@@ -28,6 +29,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/pg": "^8.15.5",
     "@types/cors": "^2.8.19",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.0.0",
     "tsx": "^4.20.5",
     "vitest": "3.2.4",
     "typescript": "^5.9.2"

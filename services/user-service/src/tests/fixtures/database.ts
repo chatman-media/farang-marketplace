@@ -1,5 +1,7 @@
 import { UserRole, VerificationStatus } from '@marketplace/shared-types'
 import { UserEntity } from '../../models/User'
+import { pool, query } from '../../database/connection'
+import { runMigrations } from '../../database/migrate'
 
 /**
  * Database fixtures for testing
@@ -24,6 +26,7 @@ export const userFixtures = {
       location: {
         latitude: 40.7128,
         longitude: -74.006,
+        address: '123 Main St',
         city: 'New York',
         country: 'USA',
       },
@@ -139,8 +142,8 @@ export const createUserEntities = () => {
       fixture.passwordHash,
       fixture.role,
       fixture.profile,
-      fixture.phone,
-      fixture.telegramId,
+      'phone' in fixture ? fixture.phone : undefined,
+      'telegramId' in fixture ? fixture.telegramId : undefined,
       fixture.isActive,
       fixture.createdAt,
       fixture.updatedAt
@@ -206,6 +209,7 @@ export const createUserTestData = {
       location: {
         latitude: 37.7749,
         longitude: -122.4194,
+        address: '456 Market St',
         city: 'San Francisco',
         country: 'USA',
       },
@@ -233,6 +237,7 @@ export const updateUserTestData = {
       location: {
         latitude: 51.5074,
         longitude: -0.1278,
+        address: '789 Oxford St',
         city: 'London',
         country: 'UK',
       },
@@ -268,4 +273,70 @@ export const mockUserStats = {
   unverifiedUsers: 25,
   pendingVerification: 10,
   rejectedVerification: 5,
+}
+/**
+ 
+* Setup test database
+ * Runs migrations and prepares database for testing
+ */
+export async function setupTestDatabase(): Promise<void> {
+  try {
+    // Run database migrations
+    await runMigrations()
+    
+    // Clear any existing test data
+    await cleanupTestDatabase()
+  } catch (error) {
+    console.error('Failed to setup test database:', error)
+    throw error
+  }
+}
+
+/**
+ * Cleanup test database
+ * Removes all test data from database tables
+ */
+export async function cleanupTestDatabase(): Promise<void> {
+  try {
+    // Delete all users (this will cascade to related tables)
+    await query('DELETE FROM users WHERE email LIKE $1', ['%@example.com'])
+    await query('DELETE FROM users WHERE email LIKE $1', ['test%@%'])
+  } catch (error) {
+    console.error('Failed to cleanup test database:', error)
+    // Don't throw error during cleanup to avoid masking test failures
+  }
+}
+
+/**
+ * Insert test user fixtures into database
+ */
+export async function insertUserFixtures(): Promise<void> {
+  const fixtures = Object.values(userFixtures)
+  
+  for (const fixture of fixtures) {
+    await query(
+      `INSERT INTO users (id, email, password_hash, phone, telegram_id, role, profile, is_active, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       ON CONFLICT (id) DO NOTHING`,
+      [
+        fixture.id,
+        fixture.email,
+        fixture.passwordHash,
+        fixture.phone || null,
+        fixture.telegramId || null,
+        fixture.role,
+        JSON.stringify(fixture.profile),
+        fixture.isActive,
+        fixture.createdAt,
+        fixture.updatedAt,
+      ]
+    )
+  }
+}
+
+/**
+ * Get test database connection for direct queries
+ */
+export function getTestConnection() {
+  return pool
 }
