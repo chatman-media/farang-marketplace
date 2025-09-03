@@ -6,19 +6,17 @@ import {
   ChangePasswordSchema,
 } from '../../models/User'
 import { UserRole, VerificationStatus } from '@marketplace/shared-types'
+import { testUserData } from '../setup'
 
-// Mock bcrypt to avoid async issues
-vi.mock('bcryptjs', () => ({
-  hash: vi.fn().mockResolvedValue('$2a$12$mockedhash'),
-  compare: vi.fn().mockImplementation((password: string, hash: string) => {
-    return Promise.resolve(password === 'correctpassword')
-  }),
-}))
+// bcrypt is used directly for real password hashing in tests
 
 describe('UserEntity', () => {
   let user: UserEntity
 
   beforeEach(() => {
+    // Reset all mocks before each test
+    vi.clearAllMocks()
+    
     user = new UserEntity(
       '123e4567-e89b-12d3-a456-426614174000',
       'test@example.com',
@@ -86,26 +84,51 @@ describe('UserEntity', () => {
       const password = 'testpassword123'
       const hash = await UserEntity.hashPassword(password)
 
-      expect(hash).toBe('$2a$12$mockedhash')
+      // Check that hash is generated and has correct format
+      expect(hash).toMatch(/^\$2[ab]\$\d{2}\$.{53}$/)
+      expect(hash).not.toBe(password) // Should be different from original
     })
 
     it('should validate correct password', async () => {
-      const isValid = await user.validatePassword('correctpassword')
+      // Create a user with a known password hash
+      const password = 'testpassword123'
+      const hash = await UserEntity.hashPassword(password)
+      const testUser = new UserEntity(
+        'test-id',
+        'test@example.com',
+        hash,
+        UserRole.USER,
+        { firstName: 'Test', lastName: 'User', rating: 0, reviewsCount: 0, verificationStatus: VerificationStatus.UNVERIFIED }
+      )
+
+      const isValid = await testUser.validatePassword(password)
       expect(isValid).toBe(true)
     })
 
     it('should reject incorrect password', async () => {
-      const isValid = await user.validatePassword('wrongpassword')
+      const password = 'testpassword123'
+      const hash = await UserEntity.hashPassword(password)
+      const testUser = new UserEntity(
+        'test-id',
+        'test@example.com',
+        hash,
+        UserRole.USER,
+        { firstName: 'Test', lastName: 'User', rating: 0, reviewsCount: 0, verificationStatus: VerificationStatus.UNVERIFIED }
+      )
+
+      const isValid = await testUser.validatePassword('wrongpassword')
       expect(isValid).toBe(false)
     })
 
     it('should update password and timestamp', async () => {
       const oldUpdatedAt = user.updatedAt
+      const oldPasswordHash = user.passwordHash
       const newPassword = 'newpassword123'
 
       await user.updatePassword(newPassword)
 
-      expect(user.passwordHash).toBe('$2a$12$mockedhash')
+      expect(user.passwordHash).not.toBe(oldPasswordHash)
+      expect(user.passwordHash).toMatch(/^\$2[ab]\$\d{2}\$.{53}$/)
       expect(user.updatedAt.getTime()).toBeGreaterThan(oldUpdatedAt.getTime())
     })
   })
@@ -284,6 +307,62 @@ describe('UserEntity', () => {
       expect(() => UserEntity.validateCreateData(invalidData)).toThrow()
     })
 
+    it('should validate email format in create data', () => {
+      const invalidEmails = ['invalid', '@example.com', 'test@', 'test.example.com']
+      
+      invalidEmails.forEach(email => {
+        const data = { ...testUserData.validCreateData, email }
+        expect(() => UserEntity.validateCreateData(data)).toThrow()
+      })
+
+      const validEmails = ['test@example.com', 'user.name@domain.co.uk', 'test+tag@example.org']
+      
+      validEmails.forEach(email => {
+        const data = { ...testUserData.validCreateData, email }
+        expect(() => UserEntity.validateCreateData(data)).not.toThrow()
+      })
+    })
+
+    it('should validate phone format in create data', () => {
+      const invalidPhones = ['abc123', '123abc', '++123456789']
+      
+      invalidPhones.forEach(phone => {
+        const data = { ...testUserData.validCreateData, phone }
+        expect(() => UserEntity.validateCreateData(data)).toThrow()
+      })
+
+      const validPhones = ['+1234567890', '123-456-7890', '(123) 456-7890', '+66 12 345 6789']
+      
+      validPhones.forEach(phone => {
+        const data = { ...testUserData.validCreateData, phone }
+        expect(() => UserEntity.validateCreateData(data)).not.toThrow()
+      })
+    })
+
+    it('should validate profile fields in create data', () => {
+      // Test firstName validation
+      expect(() => UserEntity.validateCreateData({
+        ...testUserData.validCreateData,
+        profile: { ...testUserData.validCreateData.profile, firstName: '' }
+      })).toThrow()
+
+      expect(() => UserEntity.validateCreateData({
+        ...testUserData.validCreateData,
+        profile: { ...testUserData.validCreateData.profile, firstName: 'a'.repeat(51) }
+      })).toThrow()
+
+      // Test lastName validation
+      expect(() => UserEntity.validateCreateData({
+        ...testUserData.validCreateData,
+        profile: { ...testUserData.validCreateData.profile, lastName: '' }
+      })).toThrow()
+
+      expect(() => UserEntity.validateCreateData({
+        ...testUserData.validCreateData,
+        profile: { ...testUserData.validCreateData.profile, lastName: 'a'.repeat(51) }
+      })).toThrow()
+    })
+
     it('should validate update user data', () => {
       const validUpdateData = {
         email: 'newemail@example.com',
@@ -295,6 +374,20 @@ describe('UserEntity', () => {
       expect(() => UserEntity.validateUpdateData(validUpdateData)).not.toThrow()
     })
 
+    it('should validate partial update data', () => {
+      const partialUpdates = [
+        { email: 'new@example.com' },
+        { phone: '+9876543210' },
+        { profile: { firstName: 'NewName' } },
+        { role: UserRole.AGENCY },
+        { isActive: false },
+      ]
+
+      partialUpdates.forEach(update => {
+        expect(() => UserEntity.validateUpdateData(update)).not.toThrow()
+      })
+    })
+
     it('should validate password change data', () => {
       const validPasswordData = {
         currentPassword: 'oldpassword',
@@ -304,12 +397,82 @@ describe('UserEntity', () => {
       expect(() => UserEntity.validatePasswordChange(validPasswordData)).not.toThrow()
     })
 
+    it('should reject invalid password change data', () => {
+      // Test short new password
+      expect(() => UserEntity.validatePasswordChange({
+        currentPassword: 'oldpassword',
+        newPassword: '123' // Too short
+      })).toThrow()
+
+      // Test missing fields
+      expect(() => UserEntity.validatePasswordChange({ currentPassword: 'oldpassword' })).toThrow()
+      expect(() => UserEntity.validatePasswordChange({ newPassword: 'newpassword123' })).toThrow()
+      expect(() => UserEntity.validatePasswordChange({})).toThrow()
+    })
+
     it('should validate user for specific role', () => {
       expect(user.validateForRole(UserRole.USER)).toBe(true)
       expect(user.validateForRole(UserRole.ADMIN)).toBe(false)
 
       user.deactivate()
       expect(user.validateForRole(UserRole.USER)).toBe(false)
+    })
+  })
+
+  describe('Edge Cases and Error Handling', () => {
+    it('should handle null/undefined values gracefully', () => {
+      expect(() => UserEntity.fromDatabaseRow(null)).toThrow()
+      expect(() => UserEntity.fromDatabaseRow(undefined)).toThrow()
+    })
+
+    it('should handle empty profile updates', () => {
+      const originalProfile = { ...user.profile }
+      
+      user.updateProfile({})
+      
+      expect(user.profile).toEqual(originalProfile)
+    })
+
+    it('should handle rating edge cases', () => {
+      user.updateRating(0, 0)
+      expect(user.profile.rating).toBe(0)
+      expect(user.profile.reviewsCount).toBe(0)
+
+      user.updateRating(5, 1000)
+      expect(user.profile.rating).toBe(5)
+      expect(user.profile.reviewsCount).toBe(1000)
+    })
+
+    it('should handle verification status transitions', () => {
+      const statuses = [
+        VerificationStatus.UNVERIFIED,
+        VerificationStatus.PENDING,
+        VerificationStatus.VERIFIED,
+        VerificationStatus.REJECTED,
+      ]
+
+      statuses.forEach(status => {
+        user.setVerificationStatus(status)
+        expect(user.profile.verificationStatus).toBe(status)
+      })
+    })
+
+    it('should maintain data integrity during updates', () => {
+      const originalId = user.id
+      const originalEmail = user.email
+      const originalCreatedAt = user.createdAt
+
+      user.updateProfile({ firstName: 'NewName' })
+      user.updateRating(4.0, 20)
+      user.setVerificationStatus(VerificationStatus.PENDING)
+
+      // These should not change
+      expect(user.id).toBe(originalId)
+      expect(user.email).toBe(originalEmail)
+      expect(user.createdAt).toBe(originalCreatedAt)
+
+      // updatedAt should change
+      expect(user.updatedAt.getTime()).toBeGreaterThan(originalCreatedAt.getTime())
     })
   })
 

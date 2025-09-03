@@ -1,101 +1,579 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { UserService } from '../../services/UserService'
 import { UserRepository } from '../../repositories/UserRepository'
+import { UserEntity } from '../../models/User'
 import { UserRole, VerificationStatus } from '@marketplace/shared-types'
+import { testUserData } from '../setup'
 
-// Simple integration test without database mocking
-describe('UserService Integration', () => {
-  describe('Input Validation', () => {
-    it('should validate user creation data correctly', async () => {
-      const userRepository = new UserRepository()
-      const userService = new UserService(userRepository)
+// Mock the UserRepository
+vi.mock('../../repositories/UserRepository')
 
-      const validUserData = {
-        email: 'test@example.com',
-        password: 'password123',
-        profile: {
-          firstName: 'John',
-          lastName: 'Doe',
-        },
-      }
+describe('UserService Integration Tests', () => {
+  let userService: UserService
+  let mockUserRepository: any
 
-      // This should not throw validation errors
-      expect(() => {
-        // Test the validation logic without actually creating the user
-        const userData = {
-          ...validUserData,
-          profile: {
-            ...validUserData.profile,
-            rating: 0,
-            reviewsCount: 0,
-            verificationStatus: VerificationStatus.UNVERIFIED,
-          },
+  beforeEach(() => {
+    mockUserRepository = {
+      create: vi.fn(),
+      findById: vi.fn(),
+      findByEmail: vi.fn(),
+      findByTelegramId: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      updatePassword: vi.fn(),
+      existsByEmail: vi.fn(),
+      existsByTelegramId: vi.fn(),
+      getUserStats: vi.fn(),
+    }
+
+    userService = new UserService(mockUserRepository)
+  })
+
+  describe('User Creation', () => {
+    it('should create a new user successfully', async () => {
+      const userData = testUserData.validCreateData
+      const mockUserEntity = new UserEntity(
+        'new-user-id',
+        userData.email,
+        'hashed-password',
+        UserRole.USER,
+        {
+          ...userData.profile,
+          rating: 0,
+          reviewsCount: 0,
+          verificationStatus: VerificationStatus.UNVERIFIED,
         }
-        // This would be called internally by createUser
-        // We're just testing the validation part
-        expect(userData.email).toBe('test@example.com')
-        expect(userData.profile.firstName).toBe('John')
-      }).not.toThrow()
+      )
+
+      mockUserRepository.findByEmail.mockResolvedValue(null)
+      mockUserRepository.create.mockResolvedValue(mockUserEntity)
+
+      const result = await userService.createUser(userData)
+
+      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(userData.email)
+      expect(mockUserRepository.create).toHaveBeenCalled()
+      expect(result).toEqual(mockUserEntity.toPublicUser())
+      expect(result.email).toBe(userData.email)
+      expect(result.profile.firstName).toBe(userData.profile.firstName)
     })
 
-    it('should reject invalid user creation data', () => {
-      const invalidUserData = {
-        email: 'invalid-email',
-        password: '123', // Too short
-        profile: {
-          firstName: '', // Empty
-          lastName: 'Doe',
-        },
-      }
+    it('should throw error if email already exists', async () => {
+      const userData = testUserData.validCreateData
+      const existingUser = new UserEntity(
+        'existing-id',
+        userData.email,
+        'hash',
+        UserRole.USER,
+        userData.profile
+      )
 
-      expect(() => {
-        // This simulates the validation that would happen in createUser
-        if (!invalidUserData.email.includes('@')) {
-          throw new Error('Invalid email')
+      mockUserRepository.findByEmail.mockResolvedValue(existingUser)
+
+      await expect(userService.createUser(userData)).rejects.toThrow(
+        'User with this email already exists'
+      )
+      expect(mockUserRepository.create).not.toHaveBeenCalled()
+    })
+
+    it('should throw error if telegram ID already exists', async () => {
+      const userData = {
+        ...testUserData.validCreateData,
+        telegramId: 'existing-telegram-id',
+      }
+      const existingUser = new UserEntity(
+        'existing-id',
+        'other@example.com',
+        'hash',
+        UserRole.USER,
+        userData.profile,
+        undefined,
+        userData.telegramId
+      )
+
+      mockUserRepository.findByEmail.mockResolvedValue(null)
+      mockUserRepository.findByTelegramId.mockResolvedValue(existingUser)
+
+      await expect(userService.createUser(userData)).rejects.toThrow(
+        'User with this Telegram ID already exists'
+      )
+      expect(mockUserRepository.create).not.toHaveBeenCalled()
+    })
+
+    it('should validate user data before creation', async () => {
+      const invalidUserData = testUserData.invalidCreateData
+
+      await expect(userService.createUser(invalidUserData)).rejects.toThrow()
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled()
+      expect(mockUserRepository.create).not.toHaveBeenCalled()
+    })
+
+    it('should set default values for new users', async () => {
+      const userData = testUserData.validCreateData
+      const mockUserEntity = new UserEntity(
+        'new-user-id',
+        userData.email,
+        'hashed-password',
+        UserRole.USER,
+        {
+          ...userData.profile,
+          rating: 0,
+          reviewsCount: 0,
+          verificationStatus: VerificationStatus.UNVERIFIED,
         }
-        if (invalidUserData.password.length < 8) {
-          throw new Error('Password too short')
-        }
-        if (!invalidUserData.profile.firstName.trim()) {
-          throw new Error('First name required')
-        }
-      }).toThrow()
+      )
+
+      mockUserRepository.findByEmail.mockResolvedValue(null)
+      mockUserRepository.create.mockResolvedValue(mockUserEntity)
+
+      const result = await userService.createUser(userData)
+
+      expect(result.role).toBe(UserRole.USER)
+      expect(result.profile.rating).toBe(0)
+      expect(result.profile.reviewsCount).toBe(0)
+      expect(result.profile.verificationStatus).toBe(VerificationStatus.UNVERIFIED)
     })
   })
 
-  describe('Business Logic', () => {
-    it('should handle role-based permissions correctly', () => {
-      const userRepository = new UserRepository()
-      const userService = new UserService(userRepository)
+  describe('User Retrieval', () => {
+    it('should get user by ID', async () => {
+      const mockUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        testUserData.validUser.profile
+      )
 
-      // Test role validation logic
-      const roles = [UserRole.USER, UserRole.AGENCY, UserRole.MANAGER, UserRole.ADMIN]
+      mockUserRepository.findById.mockResolvedValue(mockUserEntity)
 
-      roles.forEach(role => {
-        expect(Object.values(UserRole)).toContain(role)
-      })
+      const result = await userService.getUserById(testUserData.validUser.id)
 
-      // Test that default role is USER
-      const defaultRole = UserRole.USER
-      expect(defaultRole).toBe('user')
+      expect(mockUserRepository.findById).toHaveBeenCalledWith(testUserData.validUser.id)
+      expect(result).toEqual(mockUserEntity.toPublicUser())
     })
 
-    it('should validate password requirements', () => {
-      const validPasswords = ['password123', 'mySecurePass1', 'anotherValidPassword']
+    it('should return null if user not found by ID', async () => {
+      mockUserRepository.findById.mockResolvedValue(null)
 
-      const invalidPasswords = [
-        '123', // Too short
-        'short', // Too short
-        '1234567', // Too short
-      ]
+      const result = await userService.getUserById('non-existent-id')
 
-      validPasswords.forEach(password => {
-        expect(password.length).toBeGreaterThanOrEqual(8)
+      expect(result).toBeNull()
+    })
+
+    it('should get user by email', async () => {
+      const mockUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        testUserData.validUser.profile
+      )
+
+      mockUserRepository.findByEmail.mockResolvedValue(mockUserEntity)
+
+      const result = await userService.getUserByEmail(testUserData.validUser.email)
+
+      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(testUserData.validUser.email)
+      expect(result).toEqual(mockUserEntity.toPublicUser())
+    })
+
+    it('should get user by telegram ID', async () => {
+      const mockUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        testUserData.validUser.profile,
+        testUserData.validUser.phone,
+        testUserData.validUser.telegramId
+      )
+
+      mockUserRepository.findByTelegramId.mockResolvedValue(mockUserEntity)
+
+      const result = await userService.getUserByTelegramId(testUserData.validUser.telegramId!)
+
+      expect(mockUserRepository.findByTelegramId).toHaveBeenCalledWith(
+        testUserData.validUser.telegramId
+      )
+      expect(result).toEqual(mockUserEntity.toPublicUser())
+    })
+  })
+
+  describe('User Updates', () => {
+    it('should update user successfully', async () => {
+      const updateData = testUserData.updateData
+      const updatedUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email, // Keep original email since updateData doesn't have email
+        'hash',
+        UserRole.USER,
+        { ...testUserData.validUser.profile, ...updateData.profile }
+      )
+
+      mockUserRepository.update.mockResolvedValue(updatedUserEntity)
+
+      const result = await userService.updateUser(testUserData.validUser.id, updateData)
+
+      // Since updateData doesn't have email, existsByEmail shouldn't be called
+      expect(mockUserRepository.update).toHaveBeenCalledWith(
+        testUserData.validUser.id,
+        expect.objectContaining({
+          profile: expect.objectContaining(updateData.profile)
+        })
+      )
+      expect(result).toEqual(updatedUserEntity.toPublicUser())
+    })
+
+    it('should throw error if email already exists during update', async () => {
+      const updateData = { email: 'existing@example.com' }
+
+      mockUserRepository.existsByEmail.mockResolvedValue(true)
+
+      await expect(
+        userService.updateUser(testUserData.validUser.id, updateData)
+      ).rejects.toThrow('Email already in use by another user')
+
+      expect(mockUserRepository.update).not.toHaveBeenCalled()
+    })
+
+    it('should throw error if telegram ID already exists during update', async () => {
+      const updateData = { telegramId: 'existing-telegram' }
+
+      mockUserRepository.existsByEmail.mockResolvedValue(false)
+      mockUserRepository.existsByTelegramId.mockResolvedValue(true)
+
+      await expect(
+        userService.updateUser(testUserData.validUser.id, updateData)
+      ).rejects.toThrow('Telegram ID already in use by another user')
+
+      expect(mockUserRepository.update).not.toHaveBeenCalled()
+    })
+
+    it('should validate update data', async () => {
+      const invalidUpdateData = { email: 'invalid-email' }
+
+      await expect(
+        userService.updateUser(testUserData.validUser.id, invalidUpdateData)
+      ).rejects.toThrow()
+
+      expect(mockUserRepository.update).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Password Management', () => {
+    it('should change password successfully', async () => {
+      const mockUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'old-hash',
+        UserRole.USER,
+        testUserData.validUser.profile
+      )
+
+      // Mock password validation to return true
+      vi.spyOn(mockUserEntity, 'validatePassword').mockResolvedValue(true)
+
+      mockUserRepository.findById.mockResolvedValue(mockUserEntity)
+      mockUserRepository.updatePassword.mockResolvedValue(true)
+
+      const result = await userService.changePassword(
+        testUserData.validUser.id,
+        'oldpassword',
+        'newpassword123'
+      )
+
+      expect(mockUserRepository.findById).toHaveBeenCalledWith(testUserData.validUser.id)
+      expect(mockUserEntity.validatePassword).toHaveBeenCalledWith('oldpassword')
+      expect(mockUserRepository.updatePassword).toHaveBeenCalled()
+      expect(result).toBe(true)
+    })
+
+    it('should throw error if user not found during password change', async () => {
+      mockUserRepository.findById.mockResolvedValue(null)
+
+      await expect(
+        userService.changePassword('non-existent-id', 'oldpassword', 'newpassword123')
+      ).rejects.toThrow('User not found')
+
+      expect(mockUserRepository.updatePassword).not.toHaveBeenCalled()
+    })
+
+    it('should throw error if current password is incorrect', async () => {
+      const mockUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        testUserData.validUser.profile
+      )
+
+      vi.spyOn(mockUserEntity, 'validatePassword').mockResolvedValue(false)
+      mockUserRepository.findById.mockResolvedValue(mockUserEntity)
+
+      await expect(
+        userService.changePassword(testUserData.validUser.id, 'wrongpassword', 'newpassword123')
+      ).rejects.toThrow('Current password is incorrect')
+
+      expect(mockUserRepository.updatePassword).not.toHaveBeenCalled()
+    })
+
+    it('should validate password change data', async () => {
+      // Test short new password - this should fail validation before repository call
+      await expect(
+        userService.changePassword(testUserData.validUser.id, 'oldpassword', '123')
+      ).rejects.toThrow()
+
+      // Test missing fields - these should fail validation before repository call
+      await expect(
+        userService.changePassword(testUserData.validUser.id, 'oldpassword', undefined as any)
+      ).rejects.toThrow()
+
+      await expect(
+        userService.changePassword(testUserData.validUser.id, undefined as any, 'newpassword123')
+      ).rejects.toThrow()
+    })
+  })
+
+  describe('User Management Operations', () => {
+    it('should delete user successfully', async () => {
+      mockUserRepository.delete.mockResolvedValue(true)
+
+      const result = await userService.deleteUser(testUserData.validUser.id)
+
+      expect(mockUserRepository.delete).toHaveBeenCalledWith(testUserData.validUser.id)
+      expect(result).toBe(true)
+    })
+
+    it('should activate user', async () => {
+      const activatedUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        testUserData.validUser.profile,
+        undefined,
+        undefined,
+        true
+      )
+
+      mockUserRepository.update.mockResolvedValue(activatedUserEntity)
+
+      const result = await userService.activateUser(testUserData.validUser.id)
+
+      expect(mockUserRepository.update).toHaveBeenCalledWith(testUserData.validUser.id, {
+        isActive: true,
       })
+      expect(result).toEqual(activatedUserEntity.toPublicUser())
+    })
 
-      invalidPasswords.forEach(password => {
-        expect(password.length).toBeLessThan(8)
+    it('should deactivate user', async () => {
+      const deactivatedUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        testUserData.validUser.profile,
+        undefined,
+        undefined,
+        false
+      )
+
+      mockUserRepository.update.mockResolvedValue(deactivatedUserEntity)
+
+      const result = await userService.deactivateUser(testUserData.validUser.id)
+
+      expect(mockUserRepository.update).toHaveBeenCalledWith(testUserData.validUser.id, {
+        isActive: false,
       })
+      expect(result).toEqual(deactivatedUserEntity.toPublicUser())
+    })
+
+    it('should update user role', async () => {
+      const updatedUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.AGENCY,
+        testUserData.validUser.profile
+      )
+
+      mockUserRepository.update.mockResolvedValue(updatedUserEntity)
+
+      const result = await userService.updateUserRole(testUserData.validUser.id, UserRole.AGENCY)
+
+      expect(mockUserRepository.update).toHaveBeenCalledWith(testUserData.validUser.id, {
+        role: UserRole.AGENCY,
+      })
+      expect(result).toEqual(updatedUserEntity.toPublicUser())
+    })
+
+    it('should verify user', async () => {
+      const mockUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        {
+          ...testUserData.validUser.profile,
+          verificationStatus: VerificationStatus.UNVERIFIED,
+        }
+      )
+
+      const verifiedUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        {
+          ...testUserData.validUser.profile,
+          verificationStatus: VerificationStatus.VERIFIED,
+        }
+      )
+
+      mockUserRepository.findById.mockResolvedValue(mockUserEntity)
+      mockUserRepository.update.mockResolvedValue(verifiedUserEntity)
+
+      const result = await userService.verifyUser(testUserData.validUser.id)
+
+      expect(mockUserRepository.findById).toHaveBeenCalledWith(testUserData.validUser.id)
+      expect(mockUserRepository.update).toHaveBeenCalled()
+      expect(result?.profile.verificationStatus).toBe(VerificationStatus.VERIFIED)
+    })
+
+    it('should return null when verifying non-existent user', async () => {
+      mockUserRepository.findById.mockResolvedValue(null)
+
+      const result = await userService.verifyUser('non-existent-id')
+
+      expect(result).toBeNull()
+      expect(mockUserRepository.update).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Authentication Support', () => {
+    it('should validate user credentials successfully', async () => {
+      const mockUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        testUserData.validUser.profile,
+        undefined,
+        undefined,
+        true
+      )
+
+      vi.spyOn(mockUserEntity, 'validatePassword').mockResolvedValue(true)
+      mockUserRepository.findByEmail.mockResolvedValue(mockUserEntity)
+
+      const result = await userService.validateUserCredentials(
+        testUserData.validUser.email,
+        'correctpassword'
+      )
+
+      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(testUserData.validUser.email)
+      expect(mockUserEntity.validatePassword).toHaveBeenCalledWith('correctpassword')
+      expect(result).toBe(mockUserEntity)
+    })
+
+    it('should return null for invalid credentials', async () => {
+      const mockUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        testUserData.validUser.profile
+      )
+
+      vi.spyOn(mockUserEntity, 'validatePassword').mockResolvedValue(false)
+      mockUserRepository.findByEmail.mockResolvedValue(mockUserEntity)
+
+      const result = await userService.validateUserCredentials(
+        testUserData.validUser.email,
+        'wrongpassword'
+      )
+
+      expect(result).toBeNull()
+    })
+
+    it('should return null for non-existent user', async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null)
+
+      const result = await userService.validateUserCredentials(
+        'nonexistent@example.com',
+        'password'
+      )
+
+      expect(result).toBeNull()
+    })
+
+    it('should return null for inactive user', async () => {
+      const inactiveUserEntity = new UserEntity(
+        testUserData.validUser.id,
+        testUserData.validUser.email,
+        'hash',
+        UserRole.USER,
+        testUserData.validUser.profile,
+        undefined,
+        undefined,
+        false // inactive
+      )
+
+      mockUserRepository.findByEmail.mockResolvedValue(inactiveUserEntity)
+
+      const result = await userService.validateUserCredentials(
+        testUserData.validUser.email,
+        'correctpassword'
+      )
+
+      expect(result).toBeNull()
+    })
+  })
+
+  describe('Statistics and Analytics', () => {
+    it('should get user statistics', async () => {
+      const mockStats = {
+        totalUsers: 100,
+        activeUsers: 85,
+        usersByRole: {
+          user: 80,
+          agency: 15,
+          manager: 4,
+          admin: 1,
+        },
+        verifiedUsers: 60,
+      }
+
+      mockUserRepository.getUserStats.mockResolvedValue(mockStats)
+
+      const result = await userService.getUserStats()
+
+      expect(mockUserRepository.getUserStats).toHaveBeenCalled()
+      expect(result).toEqual(mockStats)
+    })
+  })
+
+  describe('Error Handling and Edge Cases', () => {
+    it('should handle repository errors gracefully', async () => {
+      const userData = testUserData.validCreateData
+      mockUserRepository.findByEmail.mockRejectedValue(new Error('Database connection failed'))
+
+      await expect(userService.createUser(userData)).rejects.toThrow('Database connection failed')
+    })
+
+    it('should handle null returns from repository', async () => {
+      mockUserRepository.update.mockResolvedValue(null)
+
+      const result = await userService.updateUser(testUserData.validUser.id, { email: 'new@example.com' })
+
+      expect(result).toBeNull()
+    })
+
+    it('should validate all input parameters', async () => {
+      // Test with null/undefined values
+      await expect(userService.getUserById('')).resolves.toBeNull()
+      await expect(userService.getUserByEmail('')).resolves.toBeNull()
+      await expect(userService.getUserByTelegramId('')).resolves.toBeNull()
     })
   })
 })
