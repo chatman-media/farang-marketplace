@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator';
 import { ServiceProviderService } from '../services/ServiceProviderService.js';
 import type {
   ServiceProviderFilters,
-  ServiceProviderProfile
+  ServiceProviderProfile,
 } from '@marketplace/shared-types';
 
 // Custom interfaces for our API
@@ -56,7 +56,8 @@ interface CreateServiceProviderRequestBody {
   images?: string[];
 }
 
-interface UpdateServiceProviderRequestBody extends Partial<CreateServiceProviderRequestBody> {
+interface UpdateServiceProviderRequestBody
+  extends Partial<CreateServiceProviderRequestBody> {
   images?: string[];
 }
 
@@ -69,28 +70,67 @@ export class ServiceProviderController {
 
   // Validation rules for service provider creation
   static createValidationRules = [
-    body('businessName').isLength({ min: 2, max: 100 }).withMessage('Business name must be 2-100 characters'),
-    body('businessType').isIn(['individual', 'company', 'partnership']).withMessage('Invalid business type'),
-    body('description').isLength({ min: 20, max: 1000 }).withMessage('Description must be 20-1000 characters'),
-    body('services').isArray({ min: 1 }).withMessage('At least one service must be provided'),
-    body('services.*.name').isLength({ min: 2, max: 100 }).withMessage('Service name must be 2-100 characters'),
-    body('services.*.category').notEmpty().withMessage('Service category is required'),
-    body('services.*.price').isNumeric().withMessage('Service price must be numeric'),
-    body('contactInfo.phone').isMobilePhone('any').withMessage('Valid phone number is required'),
+    body('businessName')
+      .isLength({ min: 2, max: 100 })
+      .withMessage('Business name must be 2-100 characters'),
+    body('businessType')
+      .isIn(['individual', 'company', 'partnership'])
+      .withMessage('Invalid business type'),
+    body('description')
+      .isLength({ min: 20, max: 1000 })
+      .withMessage('Description must be 20-1000 characters'),
+    body('services')
+      .isArray({ min: 1 })
+      .withMessage('At least one service must be provided'),
+    body('services.*.name')
+      .isLength({ min: 2, max: 100 })
+      .withMessage('Service name must be 2-100 characters'),
+    body('services.*.category')
+      .notEmpty()
+      .withMessage('Service category is required'),
+    body('services.*.price')
+      .isNumeric()
+      .withMessage('Service price must be numeric'),
+    body('contactInfo.phone')
+      .isMobilePhone('any')
+      .withMessage('Valid phone number is required'),
     body('contactInfo.email').isEmail().withMessage('Valid email is required'),
-    body('location.address').isLength({ min: 10, max: 200 }).withMessage('Address must be 10-200 characters'),
-    body('location.city').isLength({ min: 2, max: 50 }).withMessage('City must be 2-50 characters'),
-    body('location.region').isLength({ min: 2, max: 50 }).withMessage('Region must be 2-50 characters'),
-    body('location.country').isLength({ min: 2, max: 50 }).withMessage('Country must be 2-50 characters'),
+    body('location.address')
+      .isLength({ min: 10, max: 200 })
+      .withMessage('Address must be 10-200 characters'),
+    body('location.city')
+      .isLength({ min: 2, max: 50 })
+      .withMessage('City must be 2-50 characters'),
+    body('location.region')
+      .isLength({ min: 2, max: 50 })
+      .withMessage('Region must be 2-50 characters'),
+    body('location.country')
+      .isLength({ min: 2, max: 50 })
+      .withMessage('Country must be 2-50 characters'),
   ];
 
   // Validation rules for service provider update
   static updateValidationRules = [
-    body('businessName').optional().isLength({ min: 2, max: 100 }).withMessage('Business name must be 2-100 characters'),
-    body('description').optional().isLength({ min: 20, max: 1000 }).withMessage('Description must be 20-1000 characters'),
-    body('services').optional().isArray({ min: 1 }).withMessage('At least one service must be provided'),
-    body('contactInfo.phone').optional().isMobilePhone('any').withMessage('Valid phone number is required'),
-    body('contactInfo.email').optional().isEmail().withMessage('Valid email is required'),
+    body('businessName')
+      .optional()
+      .isLength({ min: 2, max: 100 })
+      .withMessage('Business name must be 2-100 characters'),
+    body('description')
+      .optional()
+      .isLength({ min: 20, max: 1000 })
+      .withMessage('Description must be 20-1000 characters'),
+    body('services')
+      .optional()
+      .isArray({ min: 1 })
+      .withMessage('At least one service must be provided'),
+    body('contactInfo.phone')
+      .optional()
+      .isMobilePhone('any')
+      .withMessage('Valid phone number is required'),
+    body('contactInfo.email')
+      .optional()
+      .isEmail()
+      .withMessage('Valid email is required'),
   ];
 
   // Create service provider
@@ -127,7 +167,10 @@ export class ServiceProviderController {
         images: req.body.processedImages || [],
       };
 
-      const serviceProvider = await this.serviceProviderService.createServiceProvider(serviceProviderData);
+      const serviceProvider =
+        await this.serviceProviderService.createServiceProvider(
+          serviceProviderData
+        );
 
       res.status(201).json({
         success: true,
@@ -155,7 +198,8 @@ export class ServiceProviderController {
     try {
       const { id } = req.params;
 
-      const serviceProvider = await this.serviceProviderService.getServiceProviderById(id);
+      const serviceProvider =
+        await this.serviceProviderService.getServiceProviderById(id);
 
       if (!serviceProvider) {
         return res.status(404).json({
@@ -196,21 +240,39 @@ export class ServiceProviderController {
 
       const filters: ServiceProviderFilters = {
         providerType: req.query.businessType as any,
-        serviceTypes: req.query.services ? (req.query.services as string).split(',') as any : undefined,
-        location: req.query.location ? { city: req.query.location as string } : undefined,
-        verificationLevel: req.query.verified === 'true' ? 'verified' as any : undefined,
-        rating: req.query.rating ? {
-          min: parseFloat(req.query.rating as string),
-          max: 5
-        } : undefined,
-        priceRange: req.query.minPrice || req.query.maxPrice ? {
-          min: req.query.minPrice ? parseFloat(req.query.minPrice as string) : 0,
-          max: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : 999999,
-          currency: 'THB'
-        } : undefined,
+        serviceTypes: req.query.services
+          ? ((req.query.services as string).split(',') as any)
+          : undefined,
+        location: req.query.location
+          ? { city: req.query.location as string }
+          : undefined,
+        verificationLevel:
+          req.query.verified === 'true' ? ('verified' as any) : undefined,
+        rating: req.query.rating
+          ? {
+              min: parseFloat(req.query.rating as string),
+              max: 5,
+            }
+          : undefined,
+        priceRange:
+          req.query.minPrice || req.query.maxPrice
+            ? {
+                min: req.query.minPrice
+                  ? parseFloat(req.query.minPrice as string)
+                  : 0,
+                max: req.query.maxPrice
+                  ? parseFloat(req.query.maxPrice as string)
+                  : 999999,
+                currency: 'THB',
+              }
+            : undefined,
       };
 
-      const result = await this.serviceProviderService.searchServiceProviders(filters, page, limit);
+      const result = await this.serviceProviderService.searchServiceProviders(
+        filters,
+        page,
+        limit
+      );
 
       res.json({
         success: true,
@@ -267,7 +329,12 @@ export class ServiceProviderController {
         images: req.body.processedImages || req.body.images,
       };
 
-      const serviceProvider = await this.serviceProviderService.updateServiceProvider(id, updateData, userId);
+      const serviceProvider =
+        await this.serviceProviderService.updateServiceProvider(
+          id,
+          updateData,
+          userId
+        );
 
       if (!serviceProvider) {
         return res.status(404).json({
@@ -318,7 +385,10 @@ export class ServiceProviderController {
         });
       }
 
-      const success = await this.serviceProviderService.deleteServiceProvider(id, userId);
+      const success = await this.serviceProviderService.deleteServiceProvider(
+        id,
+        userId
+      );
 
       if (!success) {
         return res.status(404).json({

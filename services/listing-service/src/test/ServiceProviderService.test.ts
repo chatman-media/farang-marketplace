@@ -164,7 +164,9 @@ describe('ServiceProviderService', () => {
         expect(Array.isArray(searchFilters.languages)).toBe(true);
 
         // Validate price range
-        expect(searchFilters.priceRange.min).toBeLessThan(searchFilters.priceRange.max);
+        expect(searchFilters.priceRange.min).toBeLessThan(
+          searchFilters.priceRange.max
+        );
         expect(searchFilters.priceRange).toHaveProperty('currency');
 
         // Validate rating range
@@ -184,7 +186,9 @@ describe('ServiceProviderService', () => {
         pricingData.forEach((pricing) => {
           expect(pricing.price).toBeGreaterThan(0);
           expect(pricing.currency).toBe('THB');
-          expect(['hourly', 'daily', 'project', 'fixed']).toContain(pricing.priceType);
+          expect(['hourly', 'daily', 'project', 'fixed']).toContain(
+            pricing.priceType
+          );
         });
       });
 
@@ -249,8 +253,12 @@ describe('ServiceProviderService', () => {
           expect(slot.end).toMatch(/^\d{2}:\d{2}$/);
 
           // Convert to minutes for comparison
-          const startMinutes = parseInt(slot.start.split(':')[0]) * 60 + parseInt(slot.start.split(':')[1]);
-          const endMinutes = parseInt(slot.end.split(':')[0]) * 60 + parseInt(slot.end.split(':')[1]);
+          const startMinutes =
+            parseInt(slot.start.split(':')[0]) * 60 +
+            parseInt(slot.start.split(':')[1]);
+          const endMinutes =
+            parseInt(slot.end.split(':')[0]) * 60 +
+            parseInt(slot.end.split(':')[1]);
 
           expect(endMinutes).toBeGreaterThan(startMinutes);
         });
@@ -259,8 +267,18 @@ describe('ServiceProviderService', () => {
       });
 
       it('should validate business types', () => {
-        const validBusinessTypes = ['individual', 'company', 'agency', 'freelancer'];
-        const testBusinessTypes = ['individual', 'company', 'agency', 'freelancer'];
+        const validBusinessTypes = [
+          'individual',
+          'company',
+          'agency',
+          'freelancer',
+        ];
+        const testBusinessTypes = [
+          'individual',
+          'company',
+          'agency',
+          'freelancer',
+        ];
 
         testBusinessTypes.forEach((type) => {
           expect(validBusinessTypes).toContain(type);

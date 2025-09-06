@@ -3,7 +3,7 @@ import { db } from '../db/connection.js';
 import { serviceProviders } from '../db/schema.js';
 import type {
   ServiceProviderFilters,
-  ServiceProviderProfile
+  ServiceProviderProfile,
 } from '@marketplace/shared-types';
 
 // Custom interfaces for our API
@@ -57,65 +57,74 @@ interface CreateServiceProviderRequest {
   images?: string[];
 }
 
-interface UpdateServiceProviderRequest extends Partial<CreateServiceProviderRequest> {
+interface UpdateServiceProviderRequest
+  extends Partial<CreateServiceProviderRequest> {
   images?: string[];
 }
 
 export class ServiceProviderService {
   // Create service provider
-  async createServiceProvider(data: CreateServiceProviderRequest): Promise<ServiceProviderProfile> {
+  async createServiceProvider(
+    data: CreateServiceProviderRequest
+  ): Promise<ServiceProviderProfile> {
     try {
       const serviceProviderId = crypto.randomUUID();
 
-      const [serviceProvider] = await db.insert(serviceProviders).values({
-        id: serviceProviderId,
-        userId: data.ownerId,
-        providerType: data.businessType,
-        businessName: data.businessName,
-        displayName: data.businessName || data.contactInfo.name || 'Service Provider',
-        bio: data.description,
-        email: data.contactInfo.email,
-        phone: data.contactInfo.phone,
-        website: data.contactInfo.website,
-        primaryLocation: {
-          latitude: data.location.latitude || 0,
-          longitude: data.location.longitude || 0,
-          address: data.location.address,
-          city: data.location.city,
-          region: data.location.region,
-          country: data.location.country,
-          postalCode: data.location.postalCode,
-        },
-        serviceCapabilities: data.services.map(service => ({
-          serviceType: service.category,
-          category: service.category,
-          subcategory: service.subcategory,
-          description: service.description || service.name,
-          pricing: {
-            basePrice: service.price,
-            currency: service.currency || 'THB',
-            priceType: service.priceType || 'fixed',
-            minimumCharge: service.minimumCharge,
+      const [serviceProvider] = await db
+        .insert(serviceProviders)
+        .values({
+          id: serviceProviderId,
+          userId: data.ownerId,
+          providerType: data.businessType,
+          businessName: data.businessName,
+          displayName:
+            data.businessName || data.contactInfo.name || 'Service Provider',
+          bio: data.description,
+          email: data.contactInfo.email,
+          phone: data.contactInfo.phone,
+          website: data.contactInfo.website,
+          primaryLocation: {
+            latitude: data.location.latitude || 0,
+            longitude: data.location.longitude || 0,
+            address: data.location.address,
+            city: data.location.city,
+            region: data.location.region,
+            country: data.location.country,
+            postalCode: data.location.postalCode,
           },
-          availability: {
-            daysOfWeek: service.availability?.daysOfWeek || [1, 2, 3, 4, 5],
-            timeSlots: service.availability?.timeSlots || [{ start: '09:00', end: '17:00' }],
-            timezone: service.availability?.timezone || 'Asia/Bangkok',
+          serviceCapabilities: data.services.map((service) => ({
+            serviceType: service.category,
+            category: service.category,
+            subcategory: service.subcategory,
+            description: service.description || service.name,
+            pricing: {
+              basePrice: service.price,
+              currency: service.currency || 'THB',
+              priceType: service.priceType || 'fixed',
+              minimumCharge: service.minimumCharge,
+            },
+            availability: {
+              daysOfWeek: service.availability?.daysOfWeek || [1, 2, 3, 4, 5],
+              timeSlots: service.availability?.timeSlots || [
+                { start: '09:00', end: '17:00' },
+              ],
+              timezone: service.availability?.timezone || 'Asia/Bangkok',
+            },
+            serviceArea: {
+              radius: service.serviceArea?.radius || 10,
+              locations: service.serviceArea?.locations || [data.location.city],
+            },
+          })),
+          languages: data.languages || ['th'],
+          settings: {
+            autoAcceptBookings: data.settings?.autoAcceptBookings || false,
+            instantBooking: data.settings?.instantBooking || false,
+            requireDeposit: data.settings?.requireDeposit || false,
+            cancellationPolicy: data.settings?.cancellationPolicy,
+            refundPolicy: data.settings?.refundPolicy,
           },
-          serviceArea: {
-            radius: service.serviceArea?.radius || 10,
-            locations: service.serviceArea?.locations || [data.location.city],
-          },
-        })),
-        languages: data.languages || ['th'],
-        settings: {
-          autoAcceptBookings: data.settings?.autoAcceptBookings || false,
-          instantBooking: data.settings?.instantBooking || false,
-          requireDeposit: data.settings?.requireDeposit || false,
-          cancellationPolicy: data.settings?.cancellationPolicy,
-          refundPolicy: data.settings?.refundPolicy,
-        },
-      }).returning();
+        })
+        .returning();
 
       return this.mapToServiceProviderProfile(serviceProvider);
     } catch (error) {
@@ -125,7 +134,9 @@ export class ServiceProviderService {
   }
 
   // Get service provider by ID
-  async getServiceProviderById(id: string): Promise<ServiceProviderProfile | null> {
+  async getServiceProviderById(
+    id: string
+  ): Promise<ServiceProviderProfile | null> {
     try {
       const [serviceProvider] = await db
         .select()
@@ -146,17 +157,19 @@ export class ServiceProviderService {
   // Search service providers
   async searchServiceProviders(
     filters: ServiceProviderFilters,
-    page = 1, 
+    page = 1,
     limit = 20
   ) {
     try {
       const offset = (page - 1) * limit;
-      
+
       // Build conditions
       const conditions = [];
 
       if (filters.providerType) {
-        conditions.push(eq(serviceProviders.providerType, filters.providerType));
+        conditions.push(
+          eq(serviceProviders.providerType, filters.providerType)
+        );
       }
 
       if (filters.serviceTypes?.length) {
@@ -176,7 +189,9 @@ export class ServiceProviderService {
       }
 
       if (filters.verificationLevel) {
-        conditions.push(eq(serviceProviders.verificationLevel, filters.verificationLevel));
+        conditions.push(
+          eq(serviceProviders.verificationLevel, filters.verificationLevel)
+        );
       }
 
       if (filters.rating) {
@@ -201,9 +216,14 @@ export class ServiceProviderService {
         .where(and(...conditions))
         .limit(limit)
         .offset(offset)
-        .orderBy(desc(serviceProviders.averageRating), desc(serviceProviders.createdAt));
+        .orderBy(
+          desc(serviceProviders.averageRating),
+          desc(serviceProviders.createdAt)
+        );
 
-      const serviceProviderProfiles = results.map(sp => this.mapToServiceProviderProfile(sp));
+      const serviceProviderProfiles = results.map((sp) =>
+        this.mapToServiceProviderProfile(sp)
+      );
 
       // Get total count
       const totalQuery = await db
@@ -229,8 +249,8 @@ export class ServiceProviderService {
 
   // Update service provider
   async updateServiceProvider(
-    id: string, 
-    data: UpdateServiceProviderRequest, 
+    id: string,
+    data: UpdateServiceProviderRequest,
     userId: string
   ): Promise<ServiceProviderProfile | null> {
     try {
@@ -238,7 +258,9 @@ export class ServiceProviderService {
       const [existing] = await db
         .select()
         .from(serviceProviders)
-        .where(and(eq(serviceProviders.id, id), eq(serviceProviders.userId, userId)));
+        .where(
+          and(eq(serviceProviders.id, id), eq(serviceProviders.userId, userId))
+        );
 
       if (!existing) {
         return null;
@@ -248,15 +270,19 @@ export class ServiceProviderService {
         updatedAt: new Date(),
       };
 
-      if (data.businessName !== undefined) updateData.businessName = data.businessName;
+      if (data.businessName !== undefined)
+        updateData.businessName = data.businessName;
       if (data.description !== undefined) updateData.bio = data.description;
-      if (data.contactInfo?.email !== undefined) updateData.email = data.contactInfo.email;
-      if (data.contactInfo?.phone !== undefined) updateData.phone = data.contactInfo.phone;
-      if (data.contactInfo?.website !== undefined) updateData.website = data.contactInfo.website;
+      if (data.contactInfo?.email !== undefined)
+        updateData.email = data.contactInfo.email;
+      if (data.contactInfo?.phone !== undefined)
+        updateData.phone = data.contactInfo.phone;
+      if (data.contactInfo?.website !== undefined)
+        updateData.website = data.contactInfo.website;
       if (data.images?.length) updateData.avatar = data.images[0];
 
       if (data.services) {
-        updateData.serviceCapabilities = data.services.map(service => ({
+        updateData.serviceCapabilities = data.services.map((service) => ({
           serviceType: service.category,
           category: service.category,
           subcategory: service.subcategory,
@@ -269,7 +295,9 @@ export class ServiceProviderService {
           },
           availability: {
             daysOfWeek: service.availability?.daysOfWeek || [1, 2, 3, 4, 5],
-            timeSlots: service.availability?.timeSlots || [{ start: '09:00', end: '17:00' }],
+            timeSlots: service.availability?.timeSlots || [
+              { start: '09:00', end: '17:00' },
+            ],
             timezone: service.availability?.timezone || 'Asia/Bangkok',
           },
           serviceArea: {
@@ -297,7 +325,9 @@ export class ServiceProviderService {
     try {
       const result = await db
         .delete(serviceProviders)
-        .where(and(eq(serviceProviders.id, id), eq(serviceProviders.userId, userId)))
+        .where(
+          and(eq(serviceProviders.id, id), eq(serviceProviders.userId, userId))
+        )
         .returning({ id: serviceProviders.id });
 
       return result.length > 0;

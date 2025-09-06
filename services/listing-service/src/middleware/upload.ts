@@ -8,13 +8,21 @@ import { Request, Response, NextFunction } from 'express';
 const storage = multer.memoryStorage();
 
 // File filter for images
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  
+
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, and WebP images are allowed.'));
+    cb(
+      new Error(
+        'Invalid file type. Only JPEG, PNG, and WebP images are allowed.'
+      )
+    );
   }
 };
 
@@ -29,7 +37,11 @@ export const upload = multer({
 });
 
 // Image processing middleware
-export const processImages = async (req: Request, res: Response, next: NextFunction) => {
+export const processImages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
       return next();
@@ -42,13 +54,13 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
 
     for (const file of req.files) {
       const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      
+
       // Process main image (800x600)
       const mainImagePath = path.join(uploadDir, `${filename}.webp`);
       await sharp(file.buffer)
-        .resize(800, 600, { 
+        .resize(800, 600, {
           fit: 'cover',
-          position: 'center'
+          position: 'center',
         })
         .webp({ quality: 85 })
         .toFile(mainImagePath);
@@ -56,9 +68,9 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
       // Process thumbnail (300x225)
       const thumbnailPath = path.join(uploadDir, `${filename}_thumb.webp`);
       await sharp(file.buffer)
-        .resize(300, 225, { 
+        .resize(300, 225, {
           fit: 'cover',
-          position: 'center'
+          position: 'center',
         })
         .webp({ quality: 80 })
         .toFile(thumbnailPath);
@@ -85,7 +97,11 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
 };
 
 // Validation middleware for image uploads
-export const validateImageUpload = (req: Request, res: Response, next: NextFunction) => {
+export const validateImageUpload = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const maxImages = 20;
   const minImages = 1;
 
@@ -131,7 +147,7 @@ export const cleanupImages = async (imagePaths: string[]) => {
     for (const imagePath of imagePaths) {
       const fullPath = path.join(process.cwd(), imagePath.replace(/^\//, ''));
       const thumbnailPath = fullPath.replace('.webp', '_thumb.webp');
-      
+
       try {
         await fs.unlink(fullPath);
         await fs.unlink(thumbnailPath);
@@ -145,9 +161,13 @@ export const cleanupImages = async (imagePaths: string[]) => {
 };
 
 // Serve static images
-export const serveImages = (req: Request, res: Response, next: NextFunction) => {
+export const serveImages = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const imagePath = path.join(process.cwd(), 'uploads', req.path);
-  
+
   // Check if file exists
   fs.access(imagePath)
     .then(() => {

@@ -17,8 +17,12 @@ describe('Image Upload Functionality', () => {
       testFiles.forEach((filename) => {
         const ext = path.extname(filename).toLowerCase();
         const isSupported = supportedFormats.includes(ext);
-        
-        if (['image.jpg', 'photo.jpeg', 'picture.png', 'graphic.webp'].includes(filename)) {
+
+        if (
+          ['image.jpg', 'photo.jpeg', 'picture.png', 'graphic.webp'].includes(
+            filename
+          )
+        ) {
           expect(isSupported).toBe(true);
         } else {
           expect(isSupported).toBe(false);
@@ -37,7 +41,7 @@ describe('Image Upload Functionality', () => {
 
       testFileSizes.forEach((file) => {
         const isValidSize = file.size <= maxFileSize;
-        
+
         if (file.size <= maxFileSize) {
           expect(isValidSize).toBe(true);
         } else {
@@ -54,7 +58,7 @@ describe('Image Upload Functionality', () => {
 
       testImageCounts.forEach((count) => {
         const isValidCount = count >= minImages && count <= maxImages;
-        
+
         if (count >= 1 && count <= 20) {
           expect(isValidCount).toBe(true);
         } else {
@@ -75,7 +79,7 @@ describe('Image Upload Functionality', () => {
       resizeConfigs.forEach((config) => {
         expect(config.width).toBeGreaterThan(0);
         expect(config.height).toBeGreaterThan(0);
-        expect(config.width / config.height).toBeCloseTo(4/3, 1); // 4:3 aspect ratio
+        expect(config.width / config.height).toBeCloseTo(4 / 3, 1); // 4:3 aspect ratio
         expect(config.name).toBeTruthy();
       });
     });
@@ -104,10 +108,10 @@ describe('Image Upload Functionality', () => {
       testFilenames.forEach((filename) => {
         // Should contain dimensions
         expect(filename).toMatch(/\d+x\d+/);
-        
+
         // Should be WebP format
         expect(filename).toMatch(/\.webp$/);
-        
+
         // Should contain identifier
         expect(filename).toMatch(/(listing|provider|product)_\d+/);
       });
@@ -125,13 +129,13 @@ describe('Image Upload Functionality', () => {
       uploadPaths.forEach((uploadPath) => {
         // Should start with uploads/
         expect(uploadPath).toMatch(/^uploads\//);
-        
+
         // Should contain year/month structure
         expect(uploadPath).toMatch(/\/\d{4}\/\d{2}\//);
-        
+
         // Should contain entity type
         expect(uploadPath).toMatch(/(listings|providers|products)/);
-        
+
         // Should end with entity ID
         expect(uploadPath).toMatch(/\w+_\d+\/$/);
       });
@@ -146,17 +150,17 @@ describe('Image Upload Functionality', () => {
 
       imageOperations.forEach((operation) => {
         expect(operation.action).toMatch(/^(upload|update|delete)$/);
-        
+
         if (operation.action === 'upload') {
           expect(Array.isArray(operation.images)).toBe(true);
           expect(operation.images.length).toBeGreaterThan(0);
         }
-        
+
         if (operation.action === 'update') {
           expect(Array.isArray(operation.oldImages)).toBe(true);
           expect(Array.isArray(operation.newImages)).toBe(true);
         }
-        
+
         if (operation.action === 'delete') {
           expect(Array.isArray(operation.images)).toBe(true);
         }
@@ -210,10 +214,10 @@ describe('Image Upload Functionality', () => {
       uploadAttempts.forEach((attempt, index) => {
         const recentAttempts = uploadAttempts
           .slice(0, index + 1)
-          .filter(a => attempt.timestamp - a.timestamp < timeWindow);
-        
+          .filter((a) => attempt.timestamp - a.timestamp < timeWindow);
+
         const isAllowed = recentAttempts.length <= maxUploadsPerMinute;
-        
+
         if (attempt.count <= maxUploadsPerMinute) {
           expect(isAllowed).toBe(true);
         } else {

@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { ListingController } from '../controllers/ListingController.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { upload, processImages, validateImageUpload } from '../middleware/upload.js';
+import {
+  upload,
+  processImages,
+  validateImageUpload,
+} from '../middleware/upload.js';
 import { param } from 'express-validator';
 
 const router = Router();

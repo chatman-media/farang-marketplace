@@ -582,9 +582,24 @@ export const listingBookingsRelations = relations(
 );
 
 // Add new enums for service providers
-export const providerTypeEnum = pgEnum('provider_type', ['individual', 'company', 'agency', 'freelancer']);
-export const verificationLevelEnum = pgEnum('verification_level', ['basic', 'verified', 'premium', 'enterprise']);
-export const availabilityStatusEnum = pgEnum('availability_status', ['available', 'busy', 'away', 'offline']);
+export const providerTypeEnum = pgEnum('provider_type', [
+  'individual',
+  'company',
+  'agency',
+  'freelancer',
+]);
+export const verificationLevelEnum = pgEnum('verification_level', [
+  'basic',
+  'verified',
+  'premium',
+  'enterprise',
+]);
+export const availabilityStatusEnum = pgEnum('availability_status', [
+  'available',
+  'busy',
+  'away',
+  'offline',
+]);
 
 // Service Providers table
 export const serviceProviders = pgTable('service_providers', {
@@ -609,76 +624,92 @@ export const serviceProviders = pgTable('service_providers', {
   }>(),
 
   // Location and Service Areas
-  primaryLocation: jsonb('primary_location').$type<{
-    latitude: number;
-    longitude: number;
-    address: string;
-    city: string;
-    region: string;
-    country: string;
-    postalCode?: string;
-  }>().notNull(),
-  serviceAreas: jsonb('service_areas').$type<Array<{
-    latitude: number;
-    longitude: number;
-    address: string;
-    city: string;
-    region: string;
-    country: string;
-    radius?: number;
-  }>>(),
+  primaryLocation: jsonb('primary_location')
+    .$type<{
+      latitude: number;
+      longitude: number;
+      address: string;
+      city: string;
+      region: string;
+      country: string;
+      postalCode?: string;
+    }>()
+    .notNull(),
+  serviceAreas:
+    jsonb('service_areas').$type<
+      Array<{
+        latitude: number;
+        longitude: number;
+        address: string;
+        city: string;
+        region: string;
+        country: string;
+        radius?: number;
+      }>
+    >(),
 
   // Verification and Status
-  verificationLevel: verificationLevelEnum('verification_level').default('basic'),
+  verificationLevel:
+    verificationLevelEnum('verification_level').default('basic'),
   isVerified: boolean('is_verified').default(false),
-  availabilityStatus: availabilityStatusEnum('availability_status').default('available'),
+  availabilityStatus: availabilityStatusEnum('availability_status').default(
+    'available'
+  ),
 
   // Business Information
-  businessLicenses: jsonb('business_licenses').$type<Array<{
-    id: string;
-    type: string;
-    number: string;
-    issuedBy: string;
-    issuedDate: string;
-    expiryDate: string;
-    isValid: boolean;
-    documentUrl?: string;
-  }>>(),
-  certifications: jsonb('certifications').$type<Array<{
-    id: string;
-    name: string;
-    issuingOrganization: string;
-    issuedDate: string;
-    expiryDate?: string;
-    credentialId?: string;
-    verificationUrl?: string;
-  }>>(),
+  businessLicenses:
+    jsonb('business_licenses').$type<
+      Array<{
+        id: string;
+        type: string;
+        number: string;
+        issuedBy: string;
+        issuedDate: string;
+        expiryDate: string;
+        isValid: boolean;
+        documentUrl?: string;
+      }>
+    >(),
+  certifications:
+    jsonb('certifications').$type<
+      Array<{
+        id: string;
+        name: string;
+        issuingOrganization: string;
+        issuedDate: string;
+        expiryDate?: string;
+        credentialId?: string;
+        verificationUrl?: string;
+      }>
+    >(),
 
   // Service Capabilities
-  serviceCapabilities: jsonb('service_capabilities').$type<Array<{
-    serviceType: string;
-    category: string;
-    subcategory?: string;
-    description: string;
-    pricing: {
-      basePrice: number;
-      currency: string;
-      priceType: 'fixed' | 'hourly' | 'daily' | 'project';
-      minimumCharge?: number;
-    };
-    availability: {
-      daysOfWeek: number[];
-      timeSlots: Array<{
-        start: string;
-        end: string;
-      }>;
-      timezone: string;
-    };
-    serviceArea: {
-      radius: number;
-      locations: string[];
-    };
-  }>>(),
+  serviceCapabilities: jsonb('service_capabilities').$type<
+    Array<{
+      serviceType: string;
+      category: string;
+      subcategory?: string;
+      description: string;
+      pricing: {
+        basePrice: number;
+        currency: string;
+        priceType: 'fixed' | 'hourly' | 'daily' | 'project';
+        minimumCharge?: number;
+      };
+      availability: {
+        daysOfWeek: number[];
+        timeSlots: Array<{
+          start: string;
+          end: string;
+        }>;
+        timezone: string;
+      };
+      serviceArea: {
+        radius: number;
+        locations: string[];
+      };
+    }>
+  >(),
 
   // Languages and Settings
   languages: jsonb('languages').$type<string[]>().default([]),
@@ -693,7 +724,9 @@ export const serviceProviders = pgTable('service_providers', {
   // Statistics
   totalBookings: integer('total_bookings').default(0),
   completedBookings: integer('completed_bookings').default(0),
-  averageRating: decimal('average_rating', { precision: 3, scale: 2 }).default('0.00'),
+  averageRating: decimal('average_rating', { precision: 3, scale: 2 }).default(
+    '0.00'
+  ),
   totalReviews: integer('total_reviews').default(0),
   responseTime: integer('response_time_minutes'),
 
@@ -704,7 +737,10 @@ export const serviceProviders = pgTable('service_providers', {
 });
 
 // Service Provider Relations
-export const serviceProvidersRelations = relations(serviceProviders, ({ many }) => ({
-  listings: many(listings),
-  bookings: many(listingBookings),
-}));
+export const serviceProvidersRelations = relations(
+  serviceProviders,
+  ({ many }) => ({
+    listings: many(listings),
+    bookings: many(listingBookings),
+  })
+);

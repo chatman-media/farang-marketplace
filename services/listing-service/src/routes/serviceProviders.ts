@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { ServiceProviderController } from '../controllers/ServiceProviderController.js';
 import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
-import { upload, processImages, validateImageUpload } from '../middleware/upload.js';
+import {
+  upload,
+  processImages,
+  validateImageUpload,
+} from '../middleware/upload.js';
 
 const router = Router();
 const serviceProviderController = new ServiceProviderController();
@@ -14,7 +18,9 @@ router.post(
   validateImageUpload,
   processImages,
   ServiceProviderController.createValidationRules,
-  serviceProviderController.createServiceProvider.bind(serviceProviderController)
+  serviceProviderController.createServiceProvider.bind(
+    serviceProviderController
+  )
 );
 
 // Get service provider by ID
@@ -28,7 +34,9 @@ router.get(
 router.get(
   '/search',
   optionalAuthMiddleware,
-  serviceProviderController.searchServiceProviders.bind(serviceProviderController)
+  serviceProviderController.searchServiceProviders.bind(
+    serviceProviderController
+  )
 );
 
 // Update service provider (with optional image upload)
@@ -38,14 +46,18 @@ router.patch(
   upload.array('images', 10),
   processImages, // Optional - only processes if images are uploaded
   ServiceProviderController.updateValidationRules,
-  serviceProviderController.updateServiceProvider.bind(serviceProviderController)
+  serviceProviderController.updateServiceProvider.bind(
+    serviceProviderController
+  )
 );
 
 // Delete service provider
 router.delete(
   '/:id',
   authMiddleware,
-  serviceProviderController.deleteServiceProvider.bind(serviceProviderController)
+  serviceProviderController.deleteServiceProvider.bind(
+    serviceProviderController
+  )
 );
 
 export default router;
