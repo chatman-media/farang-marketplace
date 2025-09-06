@@ -11,9 +11,9 @@ export const UserProfileSchema = z.object({
     .object({
       latitude: z.number(),
       longitude: z.number(),
-      address: z.string().optional(),
-      city: z.string().optional(),
-      country: z.string().optional(),
+      address: z.string(),
+      city: z.string(),
+      country: z.string(),
     })
     .optional(),
   rating: z.number().min(0).max(5).default(0),

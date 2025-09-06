@@ -1,6 +1,30 @@
 import { UserRepository } from '../repositories/UserRepository'
 import { UserEntity } from '../models/User'
 import { UserRole, UserProfile, User, VerificationStatus, Location } from '@marketplace/shared-types'
+import { z } from 'zod'
+
+const UpdateUserSchema = z.object({
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  telegramId: z.string().optional(),
+  role: z.nativeEnum(UserRole).optional(),
+  profile: z.object({
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    avatar: z.string().url().optional(),
+    location: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+      address: z.string(),
+      city: z.string(),
+      country: z.string(),
+    }).optional(),
+    rating: z.number().min(0).max(5).optional(),
+    reviewsCount: z.number().min(0).optional(),
+    verificationStatus: z.nativeEnum(VerificationStatus).optional(),
+  }).optional(),
+  isActive: z.boolean().optional(),
+})
 
 export interface CreateUserData {
   email: string
@@ -86,47 +110,55 @@ export class UserService {
     return userEntity ? userEntity.toPublicUser() : null
   }
 
-  async updateUser(id: string, updates: UpdateUserData): Promise<User | null> {
-    // Check if email is being changed and doesn't conflict
-    if (updates.email) {
-      const emailExists = await this.userRepository.existsByEmail(updates.email, id)
-      if (emailExists) {
-        throw new Error('Email already in use by another user')
-      }
-    }
+  async updateUser(userId: string, updateData: any): Promise<User | null> {
+    try {
+      // Validate update data
+      const validatedData = UpdateUserSchema.parse(updateData)
 
-    // Check if telegram ID is being changed and doesn't conflict
-    if (updates.telegramId) {
-      const telegramExists = await this.userRepository.existsByTelegramId(
-        updates.telegramId,
-        id
-      )
-      if (telegramExists) {
-        throw new Error('Telegram ID already in use by another user')
-      }
-    }
-
-    // If profile is being updated partially, merge with existing profile
-    let finalUpdates = updates
-    if (updates.profile) {
-      const currentUser = await this.userRepository.findById(id)
-      if (currentUser) {
-        finalUpdates = {
-          ...updates,
-          profile: {
-            ...currentUser.profile,
-            ...updates.profile,
+      // Check for email conflicts if email is being updated
+      if (validatedData.email) {
+        const existingEmailUser = await this.userRepository.existsByEmail(validatedData.email)
+        if (existingEmailUser) {
+          // Check if it's not the same user
+          const existingUser = await this.userRepository.findByEmail(validatedData.email)
+          if (existingUser && existingUser.id !== userId) {
+            throw new Error('Email already in use by another user')
           }
         }
       }
+
+      // Check for telegram ID conflicts if telegram ID is being updated
+      if (validatedData.telegramId) {
+        const existingTelegramUser = await this.userRepository.existsByTelegramId(validatedData.telegramId)
+        if (existingTelegramUser) {
+          // Check if it's not the same user
+          const existingUser = await this.userRepository.findByTelegramId(validatedData.telegramId)
+          if (existingUser && existingUser.id !== userId) {
+            throw new Error('Telegram ID already in use by another user')
+          }
+        }
+      }
+
+      // Handle profile updates by merging with existing profile
+      let updatePayload: any = { ...validatedData }
+      if (validatedData.profile) {
+        const currentUser = await this.userRepository.findById(userId)
+        if (currentUser) {
+          updatePayload.profile = {
+            ...currentUser.profile,
+            ...validatedData.profile
+          } as UserProfile
+        }
+      }
+
+      const updatedUser = await this.userRepository.update(userId, updatePayload)
+      return updatedUser ? updatedUser.toPublicUser() : null
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw new Error(`Validation error: ${error.message}`)
+      }
+      throw error
     }
-
-    // Skip validation for profile-only updates since we're merging with existing data
-    // The validation will happen at the entity level when creating the full profile
-    const validatedUpdates = finalUpdates
-
-    const userEntity = await this.userRepository.update(id, validatedUpdates)
-    return userEntity ? userEntity.toPublicUser() : null
   }
 
   async changePassword(id: string, currentPassword: string, newPassword: string): Promise<boolean> {

@@ -227,6 +227,21 @@ describe('UserService Integration Tests', () => {
       const updateData = { email: 'existing@example.com' }
 
       mockUserRepository.existsByEmail.mockResolvedValue(true)
+      // Mock findByEmail to return a different user
+      const existingUser = new UserEntity(
+        'different-user-id', // Different ID than the one being updated
+        'existing@example.com',
+        'hash',
+        UserRole.USER,
+        {
+          firstName: 'Existing',
+          lastName: 'User',
+          rating: 0,
+          reviewsCount: 0,
+          verificationStatus: VerificationStatus.UNVERIFIED,
+        }
+      )
+      mockUserRepository.findByEmail.mockResolvedValue(existingUser)
 
       await expect(
         userService.updateUser(testUserData.validUser.id, updateData)
@@ -240,6 +255,23 @@ describe('UserService Integration Tests', () => {
 
       mockUserRepository.existsByEmail.mockResolvedValue(false)
       mockUserRepository.existsByTelegramId.mockResolvedValue(true)
+      // Mock findByTelegramId to return a different user
+      const existingUser = new UserEntity(
+        'different-user-id', // Different ID than the one being updated
+        'existing@example.com',
+        'hash',
+        UserRole.USER,
+        {
+          firstName: 'Existing',
+          lastName: 'User',
+          rating: 0,
+          reviewsCount: 0,
+          verificationStatus: VerificationStatus.UNVERIFIED,
+        },
+        undefined,
+        'existing-telegram'
+      )
+      mockUserRepository.findByTelegramId.mockResolvedValue(existingUser)
 
       await expect(
         userService.updateUser(testUserData.validUser.id, updateData)

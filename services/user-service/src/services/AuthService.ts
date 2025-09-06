@@ -183,7 +183,7 @@ export class AuthService {
       type: 'access',
     }
 
-    return jwt.sign(payload, this.accessTokenSecret, {
+    return jwt.sign(payload, this.accessTokenSecret as jwt.Secret, {
       expiresIn: this.accessTokenExpiry,
       issuer: 'marketplace-auth',
       audience: 'marketplace-api',
@@ -198,7 +198,7 @@ export class AuthService {
       type: 'refresh',
     }
 
-    return jwt.sign(payload, this.refreshTokenSecret, {
+    return jwt.sign(payload, this.refreshTokenSecret as jwt.Secret, {
       expiresIn: this.refreshTokenExpiry,
       issuer: 'marketplace-auth',
       audience: 'marketplace-api',

@@ -73,7 +73,7 @@ export class AuthController {
           error: {
             code: 'VALIDATION_ERROR',
             message: 'Invalid request data',
-            details: error.errors,
+            details: error.issues,
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
@@ -126,7 +126,7 @@ export class AuthController {
           error: {
             code: 'VALIDATION_ERROR',
             message: 'Invalid request data',
-            details: error.errors,
+            details: error.issues,
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
@@ -179,7 +179,7 @@ export class AuthController {
           error: {
             code: 'VALIDATION_ERROR',
             message: 'Invalid request data',
-            details: error.errors,
+            details: error.issues,
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },

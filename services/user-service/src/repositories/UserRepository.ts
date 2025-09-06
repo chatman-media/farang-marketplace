@@ -158,7 +158,7 @@ export class UserRepository {
       [passwordHash, id]
     )
 
-    return result.rowCount > 0
+    return (result.rowCount ?? 0) > 0
   }
 
   async updateProfile(id: string, profile: UserProfile): Promise<UserEntity | null> {
@@ -193,7 +193,7 @@ export class UserRepository {
       [id]
     )
 
-    return result.rowCount > 0
+    return (result.rowCount ?? 0) > 0
   }
 
   async deactivate(id: string): Promise<boolean> {
@@ -202,12 +202,12 @@ export class UserRepository {
       [id]
     )
 
-    return result.rowCount > 0
+    return (result.rowCount ?? 0) > 0
   }
 
   async delete(id: string): Promise<boolean> {
     const result = await query('DELETE FROM users WHERE id = $1', [id])
-    return result.rowCount > 0
+    return (result.rowCount ?? 0) > 0
   }
 
   async findMany(
@@ -406,7 +406,7 @@ export class UserRepository {
       [...userIds, role]
     )
 
-    return result.rowCount
+    return result.rowCount ?? 0
   }
 
   async bulkDeactivate(userIds: string[]): Promise<number> {
@@ -419,7 +419,7 @@ export class UserRepository {
       userIds
     )
 
-    return result.rowCount
+    return result.rowCount ?? 0
   }
 
   async getTopRatedUsers(limit: number = 10): Promise<UserEntity[]> {

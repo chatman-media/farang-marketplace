@@ -16,6 +16,7 @@ describe('ProfileController Integration Tests', () => {
   let adminToken: string
 
   beforeAll(async () => {
+    process.env.BASE_URL = 'http://localhost:3001'
     await setupTestDatabase()
     userRepository = new UserRepository()
   })
@@ -456,7 +457,8 @@ describe('ProfileController Integration Tests', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .attach('avatar', testTextBuffer, 'test.txt')
 
-      expect(response.status).toBe(500) // Multer will throw an error for invalid file type
+      expect(response.status).toBe(400) // Multer middleware returns 400 for invalid file type
+      expect(response.body.error.code).toBe('INVALID_FILE_TYPE')
     })
 
     it('should handle file size limits', async () => {
@@ -468,7 +470,8 @@ describe('ProfileController Integration Tests', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .attach('avatar', largeBuf, 'large-image.jpg')
 
-      expect(response.status).toBe(500) // Multer will reject files over the limit
+      expect(response.status).toBe(400) // Multer middleware returns 400 for file size limit
+      expect(response.body.error.code).toBe('FILE_TOO_LARGE')
     })
   })
 

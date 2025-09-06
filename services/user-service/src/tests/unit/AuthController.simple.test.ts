@@ -10,6 +10,7 @@ const createMockRequest = (body: any = {}, headers: any = {}) => ({
     'x-request-id': 'test-request-id',
     ...headers,
   },
+  user: undefined as any,
 })
 
 const createMockResponse = () => {

@@ -141,7 +141,9 @@ describe('UserEntity', () => {
         location: {
           latitude: 40.7128,
           longitude: -74.006,
+          address: '123 Main St',
           city: 'New York',
+          country: 'USA',
         },
       }
 
