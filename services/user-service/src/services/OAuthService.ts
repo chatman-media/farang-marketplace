@@ -677,7 +677,9 @@ export class AppleOAuthProvider extends BaseOAuthProvider {
     return {
       sub: decoded.sub,
       email: decoded.email,
-      name: decoded.name ? `${decoded.name.firstName || ''} ${decoded.name.lastName || ''}`.trim() : undefined,
+      name: decoded.name
+        ? `${decoded.name.firstName || ''} ${decoded.name.lastName || ''}`.trim()
+        : undefined,
     };
   }
 }
@@ -725,26 +727,29 @@ export class TikTokOAuthProvider extends BaseOAuthProvider {
     token_type: string;
     expires_in: number;
   }> {
-    const response = await fetch('https://open-api.tiktok.com/oauth/access_token/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        client_key: this.config.clientKey,
-        client_secret: this.config.clientSecret,
-        code,
-        grant_type: 'authorization_code',
-        redirect_uri: this.config.redirectUri,
-      }),
-    });
+    const response = await fetch(
+      'https://open-api.tiktok.com/oauth/access_token/',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_key: this.config.clientKey,
+          client_secret: this.config.clientSecret,
+          code,
+          grant_type: 'authorization_code',
+          redirect_uri: this.config.redirectUri,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.text();
       throw new Error(`Failed to exchange code for token: ${error}`);
     }
 
-    const result = await response.json() as any;
+    const result = (await response.json()) as any;
 
     if (result.error_code !== 0) {
       throw new Error(`TikTok OAuth error: ${result.message}`);
@@ -766,7 +771,7 @@ export class TikTokOAuthProvider extends BaseOAuthProvider {
     const response = await fetch('https://open-api.tiktok.com/user/info/', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -779,7 +784,7 @@ export class TikTokOAuthProvider extends BaseOAuthProvider {
       throw new Error(`Failed to fetch user info: ${error}`);
     }
 
-    const result = await response.json() as any;
+    const result = (await response.json()) as any;
 
     if (result.error_code !== 0) {
       throw new Error(`TikTok API error: ${result.message}`);
@@ -924,18 +929,21 @@ export class WhatsAppOAuthProvider extends BaseOAuthProvider {
     access_token: string;
     token_type: string;
   }> {
-    const response = await fetch('https://graph.facebook.com/v18.0/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        client_id: this.config.appId,
-        client_secret: this.config.appSecret,
-        redirect_uri: this.config.redirectUri,
-        code,
-      }),
-    });
+    const response = await fetch(
+      'https://graph.facebook.com/v18.0/oauth/access_token',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: this.config.appId,
+          client_secret: this.config.appSecret,
+          redirect_uri: this.config.redirectUri,
+          code,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.text();
@@ -956,7 +964,7 @@ export class WhatsAppOAuthProvider extends BaseOAuthProvider {
       `https://graph.facebook.com/v18.0/me?fields=id,name&access_token=${accessToken}`,
       {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );

@@ -1,0 +1,27 @@
+{
+  "name": "@marketplace/i18n",
+  "version": "1.0.0",
+  "description": "Internationalization package for Thailand Marketplace",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "i18next": "25.5.2",
+    "react-i18next": "^15.7.3",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "i18next-http-backend": "3.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.12",
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  }
+}
