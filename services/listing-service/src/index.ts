@@ -7,6 +7,7 @@ import path from 'path';
 import { config } from 'dotenv';
 import listingRoutes from './routes/listings.js';
 import serviceProviderRoutes from './routes/serviceProviders.js';
+import aiSearchRoutes from './routes/aiSearch.js';
 import { serveImages } from './middleware/upload.js';
 
 // Load environment variables
@@ -60,6 +61,7 @@ app.use('/uploads', serveImages);
 // API routes
 app.use('/api/listings', listingRoutes);
 app.use('/api/service-providers', serviceProviderRoutes);
+app.use('/api/ai', aiSearchRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -93,7 +95,12 @@ app.listen(PORT, () => {
   console.log(`🚀 Listing service running on port ${PORT}`);
   console.log(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-  console.log(`📚 API endpoints: http://localhost:${PORT}/api/listings`);
+  console.log(`📚 API endpoints:`);
+  console.log(`   📋 Listings: http://localhost:${PORT}/api/listings`);
+  console.log(
+    `   🏢 Service Providers: http://localhost:${PORT}/api/service-providers`
+  );
+  console.log(`   🤖 AI Search: http://localhost:${PORT}/api/ai`);
 });
 
 export default app;

@@ -25,6 +25,14 @@
 - **Пагинация** - эффективная обработка больших результатов
 - **Сортировка** - по цене, дате, популярности, рейтингу
 
+### 🤖 AI-Powered Search & Recommendations
+- **Мультипровайдерная поддержка** - OpenAI, DeepSeek, Claude с автоматическим переключением
+- **Улучшенный поиск** - ИИ понимание запросов и ранжирование результатов
+- **Персонализированные рекомендации** - на основе поведения и предпочтений пользователя
+- **Умное сопоставление услуг** - интеллектуальный подбор провайдеров услуг
+- **Автоподсказки** - предложения в реальном времени при вводе
+- **Оптимизация затрат** - автоматический выбор провайдера по стоимости и производительности
+
 ## 📋 API Endpoints
 
 ### Транспорт
@@ -432,7 +440,83 @@ DELETE /api/service-providers/{id}
 Authorization: Bearer <token>
 ```
 
-## 🧪 Testing (Task 3.3)
+## 🤖 AI-Powered Search API (Task 3.4)
+
+### Enhanced Search
+```http
+POST /api/ai/search/enhanced
+Content-Type: application/json
+
+{
+  "query": "scooter rental bangkok",
+  "filters": {
+    "type": "vehicle",
+    "priceRange": { "min": 200, "max": 500 }
+  },
+  "userContext": {
+    "userId": "user-123",
+    "location": { "latitude": 13.7563, "longitude": 100.5018 }
+  },
+  "preferredProvider": "deepseek"
+}
+```
+
+### Query Analysis
+```http
+POST /api/ai/analyze/query
+Content-Type: application/json
+
+{
+  "query": "cheap motorbike rental near Khao San Road",
+  "preferredProvider": "claude"
+}
+```
+
+### Auto-suggestions
+```http
+GET /api/ai/suggestions?q=scoo&provider=deepseek
+```
+
+### Personalized Recommendations
+```http
+POST /api/ai/recommendations
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "userId": "user-123",
+  "type": "personalized",
+  "context": {
+    "currentItem": "listing-456",
+    "preferences": { "priceRange": "budget", "vehicleType": "scooter" }
+  },
+  "limit": 10
+}
+```
+
+### Service Matching
+```http
+POST /api/ai/services/match
+Content-Type: application/json
+
+{
+  "requirements": {
+    "serviceType": "scooter_rental",
+    "location": { "latitude": 13.7563, "longitude": 100.5018 },
+    "budget": { "min": 200, "max": 500 }
+  }
+}
+```
+
+### AI Service Status
+```http
+GET /api/ai/status
+Authorization: Bearer <token>
+```
+
+**📖 Подробная документация**: [AI_SEARCH_API.md](./AI_SEARCH_API.md)
+
+## 🧪 Testing (Task 3.3 & 3.4)
 
 ### Run All Tests
 ```bash
@@ -447,10 +531,11 @@ bun test ServiceProviderService.test.ts
 ```
 
 ### Test Coverage
-- **32 tests** covering all major functionality
+- **50+ tests** covering all major functionality
 - **Listing Service**: Vehicle/product creation, search, validation
 - **Service Providers**: CRUD operations, search filters, business logic
 - **Image Upload**: Validation, processing, security, error handling
+- **AI Services**: Multi-provider support, enhanced search, recommendations, error handling
 
 ## ✅ Task 3.3 Completed!
 
