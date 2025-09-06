@@ -16,8 +16,10 @@
     "test:watch": "turbo run test:watch",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:prettier:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "type-check": "turbo run type-check",
     "clean": "turbo run clean",
     "docker:up": "docker-compose up -d",
@@ -27,6 +29,7 @@
     "setup": "bun install && bun run docker:up && bun run build"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.2.3",
     "@eslint/js": "^9.35.0",
     "@types/node": "24.3.1",
     "@types/react": "19.1.12",

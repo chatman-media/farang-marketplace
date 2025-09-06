@@ -1,7 +1,7 @@
-import { Pool, PoolConfig } from 'pg'
-import dotenv from 'dotenv'
+import { Pool, PoolConfig } from 'pg';
+import * as dotenv from 'dotenv';
 
-dotenv.config()
+dotenv.config();
 
 const config: PoolConfig = {
   host: process.env.DB_HOST || 'localhost',
@@ -12,14 +12,14 @@ const config: PoolConfig = {
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-}
+};
 
-export const pool = new Pool(config)
+export const pool = new Pool(config);
 
 export const query = (text: string, params?: any[]) => {
-  return pool.query(text, params)
-}
+  return pool.query(text, params);
+};
 
 export const getClient = () => {
-  return pool.connect()
-}
+  return pool.connect();
+};

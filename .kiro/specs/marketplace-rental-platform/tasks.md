@@ -43,7 +43,7 @@
   - _Requirements: 1.4, 4.1_
 
 - [ ] 3. Build listing and service management system
-- [ ] 3.1 Create shared types for listings, services, and bookings
+- [x] 3.1 Create shared types for listings, services, and bookings
   - Define Listing, Service, Booking, and CRM interfaces
   - Add validation schemas and enums for listing categories and service types
   - Create common utility types and location interfaces

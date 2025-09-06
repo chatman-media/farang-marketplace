@@ -1,10 +1,10 @@
-import React from 'react'
-import { TonConnectUIProvider } from '@tonconnect/ui-react'
+import React from 'react';
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 function App() {
   return (
-    <TonConnectUIProvider manifestUrl='https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json'>
-      <div className='App'>
+    <TonConnectUIProvider manifestUrl="https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json">
+      <div className="App">
         <header>
           <h1>TON App - Thailand Marketplace</h1>
         </header>
@@ -13,7 +13,7 @@ function App() {
         </main>
       </div>
     </TonConnectUIProvider>
-  )
+  );
 }
 
-export default App
+export default App;

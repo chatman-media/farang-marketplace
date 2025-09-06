@@ -1,29 +1,37 @@
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
-import request from 'supertest'
-import app from '../../server'
-import { setupTestDatabase, cleanupTestDatabase } from '../fixtures/database'
-import { UserRepository } from '../../repositories/UserRepository'
-import { UserEntity } from '../../models/User'
-import { UserRole, VerificationStatus } from '@marketplace/shared-types'
-import fs from 'fs/promises'
-import path from 'path'
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+} from 'vitest';
+import request from 'supertest';
+import app from '../../server';
+import { setupTestDatabase, cleanupTestDatabase } from '../fixtures/database';
+import { UserRepository } from '../../repositories/UserRepository';
+import { UserEntity } from '../../models/User';
+import { UserRole, VerificationStatus } from '@marketplace/shared-types';
+import fs from 'fs/promises';
+import path from 'path';
 
 describe('ProfileController Integration Tests', () => {
-  let userRepository: UserRepository
-  let testUser: any
-  let adminUser: any
-  let userToken: string
-  let adminToken: string
+  let userRepository: UserRepository;
+  let testUser: any;
+  let adminUser: any;
+  let userToken: string;
+  let adminToken: string;
 
   beforeAll(async () => {
-    process.env.BASE_URL = 'http://localhost:3001'
-    await setupTestDatabase()
-    userRepository = new UserRepository()
-  })
+    process.env.BASE_URL = 'http://localhost:3001';
+    await setupTestDatabase();
+    userRepository = new UserRepository();
+  });
 
   afterAll(async () => {
-    await cleanupTestDatabase()
-  })
+    await cleanupTestDatabase();
+  });
 
   beforeEach(async () => {
     // Create test users
@@ -37,8 +45,10 @@ describe('ProfileController Integration Tests', () => {
         rating: 0,
         reviewsCount: 0,
         verificationStatus: VerificationStatus.UNVERIFIED,
+        socialProfiles: [],
+        primaryAuthProvider: 'email' as any,
       },
-    }
+    };
 
     const adminUserData = {
       email: 'admin@example.com',
@@ -50,62 +60,60 @@ describe('ProfileController Integration Tests', () => {
         rating: 0,
         reviewsCount: 0,
         verificationStatus: VerificationStatus.VERIFIED,
+        socialProfiles: [],
+        primaryAuthProvider: 'email' as any,
       },
-    }
+    };
 
-    testUser = await userRepository.create(testUserData)
-    adminUser = await userRepository.create(adminUserData)
+    testUser = await userRepository.create(testUserData);
+    adminUser = await userRepository.create(adminUserData);
 
     // Get auth tokens
-    const userLoginResponse = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'testuser@example.com',
-        password: 'password123',
-      })
+    const userLoginResponse = await request(app).post('/api/auth/login').send({
+      email: 'testuser@example.com',
+      password: 'password123',
+    });
 
-    const adminLoginResponse = await request(app)
-      .post('/api/auth/login')
-      .send({
-        email: 'admin@example.com',
-        password: 'password123',
-      })
+    const adminLoginResponse = await request(app).post('/api/auth/login').send({
+      email: 'admin@example.com',
+      password: 'password123',
+    });
 
-    userToken = userLoginResponse.body.data.accessToken
-    adminToken = adminLoginResponse.body.data.accessToken
-  })
+    userToken = userLoginResponse.body.data.accessToken;
+    adminToken = adminLoginResponse.body.data.accessToken;
+  });
 
   afterEach(async () => {
     // Clean up test data
     if (testUser) {
-      await userRepository.delete(testUser.id)
+      await userRepository.delete(testUser.id);
     }
     if (adminUser) {
-      await userRepository.delete(adminUser.id)
+      await userRepository.delete(adminUser.id);
     }
 
     // Clean up uploaded files
     try {
-      const uploadsDir = path.join(process.cwd(), 'uploads', 'profiles')
-      const files = await fs.readdir(uploadsDir)
+      const uploadsDir = path.join(process.cwd(), 'uploads', 'profiles');
+      const files = await fs.readdir(uploadsDir);
       for (const file of files) {
         if (file.includes(testUser?.id) || file.includes(adminUser?.id)) {
-          await fs.unlink(path.join(uploadsDir, file))
+          await fs.unlink(path.join(uploadsDir, file));
         }
       }
-    } catch (error) {
+    } catch {
       // Directory might not exist, ignore
     }
-  })
+  });
 
   describe('GET /api/profile', () => {
     it('should get current user profile successfully', async () => {
       const response = await request(app)
         .get('/api/profile')
-        .set('Authorization', `Bearer ${userToken}`)
+        .set('Authorization', `Bearer ${userToken}`);
 
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
       expect(response.body.data).toMatchObject({
         id: testUser.id,
         email: 'testuser@example.com',
@@ -117,17 +125,17 @@ describe('ProfileController Integration Tests', () => {
           reviewsCount: 0,
           verificationStatus: VerificationStatus.UNVERIFIED,
         },
-      })
-      expect(response.body.message).toBe('Profile retrieved successfully')
-    })
+      });
+      expect(response.body.message).toBe('Profile retrieved successfully');
+    });
 
     it('should return 401 when not authenticated', async () => {
-      const response = await request(app).get('/api/profile')
+      const response = await request(app).get('/api/profile');
 
-      expect(response.status).toBe(401)
-      expect(response.body.error.code).toBe('MISSING_TOKEN')
-    })
-  })
+      expect(response.status).toBe(401);
+      expect(response.body.error.code).toBe('MISSING_TOKEN');
+    });
+  });
 
   describe('PUT /api/profile', () => {
     it('should update user profile successfully', async () => {
@@ -140,23 +148,24 @@ describe('ProfileController Integration Tests', () => {
           address: '123 Test Street',
           city: 'Bangkok',
           country: 'Thailand',
+          region: 'Bangkok',
         },
-      }
+      };
 
       const response = await request(app)
         .put('/api/profile')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(updateData)
+        .send(updateData);
 
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
       expect(response.body.data.profile).toMatchObject({
         firstName: 'Updated',
         lastName: 'Name',
         location: updateData.location,
-      })
-      expect(response.body.message).toBe('Profile updated successfully')
-    })
+      });
+      expect(response.body.message).toBe('Profile updated successfully');
+    });
 
     it('should validate profile data', async () => {
       const invalidData = {
@@ -166,28 +175,28 @@ describe('ProfileController Integration Tests', () => {
           latitude: 'invalid', // Should be a number
           longitude: 100.5018,
         },
-      }
+      };
 
       const response = await request(app)
         .put('/api/profile')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(invalidData)
+        .send(invalidData);
 
-      expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe('VALIDATION_ERROR')
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
       // The error message should contain validation details
-      expect(response.body.error.message).toContain('Invalid request data')
-    })
+      expect(response.body.error.message).toContain('Invalid request data');
+    });
 
     it('should return 401 when not authenticated', async () => {
       const response = await request(app)
         .put('/api/profile')
-        .send({ firstName: 'Test' })
+        .send({ firstName: 'Test' });
 
-      expect(response.status).toBe(401)
-      expect(response.body.error.code).toBe('MISSING_TOKEN')
-    })
-  })
+      expect(response.status).toBe(401);
+      expect(response.body.error.code).toBe('MISSING_TOKEN');
+    });
+  });
 
   describe('POST /api/profile/avatar', () => {
     it('should upload avatar successfully', async () => {
@@ -207,273 +216,287 @@ describe('ProfileController Integration Tests', () => {
         0x00, 0x14, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xda, 0x00, 0x0c,
         0x03, 0x01, 0x00, 0x02, 0x11, 0x03, 0x11, 0x00, 0x3f, 0x00, 0xb2, 0xc0,
-        0x07, 0xff, 0xd9
-      ])
+        0x07, 0xff, 0xd9,
+      ]);
 
       const response = await request(app)
         .post('/api/profile/avatar')
         .set('Authorization', `Bearer ${userToken}`)
-        .attach('avatar', testImageBuffer, 'test-avatar.jpg')
+        .attach('avatar', testImageBuffer, 'test-avatar.jpg');
 
       if (response.status !== 200) {
-        console.log('Error response:', response.body)
+        console.log('Error response:', response.body);
       }
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
-      expect(response.body.data.avatarUrl).toMatch(/http:\/\/localhost:3001\/uploads\/profiles\/.*\.jpg$/)
-      expect(response.body.data.user.profile.avatar).toBeDefined()
-      expect(response.body.message).toBe('Avatar uploaded successfully')
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.avatarUrl).toMatch(
+        /http:\/\/localhost:3001\/uploads\/profiles\/.*\.jpg$/
+      );
+      expect(response.body.data.user.profile.avatar).toBeDefined();
+      expect(response.body.message).toBe('Avatar uploaded successfully');
+    });
 
     it('should return 400 when no file is provided', async () => {
       const response = await request(app)
         .post('/api/profile/avatar')
-        .set('Authorization', `Bearer ${userToken}`)
+        .set('Authorization', `Bearer ${userToken}`);
 
-      expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe('FILE_REQUIRED')
-    })
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('FILE_REQUIRED');
+    });
 
     it('should return 401 when not authenticated', async () => {
-      const testImageBuffer = Buffer.from('fake-image-data')
+      const testImageBuffer = Buffer.from('fake-image-data');
 
       const response = await request(app)
         .post('/api/profile/avatar')
-        .attach('avatar', testImageBuffer, 'test-avatar.jpg')
+        .attach('avatar', testImageBuffer, 'test-avatar.jpg');
 
-      expect(response.status).toBe(401)
-      expect(response.body.error.code).toBe('MISSING_TOKEN')
-    })
-  })
+      expect(response.status).toBe(401);
+      expect(response.body.error.code).toBe('MISSING_TOKEN');
+    });
+  });
 
   describe('POST /api/profile/verification/request', () => {
     it('should submit verification request successfully', async () => {
       const verificationData = {
         documents: ['passport.jpg', 'utility-bill.pdf'],
         notes: 'Please verify my account for business purposes',
-      }
+      };
 
       const response = await request(app)
         .post('/api/profile/verification/request')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(verificationData)
+        .send(verificationData);
 
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
-      expect(response.body.data.user.profile.verificationStatus).toBe(VerificationStatus.PENDING)
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.user.profile.verificationStatus).toBe(
+        VerificationStatus.PENDING
+      );
       expect(response.body.data.verificationRequest).toMatchObject({
         status: VerificationStatus.PENDING,
         documents: verificationData.documents,
         notes: verificationData.notes,
-      })
-      expect(response.body.message).toBe('Verification request submitted successfully')
-    })
+      });
+      expect(response.body.message).toBe(
+        'Verification request submitted successfully'
+      );
+    });
 
     it('should return 400 when user is already verified', async () => {
       // First, verify the user
       await userRepository.update(testUser.id, {
-        profile: { 
+        profile: {
           ...testUser.profile,
-          verificationStatus: VerificationStatus.VERIFIED 
+          verificationStatus: VerificationStatus.VERIFIED,
         },
-      })
+      });
 
       const verificationData = {
         documents: ['passport.jpg'],
-      }
+      };
 
       const response = await request(app)
         .post('/api/profile/verification/request')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(verificationData)
+        .send(verificationData);
 
-      expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe('ALREADY_VERIFIED')
-    })
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('ALREADY_VERIFIED');
+    });
 
     it('should return 400 when verification is already pending', async () => {
       // First, set verification to pending
       await userRepository.update(testUser.id, {
-        profile: { 
+        profile: {
           ...testUser.profile,
-          verificationStatus: VerificationStatus.PENDING 
+          verificationStatus: VerificationStatus.PENDING,
         },
-      })
+      });
 
       const verificationData = {
         documents: ['passport.jpg'],
-      }
+      };
 
       const response = await request(app)
         .post('/api/profile/verification/request')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(verificationData)
+        .send(verificationData);
 
-      expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe('VERIFICATION_PENDING')
-    })
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('VERIFICATION_PENDING');
+    });
 
     it('should validate verification request data', async () => {
       const invalidData = {
         documents: [], // Empty array should fail validation
-      }
+      };
 
       const response = await request(app)
         .post('/api/profile/verification/request')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(invalidData)
+        .send(invalidData);
 
-      expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe('VALIDATION_ERROR')
-    })
-  })
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
 
   describe('POST /api/profile/verification/:userId/approve', () => {
     it('should approve verification as admin', async () => {
       // Set user verification to pending first
       await userRepository.update(testUser.id, {
-        profile: { 
+        profile: {
           ...testUser.profile,
-          verificationStatus: VerificationStatus.PENDING 
+          verificationStatus: VerificationStatus.PENDING,
         },
-      })
+      });
 
       const response = await request(app)
         .post(`/api/profile/verification/${testUser.id}/approve`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
-      expect(response.body.data.profile.verificationStatus).toBe(VerificationStatus.VERIFIED)
-      expect(response.body.message).toBe('User verification approved successfully')
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.profile.verificationStatus).toBe(
+        VerificationStatus.VERIFIED
+      );
+      expect(response.body.message).toBe(
+        'User verification approved successfully'
+      );
+    });
 
     it('should return 403 when user lacks permissions', async () => {
       const response = await request(app)
         .post(`/api/profile/verification/${testUser.id}/approve`)
-        .set('Authorization', `Bearer ${userToken}`)
+        .set('Authorization', `Bearer ${userToken}`);
 
-      expect(response.status).toBe(403)
-      expect(response.body.error.code).toBe('INSUFFICIENT_PERMISSIONS')
-    })
+      expect(response.status).toBe(403);
+      expect(response.body.error.code).toBe('INSUFFICIENT_PERMISSIONS');
+    });
 
     it('should return 404 when user not found', async () => {
       // Use a valid UUID format that doesn't exist
-      const nonExistentUuid = '123e4567-e89b-12d3-a456-426614174999'
+      const nonExistentUuid = '123e4567-e89b-12d3-a456-426614174999';
       const response = await request(app)
         .post(`/api/profile/verification/${nonExistentUuid}/approve`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(404)
-      expect(response.body.error.code).toBe('USER_NOT_FOUND')
-    })
-  })
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('USER_NOT_FOUND');
+    });
+  });
 
   describe('POST /api/profile/verification/:userId/reject', () => {
     it('should reject verification as admin', async () => {
       // Set user verification to pending first
       await userRepository.update(testUser.id, {
-        profile: { 
+        profile: {
           ...testUser.profile,
-          verificationStatus: VerificationStatus.PENDING 
+          verificationStatus: VerificationStatus.PENDING,
         },
-      })
+      });
 
       const rejectionData = {
         reason: 'Documents are not clear enough',
-      }
+      };
 
       const response = await request(app)
         .post(`/api/profile/verification/${testUser.id}/reject`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send(rejectionData)
+        .send(rejectionData);
 
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
-      expect(response.body.data.user.profile.verificationStatus).toBe(VerificationStatus.REJECTED)
-      expect(response.body.data.rejection.reason).toBe(rejectionData.reason)
-      expect(response.body.message).toBe('User verification rejected successfully')
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.user.profile.verificationStatus).toBe(
+        VerificationStatus.REJECTED
+      );
+      expect(response.body.data.rejection.reason).toBe(rejectionData.reason);
+      expect(response.body.message).toBe(
+        'User verification rejected successfully'
+      );
+    });
 
     it('should return 403 when user lacks permissions', async () => {
       const response = await request(app)
         .post(`/api/profile/verification/${testUser.id}/reject`)
         .set('Authorization', `Bearer ${userToken}`)
-        .send({ reason: 'Test' })
+        .send({ reason: 'Test' });
 
-      expect(response.status).toBe(403)
-      expect(response.body.error.code).toBe('INSUFFICIENT_PERMISSIONS')
-    })
-  })
+      expect(response.status).toBe(403);
+      expect(response.body.error.code).toBe('INSUFFICIENT_PERMISSIONS');
+    });
+  });
 
   describe('GET /api/profile/:userId', () => {
     it('should get own profile by ID', async () => {
       const response = await request(app)
         .get(`/api/profile/${testUser.id}`)
-        .set('Authorization', `Bearer ${userToken}`)
+        .set('Authorization', `Bearer ${userToken}`);
 
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
-      expect(response.body.data.id).toBe(testUser.id)
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe(testUser.id);
+    });
 
     it('should get any profile as admin', async () => {
       const response = await request(app)
         .get(`/api/profile/${testUser.id}`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
-      expect(response.body.data.id).toBe(testUser.id)
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBe(testUser.id);
+    });
 
     it('should return 403 when accessing other user profile without permissions', async () => {
       const response = await request(app)
         .get(`/api/profile/${adminUser.id}`)
-        .set('Authorization', `Bearer ${userToken}`)
+        .set('Authorization', `Bearer ${userToken}`);
 
-      expect(response.status).toBe(403)
-      expect(response.body.error.code).toBe('INSUFFICIENT_PERMISSIONS')
-    })
+      expect(response.status).toBe(403);
+      expect(response.body.error.code).toBe('INSUFFICIENT_PERMISSIONS');
+    });
 
     it('should return 404 when user not found', async () => {
       // Use a valid UUID format that doesn't exist
-      const nonExistentUuid = '123e4567-e89b-12d3-a456-426614174999'
+      const nonExistentUuid = '123e4567-e89b-12d3-a456-426614174999';
       const response = await request(app)
         .get(`/api/profile/${nonExistentUuid}`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(404)
-      expect(response.body.error.code).toBe('USER_NOT_FOUND')
-    })
-  })
+      expect(response.status).toBe(404);
+      expect(response.body.error.code).toBe('USER_NOT_FOUND');
+    });
+  });
 
   describe('File Upload Validation', () => {
     it('should reject non-image files', async () => {
-      const testTextBuffer = Buffer.from('This is not an image')
+      const testTextBuffer = Buffer.from('This is not an image');
 
       const response = await request(app)
         .post('/api/profile/avatar')
         .set('Authorization', `Bearer ${userToken}`)
-        .attach('avatar', testTextBuffer, 'test.txt')
+        .attach('avatar', testTextBuffer, 'test.txt');
 
-      expect(response.status).toBe(400) // Multer middleware returns 400 for invalid file type
-      expect(response.body.error.code).toBe('INVALID_FILE_TYPE')
-    })
+      expect(response.status).toBe(400); // Multer middleware returns 400 for invalid file type
+      expect(response.body.error.code).toBe('INVALID_FILE_TYPE');
+    });
 
     it('should handle file size limits', async () => {
       // Create a buffer larger than 5MB
-      const largeBuf = Buffer.alloc(6 * 1024 * 1024, 'a')
+      const largeBuf = Buffer.alloc(6 * 1024 * 1024, 'a');
 
       const response = await request(app)
         .post('/api/profile/avatar')
         .set('Authorization', `Bearer ${userToken}`)
-        .attach('avatar', largeBuf, 'large-image.jpg')
+        .attach('avatar', largeBuf, 'large-image.jpg');
 
-      expect(response.status).toBe(400) // Multer middleware returns 400 for file size limit
-      expect(response.body.error.code).toBe('FILE_TOO_LARGE')
-    })
-  })
+      expect(response.status).toBe(400); // Multer middleware returns 400 for file size limit
+      expect(response.body.error.code).toBe('FILE_TOO_LARGE');
+    });
+  });
 
   describe('Error Handling', () => {
     it('should handle database errors gracefully', async () => {
@@ -481,27 +504,27 @@ describe('ProfileController Integration Tests', () => {
       // For now, we'll test with invalid user ID format
       const response = await request(app)
         .get('/api/profile/invalid-uuid-format')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Authorization', `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(500)
-      expect(response.body.error.code).toBe('INTERNAL_SERVER_ERROR')
-    })
+      expect(response.status).toBe(500);
+      expect(response.body.error.code).toBe('INTERNAL_SERVER_ERROR');
+    });
 
     it('should include request ID in error responses', async () => {
       const response = await request(app)
         .get('/api/profile')
-        .set('x-request-id', 'test-request-123')
+        .set('x-request-id', 'test-request-123');
 
-      expect(response.status).toBe(401)
-      expect(response.body.error.requestId).toBe('test-request-123')
-    })
+      expect(response.status).toBe(401);
+      expect(response.body.error.requestId).toBe('test-request-123');
+    });
 
     it('should generate request ID when not provided', async () => {
-      const response = await request(app).get('/api/profile')
+      const response = await request(app).get('/api/profile');
 
-      expect(response.status).toBe(401)
-      expect(response.body.error.requestId).toBeDefined()
-      expect(response.body.error.requestId).not.toBe('unknown')
-    })
-  })
-})
+      expect(response.status).toBe(401);
+      expect(response.body.error.requestId).toBeDefined();
+      expect(response.body.error.requestId).not.toBe('unknown');
+    });
+  });
+});

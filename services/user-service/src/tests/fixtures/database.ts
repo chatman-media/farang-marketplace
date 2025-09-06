@@ -1,7 +1,7 @@
-import { UserRole, VerificationStatus } from '@marketplace/shared-types'
-import { UserEntity } from '../../models/User'
-import { pool, query } from '../../database/connection'
-import { runMigrations } from '../../database/migrate'
+import { UserRole, VerificationStatus } from '@marketplace/shared-types';
+import { UserEntity } from '../../models/User';
+import { pool, query } from '../../database/connection';
+import { runMigrations } from '../../database/migrate';
 
 /**
  * Database fixtures for testing
@@ -23,12 +23,15 @@ export const userFixtures = {
       rating: 4.5,
       reviewsCount: 10,
       verificationStatus: VerificationStatus.VERIFIED,
+      socialProfiles: [],
+      primaryAuthProvider: 'email' as any,
       location: {
         latitude: 40.7128,
         longitude: -74.006,
         address: '123 Main St',
         city: 'New York',
         country: 'USA',
+        region: 'NY',
       },
     },
     isActive: true,
@@ -50,12 +53,15 @@ export const userFixtures = {
       rating: 4.8,
       reviewsCount: 50,
       verificationStatus: VerificationStatus.VERIFIED,
+      socialProfiles: [],
+      primaryAuthProvider: 'email' as any,
       location: {
         latitude: 34.0522,
         longitude: -118.2437,
         address: '789 Business Ave',
         city: 'Los Angeles',
         country: 'USA',
+        region: 'CA',
       },
     },
     isActive: true,
@@ -77,6 +83,8 @@ export const userFixtures = {
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.VERIFIED,
+      socialProfiles: [],
+      primaryAuthProvider: 'email' as any,
     },
     isActive: true,
     createdAt: new Date('2023-01-03T00:00:00Z'),
@@ -97,6 +105,8 @@ export const userFixtures = {
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.VERIFIED,
+      socialProfiles: [],
+      primaryAuthProvider: 'email' as any,
     },
     isActive: true,
     createdAt: new Date('2023-01-04T00:00:00Z'),
@@ -117,6 +127,8 @@ export const userFixtures = {
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
+      socialProfiles: [],
+      primaryAuthProvider: 'email' as any,
     },
     isActive: true,
     createdAt: new Date('2023-01-05T00:00:00Z'),
@@ -137,18 +149,20 @@ export const userFixtures = {
       rating: 3.2,
       reviewsCount: 5,
       verificationStatus: VerificationStatus.VERIFIED,
+      socialProfiles: [],
+      primaryAuthProvider: 'email' as any,
     },
     isActive: false,
     createdAt: new Date('2023-01-06T00:00:00Z'),
     updatedAt: new Date('2023-01-06T00:00:00Z'),
   },
-}
+};
 
 /**
  * Create UserEntity instances from fixtures
  */
 export const createUserEntities = () => {
-  const entities: Record<string, UserEntity> = {}
+  const entities: Record<string, UserEntity> = {};
 
   Object.entries(userFixtures).forEach(([key, fixture]) => {
     entities[key] = new UserEntity(
@@ -157,16 +171,18 @@ export const createUserEntities = () => {
       fixture.passwordHash,
       fixture.role,
       fixture.profile,
+      fixture.profile.socialProfiles || [],
+      fixture.profile.primaryAuthProvider || ('email' as any),
       'phone' in fixture ? fixture.phone : undefined,
       'telegramId' in fixture ? fixture.telegramId : undefined,
       fixture.isActive,
       fixture.createdAt,
       fixture.updatedAt
-    )
-  })
+    );
+  });
 
-  return entities
-}
+  return entities;
+};
 
 /**
  * Database row format fixtures (snake_case for database compatibility)
@@ -197,7 +213,7 @@ export const databaseRowFixtures = {
     created_at: userFixtures.agencyUser.createdAt,
     updated_at: userFixtures.agencyUser.updatedAt,
   },
-}
+};
 
 /**
  * Test data for user creation
@@ -212,6 +228,8 @@ export const createUserTestData = {
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
+      socialProfiles: [],
+      primaryAuthProvider: 'email' as any,
     },
   },
 
@@ -227,12 +245,15 @@ export const createUserTestData = {
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
+      socialProfiles: [],
+      primaryAuthProvider: 'email' as any,
       location: {
         latitude: 37.7749,
         longitude: -122.4194,
         address: '456 Market St',
         city: 'San Francisco',
         country: 'USA',
+        region: 'CA',
       },
     },
   },
@@ -246,9 +267,11 @@ export const createUserTestData = {
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
+      socialProfiles: [],
+      primaryAuthProvider: 'email' as any,
     },
   },
-}
+};
 
 /**
  * Test data for user updates
@@ -264,6 +287,7 @@ export const updateUserTestData = {
         address: '789 Oxford St',
         city: 'London',
         country: 'UK',
+        region: 'London',
       },
     },
   },
@@ -279,7 +303,7 @@ export const updateUserTestData = {
   statusUpdate: {
     isActive: false,
   },
-}
+};
 
 /**
  * Mock database statistics
@@ -297,7 +321,7 @@ export const mockUserStats = {
   unverifiedUsers: 25,
   pendingVerification: 10,
   rejectedVerification: 5,
-}
+};
 /**
  
 * Setup test database
@@ -306,13 +330,13 @@ export const mockUserStats = {
 export async function setupTestDatabase(): Promise<void> {
   try {
     // Run database migrations
-    await runMigrations()
+    await runMigrations();
 
     // Clear any existing test data
-    await cleanupTestDatabase()
+    await cleanupTestDatabase();
   } catch (error) {
-    console.error('Failed to setup test database:', error)
-    throw error
+    console.error('Failed to setup test database:', error);
+    throw error;
   }
 }
 
@@ -323,10 +347,10 @@ export async function setupTestDatabase(): Promise<void> {
 export async function cleanupTestDatabase(): Promise<void> {
   try {
     // Delete all users (this will cascade to related tables)
-    await query('DELETE FROM users WHERE email LIKE $1', ['%@example.com'])
-    await query('DELETE FROM users WHERE email LIKE $1', ['test%@%'])
+    await query('DELETE FROM users WHERE email LIKE $1', ['%@example.com']);
+    await query('DELETE FROM users WHERE email LIKE $1', ['test%@%']);
   } catch (error) {
-    console.error('Failed to cleanup test database:', error)
+    console.error('Failed to cleanup test database:', error);
     // Don't throw error during cleanup to avoid masking test failures
   }
 }
@@ -335,7 +359,7 @@ export async function cleanupTestDatabase(): Promise<void> {
  * Insert test user fixtures into database
  */
 export async function insertUserFixtures(): Promise<void> {
-  const fixtures = Object.values(userFixtures)
+  const fixtures = Object.values(userFixtures);
 
   for (const fixture of fixtures) {
     await query(
@@ -354,7 +378,7 @@ export async function insertUserFixtures(): Promise<void> {
         fixture.createdAt,
         fixture.updatedAt,
       ]
-    )
+    );
   }
 }
 
@@ -362,5 +386,5 @@ export async function insertUserFixtures(): Promise<void> {
  * Get test database connection for direct queries
  */
 export function getTestConnection() {
-  return pool
+  return pool;
 }

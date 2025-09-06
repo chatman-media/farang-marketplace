@@ -1,4 +1,4 @@
-import { Location } from './common'
+import { Location } from './common';
 
 export enum ServiceCategory {
   DELIVERY = 'delivery',
@@ -8,23 +8,23 @@ export enum ServiceCategory {
 }
 
 export interface AgencyServiceType {
-  id: string
-  name: string
-  description: string
-  basePrice: number
-  category: ServiceCategory
+  id: string;
+  name: string;
+  description: string;
+  basePrice: number;
+  category: ServiceCategory;
 }
 
 export interface Agency {
-  id: string
-  userId: string
-  name: string
-  description: string
-  services: AgencyServiceType[]
-  coverage: Location[]
-  rating: number
-  commissionRate: number
-  isVerified: boolean
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  userId: string;
+  name: string;
+  description: string;
+  services: AgencyServiceType[];
+  coverage: Location[];
+  rating: number;
+  commissionRate: number;
+  isVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }

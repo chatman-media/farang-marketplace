@@ -1,12 +1,17 @@
-import { Request, Response } from 'express'
-import { AuthService, LoginRequest, RegisterRequest, RefreshRequest } from '../services/AuthService'
-import { z } from 'zod'
+import { Request, Response } from 'express';
+import {
+  AuthService,
+  LoginRequest,
+  RegisterRequest,
+  RefreshRequest,
+} from '../services/AuthService';
+import { z } from 'zod';
 
 // Validation schemas for request bodies
 const LoginSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(1, 'Password is required'),
-})
+});
 
 const RegisterSchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -29,11 +34,11 @@ const RegisterSchema = z.object({
       })
       .optional(),
   }),
-})
+});
 
 const RefreshTokenSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh token is required'),
-})
+});
 
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -41,22 +46,25 @@ export class AuthController {
   login = async (req: Request, res: Response) => {
     try {
       // Validate request body
-      const loginData = LoginSchema.parse(req.body) as LoginRequest
+      const loginData = LoginSchema.parse(req.body) as LoginRequest;
 
       // Authenticate user
-      const authResponse = await this.authService.login(loginData)
+      const authResponse = await this.authService.login(loginData);
 
       res.status(200).json({
         success: true,
         data: authResponse,
         message: 'Login successful',
-      })
+      });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed'
-      
+      const errorMessage =
+        error instanceof Error ? error.message : 'Login failed';
+
       // Check for specific error types
-      if (errorMessage.includes('Invalid email or password') || 
-          errorMessage.includes('Account is deactivated')) {
+      if (
+        errorMessage.includes('Invalid email or password') ||
+        errorMessage.includes('Account is deactivated')
+      ) {
         return res.status(401).json({
           error: {
             code: 'AUTHENTICATION_FAILED',
@@ -64,7 +72,7 @@ export class AuthController {
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
-        })
+        });
       }
 
       // Validation errors
@@ -77,7 +85,7 @@ export class AuthController {
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
-        })
+        });
       }
 
       // Generic server error
@@ -88,26 +96,27 @@ export class AuthController {
           timestamp: new Date().toISOString(),
           requestId: req.headers['x-request-id'] || 'unknown',
         },
-      })
+      });
     }
-  }
+  };
 
   register = async (req: Request, res: Response) => {
     try {
       // Validate request body
-      const registerData = RegisterSchema.parse(req.body) as RegisterRequest
+      const registerData = RegisterSchema.parse(req.body) as RegisterRequest;
 
       // Register user
-      const authResponse = await this.authService.register(registerData)
+      const authResponse = await this.authService.register(registerData);
 
       res.status(201).json({
         success: true,
         data: authResponse,
         message: 'Registration successful',
-      })
+      });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Registration failed'
-      
+      const errorMessage =
+        error instanceof Error ? error.message : 'Registration failed';
+
       // Check for specific error types
       if (errorMessage.includes('already exists')) {
         return res.status(409).json({
@@ -117,7 +126,7 @@ export class AuthController {
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
-        })
+        });
       }
 
       // Validation errors
@@ -130,7 +139,7 @@ export class AuthController {
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
-        })
+        });
       }
 
       // Generic server error
@@ -141,28 +150,32 @@ export class AuthController {
           timestamp: new Date().toISOString(),
           requestId: req.headers['x-request-id'] || 'unknown',
         },
-      })
+      });
     }
-  }
+  };
 
   refreshToken = async (req: Request, res: Response) => {
     try {
       // Validate request body
-      const refreshData = RefreshTokenSchema.parse(req.body) as RefreshRequest
+      const refreshData = RefreshTokenSchema.parse(req.body) as RefreshRequest;
 
       // Refresh tokens
-      const authResponse = await this.authService.refreshTokens(refreshData)
+      const authResponse = await this.authService.refreshTokens(refreshData);
 
       res.status(200).json({
         success: true,
         data: authResponse,
         message: 'Token refresh successful',
-      })
+      });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Token refresh failed'
-      
+      const errorMessage =
+        error instanceof Error ? error.message : 'Token refresh failed';
+
       // Check for specific error types
-      if (errorMessage.includes('Invalid') || errorMessage.includes('expired')) {
+      if (
+        errorMessage.includes('Invalid') ||
+        errorMessage.includes('expired')
+      ) {
         return res.status(401).json({
           error: {
             code: 'INVALID_REFRESH_TOKEN',
@@ -170,7 +183,7 @@ export class AuthController {
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
-        })
+        });
       }
 
       // Validation errors
@@ -183,7 +196,7 @@ export class AuthController {
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
-        })
+        });
       }
 
       // Generic server error
@@ -194,9 +207,9 @@ export class AuthController {
           timestamp: new Date().toISOString(),
           requestId: req.headers['x-request-id'] || 'unknown',
         },
-      })
+      });
     }
-  }
+  };
 
   // Get current user profile (requires authentication)
   getProfile = async (req: Request, res: Response) => {
@@ -209,7 +222,7 @@ export class AuthController {
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
-        })
+        });
       }
 
       // Get user data (this would typically come from UserService)
@@ -222,7 +235,7 @@ export class AuthController {
           role: req.user.role,
         },
         message: 'Profile retrieved successfully',
-      })
+      });
     } catch (error) {
       res.status(500).json({
         error: {
@@ -231,27 +244,27 @@ export class AuthController {
           timestamp: new Date().toISOString(),
           requestId: req.headers['x-request-id'] || 'unknown',
         },
-      })
+      });
     }
-  }
+  };
 
   // Logout endpoint (for client-side token cleanup)
   logout = async (req: Request, res: Response) => {
     // In a stateless JWT implementation, logout is typically handled client-side
     // by removing the tokens from storage. However, we can provide this endpoint
     // for consistency and future token blacklisting if needed.
-    
+
     res.status(200).json({
       success: true,
       message: 'Logout successful',
-    })
-  }
+    });
+  };
 
   // Validate token endpoint (for other services to validate tokens)
   validateToken = async (req: Request, res: Response) => {
     try {
-      const authHeader = req.headers.authorization
-      const token = AuthService.extractTokenFromHeader(authHeader)
+      const authHeader = req.headers.authorization;
+      const token = AuthService.extractTokenFromHeader(authHeader);
 
       if (!token) {
         return res.status(400).json({
@@ -261,10 +274,10 @@ export class AuthController {
             timestamp: new Date().toISOString(),
             requestId: req.headers['x-request-id'] || 'unknown',
           },
-        })
+        });
       }
 
-      const payload = await this.authService.validateAccessToken(token)
+      const payload = await this.authService.validateAccessToken(token);
 
       res.status(200).json({
         success: true,
@@ -273,7 +286,7 @@ export class AuthController {
           payload,
         },
         message: 'Token is valid',
-      })
+      });
     } catch (error) {
       res.status(401).json({
         error: {
@@ -282,7 +295,7 @@ export class AuthController {
           timestamp: new Date().toISOString(),
           requestId: req.headers['x-request-id'] || 'unknown',
         },
-      })
+      });
     }
-  }
+  };
 }
