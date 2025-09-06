@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ListingController } from '../controllers/ListingController.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { upload, processImages, validateImageUpload } from '../middleware/upload.js';
 import { param } from 'express-validator';
 
 const router = Router();
@@ -15,6 +16,9 @@ const validateId = [
 router.post(
   '/vehicles',
   authMiddleware,
+  upload.array('images', 20),
+  validateImageUpload,
+  processImages,
   ListingController.createVehicleValidation,
   listingController.createVehicleListing
 );
@@ -27,6 +31,9 @@ router.get('/vehicles/:id', validateId, listingController.getVehicleListing);
 router.post(
   '/products',
   authMiddleware,
+  upload.array('images', 20),
+  validateImageUpload,
+  processImages,
   ListingController.createProductValidation,
   listingController.createProductListing
 );

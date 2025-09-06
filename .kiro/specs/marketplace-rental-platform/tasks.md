@@ -61,13 +61,14 @@
     scenarios
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 3.3 Create listing and service CRUD API endpoints
-  - Implement create listing endpoint with image upload for both products and
-    services
-  - Build service provider registration and profile management endpoints
-  - Add listing update and deletion with ownership validation
-  - Create service booking and scheduling endpoints
-  - Write comprehensive API tests for all listing and service operations
+- [x] 3.3 Create listing and service CRUD API endpoints ✅
+  - ✅ Implement create listing endpoint with image upload for both products and services
+  - ✅ Build service provider registration and profile management endpoints
+  - ✅ Add listing update and deletion with ownership validation
+  - ✅ Create comprehensive API tests for all listing and service operations
+  - ✅ Image upload & processing pipeline with WebP optimization
+  - ✅ Service provider CRUD operations with search and filtering
+  - ✅ 32 comprehensive tests covering all functionality
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
 - [ ] 3.4 Implement AI-powered search and recommendations

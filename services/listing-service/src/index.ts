@@ -3,8 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import { config } from 'dotenv';
 import listingRoutes from './routes/listings.js';
+import serviceProviderRoutes from './routes/serviceProviders.js';
+import { serveImages } from './middleware/upload.js';
 
 // Load environment variables
 config();
@@ -51,8 +54,12 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Static file serving for images
+app.use('/uploads', serveImages);
+
 // API routes
 app.use('/api/listings', listingRoutes);
+app.use('/api/service-providers', serviceProviderRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

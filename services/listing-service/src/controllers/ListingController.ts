@@ -138,7 +138,10 @@ export class ListingController {
         });
       }
 
-      const vehicleData: CreateVehicleRequest = req.body;
+      const vehicleData: CreateVehicleRequest = {
+        ...req.body,
+        images: req.body.processedImages || req.body.images || [],
+      };
       const listing = await this.listingService.createVehicleListing(
         ownerId,
         vehicleData
@@ -179,7 +182,10 @@ export class ListingController {
         });
       }
 
-      const productData: CreateProductRequest = req.body;
+      const productData: CreateProductRequest = {
+        ...req.body,
+        images: req.body.processedImages || req.body.images || [],
+      };
       const listing = await this.listingService.createProductListing(
         ownerId,
         productData

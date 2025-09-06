@@ -266,6 +266,9 @@ export interface ServiceProvidersResponse {
   hasMore: boolean;
 }
 
+// Alias for backward compatibility
+export type ServiceProviderSearchFilters = ServiceProviderFilters;
+
 // Validation Constants
 export const SERVICE_PROVIDER_VALIDATION = {
   DISPLAY_NAME: {

@@ -8,6 +8,7 @@ import {
   boolean,
   timestamp,
   jsonb,
+  json,
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
@@ -579,3 +580,131 @@ export const listingBookingsRelations = relations(
     }),
   })
 );
+
+// Add new enums for service providers
+export const providerTypeEnum = pgEnum('provider_type', ['individual', 'company', 'agency', 'freelancer']);
+export const verificationLevelEnum = pgEnum('verification_level', ['basic', 'verified', 'premium', 'enterprise']);
+export const availabilityStatusEnum = pgEnum('availability_status', ['available', 'busy', 'away', 'offline']);
+
+// Service Providers table
+export const serviceProviders = pgTable('service_providers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: varchar('user_id', { length: 255 }).notNull(),
+  providerType: providerTypeEnum('provider_type').notNull(),
+  businessName: varchar('business_name', { length: 100 }),
+  displayName: varchar('display_name', { length: 50 }).notNull(),
+  bio: text('bio').notNull(),
+  avatar: varchar('avatar', { length: 500 }),
+  coverImage: varchar('cover_image', { length: 500 }),
+
+  // Contact Information
+  email: varchar('email', { length: 255 }).notNull(),
+  phone: varchar('phone', { length: 50 }).notNull(),
+  website: varchar('website', { length: 500 }),
+  socialMedia: jsonb('social_media').$type<{
+    linkedin?: string;
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+  }>(),
+
+  // Location and Service Areas
+  primaryLocation: jsonb('primary_location').$type<{
+    latitude: number;
+    longitude: number;
+    address: string;
+    city: string;
+    region: string;
+    country: string;
+    postalCode?: string;
+  }>().notNull(),
+  serviceAreas: jsonb('service_areas').$type<Array<{
+    latitude: number;
+    longitude: number;
+    address: string;
+    city: string;
+    region: string;
+    country: string;
+    radius?: number;
+  }>>(),
+
+  // Verification and Status
+  verificationLevel: verificationLevelEnum('verification_level').default('basic'),
+  isVerified: boolean('is_verified').default(false),
+  availabilityStatus: availabilityStatusEnum('availability_status').default('available'),
+
+  // Business Information
+  businessLicenses: jsonb('business_licenses').$type<Array<{
+    id: string;
+    type: string;
+    number: string;
+    issuedBy: string;
+    issuedDate: string;
+    expiryDate: string;
+    isValid: boolean;
+    documentUrl?: string;
+  }>>(),
+  certifications: jsonb('certifications').$type<Array<{
+    id: string;
+    name: string;
+    issuingOrganization: string;
+    issuedDate: string;
+    expiryDate?: string;
+    credentialId?: string;
+    verificationUrl?: string;
+  }>>(),
+
+  // Service Capabilities
+  serviceCapabilities: jsonb('service_capabilities').$type<Array<{
+    serviceType: string;
+    category: string;
+    subcategory?: string;
+    description: string;
+    pricing: {
+      basePrice: number;
+      currency: string;
+      priceType: 'fixed' | 'hourly' | 'daily' | 'project';
+      minimumCharge?: number;
+    };
+    availability: {
+      daysOfWeek: number[];
+      timeSlots: Array<{
+        start: string;
+        end: string;
+      }>;
+      timezone: string;
+    };
+    serviceArea: {
+      radius: number;
+      locations: string[];
+    };
+  }>>(),
+
+  // Languages and Settings
+  languages: jsonb('languages').$type<string[]>().default([]),
+  settings: jsonb('settings').$type<{
+    autoAcceptBookings?: boolean;
+    instantBooking?: boolean;
+    requireDeposit?: boolean;
+    cancellationPolicy?: string;
+    refundPolicy?: string;
+  }>(),
+
+  // Statistics
+  totalBookings: integer('total_bookings').default(0),
+  completedBookings: integer('completed_bookings').default(0),
+  averageRating: decimal('average_rating', { precision: 3, scale: 2 }).default('0.00'),
+  totalReviews: integer('total_reviews').default(0),
+  responseTime: integer('response_time_minutes'),
+
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+  verifiedAt: timestamp('verified_at'),
+});
+
+// Service Provider Relations
+export const serviceProvidersRelations = relations(serviceProviders, ({ many }) => ({
+  listings: many(listings),
+  bookings: many(listingBookings),
+}));

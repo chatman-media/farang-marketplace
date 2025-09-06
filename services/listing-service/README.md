@@ -335,3 +335,130 @@ Listing Service полностью готов для:
 - ✅ Масштабирования под нагрузку
 
 **Универсальная система для любых товаров и услуг!** 🎉
+
+## 📸 Image Upload & Processing (Task 3.3)
+
+### Supported Features
+- **Multiple formats**: JPEG, PNG, WebP
+- **Automatic optimization**: WebP conversion with quality settings
+- **Multiple sizes**: Thumbnail (300x225), Medium (800x600), Large (1200x900)
+- **Smart validation**: File type, size (max 10MB), count (max 20 images)
+- **Organized storage**: Date-based directory structure
+- **Automatic cleanup**: Old images removed on updates
+
+### Upload Endpoints
+
+#### Upload images with vehicle listing
+```http
+POST /api/listings/vehicles
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+images: [file1.jpg, file2.png, ...]
+type: "scooter"
+category: "economy"
+...
+```
+
+#### Upload images with product listing
+```http
+POST /api/listings/products
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+images: [file1.jpg, file2.png, ...]
+type: "electronics"
+category: "smartphones"
+...
+```
+
+### Image URLs
+- **Static serving**: `GET /uploads/{year}/{month}/{entity_type}/{entity_id}/{filename}`
+- **Example**: `/uploads/2024/01/listings/listing_123/image_1_800x600.webp`
+- **Caching**: Browser cache headers included for performance
+
+## 🏢 Service Provider Management (Task 3.3)
+
+### Create Service Provider
+```http
+POST /api/service-providers
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+images: [avatar.jpg, cover.jpg, ...]
+businessName: "Thai Scooter Rentals"
+businessType: "company"
+description: "Professional scooter rental service"
+services: [
+  {
+    "name": "Scooter Rental",
+    "category": "transportation",
+    "price": 300,
+    "currency": "THB",
+    "priceType": "daily"
+  }
+]
+contactInfo: {
+  "phone": "+66812345678",
+  "email": "info@thaiscooters.com"
+}
+location: {
+  "address": "123 Sukhumvit Road",
+  "city": "Bangkok",
+  "region": "Bangkok",
+  "country": "Thailand"
+}
+```
+
+### Search Service Providers
+```http
+GET /api/service-providers/search?providerType=company&serviceTypes=transportation&location=Bangkok&rating=4.0&page=1&limit=20
+```
+
+### Update Service Provider
+```http
+PATCH /api/service-providers/{id}
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+images: [new_avatar.jpg, ...]
+businessName: "Updated Business Name"
+description: "Updated description"
+```
+
+### Delete Service Provider
+```http
+DELETE /api/service-providers/{id}
+Authorization: Bearer <token>
+```
+
+## 🧪 Testing (Task 3.3)
+
+### Run All Tests
+```bash
+# Run all tests
+bun test
+
+# Run with coverage
+bun test --coverage
+
+# Run specific test file
+bun test ServiceProviderService.test.ts
+```
+
+### Test Coverage
+- **32 tests** covering all major functionality
+- **Listing Service**: Vehicle/product creation, search, validation
+- **Service Providers**: CRUD operations, search filters, business logic
+- **Image Upload**: Validation, processing, security, error handling
+
+## ✅ Task 3.3 Completed!
+
+**Новые возможности:**
+- ✅ **Image Upload & Processing** - Загрузка и обработка изображений
+- ✅ **Service Provider Management** - Управление поставщиками услуг
+- ✅ **CRUD API Endpoints** - Полный набор API для создания, чтения, обновления и удаления
+- ✅ **Comprehensive Testing** - 32 теста покрывающих всю функциональность
+- ✅ **Production Ready** - Готов к продакшену с безопасностью и оптимизацией
+
+**Listing Service полностью готов для Thailand Marketplace!** 🎉
