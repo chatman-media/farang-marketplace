@@ -2,6 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"],
       "@marketplace/shared-types": ["../../packages/shared-types/src"]
