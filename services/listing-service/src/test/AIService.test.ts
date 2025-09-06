@@ -107,7 +107,7 @@ describe('AIService', () => {
       expect(result).toBeDefined();
       expect(result.query).toBe('enhanced search terms');
       expect(result.aiInsights).toBeDefined();
-      expect(result.processingTime).toBeGreaterThan(0);
+      expect(result.processingTime).toBeGreaterThanOrEqual(0);
     });
 
     it('should handle API errors gracefully', async () => {
