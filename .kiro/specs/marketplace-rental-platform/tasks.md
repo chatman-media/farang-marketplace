@@ -50,7 +50,7 @@
   - Include service provider profiles and capability definitions
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 3.2 Implement listing service with data models
+- [x] 3.2 Implement listing service with data models
   - Create Listing entity with categories, pricing, and availability for both
     products and services
   - Design PostgreSQL schema for listings with proper indexing and

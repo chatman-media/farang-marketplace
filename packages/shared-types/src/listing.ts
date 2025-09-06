@@ -1,4 +1,6 @@
 import { Location } from './common';
+import { Vehicle, VehicleType } from './vehicle';
+import { Product, ProductType } from './product';
 
 export enum ListingCategory {
   ACCOMMODATION = 'accommodation',
@@ -9,6 +11,8 @@ export enum ListingCategory {
   SHOPPING = 'shopping',
   SERVICES = 'services',
   EVENTS = 'events',
+  VEHICLES = 'vehicles',
+  PRODUCTS = 'products',
 }
 
 export enum ServiceType {
@@ -118,6 +122,37 @@ export interface Listing {
   createdAt: string;
   updatedAt: string;
   metadata?: Record<string, any>;
+}
+
+// Vehicle-specific listing interface
+export interface VehicleListing extends Omit<Listing, 'amenities'> {
+  category: ListingCategory.VEHICLES;
+  vehicleType: VehicleType;
+  vehicle: Vehicle;
+  rentalTerms?: {
+    minimumAge: number;
+    licenseRequired: boolean;
+    depositRequired: boolean;
+    insuranceIncluded: boolean;
+    fuelPolicy: string;
+    mileageLimit?: number;
+    restrictions?: string[];
+  };
+}
+
+// Product-specific listing interface
+export interface ProductListing extends Omit<Listing, 'amenities' | 'availability'> {
+  category: ListingCategory.PRODUCTS;
+  productType: ProductType;
+  product: Product;
+  shippingOptions?: {
+    localDelivery: boolean;
+    nationalShipping: boolean;
+    internationalShipping: boolean;
+    pickupAvailable: boolean;
+    shippingCost?: number;
+    freeShippingThreshold?: number;
+  };
 }
 
 export interface ServiceListing

@@ -9,3 +9,5 @@ export * from './payment';
 export * from './common';
 export * from './service-provider';
 export * from './review';
+export * from './vehicle';
+export * from './product';
