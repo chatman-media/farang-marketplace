@@ -11,8 +11,8 @@
 1. **Clone and setup the project:**
 
    ```bash
-   git clone <repository-url>
-   cd marketplace-rental-platform
+   git clone https://github.com/chatman-media/farang-marketplace.git
+   cd thailand-marketplace
    ./scripts/setup-dev.sh
    ```
 
@@ -31,7 +31,7 @@
 ## Project Structure
 
 ```
-marketplace-rental-platform/
+thailand-marketplace/
 ├── apps/                    # Frontend applications
 │   ├── web/                # Main web application
 │   ├── admin/              # Admin panel
@@ -95,8 +95,7 @@ marketplace-rental-platform/
 
 ### Monorepo Structure
 
-This project uses Turbo for monorepo management with the following workspace
-structure:
+This project uses Turbo for monorepo management with the following workspace structure:
 
 - **Apps**: Frontend applications built with Vite + React
 - **Services**: Backend microservices built with Node.js/TypeScript
@@ -128,8 +127,7 @@ structure:
 
 ## Shared Types Package
 
-The `@marketplace/shared-types` package contains all TypeScript interfaces and
-types used across the platform:
+The `@marketplace/shared-types` package contains all TypeScript interfaces and types used across the platform:
 
 - **User Types**: User profiles, authentication, roles
 - **Listing Types**: Product/service listings, categories
@@ -164,8 +162,7 @@ TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 
 ### Service-Specific Configuration
 
-Each service may have additional environment variables. Check the `.env.example`
-file in each service directory.
+Each service may have additional environment variables. Check the `.env.example` file in each service directory.
 
 ## Development Workflow
 

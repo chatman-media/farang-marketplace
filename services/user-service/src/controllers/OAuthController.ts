@@ -223,6 +223,7 @@ export class OAuthController {
       [AuthProvider.TIKTOK]: 'TikTok',
       [AuthProvider.TELEGRAM]: 'Telegram',
       [AuthProvider.LINE]: 'LINE',
+      [AuthProvider.WHATSAPP]: 'WhatsApp',
       [AuthProvider.EMAIL]: 'Email',
     };
     return displayNames[provider] || provider;
@@ -252,6 +253,12 @@ export class OAuthController {
       case AuthProvider.LINE:
         return !!(
           process.env.LINE_CHANNEL_ID && process.env.LINE_CHANNEL_SECRET
+        );
+      case AuthProvider.WHATSAPP:
+        return !!(
+          process.env.WHATSAPP_APP_ID &&
+          process.env.WHATSAPP_APP_SECRET &&
+          process.env.WHATSAPP_PHONE_NUMBER_ID
         );
       case AuthProvider.EMAIL:
         return true; // Email всегда доступен

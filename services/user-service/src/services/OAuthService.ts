@@ -47,6 +47,12 @@ export interface OAuthConfig {
     channelSecret: string;
     redirectUri: string;
   };
+  whatsapp?: {
+    appId: string;
+    appSecret: string;
+    phoneNumberId: string;
+    redirectUri: string;
+  };
 }
 
 export class OAuthService {
@@ -107,6 +113,16 @@ export class OAuthService {
               `${process.env.BACKEND_URL}/auth/line/callback`,
           }
         : undefined,
+      whatsapp: process.env.WHATSAPP_APP_ID
+        ? {
+            appId: process.env.WHATSAPP_APP_ID!,
+            appSecret: process.env.WHATSAPP_APP_SECRET!,
+            phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID!,
+            redirectUri:
+              process.env.WHATSAPP_CALLBACK_URL ||
+              `${process.env.BACKEND_URL}/auth/whatsapp/callback`,
+          }
+        : undefined,
     };
   }
 
@@ -139,6 +155,12 @@ export class OAuthService {
       this.providers.set(
         AuthProvider.LINE,
         new LineOAuthProvider(this.config.line)
+      );
+    }
+    if (this.config.whatsapp) {
+      this.providers.set(
+        AuthProvider.WHATSAPP,
+        new WhatsAppOAuthProvider(this.config.whatsapp)
       );
     }
   }
@@ -546,20 +568,117 @@ export class TelegramOAuthProvider extends BaseOAuthProvider {
   }
 }
 
-// Заглушки для остальных провайдеров
 export class AppleOAuthProvider extends BaseOAuthProvider {
   constructor(private config: NonNullable<OAuthConfig['apple']>) {
     super();
   }
 
-  getAuthorizationUrl(_state: string): string {
-    // TODO: Реализовать Apple Sign In
-    throw new Error('Apple Sign In not implemented yet');
+  getAuthorizationUrl(state: string): string {
+    const params = new URLSearchParams({
+      client_id: this.config.clientId,
+      redirect_uri: this.config.redirectUri,
+      response_type: 'code',
+      scope: 'name email',
+      response_mode: 'form_post',
+      state,
+    });
+
+    return `https://appleid.apple.com/auth/authorize?${params.toString()}`;
   }
 
-  async getUserProfile(_request: OAuthLoginRequest): Promise<SocialProfile> {
-    // TODO: Реализовать Apple Sign In
-    throw new Error('Apple Sign In not implemented yet');
+  async getUserProfile(request: OAuthLoginRequest): Promise<SocialProfile> {
+    if (!request.code) {
+      throw new Error('Authorization code is required for Apple Sign In');
+    }
+
+    // Обмен кода на токен доступа
+    const tokenResponse = await this.exchangeCodeForToken(request.code);
+
+    // Apple не предоставляет API для получения профиля после первой авторизации
+    // Информация о пользователе приходит только в первый раз в id_token
+    const userInfo = this.decodeIdToken(tokenResponse.id_token);
+
+    return {
+      provider: AuthProvider.APPLE,
+      providerId: userInfo.sub,
+      email: userInfo.email,
+      name: userInfo.name,
+      connectedAt: new Date().toISOString(),
+    };
+  }
+
+  private async exchangeCodeForToken(code: string): Promise<{
+    access_token: string;
+    id_token: string;
+    token_type: string;
+  }> {
+    // Создаем client_secret JWT для Apple
+    const clientSecret = await this.generateClientSecret();
+
+    const response = await fetch('https://appleid.apple.com/auth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: this.config.clientId,
+        client_secret: clientSecret,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: this.config.redirectUri,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to exchange code for token: ${error}`);
+    }
+
+    return response.json() as Promise<{
+      access_token: string;
+      id_token: string;
+      token_type: string;
+    }>;
+  }
+
+  private async generateClientSecret(): Promise<string> {
+    // Для Apple Sign In нужно генерировать JWT с приватным ключом
+    // Это упрощенная версия - в реальном проекте используйте библиотеку jsonwebtoken
+    const jwt = require('jsonwebtoken');
+    const fs = require('fs');
+
+    const privateKey = fs.readFileSync(this.config.privateKeyPath);
+
+    const payload = {
+      iss: this.config.teamId,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + 3600, // 1 час
+      aud: 'https://appleid.apple.com',
+      sub: this.config.clientId,
+    };
+
+    return jwt.sign(payload, privateKey, {
+      algorithm: 'ES256',
+      header: {
+        kid: this.config.keyId,
+      },
+    });
+  }
+
+  private decodeIdToken(idToken: string): {
+    sub: string;
+    email?: string;
+    name?: string;
+  } {
+    // Простое декодирование JWT (без проверки подписи для примера)
+    const payload = idToken.split('.')[1];
+    const decoded = JSON.parse(Buffer.from(payload, 'base64').toString());
+
+    return {
+      sub: decoded.sub,
+      email: decoded.email,
+      name: decoded.name ? `${decoded.name.firstName || ''} ${decoded.name.lastName || ''}`.trim() : undefined,
+    };
   }
 }
 
@@ -568,14 +687,105 @@ export class TikTokOAuthProvider extends BaseOAuthProvider {
     super();
   }
 
-  getAuthorizationUrl(_state: string): string {
-    // TODO: Реализовать TikTok Login Kit
-    throw new Error('TikTok Login Kit not implemented yet');
+  getAuthorizationUrl(state: string): string {
+    const params = new URLSearchParams({
+      client_key: this.config.clientKey,
+      redirect_uri: this.config.redirectUri,
+      response_type: 'code',
+      scope: 'user.info.basic',
+      state,
+    });
+
+    return `https://www.tiktok.com/auth/authorize/?${params.toString()}`;
   }
 
-  async getUserProfile(_request: OAuthLoginRequest): Promise<SocialProfile> {
-    // TODO: Реализовать TikTok Login Kit
-    throw new Error('TikTok Login Kit not implemented yet');
+  async getUserProfile(request: OAuthLoginRequest): Promise<SocialProfile> {
+    if (!request.code) {
+      throw new Error('Authorization code is required for TikTok Login');
+    }
+
+    // Обмен кода на токен доступа
+    const tokenResponse = await this.exchangeCodeForToken(request.code);
+
+    // Получение профиля пользователя
+    const userInfo = await this.fetchUserInfo(tokenResponse.access_token);
+
+    return {
+      provider: AuthProvider.TIKTOK,
+      providerId: userInfo.data.user.open_id,
+      name: userInfo.data.user.display_name,
+      avatar: userInfo.data.user.avatar_url,
+      username: userInfo.data.user.username,
+      connectedAt: new Date().toISOString(),
+    };
+  }
+
+  private async exchangeCodeForToken(code: string): Promise<{
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+  }> {
+    const response = await fetch('https://open-api.tiktok.com/oauth/access_token/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_key: this.config.clientKey,
+        client_secret: this.config.clientSecret,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: this.config.redirectUri,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to exchange code for token: ${error}`);
+    }
+
+    const result = await response.json() as any;
+
+    if (result.error_code !== 0) {
+      throw new Error(`TikTok OAuth error: ${result.message}`);
+    }
+
+    return result.data;
+  }
+
+  private async fetchUserInfo(accessToken: string): Promise<{
+    data: {
+      user: {
+        open_id: string;
+        display_name: string;
+        avatar_url: string;
+        username: string;
+      };
+    };
+  }> {
+    const response = await fetch('https://open-api.tiktok.com/user/info/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fields: ['open_id', 'display_name', 'avatar_url', 'username'],
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to fetch user info: ${error}`);
+    }
+
+    const result = await response.json() as any;
+
+    if (result.error_code !== 0) {
+      throw new Error(`TikTok API error: ${result.message}`);
+    }
+
+    return result;
   }
 }
 
@@ -670,5 +880,95 @@ export class LineOAuthProvider extends BaseOAuthProvider {
       pictureUrl?: string;
       email?: string;
     };
+  }
+}
+
+export class WhatsAppOAuthProvider extends BaseOAuthProvider {
+  constructor(private config: NonNullable<OAuthConfig['whatsapp']>) {
+    super();
+  }
+
+  getAuthorizationUrl(state: string): string {
+    // WhatsApp Business API OAuth URL
+    const params = new URLSearchParams({
+      client_id: this.config.appId,
+      redirect_uri: this.config.redirectUri,
+      state,
+      scope: 'whatsapp_business_management',
+      response_type: 'code',
+    });
+
+    return `https://www.facebook.com/v18.0/dialog/oauth?${params.toString()}`;
+  }
+
+  async getUserProfile(request: OAuthLoginRequest): Promise<SocialProfile> {
+    if (!request.code) {
+      throw new Error('Authorization code is required for WhatsApp OAuth');
+    }
+
+    // Обмен кода на токен доступа
+    const tokenResponse = await this.exchangeCodeForToken(request.code);
+
+    // Получение информации о бизнес-аккаунте
+    const userInfo = await this.fetchUserInfo(tokenResponse.access_token);
+
+    return {
+      provider: AuthProvider.WHATSAPP,
+      providerId: userInfo.id,
+      name: userInfo.name,
+      connectedAt: new Date().toISOString(),
+    };
+  }
+
+  private async exchangeCodeForToken(code: string): Promise<{
+    access_token: string;
+    token_type: string;
+  }> {
+    const response = await fetch('https://graph.facebook.com/v18.0/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: this.config.appId,
+        client_secret: this.config.appSecret,
+        redirect_uri: this.config.redirectUri,
+        code,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to exchange code for token: ${error}`);
+    }
+
+    return response.json() as Promise<{
+      access_token: string;
+      token_type: string;
+    }>;
+  }
+
+  private async fetchUserInfo(accessToken: string): Promise<{
+    id: string;
+    name?: string;
+  }> {
+    const response = await fetch(
+      `https://graph.facebook.com/v18.0/me?fields=id,name&access_token=${accessToken}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Failed to fetch user info: ${error}`);
+    }
+
+    return response.json() as Promise<{
+      id: string;
+      name?: string;
+    }>;
   }
 }

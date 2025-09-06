@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the OAuth authentication API endpoints for the Thailand Marketplace platform. The OAuth system supports multiple authentication providers including Google, Apple, TikTok, and Telegram.
+This document describes the OAuth authentication API endpoints for the Thailand Marketplace platform. The OAuth system supports multiple authentication providers including Google, Apple, TikTok, Telegram, LINE, WhatsApp, and traditional email/password authentication.
 
 ## Base URL
 
@@ -58,7 +58,7 @@ Initiates the OAuth authentication flow for the specified provider.
 
 #### Parameters
 
-- `provider` (path): The OAuth provider name (google, apple, tiktok)
+- `provider` (path): The OAuth provider name (google, apple, tiktok, line, whatsapp)
 - `redirect_uri` (query, optional): Custom redirect URI after authentication
 
 #### Response
@@ -88,7 +88,7 @@ Handles the OAuth callback and completes the authentication process.
 
 #### Request Body
 
-**For Google/Apple/TikTok:**
+**For Google/Apple/TikTok/LINE/WhatsApp:**
 ```json
 {
   "code": "authorization_code_from_provider",
@@ -293,6 +293,28 @@ All endpoints may return the following error responses:
 - Uses Telegram Login Widget instead of traditional OAuth flow
 - No authorization URL - uses widget integration
 
+### LINE Login
+
+- Requires `LINE_CHANNEL_ID` and `LINE_CHANNEL_SECRET` environment variables
+- Scopes: `profile openid email`
+- Popular in Thailand and other Asian markets
+- Redirect URI must be registered in LINE Developers Console
+
+### WhatsApp Business API
+
+- Requires `WHATSAPP_APP_ID`, `WHATSAPP_APP_SECRET`, and `WHATSAPP_PHONE_NUMBER_ID` environment variables
+- Uses WhatsApp Business API for authentication
+- Requires phone number verification
+- Limited to approved business accounts
+
+### Email/Password Authentication
+
+- Traditional email and password authentication
+- Always available (no external configuration required)
+- Includes registration, login, password reset functionality
+- Uses JWT tokens for session management
+- Available at `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh`
+
 ## Security Considerations
 
 1. **State Parameter**: Always validate the state parameter to prevent CSRF attacks
@@ -344,5 +366,33 @@ curl -X POST "http://localhost:3001/api/oauth/telegram/link" \
       "first_name": "John",
       "hash": "telegram_hash"
     }
+  }'
+```
+
+### LINE Login Flow
+
+1. **Initialize LINE OAuth:**
+   ```bash
+   curl "http://localhost:3001/api/oauth/line/auth"
+   ```
+
+2. **Handle LINE callback:**
+   ```bash
+   curl -X POST "http://localhost:3001/api/oauth/line/callback" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "code": "authorization_code_from_line",
+       "state": "state_from_step_1"
+     }'
+   ```
+
+### WhatsApp Business Authentication
+
+```bash
+curl -X POST "http://localhost:3001/api/oauth/whatsapp/callback" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "authorization_code_from_whatsapp",
+    "state": "state_from_auth_request"
   }'
 ```

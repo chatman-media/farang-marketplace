@@ -14,6 +14,7 @@ export enum AuthProvider {
   TIKTOK = 'tiktok',
   TELEGRAM = 'telegram',
   LINE = 'line',
+  WHATSAPP = 'whatsapp',
 }
 
 export enum VerificationStatus {
