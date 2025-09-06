@@ -19,16 +19,9 @@ router.post(
   listingController.createVehicleListing
 );
 
-router.get(
-  '/vehicles/search',
-  listingController.searchVehicleListings
-);
+router.get('/vehicles/search', listingController.searchVehicleListings);
 
-router.get(
-  '/vehicles/:id',
-  validateId,
-  listingController.getVehicleListing
-);
+router.get('/vehicles/:id', validateId, listingController.getVehicleListing);
 
 // Product listing routes
 router.post(
@@ -38,16 +31,9 @@ router.post(
   listingController.createProductListing
 );
 
-router.get(
-  '/products/search',
-  listingController.searchProductListings
-);
+router.get('/products/search', listingController.searchProductListings);
 
-router.get(
-  '/products/:id',
-  validateId,
-  listingController.getProductListing
-);
+router.get('/products/:id', validateId, listingController.getProductListing);
 
 // General listing management routes
 router.patch(

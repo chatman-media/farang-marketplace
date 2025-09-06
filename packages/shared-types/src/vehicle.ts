@@ -62,25 +62,25 @@ export interface VehicleSpecifications {
   model: string;
   year: number;
   color: string;
-  
+
   // Engine & Performance
   engineSize?: string; // e.g., "125cc", "1.6L"
   power?: string; // e.g., "150hp", "10kW"
   maxSpeed?: number; // km/h
   fuelConsumption?: number; // L/100km or km/charge
-  
+
   // Technical Details
   fuelType: FuelType;
   transmission: TransmissionType;
   seatingCapacity: number;
   doors?: number;
-  
+
   // Dimensions
   length?: number; // cm
   width?: number; // cm
   height?: number; // cm
   weight?: number; // kg
-  
+
   // Features
   features: string[];
   safetyFeatures: string[];
@@ -94,12 +94,12 @@ export interface VehicleDocuments {
   registrationNumber?: string;
   engineNumber?: string;
   chassisNumber?: string;
-  
+
   // Insurance & Inspection
   insuranceNumber?: string;
   insuranceExpiry?: string;
   techInspectionExpiry?: string;
-  
+
   // Documentation Status
   documentsComplete: boolean;
   documentsVerified: boolean;
@@ -112,43 +112,43 @@ export interface VehicleMaintenance {
   lastServiceKm?: number;
   nextServiceDue?: string;
   nextServiceKm?: number;
-  
+
   // Component Status (in km when last replaced/checked)
   engineOilKm?: number;
   gearOilKm?: number;
   coolantKm?: number;
   brakeFluidKm?: number;
-  
+
   // Brake System
   frontBrakesKm?: number;
   rearBrakesKm?: number;
   brakeDiscsKm?: number;
-  
+
   // Filters & Consumables
   airFilterKm?: number;
   fuelFilterKm?: number;
   sparkPlugsKm?: number;
-  
+
   // Tires & Suspension
   frontTireCondition?: string;
   rearTireCondition?: string;
   frontBearingCondition?: string;
   rearBearingCondition?: string;
-  
+
   // Electrical & Other
   batteryCondition?: string;
   starterCondition?: string;
   beltCondition?: string;
   gasketCondition?: string;
-  
+
   // Additional Components
   additionalComponents?: Record<string, string>;
   maintenanceNotes?: string;
-  
+
   // GPS & Tracking
   gpsTrackerId?: string;
   gpsProvider?: string;
-  
+
   // Accessories
   hasCharger?: boolean;
   hasHelmet?: boolean;
@@ -160,21 +160,21 @@ export interface VehiclePricing {
   // Base Pricing
   basePrice: number;
   currency: string;
-  
+
   // Duration-based Pricing
   hourlyRate?: number;
   dailyRate?: number;
   weeklyRate?: number;
   monthlyRate?: number;
   yearlyRate?: number;
-  
+
   // Seasonal Pricing
   highSeasonMultiplier?: number;
   lowSeasonMultiplier?: number;
   seasonalPrices?: {
     [month: string]: number;
   };
-  
+
   // Duration Discounts
   durationDiscounts?: {
     days1_3?: number;
@@ -184,7 +184,7 @@ export interface VehiclePricing {
     monthly?: number;
     longTerm?: number;
   };
-  
+
   // Additional Costs
   securityDeposit: number;
   insurancePerDay?: number;
@@ -192,7 +192,7 @@ export interface VehiclePricing {
   pickupFee?: number;
   lateFee?: number;
   damageFee?: number;
-  
+
   // Fuel Policy
   fuelPolicy: 'full_to_full' | 'same_to_same' | 'included' | 'pay_per_use';
   fuelCostPerLiter?: number;
@@ -205,13 +205,13 @@ export interface VehicleLocation {
     latitude: number;
     longitude: number;
   };
-  
+
   // Pickup/Delivery
   pickupLocations: string[];
   deliveryAvailable: boolean;
   deliveryRadius?: number; // km
   deliveryFee?: number;
-  
+
   // Service Area
   serviceAreas: string[];
   restrictedAreas?: string[];
@@ -220,47 +220,47 @@ export interface VehicleLocation {
 export interface Vehicle {
   id: string;
   ownerId: string;
-  
+
   // Basic Information
   type: VehicleType;
   category: VehicleCategory;
   condition: VehicleCondition;
   status: VehicleStatus;
-  
+
   // Detailed Specifications
   specifications: VehicleSpecifications;
   documents: VehicleDocuments;
   maintenance: VehicleMaintenance;
   pricing: VehiclePricing;
   location: VehicleLocation;
-  
+
   // Media
   images: string[];
   mainImage?: string;
   videoUrl?: string;
-  
+
   // Availability
   isAvailable: boolean;
   availableFrom?: string;
   availableUntil?: string;
   blackoutDates?: string[];
-  
+
   // Verification & Quality
   isVerified: boolean;
   verificationDate?: string;
   qualityScore?: number;
-  
+
   // Rental History
   totalRentals: number;
   totalKilometers: number;
   averageRating: number;
   reviewCount: number;
-  
+
   // Metadata
   createdAt: string;
   updatedAt: string;
   lastMaintenanceUpdate?: string;
-  
+
   // Additional Data
   metadata?: Record<string, any>;
   tags?: string[];

@@ -141,7 +141,8 @@ export interface VehicleListing extends Omit<Listing, 'amenities'> {
 }
 
 // Product-specific listing interface
-export interface ProductListing extends Omit<Listing, 'amenities' | 'availability'> {
+export interface ProductListing
+  extends Omit<Listing, 'amenities' | 'availability'> {
   category: ListingCategory.PRODUCTS;
   productType: ProductType;
   product: Product;

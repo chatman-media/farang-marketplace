@@ -69,26 +69,26 @@ export interface ProductSpecifications {
   serialNumber?: string;
   manufacturingYear?: number;
   countryOfOrigin?: string;
-  
+
   // Physical Properties
   dimensions?: ProductDimensions;
   material?: string;
   color?: string;
   size?: string; // for clothing, shoes, etc.
-  
+
   // Technical Specifications (flexible for different product types)
   technicalSpecs?: Record<string, string | number | boolean>;
-  
+
   // Features and Capabilities
   features: string[];
   included?: string[]; // what's included in the package
   requirements?: string[]; // system requirements, compatibility, etc.
-  
+
   // Condition Details
   conditionNotes?: string;
   defects?: string[];
   repairs?: string[];
-  
+
   // Warranty & Support
   warrantyPeriod?: string;
   warrantyType?: 'manufacturer' | 'seller' | 'none';
@@ -101,11 +101,11 @@ export interface ProductPricing {
   price: number;
   currency: string;
   priceType: PriceType;
-  
+
   // Original/Comparison Pricing
   originalPrice?: number;
   msrp?: number; // Manufacturer's Suggested Retail Price
-  
+
   // Rental Pricing (if applicable)
   rentalPricing?: {
     hourly?: number;
@@ -115,7 +115,7 @@ export interface ProductPricing {
     deposit?: number;
     minimumRentalPeriod?: string;
   };
-  
+
   // Auction Pricing (if applicable)
   auctionPricing?: {
     startingBid: number;
@@ -124,12 +124,12 @@ export interface ProductPricing {
     bidIncrement: number;
     auctionEndDate: string;
   };
-  
+
   // Additional Costs
   shippingCost?: number;
   handlingFee?: number;
   installationFee?: number;
-  
+
   // Discounts and Offers
   discounts?: {
     percentage?: number;
@@ -137,13 +137,13 @@ export interface ProductPricing {
     validUntil?: string;
     conditions?: string;
   }[];
-  
+
   // Bulk Pricing
   bulkPricing?: {
     quantity: number;
     pricePerUnit: number;
   }[];
-  
+
   // Payment Options
   acceptedPayments: string[];
   installmentAvailable?: boolean;
@@ -158,16 +158,16 @@ export interface ProductAvailability {
   isAvailable: boolean;
   quantity?: number;
   quantityType?: 'exact' | 'approximate' | 'unlimited';
-  
+
   // Rental Availability
   availableFrom?: string;
   availableUntil?: string;
   blackoutDates?: string[];
-  
+
   // Stock Management
   stockLevel?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'pre_order';
   restockDate?: string;
-  
+
   // Location Availability
   availableLocations?: string[];
   pickupLocations?: string[];
@@ -185,7 +185,7 @@ export interface ProductSeller {
   isVerified: boolean;
   businessLicense?: string;
   taxId?: string;
-  
+
   // Contact Information
   contactInfo: {
     phone?: string;
@@ -194,12 +194,12 @@ export interface ProductSeller {
     address?: string;
     socialMedia?: Record<string, string>;
   };
-  
+
   // Business Details
   businessHours?: string;
   languages?: string[];
   responseTime?: string;
-  
+
   // Policies
   returnPolicy?: string;
   warrantyPolicy?: string;
@@ -208,7 +208,7 @@ export interface ProductSeller {
 
 export interface Product {
   id: string;
-  
+
   // Basic Information
   title: string;
   description: string;
@@ -218,19 +218,19 @@ export interface Product {
   condition: ProductCondition;
   status: ProductStatus;
   listingType: ProductListingType;
-  
+
   // Detailed Information
   specifications: ProductSpecifications;
   pricing: ProductPricing;
   availability: ProductAvailability;
   seller: ProductSeller;
-  
+
   // Media
   images: string[];
   mainImage?: string;
   videos?: string[];
   documents?: string[]; // manuals, certificates, etc.
-  
+
   // Location
   location: {
     address: string;
@@ -243,44 +243,44 @@ export interface Product {
     };
     zipCode?: string;
   };
-  
+
   // SEO and Discovery
   tags: string[];
   keywords?: string[];
   slug?: string;
-  
+
   // Quality and Trust
   isVerified: boolean;
   verificationDate?: string;
   qualityScore?: number;
   trustScore?: number;
-  
+
   // Performance Metrics
   views: number;
   favorites: number;
   inquiries: number;
   averageRating: number;
   reviewCount: number;
-  
+
   // Moderation
   moderationStatus: 'pending' | 'approved' | 'rejected' | 'flagged';
   moderationNotes?: string;
   flagReasons?: string[];
-  
+
   // Timestamps
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
   expiresAt?: string;
-  
+
   // Additional Data
   metadata?: Record<string, any>;
   customFields?: Record<string, any>;
-  
+
   // Related Products
   relatedProducts?: string[];
   crossSellProducts?: string[];
-  
+
   // Analytics
   analytics?: {
     impressions: number;

@@ -1,43 +1,35 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ListingService } from '../services/ListingService.js';
-import type { CreateVehicleRequest, CreateProductRequest } from '@marketplace/shared-types';
+import { describe, it, expect } from 'vitest';
+import type {
+  CreateVehicleRequest,
+  CreateProductRequest,
+} from '@marketplace/shared-types';
+import {
+  VehicleType,
+  VehicleCategory,
+  VehicleCondition,
+  FuelType,
+  TransmissionType,
+  ProductType,
+  ProductCondition,
+  ProductListingType,
+  PriceType,
+} from '@marketplace/shared-types';
 
-// Mock the database
-vi.mock('../db/connection.js', () => ({
-  db: {
-    transaction: vi.fn(),
-    select: vi.fn(),
-    insert: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
-  },
-  listings: {},
-  vehicles: {},
-  products: {},
-}));
-
-describe('ListingService', () => {
-  let listingService: ListingService;
-
-  beforeEach(() => {
-    listingService = new ListingService();
-    vi.clearAllMocks();
-  });
-
+describe('ListingService Data Validation', () => {
   describe('Vehicle Listings', () => {
     it('should validate vehicle data structure', () => {
       const vehicleData: CreateVehicleRequest = {
-        type: 'scooter',
-        category: 'economy',
-        condition: 'good',
+        type: VehicleType.SCOOTER,
+        category: VehicleCategory.ECONOMY,
+        condition: VehicleCondition.GOOD,
         specifications: {
           make: 'Honda',
           model: 'PCX 150',
           year: 2022,
           color: 'White',
           engineSize: '150cc',
-          fuelType: 'gasoline',
-          transmission: 'cvt',
+          fuelType: FuelType.GASOLINE,
+          transmission: TransmissionType.CVT,
           seatingCapacity: 2,
           features: ['LED Headlights'],
           safetyFeatures: ['ABS'],
@@ -74,16 +66,16 @@ describe('ListingService', () => {
 
     it('should validate required fields for vehicle creation', () => {
       const vehicleData: CreateVehicleRequest = {
-        type: 'scooter',
-        category: 'economy',
-        condition: 'good',
+        type: VehicleType.SCOOTER,
+        category: VehicleCategory.ECONOMY,
+        condition: VehicleCondition.GOOD,
         specifications: {
           make: 'Honda',
           model: 'PCX 150',
           year: 2022,
           color: 'White',
-          fuelType: 'gasoline',
-          transmission: 'cvt',
+          fuelType: FuelType.GASOLINE,
+          transmission: TransmissionType.CVT,
           seatingCapacity: 2,
           features: [],
           safetyFeatures: [],
@@ -125,10 +117,10 @@ describe('ListingService', () => {
       const productData: CreateProductRequest = {
         title: 'iPhone 15 Pro Max',
         description: 'Latest iPhone with advanced features',
-        type: 'electronics',
+        type: ProductType.ELECTRONICS,
         category: 'smartphones',
-        condition: 'new',
-        listingType: 'sale',
+        condition: ProductCondition.NEW,
+        listingType: ProductListingType.SALE,
         specifications: {
           brand: 'Apple',
           model: 'iPhone 15 Pro Max',
@@ -141,7 +133,7 @@ describe('ListingService', () => {
         pricing: {
           price: 45000,
           currency: 'THB',
-          priceType: 'fixed',
+          priceType: PriceType.FIXED,
           acceptedPayments: ['credit_card'],
         },
         availability: {
@@ -170,17 +162,17 @@ describe('ListingService', () => {
       const productData: CreateProductRequest = {
         title: 'Test Product',
         description: 'A test product for validation',
-        type: 'electronics',
+        type: ProductType.ELECTRONICS,
         category: 'test',
-        condition: 'new',
-        listingType: 'sale',
+        condition: ProductCondition.NEW,
+        listingType: ProductListingType.SALE,
         specifications: {
           features: [],
         },
         pricing: {
           price: 1000,
           currency: 'THB',
-          priceType: 'fixed',
+          priceType: PriceType.FIXED,
           acceptedPayments: ['credit_card'],
         },
         availability: {
@@ -208,8 +200,8 @@ describe('ListingService', () => {
   describe('Search Filters', () => {
     it('should handle vehicle search filters', () => {
       const filters = {
-        type: ['scooter', 'motorcycle'],
-        category: ['economy', 'standard'],
+        type: [VehicleType.SCOOTER, VehicleType.MOTORCYCLE],
+        category: [VehicleCategory.ECONOMY, VehicleCategory.STANDARD],
         priceRange: {
           min: 500,
           max: 2000,
@@ -220,16 +212,16 @@ describe('ListingService', () => {
         rating: 4.0,
       };
 
-      expect(filters.type).toContain('scooter');
+      expect(filters.type).toContain(VehicleType.SCOOTER);
       expect(filters.priceRange.min).toBe(500);
       expect(filters.location).toBe('Phuket');
     });
 
     it('should handle product search filters', () => {
       const filters = {
-        type: ['electronics'],
+        type: [ProductType.ELECTRONICS],
         category: ['smartphones'],
-        condition: ['new', 'like_new'],
+        condition: [ProductCondition.NEW, ProductCondition.LIKE_NEW],
         priceRange: {
           min: 10000,
           max: 50000,
@@ -244,7 +236,7 @@ describe('ListingService', () => {
         },
       };
 
-      expect(filters.type).toContain('electronics');
+      expect(filters.type).toContain(ProductType.ELECTRONICS);
       expect(filters.priceRange.max).toBe(50000);
       expect(filters.location.city).toBe('Bangkok');
     });
@@ -262,7 +254,10 @@ describe('ListingService', () => {
     });
 
     it('should validate image arrays', () => {
-      const validImages = ['https://example.com/1.jpg', 'https://example.com/2.jpg'];
+      const validImages = [
+        'https://example.com/1.jpg',
+        'https://example.com/2.jpg',
+      ];
       const emptyImages: string[] = [];
       const tooManyImages = new Array(25).fill('https://example.com/image.jpg');
 
@@ -297,14 +292,20 @@ describe('ListingService', () => {
       };
 
       const weeklyPrice = basePrice * 7 * (1 - durationDiscounts.days4_7 / 100);
-      const monthlyPrice = basePrice * 30 * (1 - durationDiscounts.monthly / 100);
+      const monthlyPrice =
+        basePrice * 30 * (1 - durationDiscounts.monthly / 100);
 
       expect(weeklyPrice).toBe(6300); // 7000 - 10%
       expect(monthlyPrice).toBe(24000); // 30000 - 20%
     });
 
     it('should validate fuel policy options', () => {
-      const validPolicies = ['full_to_full', 'same_to_same', 'included', 'pay_per_use'];
+      const validPolicies = [
+        'full_to_full',
+        'same_to_same',
+        'included',
+        'pay_per_use',
+      ];
       const testPolicy = 'full_to_full';
 
       expect(validPolicies).toContain(testPolicy);

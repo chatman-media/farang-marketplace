@@ -9,10 +9,14 @@ interface JWTPayload {
   exp: number;
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
@@ -24,7 +28,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
 
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
-    
+
     req.user = {
       id: decoded.id,
       email: decoded.email,
@@ -55,10 +59,14 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   }
 };
 
-export const optionalAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const optionalAuthMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return next(); // Continue without authentication
     }
@@ -67,7 +75,7 @@ export const optionalAuthMiddleware = (req: Request, res: Response, next: NextFu
     const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
 
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
-    
+
     req.user = {
       id: decoded.id,
       email: decoded.email,
@@ -76,12 +84,17 @@ export const optionalAuthMiddleware = (req: Request, res: Response, next: NextFu
 
     next();
   } catch (error) {
+    console.log('Optional auth error:', error);
     // If token is invalid, continue without authentication
     next();
   }
 };
 
-export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const adminMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (!req.user) {
     return res.status(401).json({
       success: false,
