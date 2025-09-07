@@ -172,7 +172,10 @@ export class PaymentController {
       console.error('Process Stripe payment error:', error);
       res.status(500).json({
         error: 'Payment Processing Error',
-        message: error instanceof Error ? error.message : 'Failed to process Stripe payment',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to process Stripe payment',
         timestamp: new Date().toISOString(),
       });
     }
@@ -197,7 +200,10 @@ export class PaymentController {
       console.error('Confirm Stripe payment error:', error);
       res.status(500).json({
         error: 'Payment Confirmation Error',
-        message: error instanceof Error ? error.message : 'Failed to confirm Stripe payment',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to confirm Stripe payment',
         timestamp: new Date().toISOString(),
       });
     }

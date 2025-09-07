@@ -291,7 +291,10 @@ export class WebhookController {
       }
 
       // Verify webhook signature
-      const event = this.stripeService.verifyWebhookSignature(payload, signature);
+      const event = this.stripeService.verifyWebhookSignature(
+        payload,
+        signature
+      );
 
       console.log('Stripe webhook event received:', event.type);
 
@@ -323,7 +326,10 @@ export class WebhookController {
       console.error('Stripe webhook processing error:', error);
       res.status(400).json({
         error: 'Webhook Processing Error',
-        message: error instanceof Error ? error.message : 'Failed to process Stripe webhook',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to process Stripe webhook',
         timestamp: new Date().toISOString(),
       });
     }
@@ -332,7 +338,9 @@ export class WebhookController {
   /**
    * Handle successful Stripe payment
    */
-  private async handleStripePaymentSucceeded(paymentIntent: any): Promise<void> {
+  private async handleStripePaymentSucceeded(
+    paymentIntent: any
+  ): Promise<void> {
     try {
       const paymentId = paymentIntent.metadata?.paymentId;
       if (!paymentId) {
@@ -346,7 +354,9 @@ export class WebhookController {
         'Payment completed via Stripe'
       );
 
-      console.log(`Stripe payment ${paymentIntent.id} completed for payment ${paymentId}`);
+      console.log(
+        `Stripe payment ${paymentIntent.id} completed for payment ${paymentId}`
+      );
     } catch (error) {
       console.error('Failed to handle Stripe payment success:', error);
     }
@@ -363,7 +373,8 @@ export class WebhookController {
         return;
       }
 
-      const failureReason = paymentIntent.last_payment_error?.message || 'Payment failed';
+      const failureReason =
+        paymentIntent.last_payment_error?.message || 'Payment failed';
 
       await this.paymentService.updatePaymentStatus(
         paymentId,
@@ -371,7 +382,9 @@ export class WebhookController {
         `Stripe payment failed: ${failureReason}`
       );
 
-      console.log(`Stripe payment ${paymentIntent.id} failed for payment ${paymentId}: ${failureReason}`);
+      console.log(
+        `Stripe payment ${paymentIntent.id} failed for payment ${paymentId}: ${failureReason}`
+      );
     } catch (error) {
       console.error('Failed to handle Stripe payment failure:', error);
     }
@@ -380,7 +393,9 @@ export class WebhookController {
   /**
    * Handle Stripe payment requiring action
    */
-  private async handleStripePaymentRequiresAction(paymentIntent: any): Promise<void> {
+  private async handleStripePaymentRequiresAction(
+    paymentIntent: any
+  ): Promise<void> {
     try {
       const paymentId = paymentIntent.metadata?.paymentId;
       if (!paymentId) {
@@ -394,7 +409,9 @@ export class WebhookController {
         'Payment requires additional action (3D Secure, etc.)'
       );
 
-      console.log(`Stripe payment ${paymentIntent.id} requires action for payment ${paymentId}`);
+      console.log(
+        `Stripe payment ${paymentIntent.id} requires action for payment ${paymentId}`
+      );
     } catch (error) {
       console.error('Failed to handle Stripe payment requiring action:', error);
     }
@@ -418,7 +435,9 @@ export class WebhookController {
         paymentId,
         raisedBy: 'customer', // Stripe disputes are raised by customers
         reason: charge.dispute?.reason || 'chargeback',
-        description: charge.dispute?.evidence?.customer_communication || 'Stripe chargeback dispute',
+        description:
+          charge.dispute?.evidence?.customer_communication ||
+          'Stripe chargeback dispute',
         externalDisputeId: charge.dispute?.id,
       });
 
@@ -428,7 +447,9 @@ export class WebhookController {
         `Stripe dispute created: ${charge.dispute?.reason || 'chargeback'}`
       );
 
-      console.log(`Stripe dispute created for payment ${paymentId}: ${charge.dispute?.id}`);
+      console.log(
+        `Stripe dispute created for payment ${paymentId}: ${charge.dispute?.id}`
+      );
     } catch (error) {
       console.error('Failed to handle Stripe dispute creation:', error);
     }

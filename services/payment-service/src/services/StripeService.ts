@@ -46,7 +46,7 @@ export class StripeService {
   constructor() {
     const secretKey = process.env.STRIPE_SECRET_KEY;
     this.webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
-    
+
     if (!secretKey) {
       throw new Error('STRIPE_SECRET_KEY environment variable is required');
     }
@@ -60,7 +60,9 @@ export class StripeService {
   /**
    * Create a payment intent for processing payment
    */
-  async createPaymentIntent(request: StripePaymentRequest): Promise<StripePaymentResponse> {
+  async createPaymentIntent(
+    request: StripePaymentRequest
+  ): Promise<StripePaymentResponse> {
     try {
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: request.amount,
@@ -71,7 +73,9 @@ export class StripeService {
         metadata: request.metadata || {},
         confirmation_method: 'manual',
         confirm: true,
-        return_url: process.env.STRIPE_RETURN_URL || 'https://marketplace.com/payment/return',
+        return_url:
+          process.env.STRIPE_RETURN_URL ||
+          'https://marketplace.com/payment/return',
       });
 
       return {
@@ -82,17 +86,22 @@ export class StripeService {
       };
     } catch (error) {
       console.error('Stripe payment intent creation failed:', error);
-      throw new Error(`Payment processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Payment processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Confirm a payment intent
    */
-  async confirmPaymentIntent(paymentIntentId: string): Promise<StripePaymentResponse> {
+  async confirmPaymentIntent(
+    paymentIntentId: string
+  ): Promise<StripePaymentResponse> {
     try {
-      const paymentIntent = await this.stripe.paymentIntents.confirm(paymentIntentId);
-      
+      const paymentIntent =
+        await this.stripe.paymentIntents.confirm(paymentIntentId);
+
       return {
         paymentIntentId: paymentIntent.id,
         clientSecret: paymentIntent.client_secret!,
@@ -101,19 +110,25 @@ export class StripeService {
       };
     } catch (error) {
       console.error('Stripe payment confirmation failed:', error);
-      throw new Error(`Payment confirmation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Payment confirmation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Retrieve payment intent details
    */
-  async getPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+  async getPaymentIntent(
+    paymentIntentId: string
+  ): Promise<Stripe.PaymentIntent> {
     try {
       return await this.stripe.paymentIntents.retrieve(paymentIntentId);
     } catch (error) {
       console.error('Failed to retrieve payment intent:', error);
-      throw new Error(`Failed to retrieve payment: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to retrieve payment: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -122,8 +137,10 @@ export class StripeService {
    */
   async createRefund(request: StripeRefundRequest): Promise<Stripe.Refund> {
     try {
-      const paymentIntent = await this.getPaymentIntent(request.paymentIntentId);
-      
+      const paymentIntent = await this.getPaymentIntent(
+        request.paymentIntentId
+      );
+
       if (!paymentIntent.latest_charge) {
         throw new Error('No charge found for this payment intent');
       }
@@ -136,14 +153,18 @@ export class StripeService {
       });
     } catch (error) {
       console.error('Stripe refund creation failed:', error);
-      throw new Error(`Refund processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Refund processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Create or retrieve a Stripe customer
    */
-  async createCustomer(customerData: StripeCustomerData): Promise<Stripe.Customer> {
+  async createCustomer(
+    customerData: StripeCustomerData
+  ): Promise<Stripe.Customer> {
     try {
       // Check if customer already exists by email
       const existingCustomers = await this.stripe.customers.list({
@@ -164,17 +185,23 @@ export class StripeService {
       });
     } catch (error) {
       console.error('Stripe customer creation failed:', error);
-      throw new Error(`Customer creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Customer creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Create a payment method for a customer
    */
-  async createPaymentMethod(customerId: string, paymentMethodData: any): Promise<Stripe.PaymentMethod> {
+  async createPaymentMethod(
+    customerId: string,
+    paymentMethodData: any
+  ): Promise<Stripe.PaymentMethod> {
     try {
-      const paymentMethod = await this.stripe.paymentMethods.create(paymentMethodData);
-      
+      const paymentMethod =
+        await this.stripe.paymentMethods.create(paymentMethodData);
+
       // Attach to customer
       await this.stripe.paymentMethods.attach(paymentMethod.id, {
         customer: customerId,
@@ -183,7 +210,9 @@ export class StripeService {
       return paymentMethod;
     } catch (error) {
       console.error('Stripe payment method creation failed:', error);
-      throw new Error(`Payment method creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Payment method creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -192,7 +221,11 @@ export class StripeService {
    */
   verifyWebhookSignature(payload: string, signature: string): Stripe.Event {
     try {
-      return this.stripe.webhooks.constructEvent(payload, signature, this.webhookSecret);
+      return this.stripe.webhooks.constructEvent(
+        payload,
+        signature,
+        this.webhookSecret
+      );
     } catch (error) {
       console.error('Stripe webhook signature verification failed:', error);
       throw new Error('Invalid webhook signature');
@@ -202,12 +235,15 @@ export class StripeService {
   /**
    * Calculate Stripe fees
    */
-  calculateStripeFees(amount: number, currency: string): { stripeFee: number, netAmount: number } {
+  calculateStripeFees(
+    amount: number,
+    currency: string
+  ): { stripeFee: number; netAmount: number } {
     // Stripe fees: 2.9% + $0.30 for most cards
     const percentageFee = Math.round(amount * 0.029);
     const fixedFee = currency.toLowerCase() === 'usd' ? 30 : 0; // 30 cents in USD
     const stripeFee = percentageFee + fixedFee;
-    
+
     return {
       stripeFee,
       netAmount: amount - stripeFee,
@@ -220,11 +256,11 @@ export class StripeService {
   convertToStripeAmount(amount: number, currency: string): number {
     // Stripe expects amounts in the smallest currency unit
     const zeroDecimalCurrencies = ['jpy', 'krw', 'vnd', 'clp'];
-    
+
     if (zeroDecimalCurrencies.includes(currency.toLowerCase())) {
       return Math.round(amount);
     }
-    
+
     return Math.round(amount * 100); // Convert to cents
   }
 
@@ -233,11 +269,11 @@ export class StripeService {
    */
   convertFromStripeAmount(amount: number, currency: string): number {
     const zeroDecimalCurrencies = ['jpy', 'krw', 'vnd', 'clp'];
-    
+
     if (zeroDecimalCurrencies.includes(currency.toLowerCase())) {
       return amount;
     }
-    
+
     return amount / 100; // Convert from cents
   }
 
@@ -268,22 +304,40 @@ export class StripeService {
    */
   getSupportedPaymentMethods(country: string): PaymentMethodType[] {
     const countryMethods: Record<string, PaymentMethodType[]> = {
-      'US': ['stripe_card' as PaymentMethodType],
-      'GB': ['stripe_card' as PaymentMethodType],
-      'DE': ['stripe_card' as PaymentMethodType, 'stripe_sepa' as PaymentMethodType, 'stripe_sofort' as PaymentMethodType],
-      'NL': ['stripe_card' as PaymentMethodType, 'stripe_sepa' as PaymentMethodType, 'stripe_ideal' as PaymentMethodType],
-      'FR': ['stripe_card' as PaymentMethodType, 'stripe_sepa' as PaymentMethodType],
-      'TH': ['stripe_card' as PaymentMethodType],
+      US: ['stripe_card' as PaymentMethodType],
+      GB: ['stripe_card' as PaymentMethodType],
+      DE: [
+        'stripe_card' as PaymentMethodType,
+        'stripe_sepa' as PaymentMethodType,
+        'stripe_sofort' as PaymentMethodType,
+      ],
+      NL: [
+        'stripe_card' as PaymentMethodType,
+        'stripe_sepa' as PaymentMethodType,
+        'stripe_ideal' as PaymentMethodType,
+      ],
+      FR: [
+        'stripe_card' as PaymentMethodType,
+        'stripe_sepa' as PaymentMethodType,
+      ],
+      TH: ['stripe_card' as PaymentMethodType],
       // Add more countries as needed
     };
 
-    return countryMethods[country.toUpperCase()] || ['stripe_card' as PaymentMethodType];
+    return (
+      countryMethods[country.toUpperCase()] || [
+        'stripe_card' as PaymentMethodType,
+      ]
+    );
   }
 
   /**
    * Validate payment method for country
    */
-  validatePaymentMethodForCountry(paymentMethod: PaymentMethodType, country: string): boolean {
+  validatePaymentMethodForCountry(
+    paymentMethod: PaymentMethodType,
+    country: string
+  ): boolean {
     const supportedMethods = this.getSupportedPaymentMethods(country);
     return supportedMethods.includes(paymentMethod);
   }

@@ -6,7 +6,10 @@ describe('Stripe Service Logic Tests', () => {
   describe('Amount Conversions', () => {
     it('should convert USD amounts to cents correctly', () => {
       // Test conversion logic without requiring Stripe SDK
-      const convertToStripeAmount = (amount: number, currency: string): number => {
+      const convertToStripeAmount = (
+        amount: number,
+        currency: string
+      ): number => {
         const zeroDecimalCurrencies = ['jpy', 'krw', 'vnd', 'clp'];
 
         if (zeroDecimalCurrencies.includes(currency.toLowerCase())) {
@@ -17,7 +20,7 @@ describe('Stripe Service Logic Tests', () => {
       };
 
       const testCases = [
-        { amount: 10.50, currency: 'USD', expected: 1050 },
+        { amount: 10.5, currency: 'USD', expected: 1050 },
         { amount: 100, currency: 'USD', expected: 10000 },
         { amount: 0.99, currency: 'USD', expected: 99 },
         { amount: 1234.56, currency: 'USD', expected: 123456 },
@@ -30,7 +33,10 @@ describe('Stripe Service Logic Tests', () => {
     });
 
     it('should handle zero-decimal currencies correctly', () => {
-      const convertToStripeAmount = (amount: number, currency: string): number => {
+      const convertToStripeAmount = (
+        amount: number,
+        currency: string
+      ): number => {
         const zeroDecimalCurrencies = ['jpy', 'krw', 'vnd', 'clp'];
 
         if (zeroDecimalCurrencies.includes(currency.toLowerCase())) {
@@ -53,7 +59,10 @@ describe('Stripe Service Logic Tests', () => {
     });
 
     it('should convert from Stripe amounts correctly', () => {
-      const convertFromStripeAmount = (amount: number, currency: string): number => {
+      const convertFromStripeAmount = (
+        amount: number,
+        currency: string
+      ): number => {
         const zeroDecimalCurrencies = ['jpy', 'krw', 'vnd', 'clp'];
 
         if (zeroDecimalCurrencies.includes(currency.toLowerCase())) {
@@ -64,7 +73,7 @@ describe('Stripe Service Logic Tests', () => {
       };
 
       const testCases = [
-        { amount: 1050, currency: 'USD', expected: 10.50 },
+        { amount: 1050, currency: 'USD', expected: 10.5 },
         { amount: 10000, currency: 'EUR', expected: 100 },
         { amount: 1000, currency: 'JPY', expected: 1000 },
       ];
@@ -129,20 +138,26 @@ describe('Stripe Service Logic Tests', () => {
     it('should return supported payment methods for different countries', () => {
       const getSupportedPaymentMethods = (country: string) => {
         const countryMethods: Record<string, string[]> = {
-          'US': ['stripe_card'],
-          'GB': ['stripe_card'],
-          'DE': ['stripe_card', 'stripe_sepa', 'stripe_sofort'],
-          'NL': ['stripe_card', 'stripe_sepa', 'stripe_ideal'],
-          'FR': ['stripe_card', 'stripe_sepa'],
-          'TH': ['stripe_card'],
+          US: ['stripe_card'],
+          GB: ['stripe_card'],
+          DE: ['stripe_card', 'stripe_sepa', 'stripe_sofort'],
+          NL: ['stripe_card', 'stripe_sepa', 'stripe_ideal'],
+          FR: ['stripe_card', 'stripe_sepa'],
+          TH: ['stripe_card'],
         };
         return countryMethods[country.toUpperCase()] || ['stripe_card'];
       };
 
       const testCases = [
         { country: 'US', expected: ['stripe_card'] },
-        { country: 'DE', expected: ['stripe_card', 'stripe_sepa', 'stripe_sofort'] },
-        { country: 'NL', expected: ['stripe_card', 'stripe_sepa', 'stripe_ideal'] },
+        {
+          country: 'DE',
+          expected: ['stripe_card', 'stripe_sepa', 'stripe_sofort'],
+        },
+        {
+          country: 'NL',
+          expected: ['stripe_card', 'stripe_sepa', 'stripe_ideal'],
+        },
         { country: 'TH', expected: ['stripe_card'] },
         { country: 'XX', expected: ['stripe_card'] }, // Unknown country defaults to card
       ];
@@ -152,7 +167,6 @@ describe('Stripe Service Logic Tests', () => {
         expect(result).toEqual(expected);
       });
     });
-
   });
 
   describe('Status Mapping', () => {
@@ -200,9 +214,12 @@ describe('Stripe Service Logic Tests', () => {
       const regularCurrencies = ['USD', 'EUR', 'GBP', 'THB'];
 
       // Test zero-decimal currencies
-      zeroDecimalCurrencies.forEach(currency => {
+      zeroDecimalCurrencies.forEach((currency) => {
         const amount = 1000;
-        const convertToStripeAmount = (amount: number, currency: string): number => {
+        const convertToStripeAmount = (
+          amount: number,
+          currency: string
+        ): number => {
           const zeroDecimalCurrencies = ['jpy', 'krw', 'vnd', 'clp'];
 
           if (zeroDecimalCurrencies.includes(currency.toLowerCase())) {
@@ -217,9 +234,12 @@ describe('Stripe Service Logic Tests', () => {
       });
 
       // Test regular currencies
-      regularCurrencies.forEach(currency => {
+      regularCurrencies.forEach((currency) => {
         const amount = 10;
-        const convertToStripeAmount = (amount: number, currency: string): number => {
+        const convertToStripeAmount = (
+          amount: number,
+          currency: string
+        ): number => {
           const zeroDecimalCurrencies = ['jpy', 'krw', 'vnd', 'clp'];
 
           if (zeroDecimalCurrencies.includes(currency.toLowerCase())) {

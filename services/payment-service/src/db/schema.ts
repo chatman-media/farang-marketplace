@@ -50,7 +50,7 @@ export const transactionTypeEnum = pgEnum('transaction_type', [
   'commission',
   'withdrawal',
   'deposit',
-  'confirmation'
+  'confirmation',
 ]);
 
 export const refundStatusEnum = pgEnum('refund_status', [

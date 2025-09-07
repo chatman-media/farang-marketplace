@@ -113,9 +113,7 @@ router.post(
 router.post(
   '/:paymentId/confirm-stripe',
   authMiddleware,
-  [
-    param('paymentId').isUUID().withMessage('Payment ID must be a valid UUID'),
-  ],
+  [param('paymentId').isUUID().withMessage('Payment ID must be a valid UUID')],
   paymentController.confirmStripePayment
 );
 
