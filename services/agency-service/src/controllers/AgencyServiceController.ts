@@ -1,13 +1,13 @@
-import { Request, Response } from 'express';
-import { body, param, query, validationResult } from 'express-validator';
-import { AgencyServiceService } from '../services/AgencyServiceService.js';
-import type { AuthenticatedRequest } from '../middleware/auth.js';
+import { Request, Response } from "express"
+import { body, param, query, validationResult } from "express-validator"
+import { AgencyServiceService } from "../services/AgencyServiceService.js"
+import type { AuthenticatedRequest } from "../middleware/auth.js"
 
 export class AgencyServiceController {
-  private agencyServiceService: AgencyServiceService;
+  private agencyServiceService: AgencyServiceService
 
   constructor() {
-    this.agencyServiceService = new AgencyServiceService();
+    this.agencyServiceService = new AgencyServiceService()
   }
 
   /**
@@ -15,40 +15,40 @@ export class AgencyServiceController {
    */
   async createService(req: AuthenticatedRequest, res: Response): Promise<any> {
     try {
-      const errors = validationResult(req);
+      const errors = validationResult(req)
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors: errors.array(),
-        });
+        })
       }
 
       const serviceData = {
         ...req.body,
         agencyId: req.body.agencyId || req.user?.agencyId,
-      };
+      }
 
       if (!serviceData.agencyId) {
         return res.status(400).json({
           success: false,
-          message: 'Agency ID is required',
-        });
+          message: "Agency ID is required",
+        })
       }
 
-      const service = await this.agencyServiceService.createService(serviceData);
+      const service = await this.agencyServiceService.createService(serviceData)
 
       res.status(201).json({
         success: true,
-        message: 'Service created successfully',
+        message: "Service created successfully",
         data: service,
-      });
+      })
     } catch (error) {
-      console.error('Error creating service:', error);
+      console.error("Error creating service:", error)
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to create service',
-      });
+        message: error instanceof Error ? error.message : "Failed to create service",
+      })
     }
   }
 
@@ -57,42 +57,42 @@ export class AgencyServiceController {
    */
   async getServiceById(req: AuthenticatedRequest, res: Response): Promise<any> {
     try {
-      const errors = validationResult(req);
+      const errors = validationResult(req)
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors: errors.array(),
-        });
+        })
       }
 
-      const { id } = req.params;
+      const { id } = req.params
       if (!id) {
         return res.status(400).json({
           success: false,
-          message: 'Service ID is required',
-        });
+          message: "Service ID is required",
+        })
       }
 
-      const service = await this.agencyServiceService.getServiceById(id);
+      const service = await this.agencyServiceService.getServiceById(id)
 
       if (!service) {
         return res.status(404).json({
           success: false,
-          message: 'Service not found',
-        });
+          message: "Service not found",
+        })
       }
 
       res.json({
         success: true,
         data: service,
-      });
+      })
     } catch (error) {
-      console.error('Error getting service:', error);
+      console.error("Error getting service:", error)
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to get service',
-      });
+        message: error instanceof Error ? error.message : "Failed to get service",
+      })
     }
   }
 
@@ -101,35 +101,35 @@ export class AgencyServiceController {
    */
   async getServicesByAgency(req: AuthenticatedRequest, res: Response): Promise<any> {
     try {
-      const errors = validationResult(req);
+      const errors = validationResult(req)
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors: errors.array(),
-        });
+        })
       }
 
-      const { agencyId } = req.params;
+      const { agencyId } = req.params
       if (!agencyId) {
         return res.status(400).json({
           success: false,
-          message: 'Agency ID is required',
-        });
+          message: "Agency ID is required",
+        })
       }
 
-      const services = await this.agencyServiceService.getServicesByAgencyId(agencyId);
+      const services = await this.agencyServiceService.getServicesByAgencyId(agencyId)
 
       res.json({
         success: true,
         data: services,
-      });
+      })
     } catch (error) {
-      console.error('Error getting services by agency:', error);
+      console.error("Error getting services by agency:", error)
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to get services',
-      });
+        message: error instanceof Error ? error.message : "Failed to get services",
+      })
     }
   }
 
@@ -138,44 +138,44 @@ export class AgencyServiceController {
    */
   async updateService(req: AuthenticatedRequest, res: Response): Promise<any> {
     try {
-      const errors = validationResult(req);
+      const errors = validationResult(req)
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors: errors.array(),
-        });
+        })
       }
 
-      const { id } = req.params;
+      const { id } = req.params
       if (!id) {
         return res.status(400).json({
           success: false,
-          message: 'Service ID is required',
-        });
+          message: "Service ID is required",
+        })
       }
 
-      const updates = req.body;
-      const service = await this.agencyServiceService.updateService(id, updates);
+      const updates = req.body
+      const service = await this.agencyServiceService.updateService(id, updates)
 
       if (!service) {
         return res.status(404).json({
           success: false,
-          message: 'Service not found',
-        });
+          message: "Service not found",
+        })
       }
 
       res.json({
         success: true,
-        message: 'Service updated successfully',
+        message: "Service updated successfully",
         data: service,
-      });
+      })
     } catch (error) {
-      console.error('Error updating service:', error);
+      console.error("Error updating service:", error)
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to update service',
-      });
+        message: error instanceof Error ? error.message : "Failed to update service",
+      })
     }
   }
 
@@ -184,42 +184,42 @@ export class AgencyServiceController {
    */
   async deleteService(req: AuthenticatedRequest, res: Response): Promise<any> {
     try {
-      const errors = validationResult(req);
+      const errors = validationResult(req)
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors: errors.array(),
-        });
+        })
       }
 
-      const { id } = req.params;
+      const { id } = req.params
       if (!id) {
         return res.status(400).json({
           success: false,
-          message: 'Service ID is required',
-        });
+          message: "Service ID is required",
+        })
       }
 
-      const deleted = await this.agencyServiceService.deleteService(id);
+      const deleted = await this.agencyServiceService.deleteService(id)
 
       if (!deleted) {
         return res.status(404).json({
           success: false,
-          message: 'Service not found',
-        });
+          message: "Service not found",
+        })
       }
 
       res.json({
         success: true,
-        message: 'Service deleted successfully',
-      });
+        message: "Service deleted successfully",
+      })
     } catch (error) {
-      console.error('Error deleting service:', error);
+      console.error("Error deleting service:", error)
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete service',
-      });
+        message: error instanceof Error ? error.message : "Failed to delete service",
+      })
     }
   }
 
@@ -228,45 +228,48 @@ export class AgencyServiceController {
    */
   async searchServices(req: AuthenticatedRequest, res: Response): Promise<any> {
     try {
-      const errors = validationResult(req);
+      const errors = validationResult(req)
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors: errors.array(),
-        });
+        })
       }
 
       const filters = {
         agencyId: req.query.agencyId as string,
         category: req.query.category as any,
-        isActive: req.query.isActive ? req.query.isActive === 'true' : undefined,
+        isActive: req.query.isActive ? req.query.isActive === "true" : undefined,
         search: req.query.search as string,
-        priceRange: req.query.minPrice && req.query.maxPrice ? {
-          min: parseFloat(req.query.minPrice as string),
-          max: parseFloat(req.query.maxPrice as string),
-        } : undefined,
-      };
+        priceRange:
+          req.query.minPrice && req.query.maxPrice
+            ? {
+                min: parseFloat(req.query.minPrice as string),
+                max: parseFloat(req.query.maxPrice as string),
+              }
+            : undefined,
+      }
 
       const options = {
         page: req.query.page ? parseInt(req.query.page as string) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
-        sortBy: req.query.sortBy as any || 'createdAt',
-        sortOrder: req.query.sortOrder as any || 'desc',
-      };
+        sortBy: (req.query.sortBy as any) || "createdAt",
+        sortOrder: (req.query.sortOrder as any) || "desc",
+      }
 
-      const result = await this.agencyServiceService.searchServices(filters, options);
+      const result = await this.agencyServiceService.searchServices(filters, options)
 
       res.json({
         success: true,
         data: result,
-      });
+      })
     } catch (error) {
-      console.error('Error searching services:', error);
+      console.error("Error searching services:", error)
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to search services',
-      });
+        message: error instanceof Error ? error.message : "Failed to search services",
+      })
     }
   }
 
@@ -275,43 +278,43 @@ export class AgencyServiceController {
    */
   async toggleServiceStatus(req: AuthenticatedRequest, res: Response): Promise<any> {
     try {
-      const errors = validationResult(req);
+      const errors = validationResult(req)
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors: errors.array(),
-        });
+        })
       }
 
-      const { id } = req.params;
+      const { id } = req.params
       if (!id) {
         return res.status(400).json({
           success: false,
-          message: 'Service ID is required',
-        });
+          message: "Service ID is required",
+        })
       }
 
-      const service = await this.agencyServiceService.toggleServiceStatus(id);
+      const service = await this.agencyServiceService.toggleServiceStatus(id)
 
       if (!service) {
         return res.status(404).json({
           success: false,
-          message: 'Service not found',
-        });
+          message: "Service not found",
+        })
       }
 
       res.json({
         success: true,
-        message: `Service ${service.isActive ? 'activated' : 'deactivated'} successfully`,
+        message: `Service ${service.isActive ? "activated" : "deactivated"} successfully`,
         data: service,
-      });
+      })
     } catch (error) {
-      console.error('Error toggling service status:', error);
+      console.error("Error toggling service status:", error)
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to toggle service status',
-      });
+        message: error instanceof Error ? error.message : "Failed to toggle service status",
+      })
     }
   }
 
@@ -320,67 +323,99 @@ export class AgencyServiceController {
    */
   async bulkUpdatePrices(req: AuthenticatedRequest, res: Response): Promise<any> {
     try {
-      const errors = validationResult(req);
+      const errors = validationResult(req)
       if (!errors.isEmpty()) {
         return res.status(400).json({
           success: false,
-          message: 'Validation failed',
+          message: "Validation failed",
           errors: errors.array(),
-        });
+        })
       }
 
-      const { agencyId } = req.params;
-      const { priceMultiplier } = req.body;
+      const { agencyId } = req.params
+      const { priceMultiplier } = req.body
 
       if (!agencyId) {
         return res.status(400).json({
           success: false,
-          message: 'Agency ID is required',
-        });
+          message: "Agency ID is required",
+        })
       }
 
-      const result = await this.agencyServiceService.bulkUpdatePrices(agencyId, priceMultiplier);
+      const result = await this.agencyServiceService.bulkUpdatePrices(agencyId, priceMultiplier)
 
       res.json({
         success: true,
         message: `Updated ${result.updated} services`,
         data: result,
-      });
+      })
     } catch (error) {
-      console.error('Error bulk updating prices:', error);
+      console.error("Error bulk updating prices:", error)
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to bulk update prices',
-      });
+        message: error instanceof Error ? error.message : "Failed to bulk update prices",
+      })
     }
   }
 }
 
 // Validation rules
 export const createServiceValidation = [
-  body('name').isLength({ min: 2, max: 255 }).withMessage('Name must be between 2 and 255 characters'),
-  body('description').isLength({ min: 10, max: 2000 }).withMessage('Description must be between 10 and 2000 characters'),
-  body('category').isIn(['delivery', 'emergency', 'maintenance', 'insurance', 'cleaning', 'security', 'transportation', 'legal', 'financial', 'marketing', 'consulting', 'other']).withMessage('Valid category is required'),
-  body('basePrice').isFloat({ min: 0 }).withMessage('Base price must be a positive number'),
-  body('pricingModel').isIn(['fixed', 'hourly', 'per_item', 'percentage']).withMessage('Valid pricing model is required'),
-];
+  body("name")
+    .isLength({ min: 2, max: 255 })
+    .withMessage("Name must be between 2 and 255 characters"),
+  body("description")
+    .isLength({ min: 10, max: 2000 })
+    .withMessage("Description must be between 10 and 2000 characters"),
+  body("category")
+    .isIn([
+      "delivery",
+      "emergency",
+      "maintenance",
+      "insurance",
+      "cleaning",
+      "security",
+      "transportation",
+      "legal",
+      "financial",
+      "marketing",
+      "consulting",
+      "other",
+    ])
+    .withMessage("Valid category is required"),
+  body("basePrice").isFloat({ min: 0 }).withMessage("Base price must be a positive number"),
+  body("pricingModel")
+    .isIn(["fixed", "hourly", "per_item", "percentage"])
+    .withMessage("Valid pricing model is required"),
+]
 
 export const updateServiceValidation = [
-  param('id').isUUID().withMessage('Valid service ID is required'),
-  body('name').optional().isLength({ min: 2, max: 255 }).withMessage('Name must be between 2 and 255 characters'),
-  body('description').optional().isLength({ min: 10, max: 2000 }).withMessage('Description must be between 10 and 2000 characters'),
-  body('basePrice').optional().isFloat({ min: 0 }).withMessage('Base price must be a positive number'),
-];
+  param("id").isUUID().withMessage("Valid service ID is required"),
+  body("name")
+    .optional()
+    .isLength({ min: 2, max: 255 })
+    .withMessage("Name must be between 2 and 255 characters"),
+  body("description")
+    .optional()
+    .isLength({ min: 10, max: 2000 })
+    .withMessage("Description must be between 10 and 2000 characters"),
+  body("basePrice")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Base price must be a positive number"),
+]
 
 export const serviceIdValidation = [
-  param('id').isUUID().withMessage('Valid service ID is required'),
-];
+  param("id").isUUID().withMessage("Valid service ID is required"),
+]
 
 export const agencyIdValidation = [
-  param('agencyId').isUUID().withMessage('Valid agency ID is required'),
-];
+  param("agencyId").isUUID().withMessage("Valid agency ID is required"),
+]
 
 export const bulkUpdatePricesValidation = [
-  param('agencyId').isUUID().withMessage('Valid agency ID is required'),
-  body('priceMultiplier').isFloat({ min: 0.1, max: 10 }).withMessage('Price multiplier must be between 0.1 and 10'),
-];
+  param("agencyId").isUUID().withMessage("Valid agency ID is required"),
+  body("priceMultiplier")
+    .isFloat({ min: 0.1, max: 10 })
+    .withMessage("Price multiplier must be between 0.1 and 10"),
+]

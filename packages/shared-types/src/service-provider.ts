@@ -1,273 +1,272 @@
-import { Location } from './common';
-import { ServiceType, LanguageCode, CountryCode } from './listing';
+import { Location } from "./common"
+import { ServiceType, LanguageCode, CountryCode } from "./listing"
 
 // Service Provider Profile Types
 export enum ProviderType {
-  INDIVIDUAL = 'individual',
-  COMPANY = 'company',
-  AGENCY = 'agency',
-  FREELANCER = 'freelancer',
+  INDIVIDUAL = "individual",
+  COMPANY = "company",
+  AGENCY = "agency",
+  FREELANCER = "freelancer",
 }
 
 export enum BusinessRegistrationStatus {
-  REGISTERED = 'registered',
-  PENDING = 'pending',
-  NOT_REGISTERED = 'not_registered',
+  REGISTERED = "registered",
+  PENDING = "pending",
+  NOT_REGISTERED = "not_registered",
 }
 
 export enum ProviderVerificationLevel {
-  BASIC = 'basic',
-  VERIFIED = 'verified',
-  PREMIUM = 'premium',
-  ENTERPRISE = 'enterprise',
+  BASIC = "basic",
+  VERIFIED = "verified",
+  PREMIUM = "premium",
+  ENTERPRISE = "enterprise",
 }
 
 export enum AvailabilityStatus {
-  AVAILABLE = 'available',
-  BUSY = 'busy',
-  AWAY = 'away',
-  OFFLINE = 'offline',
+  AVAILABLE = "available",
+  BUSY = "busy",
+  AWAY = "away",
+  OFFLINE = "offline",
 }
 
 export interface BusinessLicense {
-  id: string;
-  type: string;
-  number: string;
-  issuedBy: string;
-  issuedDate: string;
-  expiryDate: string;
-  isValid: boolean;
-  documentUrl?: string;
+  id: string
+  type: string
+  number: string
+  issuedBy: string
+  issuedDate: string
+  expiryDate: string
+  isValid: boolean
+  documentUrl?: string
 }
 
 export interface Certification {
-  id: string;
-  name: string;
-  issuingOrganization: string;
-  issuedDate: string;
-  expiryDate?: string;
-  credentialId?: string;
-  verificationUrl?: string;
-  documentUrl?: string;
-  isVerified: boolean;
+  id: string
+  name: string
+  issuingOrganization: string
+  issuedDate: string
+  expiryDate?: string
+  credentialId?: string
+  verificationUrl?: string
+  documentUrl?: string
+  isVerified: boolean
 }
 
 export interface WorkExperience {
-  id: string;
-  company: string;
-  position: string;
-  startDate: string;
-  endDate?: string;
-  description: string;
-  location: Location;
-  isCurrentPosition: boolean;
-  achievements?: string[];
+  id: string
+  company: string
+  position: string
+  startDate: string
+  endDate?: string
+  description: string
+  location: Location
+  isCurrentPosition: boolean
+  achievements?: string[]
 }
 
 export interface Education {
-  id: string;
-  institution: string;
-  degree: string;
-  fieldOfStudy: string;
-  startDate: string;
-  endDate?: string;
-  gpa?: number;
-  honors?: string[];
-  location: Location;
+  id: string
+  institution: string
+  degree: string
+  fieldOfStudy: string
+  startDate: string
+  endDate?: string
+  gpa?: number
+  honors?: string[]
+  location: Location
 }
 
 export interface ServiceCapability {
-  serviceType: ServiceType;
-  experienceYears: number;
-  skillLevel: 'beginner' | 'intermediate' | 'advanced' | 'expert';
-  specializations: string[];
-  certifications: string[];
-  portfolioItems: string[];
+  serviceType: ServiceType
+  experienceYears: number
+  skillLevel: "beginner" | "intermediate" | "advanced" | "expert"
+  specializations: string[]
+  certifications: string[]
+  portfolioItems: string[]
   pricing: {
-    hourlyRate?: number;
-    projectRate?: number;
-    consultationRate?: number;
-    currency: string;
-  };
+    hourlyRate?: number
+    projectRate?: number
+    consultationRate?: number
+    currency: string
+  }
   availability: {
-    hoursPerWeek: number;
-    responseTime: string;
+    hoursPerWeek: number
+    responseTime: string
     workingHours: {
       [key: string]: {
-        start: string;
-        end: string;
-        available: boolean;
-      };
-    };
-  };
+        start: string
+        end: string
+        available: boolean
+      }
+    }
+  }
 }
 
 export interface ServiceProviderProfile {
-  id: string;
-  userId: string;
-  providerType: ProviderType;
-  businessName?: string;
-  displayName: string;
-  bio: string;
-  avatar?: string;
-  coverImage?: string;
+  id: string
+  userId: string
+  providerType: ProviderType
+  businessName?: string
+  displayName: string
+  bio: string
+  avatar?: string
+  coverImage?: string
 
   // Contact Information
-  email: string;
-  phone: string;
-  website?: string;
+  email: string
+  phone: string
+  website?: string
   socialMedia?: {
-    linkedin?: string;
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-  };
+    linkedin?: string
+    facebook?: string
+    instagram?: string
+    twitter?: string
+  }
 
   // Location and Service Areas
-  primaryLocation: Location;
-  serviceAreas: Location[];
+  primaryLocation: Location
+  serviceAreas: Location[]
 
   // Business Information
   businessRegistration?: {
-    status: BusinessRegistrationStatus;
-    registrationNumber?: string;
-    taxId?: string;
-    licenses: BusinessLicense[];
-  };
+    status: BusinessRegistrationStatus
+    registrationNumber?: string
+    taxId?: string
+    licenses: BusinessLicense[]
+  }
 
   // Professional Information
-  languages: LanguageCode[];
-  certifications: Certification[];
-  education: Education[];
-  workExperience: WorkExperience[];
+  languages: LanguageCode[]
+  certifications: Certification[]
+  education: Education[]
+  workExperience: WorkExperience[]
 
   // Service Capabilities
-  serviceCapabilities: ServiceCapability[];
+  serviceCapabilities: ServiceCapability[]
 
   // Verification and Trust
-  verificationLevel: ProviderVerificationLevel;
+  verificationLevel: ProviderVerificationLevel
   verificationDocuments: {
-    identityVerified: boolean;
-    addressVerified: boolean;
-    phoneVerified: boolean;
-    emailVerified: boolean;
-    businessVerified: boolean;
-  };
+    identityVerified: boolean
+    addressVerified: boolean
+    phoneVerified: boolean
+    emailVerified: boolean
+    businessVerified: boolean
+  }
 
   // Performance Metrics
   metrics: {
-    totalJobs: number;
-    completedJobs: number;
-    cancelledJobs: number;
-    averageRating: number;
-    totalReviews: number;
-    responseRate: number;
-    onTimeDelivery: number;
-    repeatCustomers: number;
-  };
+    totalJobs: number
+    completedJobs: number
+    cancelledJobs: number
+    averageRating: number
+    totalReviews: number
+    responseRate: number
+    onTimeDelivery: number
+    repeatCustomers: number
+  }
 
   // Availability
-  availabilityStatus: AvailabilityStatus;
-  lastActiveAt: string;
+  availabilityStatus: AvailabilityStatus
+  lastActiveAt: string
 
   // Settings
   settings: {
-    autoAcceptBookings: boolean;
-    instantBooking: boolean;
-    requireDeposit: boolean;
-    cancellationPolicy: string;
-    refundPolicy: string;
-  };
+    autoAcceptBookings: boolean
+    instantBooking: boolean
+    requireDeposit: boolean
+    cancellationPolicy: string
+    refundPolicy: string
+  }
 
   // Timestamps
-  createdAt: string;
-  updatedAt: string;
-  verifiedAt?: string;
+  createdAt: string
+  updatedAt: string
+  verifiedAt?: string
 }
 
 // Request/Response Types
 export interface CreateServiceProviderRequest {
-  providerType: ProviderType;
-  businessName?: string;
-  displayName: string;
-  bio: string;
-  email: string;
-  phone: string;
-  primaryLocation: Location;
-  languages: LanguageCode[];
-  serviceCapabilities: Omit<ServiceCapability, 'portfolioItems'>[];
+  providerType: ProviderType
+  businessName?: string
+  displayName: string
+  bio: string
+  email: string
+  phone: string
+  primaryLocation: Location
+  languages: LanguageCode[]
+  serviceCapabilities: Omit<ServiceCapability, "portfolioItems">[]
 }
 
-export interface UpdateServiceProviderRequest
-  extends Partial<CreateServiceProviderRequest> {
-  id: string;
-  avatar?: string;
-  coverImage?: string;
-  website?: string;
+export interface UpdateServiceProviderRequest extends Partial<CreateServiceProviderRequest> {
+  id: string
+  avatar?: string
+  coverImage?: string
+  website?: string
   socialMedia?: {
-    linkedin?: string;
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-  };
-  serviceAreas?: Location[];
-  certifications?: Certification[];
-  education?: Education[];
-  workExperience?: WorkExperience[];
+    linkedin?: string
+    facebook?: string
+    instagram?: string
+    twitter?: string
+  }
+  serviceAreas?: Location[]
+  certifications?: Certification[]
+  education?: Education[]
+  workExperience?: WorkExperience[]
   settings?: {
-    autoAcceptBookings?: boolean;
-    instantBooking?: boolean;
-    requireDeposit?: boolean;
-    cancellationPolicy?: string;
-    refundPolicy?: string;
-  };
+    autoAcceptBookings?: boolean
+    instantBooking?: boolean
+    requireDeposit?: boolean
+    cancellationPolicy?: string
+    refundPolicy?: string
+  }
 }
 
 export interface ServiceProviderFilters {
-  providerType?: ProviderType;
-  serviceTypes?: ServiceType[];
+  providerType?: ProviderType
+  serviceTypes?: ServiceType[]
   location?: {
-    city?: string;
-    region?: string;
-    country?: CountryCode;
-    radius?: number;
-  };
-  verificationLevel?: ProviderVerificationLevel;
-  languages?: LanguageCode[];
-  availabilityStatus?: AvailabilityStatus;
+    city?: string
+    region?: string
+    country?: CountryCode
+    radius?: number
+  }
+  verificationLevel?: ProviderVerificationLevel
+  languages?: LanguageCode[]
+  availabilityStatus?: AvailabilityStatus
   rating?: {
-    min: number;
-    max: number;
-  };
+    min: number
+    max: number
+  }
   priceRange?: {
-    min: number;
-    max: number;
-    currency: string;
-  };
+    min: number
+    max: number
+    currency: string
+  }
   experienceYears?: {
-    min: number;
-    max: number;
-  };
-  hasPortfolio?: boolean;
-  instantBooking?: boolean;
+    min: number
+    max: number
+  }
+  hasPortfolio?: boolean
+  instantBooking?: boolean
 }
 
 export interface ServiceProviderResponse {
-  provider: ServiceProviderProfile;
-  success: boolean;
-  message?: string;
+  provider: ServiceProviderProfile
+  success: boolean
+  message?: string
 }
 
 export interface ServiceProvidersResponse {
-  providers: ServiceProviderProfile[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
+  providers: ServiceProviderProfile[]
+  total: number
+  page: number
+  limit: number
+  hasMore: boolean
 }
 
 // Alias for backward compatibility
-export type ServiceProviderSearchFilters = ServiceProviderFilters;
+export type ServiceProviderSearchFilters = ServiceProviderFilters
 
 // Validation Constants
 export const SERVICE_PROVIDER_VALIDATION = {
@@ -304,4 +303,4 @@ export const SERVICE_PROVIDER_VALIDATION = {
   WORK_EXPERIENCE: {
     MAX_COUNT: 15,
   },
-} as const;
+} as const

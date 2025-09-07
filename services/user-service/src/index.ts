@@ -1,13 +1,13 @@
-export { UserEntity } from './models/User';
-export { UserRepository } from './repositories/UserRepository';
-export { UserService } from './services/UserService';
-export { AuthService } from './services/AuthService';
-export { OAuthService } from './services/OAuthService';
-export { AuthController } from './controllers/AuthController';
-export { OAuthController } from './controllers/OAuthController';
-export { AuthMiddleware, authErrorHandler } from './middleware/auth';
-export { runMigrations } from './database/migrate';
-export { pool, query, getClient } from './database/connection';
+export { UserEntity } from "./models/User"
+export { UserRepository } from "./repositories/UserRepository"
+export { UserService } from "./services/UserService"
+export { AuthService } from "./services/AuthService"
+export { OAuthService } from "./services/OAuthService"
+export { AuthController } from "./controllers/AuthController"
+export { OAuthController } from "./controllers/OAuthController"
+export { AuthMiddleware, authErrorHandler } from "./middleware/auth"
+export { runMigrations } from "./database/migrate"
+export { pool, query, getClient } from "./database/connection"
 
 // Re-export types from shared-types for convenience
 export type {
@@ -17,7 +17,7 @@ export type {
   VerificationStatus,
   AuthProvider,
   SocialProfile,
-} from '@marketplace/shared-types';
+} from "@marketplace/shared-types"
 
 // Export auth-related types
 export type {
@@ -26,4 +26,4 @@ export type {
   RefreshRequest,
   AuthResponse,
   TokenPayload,
-} from './services/AuthService';
+} from "./services/AuthService"

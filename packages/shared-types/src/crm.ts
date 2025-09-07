@@ -1,332 +1,315 @@
 // CRM and Customer Management Types
 
 export interface Customer {
-  id: string;
-  userId?: string; // Link to platform user if exists
-  email: string;
-  phone?: string;
-  telegramId?: string;
-  whatsappId?: string;
-  firstName: string;
-  lastName: string;
-  preferredLanguage: string;
-  preferredChannel: CommunicationChannel;
-  status: CustomerStatus;
-  leadScore: number;
-  tags: string[];
-  customFields: Record<string, any>;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  userId?: string // Link to platform user if exists
+  email: string
+  phone?: string
+  telegramId?: string
+  whatsappId?: string
+  firstName: string
+  lastName: string
+  preferredLanguage: string
+  preferredChannel: CommunicationChannel
+  status: CustomerStatus
+  leadScore: number
+  tags: string[]
+  customFields: Record<string, any>
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface Lead {
-  id: string;
-  customerId: string;
-  listingId?: string;
-  source: LeadSource;
-  status: LeadStatus;
-  priority: LeadPriority;
-  assignedTo?: string;
-  value?: number;
-  notes: string;
-  followUpDate?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  customerId: string
+  listingId?: string
+  source: LeadSource
+  status: LeadStatus
+  priority: LeadPriority
+  assignedTo?: string
+  value?: number
+  notes: string
+  followUpDate?: Date
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface CommunicationHistory {
-  id: string;
-  customerId: string;
-  leadId?: string;
-  channel: CommunicationChannel;
-  direction: CommunicationDirection;
-  subject?: string;
-  content: string;
-  templateId?: string;
-  campaignId?: string;
-  status: MessageStatus;
-  sentAt?: Date;
-  deliveredAt?: Date;
-  readAt?: Date;
-  respondedAt?: Date;
-  metadata: Record<string, any>;
-  createdAt: Date;
+  id: string
+  customerId: string
+  leadId?: string
+  channel: CommunicationChannel
+  direction: CommunicationDirection
+  subject?: string
+  content: string
+  templateId?: string
+  campaignId?: string
+  status: MessageStatus
+  sentAt?: Date
+  deliveredAt?: Date
+  readAt?: Date
+  respondedAt?: Date
+  metadata: Record<string, any>
+  createdAt: Date
 }
 
 export interface Campaign {
-  id: string;
-  name: string;
-  type: CampaignType;
-  status: CampaignStatus;
-  channels: CommunicationChannel[];
-  targetSegment: CustomerSegment;
-  messages: CampaignMessage[];
-  triggers: CampaignTrigger[];
-  schedule?: CampaignSchedule;
-  analytics: CampaignAnalytics;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  name: string
+  type: CampaignType
+  status: CampaignStatus
+  channels: CommunicationChannel[]
+  targetSegment: CustomerSegment
+  messages: CampaignMessage[]
+  triggers: CampaignTrigger[]
+  schedule?: CampaignSchedule
+  analytics: CampaignAnalytics
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface CampaignMessage {
-  id: string;
-  channel: CommunicationChannel;
-  templateId: string;
-  delay: number; // minutes after trigger
-  conditions?: MessageCondition[];
+  id: string
+  channel: CommunicationChannel
+  templateId: string
+  delay: number // minutes after trigger
+  conditions?: MessageCondition[]
 }
 
 export interface MessageTemplate {
-  id: string;
-  name: string;
-  channel: CommunicationChannel;
-  language: string;
-  subject?: string;
-  content: string;
-  variables: string[];
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  name: string
+  channel: CommunicationChannel
+  language: string
+  subject?: string
+  content: string
+  variables: string[]
+  isActive: boolean
+  createdAt: Date
+  updatedAt: Date
 }
 
 export interface Automation {
-  id: string;
-  name: string;
-  description: string;
-  trigger: AutomationTrigger;
-  conditions: AutomationCondition[];
-  actions: AutomationAction[];
-  isActive: boolean;
-  createdBy: string;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  name: string
+  description: string
+  trigger: AutomationTrigger
+  conditions: AutomationCondition[]
+  actions: AutomationAction[]
+  isActive: boolean
+  createdBy: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 // Enums
 export enum CustomerStatus {
-  LEAD = 'lead',
-  PROSPECT = 'prospect',
-  CUSTOMER = 'customer',
-  INACTIVE = 'inactive',
-  BLOCKED = 'blocked',
+  LEAD = "lead",
+  PROSPECT = "prospect",
+  CUSTOMER = "customer",
+  INACTIVE = "inactive",
+  BLOCKED = "blocked",
 }
 
 export enum LeadStatus {
-  NEW = 'new',
-  CONTACTED = 'contacted',
-  QUALIFIED = 'qualified',
-  PROPOSAL = 'proposal',
-  NEGOTIATION = 'negotiation',
-  CLOSED_WON = 'closed_won',
-  CLOSED_LOST = 'closed_lost',
+  NEW = "new",
+  CONTACTED = "contacted",
+  QUALIFIED = "qualified",
+  PROPOSAL = "proposal",
+  NEGOTIATION = "negotiation",
+  CLOSED_WON = "closed_won",
+  CLOSED_LOST = "closed_lost",
 }
 
 export enum LeadPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  URGENT = 'urgent',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  URGENT = "urgent",
 }
 
 export enum LeadSource {
-  WEBSITE = 'website',
-  TELEGRAM = 'telegram',
-  WHATSAPP = 'whatsapp',
-  EMAIL = 'email',
-  REFERRAL = 'referral',
-  SOCIAL_MEDIA = 'social_media',
-  DIRECT = 'direct',
-  ADVERTISING = 'advertising',
+  WEBSITE = "website",
+  TELEGRAM = "telegram",
+  WHATSAPP = "whatsapp",
+  EMAIL = "email",
+  REFERRAL = "referral",
+  SOCIAL_MEDIA = "social_media",
+  DIRECT = "direct",
+  ADVERTISING = "advertising",
 }
 
 export enum CommunicationChannel {
-  EMAIL = 'email',
-  TELEGRAM = 'telegram',
-  WHATSAPP = 'whatsapp',
-  SMS = 'sms',
-  PHONE = 'phone',
-  IN_APP = 'in_app',
+  EMAIL = "email",
+  TELEGRAM = "telegram",
+  WHATSAPP = "whatsapp",
+  SMS = "sms",
+  PHONE = "phone",
+  IN_APP = "in_app",
 }
 
 export enum CommunicationDirection {
-  INBOUND = 'inbound',
-  OUTBOUND = 'outbound',
+  INBOUND = "inbound",
+  OUTBOUND = "outbound",
 }
 
 export enum MessageStatus {
-  DRAFT = 'draft',
-  SCHEDULED = 'scheduled',
-  SENT = 'sent',
-  DELIVERED = 'delivered',
-  READ = 'read',
-  RESPONDED = 'responded',
-  FAILED = 'failed',
-  BOUNCED = 'bounced',
+  DRAFT = "draft",
+  SCHEDULED = "scheduled",
+  SENT = "sent",
+  DELIVERED = "delivered",
+  READ = "read",
+  RESPONDED = "responded",
+  FAILED = "failed",
+  BOUNCED = "bounced",
 }
 
 export enum CampaignType {
-  WELCOME = 'welcome',
-  NURTURE = 'nurture',
-  PROMOTIONAL = 'promotional',
-  FOLLOW_UP = 'follow_up',
-  REACTIVATION = 'reactivation',
-  ABANDONED_CART = 'abandoned_cart',
+  WELCOME = "welcome",
+  NURTURE = "nurture",
+  PROMOTIONAL = "promotional",
+  FOLLOW_UP = "follow_up",
+  REACTIVATION = "reactivation",
+  ABANDONED_CART = "abandoned_cart",
 }
 
 export enum CampaignStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  PAUSED = 'paused',
-  COMPLETED = 'completed',
-  ARCHIVED = 'archived',
+  DRAFT = "draft",
+  ACTIVE = "active",
+  PAUSED = "paused",
+  COMPLETED = "completed",
+  ARCHIVED = "archived",
 }
 
 // Supporting interfaces
 export interface CustomerSegment {
-  criteria: SegmentCriteria[];
-  operator: 'AND' | 'OR';
+  criteria: SegmentCriteria[]
+  operator: "AND" | "OR"
 }
 
 export interface SegmentCriteria {
-  field: string;
-  operator:
-    | 'equals'
-    | 'not_equals'
-    | 'contains'
-    | 'greater_than'
-    | 'less_than'
-    | 'in'
-    | 'not_in';
-  value: any;
+  field: string
+  operator: "equals" | "not_equals" | "contains" | "greater_than" | "less_than" | "in" | "not_in"
+  value: any
 }
 
 export interface CampaignTrigger {
-  type: 'event' | 'time' | 'condition';
-  event?: string;
-  schedule?: CampaignSchedule;
-  condition?: AutomationCondition;
+  type: "event" | "time" | "condition"
+  event?: string
+  schedule?: CampaignSchedule
+  condition?: AutomationCondition
 }
 
 export interface CampaignSchedule {
-  startDate: Date;
-  endDate?: Date;
-  timezone: string;
-  frequency?: 'once' | 'daily' | 'weekly' | 'monthly';
-  daysOfWeek?: number[];
-  timeOfDay?: string;
+  startDate: Date
+  endDate?: Date
+  timezone: string
+  frequency?: "once" | "daily" | "weekly" | "monthly"
+  daysOfWeek?: number[]
+  timeOfDay?: string
 }
 
 export interface CampaignAnalytics {
-  sent: number;
-  delivered: number;
-  opened: number;
-  clicked: number;
-  responded: number;
-  unsubscribed: number;
-  bounced: number;
-  conversionRate: number;
-  roi?: number;
+  sent: number
+  delivered: number
+  opened: number
+  clicked: number
+  responded: number
+  unsubscribed: number
+  bounced: number
+  conversionRate: number
+  roi?: number
 }
 
 export interface MessageCondition {
-  field: string;
-  operator: string;
-  value: any;
+  field: string
+  operator: string
+  value: any
 }
 
 export interface AutomationTrigger {
-  type:
-    | 'lead_created'
-    | 'lead_updated'
-    | 'customer_registered'
-    | 'booking_created'
-    | 'custom_event';
-  event?: string;
-  conditions?: AutomationCondition[];
+  type: "lead_created" | "lead_updated" | "customer_registered" | "booking_created" | "custom_event"
+  event?: string
+  conditions?: AutomationCondition[]
 }
 
 export interface AutomationCondition {
-  field: string;
-  operator: string;
-  value: any;
+  field: string
+  operator: string
+  value: any
 }
 
 export interface AutomationAction {
-  type:
-    | 'send_message'
-    | 'update_lead'
-    | 'assign_lead'
-    | 'create_task'
-    | 'webhook';
-  parameters: Record<string, any>;
+  type: "send_message" | "update_lead" | "assign_lead" | "create_task" | "webhook"
+  parameters: Record<string, any>
 }
 
 // API Request/Response types
 export interface CreateCustomerRequest {
-  email: string;
-  phone?: string;
-  telegramId?: string;
-  whatsappId?: string;
-  firstName: string;
-  lastName: string;
-  preferredLanguage?: string;
-  preferredChannel?: CommunicationChannel;
-  tags?: string[];
-  customFields?: Record<string, any>;
+  email: string
+  phone?: string
+  telegramId?: string
+  whatsappId?: string
+  firstName: string
+  lastName: string
+  preferredLanguage?: string
+  preferredChannel?: CommunicationChannel
+  tags?: string[]
+  customFields?: Record<string, any>
 }
 
 export interface UpdateCustomerRequest extends Partial<CreateCustomerRequest> {
-  status?: CustomerStatus;
-  leadScore?: number;
+  status?: CustomerStatus
+  leadScore?: number
 }
 
 export interface CreateLeadRequest {
-  customerId: string;
-  listingId?: string;
-  source: LeadSource;
-  priority?: LeadPriority;
-  value?: number;
-  notes?: string;
-  followUpDate?: Date;
+  customerId: string
+  listingId?: string
+  source: LeadSource
+  priority?: LeadPriority
+  value?: number
+  notes?: string
+  followUpDate?: Date
 }
 
 export interface UpdateLeadRequest extends Partial<CreateLeadRequest> {
-  status?: LeadStatus;
-  assignedTo?: string;
+  status?: LeadStatus
+  assignedTo?: string
 }
 
 export interface SendMessageRequest {
-  customerId: string;
-  leadId?: string;
-  channel: CommunicationChannel;
-  templateId?: string;
-  content?: string;
-  subject?: string;
-  variables?: Record<string, any>;
-  scheduleAt?: Date;
+  customerId: string
+  leadId?: string
+  channel: CommunicationChannel
+  templateId?: string
+  content?: string
+  subject?: string
+  variables?: Record<string, any>
+  scheduleAt?: Date
 }
 
 export interface CreateCampaignRequest {
-  name: string;
-  type: CampaignType;
-  channels: CommunicationChannel[];
-  targetSegment: CustomerSegment;
-  messages: Omit<CampaignMessage, 'id'>[];
-  triggers: CampaignTrigger[];
-  schedule?: CampaignSchedule;
+  name: string
+  type: CampaignType
+  channels: CommunicationChannel[]
+  targetSegment: CustomerSegment
+  messages: Omit<CampaignMessage, "id">[]
+  triggers: CampaignTrigger[]
+  schedule?: CampaignSchedule
 }
 
 export interface CRMAnalytics {
-  totalCustomers: number;
-  totalLeads: number;
-  conversionRate: number;
-  averageLeadScore: number;
-  leadsByStatus: Record<LeadStatus, number>;
-  customersByStatus: Record<CustomerStatus, number>;
-  messagesSent: number;
-  messagesDelivered: number;
-  responseRate: number;
-  topPerformingCampaigns: Campaign[];
-  recentActivity: CommunicationHistory[];
+  totalCustomers: number
+  totalLeads: number
+  conversionRate: number
+  averageLeadScore: number
+  leadsByStatus: Record<LeadStatus, number>
+  customersByStatus: Record<CustomerStatus, number>
+  messagesSent: number
+  messagesDelivered: number
+  responseRate: number
+  topPerformingCampaigns: Campaign[]
+  recentActivity: CommunicationHistory[]
 }

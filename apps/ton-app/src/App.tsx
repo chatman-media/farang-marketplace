@@ -1,8 +1,8 @@
-import React from 'react';
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
+import React from "react"
+import { TonConnectUIProvider } from "@tonconnect/ui-react"
 
 function App() {
-  const Provider = TonConnectUIProvider as any;
+  const Provider = TonConnectUIProvider as any
 
   return (
     <Provider manifestUrl="https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json">
@@ -15,7 +15,7 @@ function App() {
         </main>
       </div>
     </Provider>
-  );
+  )
 }
 
-export default App;
+export default App

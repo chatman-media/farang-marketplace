@@ -1,10 +1,10 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from "react"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 
 function App() {
-  const RouterComponent = Router as any;
-  const RoutesComponent = Routes as any;
-  const RouteComponent = Route as any;
+  const RouterComponent = Router as any
+  const RoutesComponent = Routes as any
+  const RouteComponent = Route as any
 
   return (
     <RouterComponent>
@@ -19,7 +19,7 @@ function App() {
         </main>
       </div>
     </RouterComponent>
-  );
+  )
 }
 
-export default App;
+export default App

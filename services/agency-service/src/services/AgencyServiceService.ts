@@ -1,29 +1,29 @@
-import { eq, and, desc, asc, sql, ilike, inArray } from 'drizzle-orm';
-import { db } from '../db/connection.js';
+import { eq, and, desc, asc, sql, ilike, inArray } from "drizzle-orm"
+import { db } from "../db/connection.js"
 import {
   agencyServices,
   agencies,
   type AgencyService,
   type NewAgencyService,
   type ServiceCategoryType,
-} from '../db/schema.js';
+} from "../db/schema.js"
 
 export interface ServiceFilters {
-  agencyId?: string;
-  category?: ServiceCategoryType;
-  isActive?: boolean;
+  agencyId?: string
+  category?: ServiceCategoryType
+  isActive?: boolean
   priceRange?: {
-    min: number;
-    max: number;
-  };
-  search?: string;
+    min: number
+    max: number
+  }
+  search?: string
 }
 
 export interface ServiceSearchOptions {
-  page?: number;
-  limit?: number;
-  sortBy?: 'name' | 'basePrice' | 'createdAt' | 'category';
-  sortOrder?: 'asc' | 'desc';
+  page?: number
+  limit?: number
+  sortBy?: "name" | "basePrice" | "createdAt" | "category"
+  sortOrder?: "asc" | "desc"
 }
 
 export class AgencyServiceService {
@@ -31,17 +31,14 @@ export class AgencyServiceService {
    * Create a new agency service
    */
   async createService(
-    serviceData: Omit<NewAgencyService, 'id' | 'createdAt' | 'updatedAt'>
+    serviceData: Omit<NewAgencyService, "id" | "createdAt" | "updatedAt">
   ): Promise<AgencyService> {
     try {
       // Verify agency exists
-      const [agency] = await db
-        .select()
-        .from(agencies)
-        .where(eq(agencies.id, serviceData.agencyId));
+      const [agency] = await db.select().from(agencies).where(eq(agencies.id, serviceData.agencyId))
 
       if (!agency) {
-        throw new Error('Agency not found');
+        throw new Error("Agency not found")
       }
 
       const [service] = await db
@@ -51,16 +48,16 @@ export class AgencyServiceService {
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning();
+        .returning()
 
       if (!service) {
-        throw new Error('Failed to create service');
+        throw new Error("Failed to create service")
       }
 
-      return service;
+      return service
     } catch (error) {
-      console.error('Error creating agency service:', error);
-      throw new Error('Failed to create agency service');
+      console.error("Error creating agency service:", error)
+      throw new Error("Failed to create agency service")
     }
   }
 
@@ -69,15 +66,12 @@ export class AgencyServiceService {
    */
   async getServiceById(id: string): Promise<AgencyService | null> {
     try {
-      const [service] = await db
-        .select()
-        .from(agencyServices)
-        .where(eq(agencyServices.id, id));
+      const [service] = await db.select().from(agencyServices).where(eq(agencyServices.id, id))
 
-      return service || null;
+      return service || null
     } catch (error) {
-      console.error('Error getting service by ID:', error);
-      throw new Error('Failed to get service');
+      console.error("Error getting service by ID:", error)
+      throw new Error("Failed to get service")
     }
   }
 
@@ -90,12 +84,12 @@ export class AgencyServiceService {
         .select()
         .from(agencyServices)
         .where(eq(agencyServices.agencyId, agencyId))
-        .orderBy(desc(agencyServices.createdAt));
+        .orderBy(desc(agencyServices.createdAt))
 
-      return services;
+      return services
     } catch (error) {
-      console.error('Error getting services by agency ID:', error);
-      throw new Error('Failed to get services');
+      console.error("Error getting services by agency ID:", error)
+      throw new Error("Failed to get services")
     }
   }
 
@@ -104,7 +98,7 @@ export class AgencyServiceService {
    */
   async updateService(
     id: string,
-    updates: Partial<Omit<AgencyService, 'id' | 'agencyId' | 'createdAt'>>
+    updates: Partial<Omit<AgencyService, "id" | "agencyId" | "createdAt">>
   ): Promise<AgencyService | null> {
     try {
       const [service] = await db
@@ -114,12 +108,12 @@ export class AgencyServiceService {
           updatedAt: new Date(),
         })
         .where(eq(agencyServices.id, id))
-        .returning();
+        .returning()
 
-      return service || null;
+      return service || null
     } catch (error) {
-      console.error('Error updating service:', error);
-      throw new Error('Failed to update service');
+      console.error("Error updating service:", error)
+      throw new Error("Failed to update service")
     }
   }
 
@@ -128,14 +122,12 @@ export class AgencyServiceService {
    */
   async deleteService(id: string): Promise<boolean> {
     try {
-      const result = await db
-        .delete(agencyServices)
-        .where(eq(agencyServices.id, id));
+      const result = await db.delete(agencyServices).where(eq(agencyServices.id, id))
 
-      return result.length > 0;
+      return result.length > 0
     } catch (error) {
-      console.error('Error deleting service:', error);
-      throw new Error('Failed to delete service');
+      console.error("Error deleting service:", error)
+      throw new Error("Failed to delete service")
     }
   }
 
@@ -146,85 +138,66 @@ export class AgencyServiceService {
     filters: ServiceFilters = {},
     options: ServiceSearchOptions = {}
   ): Promise<{
-    services: (AgencyService & { agencyName: string | null })[];
-    total: number;
-    page: number;
-    limit: number;
-    hasMore: boolean;
+    services: (AgencyService & { agencyName: string | null })[]
+    total: number
+    page: number
+    limit: number
+    hasMore: boolean
   }> {
     try {
-      const {
-        page = 1,
-        limit = 20,
-        sortBy = 'createdAt',
-        sortOrder = 'desc',
-      } = options;
+      const { page = 1, limit = 20, sortBy = "createdAt", sortOrder = "desc" } = options
 
-      const offset = (page - 1) * limit;
+      const offset = (page - 1) * limit
 
       // Build where conditions
-      const conditions = [];
+      const conditions = []
 
       if (filters.agencyId) {
-        conditions.push(eq(agencyServices.agencyId, filters.agencyId));
+        conditions.push(eq(agencyServices.agencyId, filters.agencyId))
       }
 
       if (filters.category) {
-        conditions.push(eq(agencyServices.category, filters.category));
+        conditions.push(eq(agencyServices.category, filters.category))
       }
 
       if (filters.isActive !== undefined) {
-        conditions.push(eq(agencyServices.isActive, filters.isActive));
+        conditions.push(eq(agencyServices.isActive, filters.isActive))
       }
 
       if (filters.search) {
         conditions.push(
           sql`(${ilike(agencyServices.name, `%${filters.search}%`)} OR ${ilike(agencyServices.description, `%${filters.search}%`)})`
-        );
+        )
       }
 
       if (filters.priceRange) {
         if (filters.priceRange.min !== undefined) {
-          conditions.push(
-            sql`${agencyServices.basePrice} >= ${filters.priceRange.min}`
-          );
+          conditions.push(sql`${agencyServices.basePrice} >= ${filters.priceRange.min}`)
         }
         if (filters.priceRange.max !== undefined) {
-          conditions.push(
-            sql`${agencyServices.basePrice} <= ${filters.priceRange.max}`
-          );
+          conditions.push(sql`${agencyServices.basePrice} <= ${filters.priceRange.max}`)
         }
       }
 
-      const whereClause =
-        conditions.length > 0 ? and(...conditions) : undefined;
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
       // Build sort clause
-      let orderClause;
+      let orderClause
       switch (sortBy) {
-        case 'name':
+        case "name":
+          orderClause = sortOrder === "asc" ? asc(agencyServices.name) : desc(agencyServices.name)
+          break
+        case "basePrice":
           orderClause =
-            sortOrder === 'asc'
-              ? asc(agencyServices.name)
-              : desc(agencyServices.name);
-          break;
-        case 'basePrice':
+            sortOrder === "asc" ? asc(agencyServices.basePrice) : desc(agencyServices.basePrice)
+          break
+        case "category":
           orderClause =
-            sortOrder === 'asc'
-              ? asc(agencyServices.basePrice)
-              : desc(agencyServices.basePrice);
-          break;
-        case 'category':
-          orderClause =
-            sortOrder === 'asc'
-              ? asc(agencyServices.category)
-              : desc(agencyServices.category);
-          break;
+            sortOrder === "asc" ? asc(agencyServices.category) : desc(agencyServices.category)
+          break
         default:
           orderClause =
-            sortOrder === 'asc'
-              ? asc(agencyServices.createdAt)
-              : desc(agencyServices.createdAt);
+            sortOrder === "asc" ? asc(agencyServices.createdAt) : desc(agencyServices.createdAt)
       }
 
       // Get total count
@@ -232,7 +205,7 @@ export class AgencyServiceService {
         .select({ count: sql<number>`count(*)` })
         .from(agencyServices)
         .leftJoin(agencies, eq(agencyServices.agencyId, agencies.id))
-        .where(whereClause);
+        .where(whereClause)
 
       // Get services with agency names
       const serviceList = await db
@@ -260,10 +233,10 @@ export class AgencyServiceService {
         .where(whereClause)
         .orderBy(orderClause)
         .limit(limit)
-        .offset(offset);
+        .offset(offset)
 
-      const total = Number(countResult[0]?.count || 0);
-      const hasMore = offset + serviceList.length < total;
+      const total = Number(countResult[0]?.count || 0)
+      const hasMore = offset + serviceList.length < total
 
       return {
         services: serviceList,
@@ -271,35 +244,28 @@ export class AgencyServiceService {
         page,
         limit,
         hasMore,
-      };
+      }
     } catch (error) {
-      console.error('Error searching services:', error);
-      throw new Error('Failed to search services');
+      console.error("Error searching services:", error)
+      throw new Error("Failed to search services")
     }
   }
 
   /**
    * Get services by category
    */
-  async getServicesByCategory(
-    category: ServiceCategoryType
-  ): Promise<AgencyService[]> {
+  async getServicesByCategory(category: ServiceCategoryType): Promise<AgencyService[]> {
     try {
       const services = await db
         .select()
         .from(agencyServices)
-        .where(
-          and(
-            eq(agencyServices.category, category),
-            eq(agencyServices.isActive, true)
-          )
-        )
-        .orderBy(asc(agencyServices.basePrice));
+        .where(and(eq(agencyServices.category, category), eq(agencyServices.isActive, true)))
+        .orderBy(asc(agencyServices.basePrice))
 
-      return services;
+      return services
     } catch (error) {
-      console.error('Error getting services by category:', error);
-      throw new Error('Failed to get services by category');
+      console.error("Error getting services by category:", error)
+      throw new Error("Failed to get services by category")
     }
   }
 
@@ -309,9 +275,9 @@ export class AgencyServiceService {
   async toggleServiceStatus(id: string): Promise<AgencyService | null> {
     try {
       // Get current status
-      const service = await this.getServiceById(id);
+      const service = await this.getServiceById(id)
       if (!service) {
-        throw new Error('Service not found');
+        throw new Error("Service not found")
       }
 
       // Toggle status
@@ -322,12 +288,12 @@ export class AgencyServiceService {
           updatedAt: new Date(),
         })
         .where(eq(agencyServices.id, id))
-        .returning();
+        .returning()
 
-      return updatedService || null;
+      return updatedService || null
     } catch (error) {
-      console.error('Error toggling service status:', error);
-      throw new Error('Failed to toggle service status');
+      console.error("Error toggling service status:", error)
+      throw new Error("Failed to toggle service status")
     }
   }
 
@@ -335,11 +301,11 @@ export class AgencyServiceService {
    * Get service statistics
    */
   async getServiceStats(serviceId: string): Promise<{
-    totalAssignments: number;
-    activeAssignments: number;
-    completedAssignments: number;
-    averageRating: number;
-    totalRevenue: number;
+    totalAssignments: number
+    activeAssignments: number
+    completedAssignments: number
+    averageRating: number
+    totalRevenue: number
   }> {
     try {
       // This would require joining with service assignments table
@@ -350,20 +316,17 @@ export class AgencyServiceService {
         completedAssignments: 0,
         averageRating: 0,
         totalRevenue: 0,
-      };
+      }
     } catch (error) {
-      console.error('Error getting service stats:', error);
-      throw new Error('Failed to get service statistics');
+      console.error("Error getting service stats:", error)
+      throw new Error("Failed to get service statistics")
     }
   }
 
   /**
    * Bulk update service prices
    */
-  async bulkUpdatePrices(
-    agencyId: string,
-    priceMultiplier: number
-  ): Promise<{ updated: number }> {
+  async bulkUpdatePrices(agencyId: string, priceMultiplier: number): Promise<{ updated: number }> {
     try {
       const result = await db
         .update(agencyServices)
@@ -371,12 +334,12 @@ export class AgencyServiceService {
           basePrice: sql`${agencyServices.basePrice} * ${priceMultiplier}`,
           updatedAt: new Date(),
         })
-        .where(eq(agencyServices.agencyId, agencyId));
+        .where(eq(agencyServices.agencyId, agencyId))
 
-      return { updated: result.length };
+      return { updated: result.length }
     } catch (error) {
-      console.error('Error bulk updating prices:', error);
-      throw new Error('Failed to bulk update prices');
+      console.error("Error bulk updating prices:", error)
+      throw new Error("Failed to bulk update prices")
     }
   }
 }

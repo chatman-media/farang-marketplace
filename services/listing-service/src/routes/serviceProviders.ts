@@ -1,63 +1,51 @@
-import { Router } from 'express';
-import { ServiceProviderController } from '../controllers/ServiceProviderController.js';
-import { authMiddleware, optionalAuthMiddleware } from '../middleware/auth.js';
-import {
-  upload,
-  processImages,
-  validateImageUpload,
-} from '../middleware/upload.js';
+import { Router } from "express"
+import { ServiceProviderController } from "../controllers/ServiceProviderController.js"
+import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth.js"
+import { upload, processImages, validateImageUpload } from "../middleware/upload.js"
 
-const router = Router();
-const serviceProviderController = new ServiceProviderController();
+const router = Router()
+const serviceProviderController = new ServiceProviderController()
 
 // Create service provider (with image upload)
 router.post(
-  '/',
+  "/",
   authMiddleware,
-  upload.array('images', 10),
+  upload.array("images", 10),
   validateImageUpload,
   processImages,
   ServiceProviderController.createValidationRules,
-  serviceProviderController.createServiceProvider.bind(
-    serviceProviderController
-  )
-);
+  serviceProviderController.createServiceProvider.bind(serviceProviderController)
+)
 
 // Get service provider by ID
 router.get(
-  '/:id',
+  "/:id",
   optionalAuthMiddleware,
   serviceProviderController.getServiceProvider.bind(serviceProviderController)
-);
+)
 
 // Search service providers
 router.get(
-  '/search',
+  "/search",
   optionalAuthMiddleware,
-  serviceProviderController.searchServiceProviders.bind(
-    serviceProviderController
-  )
-);
+  serviceProviderController.searchServiceProviders.bind(serviceProviderController)
+)
 
 // Update service provider (with optional image upload)
 router.patch(
-  '/:id',
+  "/:id",
   authMiddleware,
-  upload.array('images', 10),
+  upload.array("images", 10),
   processImages, // Optional - only processes if images are uploaded
   ServiceProviderController.updateValidationRules,
-  serviceProviderController.updateServiceProvider.bind(
-    serviceProviderController
-  )
-);
+  serviceProviderController.updateServiceProvider.bind(serviceProviderController)
+)
 
 // Delete service provider
 router.delete(
-  '/:id',
+  "/:id",
   authMiddleware,
-  serviceProviderController.deleteServiceProvider.bind(
-    serviceProviderController
-  )
-);
+  serviceProviderController.deleteServiceProvider.bind(serviceProviderController)
+)
 
-export default router;
+export default router

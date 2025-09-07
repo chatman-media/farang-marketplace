@@ -1,46 +1,38 @@
-import { eq, and, gte, lte, or, between } from 'drizzle-orm';
-import { db } from '../db/connection.js';
-import {
-  availabilityConflicts,
-  bookings,
-  serviceBookings,
-} from '../db/schema.js';
+import { eq, and, gte, lte, or, between } from "drizzle-orm"
+import { db } from "../db/connection.js"
+import { availabilityConflicts, bookings, serviceBookings } from "../db/schema.js"
 
 export interface TimeSlot {
-  start: string; // HH:MM format
-  end: string; // HH:MM format
+  start: string // HH:MM format
+  end: string // HH:MM format
 }
 
 export interface AvailabilityWindow {
-  date: string;
-  available: boolean;
+  date: string
+  available: boolean
   conflicts: Array<{
-    type: 'booking' | 'maintenance' | 'blocked';
-    startTime?: string;
-    endTime?: string;
-    reason?: string;
-  }>;
+    type: "booking" | "maintenance" | "blocked"
+    startTime?: string
+    endTime?: string
+    reason?: string
+  }>
 }
 
 export interface ServiceAvailability {
-  providerId: string;
-  date: string;
+  providerId: string
+  date: string
   timeSlots: Array<{
-    start: string;
-    end: string;
-    available: boolean;
-    bookingId?: string;
-  }>;
+    start: string
+    end: string
+    available: boolean
+    bookingId?: string
+  }>
 }
 
 export class AvailabilityService {
   // Check if a listing is available for the given date range
-  async checkAvailability(
-    listingId: string,
-    checkIn: Date,
-    checkOut?: Date
-  ): Promise<boolean> {
-    const endDate = checkOut || checkIn;
+  async checkAvailability(listingId: string, checkIn: Date, checkOut?: Date): Promise<boolean> {
+    const endDate = checkOut || checkIn
 
     // Check for existing conflicts
     const conflicts = await db
@@ -67,9 +59,9 @@ export class AvailabilityService {
             )
           )
         )
-      );
+      )
 
-    return conflicts.length === 0;
+    return conflicts.length === 0
   }
 
   // Check service provider availability for a specific time
@@ -78,7 +70,7 @@ export class AvailabilityService {
     scheduledDate: Date,
     duration: { value: number; unit: string }
   ): Promise<boolean> {
-    const endTime = this.calculateEndTime(scheduledDate, duration);
+    const endTime = this.calculateEndTime(scheduledDate, duration)
 
     // Check for existing service bookings that conflict
     const conflictingBookings = await db
@@ -88,7 +80,7 @@ export class AvailabilityService {
       .where(
         and(
           eq(serviceBookings.providerId, providerId),
-          eq(bookings.status, 'confirmed'),
+          eq(bookings.status, "confirmed"),
           // Check if the scheduled date conflicts
           or(
             // Existing booking starts within our time
@@ -103,9 +95,9 @@ export class AvailabilityService {
             )
           )
         )
-      );
+      )
 
-    return conflictingBookings.length === 0;
+    return conflictingBookings.length === 0
   }
 
   // Get availability calendar for a listing
@@ -129,32 +121,32 @@ export class AvailabilityService {
             )
           )
         )
-      );
+      )
 
-    const calendar: AvailabilityWindow[] = [];
-    const currentDate = new Date(startDate);
+    const calendar: AvailabilityWindow[] = []
+    const currentDate = new Date(startDate)
 
     while (currentDate <= endDate) {
-      const dateStr = currentDate.toISOString().split('T')[0];
+      const dateStr = currentDate.toISOString().split("T")[0]
       const dayConflicts = conflicts.filter((conflict) => {
-        const conflictStart = conflict.startDate.toISOString().split('T')[0];
-        const conflictEnd = conflict.endDate.toISOString().split('T')[0];
-        return dateStr >= conflictStart && dateStr <= conflictEnd;
-      });
+        const conflictStart = conflict.startDate.toISOString().split("T")[0]
+        const conflictEnd = conflict.endDate.toISOString().split("T")[0]
+        return dateStr >= conflictStart && dateStr <= conflictEnd
+      })
 
       calendar.push({
         date: dateStr,
         available: dayConflicts.length === 0,
         conflicts: dayConflicts.map((conflict) => ({
-          type: conflict.conflictType as 'booking' | 'maintenance' | 'blocked',
+          type: conflict.conflictType as "booking" | "maintenance" | "blocked",
           reason: conflict.reason || undefined,
         })),
-      });
+      })
 
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setDate(currentDate.getDate() + 1)
     }
 
-    return calendar;
+    return calendar
   }
 
   // Get service provider availability for a specific date
@@ -162,11 +154,11 @@ export class AvailabilityService {
     providerId: string,
     date: Date
   ): Promise<ServiceAvailability> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    const startOfDay = new Date(date)
+    startOfDay.setHours(0, 0, 0, 0)
 
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const endOfDay = new Date(date)
+    endOfDay.setHours(23, 59, 59, 999)
 
     // Get existing bookings for the day
     const existingBookings = await db
@@ -178,43 +170,41 @@ export class AvailabilityService {
           eq(serviceBookings.providerId, providerId),
           gte(serviceBookings.scheduledDate, startOfDay),
           lte(serviceBookings.scheduledDate, endOfDay),
-          or(eq(bookings.status, 'confirmed'), eq(bookings.status, 'active'))
+          or(eq(bookings.status, "confirmed"), eq(bookings.status, "active"))
         )
-      );
+      )
 
     // Generate time slots (assuming 1-hour slots from 9 AM to 6 PM)
-    const timeSlots = this.generateTimeSlots();
+    const timeSlots = this.generateTimeSlots()
 
     const availableSlots = timeSlots.map((slot) => {
-      const slotStart = this.parseTimeSlot(date, slot.start);
-      const slotEnd = this.parseTimeSlot(date, slot.end);
+      const slotStart = this.parseTimeSlot(date, slot.start)
+      const slotEnd = this.parseTimeSlot(date, slot.end)
 
       const conflictingBooking = existingBookings.find((booking) => {
-        const bookingStart = booking.service_bookings.scheduledDate;
-        const bookingEnd = this.calculateServiceEndTime(
-          booking.service_bookings
-        );
+        const bookingStart = booking.service_bookings.scheduledDate
+        const bookingEnd = this.calculateServiceEndTime(booking.service_bookings)
 
         return (
           (slotStart >= bookingStart && slotStart < bookingEnd) ||
           (slotEnd > bookingStart && slotEnd <= bookingEnd) ||
           (slotStart <= bookingStart && slotEnd >= bookingEnd)
-        );
-      });
+        )
+      })
 
       return {
         start: slot.start,
         end: slot.end,
         available: !conflictingBooking,
         bookingId: conflictingBooking?.bookings.id,
-      };
-    });
+      }
+    })
 
     return {
       providerId,
-      date: date.toISOString().split('T')[0],
+      date: date.toISOString().split("T")[0],
       timeSlots: availableSlots,
-    };
+    }
   }
 
   // Create an availability conflict
@@ -222,7 +212,7 @@ export class AvailabilityService {
     listingId: string,
     startDate: Date,
     endDate: Date,
-    conflictType: 'booking' | 'maintenance' | 'blocked',
+    conflictType: "booking" | "maintenance" | "blocked",
     bookingId?: string,
     createdBy?: string,
     reason?: string
@@ -234,15 +224,13 @@ export class AvailabilityService {
       endDate,
       bookingId,
       reason,
-      createdBy: createdBy || 'system',
-    });
+      createdBy: createdBy || "system",
+    })
   }
 
   // Remove an availability conflict
   async removeConflict(bookingId: string): Promise<void> {
-    await db
-      .delete(availabilityConflicts)
-      .where(eq(availabilityConflicts.bookingId, bookingId));
+    await db.delete(availabilityConflicts).where(eq(availabilityConflicts.bookingId, bookingId))
   }
 
   // Block dates for maintenance or other reasons
@@ -254,43 +242,35 @@ export class AvailabilityService {
     createdBy: string
   ): Promise<void> {
     // Check if dates are already blocked or booked
-    const isAvailable = await this.checkAvailability(
-      listingId,
-      startDate,
-      endDate
-    );
+    const isAvailable = await this.checkAvailability(listingId, startDate, endDate)
 
     if (!isAvailable) {
-      throw new Error('Cannot block dates that are already unavailable');
+      throw new Error("Cannot block dates that are already unavailable")
     }
 
     await this.createConflict(
       listingId,
       startDate,
       endDate,
-      'blocked',
+      "blocked",
       undefined,
       createdBy,
       reason
-    );
+    )
   }
 
   // Unblock dates
-  async unblockDates(
-    listingId: string,
-    startDate: Date,
-    endDate: Date
-  ): Promise<void> {
+  async unblockDates(listingId: string, startDate: Date, endDate: Date): Promise<void> {
     await db
       .delete(availabilityConflicts)
       .where(
         and(
           eq(availabilityConflicts.listingId, listingId),
-          eq(availabilityConflicts.conflictType, 'blocked'),
+          eq(availabilityConflicts.conflictType, "blocked"),
           gte(availabilityConflicts.startDate, startDate),
           lte(availabilityConflicts.endDate, endDate)
         )
-      );
+      )
   }
 
   // Get upcoming bookings for a listing
@@ -299,14 +279,14 @@ export class AvailabilityService {
     limit: number = 10
   ): Promise<
     Array<{
-      bookingId: string;
-      checkIn: Date;
-      checkOut?: Date;
-      guestId: string;
-      status: string;
+      bookingId: string
+      checkIn: Date
+      checkOut?: Date
+      guestId: string
+      status: string
     }>
   > {
-    const now = new Date();
+    const now = new Date()
 
     const upcomingBookings = await db
       .select({
@@ -321,11 +301,11 @@ export class AvailabilityService {
         and(
           eq(bookings.listingId, listingId),
           gte(bookings.checkIn, now),
-          or(eq(bookings.status, 'confirmed'), eq(bookings.status, 'active'))
+          or(eq(bookings.status, "confirmed"), eq(bookings.status, "active"))
         )
       )
       .orderBy(bookings.checkIn)
-      .limit(limit);
+      .limit(limit)
 
     return upcomingBookings.map((booking) => ({
       bookingId: booking.id,
@@ -333,59 +313,56 @@ export class AvailabilityService {
       checkOut: booking.checkOut || undefined,
       guestId: booking.guestId,
       status: booking.status,
-    }));
+    }))
   }
 
   // Private helper methods
-  private calculateEndTime(
-    startTime: Date,
-    duration: { value: number; unit: string }
-  ): Date {
-    const endTime = new Date(startTime);
+  private calculateEndTime(startTime: Date, duration: { value: number; unit: string }): Date {
+    const endTime = new Date(startTime)
 
     switch (duration.unit) {
-      case 'minutes':
-        endTime.setMinutes(endTime.getMinutes() + duration.value);
-        break;
-      case 'hours':
-        endTime.setHours(endTime.getHours() + duration.value);
-        break;
-      case 'days':
-        endTime.setDate(endTime.getDate() + duration.value);
-        break;
-      case 'weeks':
-        endTime.setDate(endTime.getDate() + duration.value * 7);
-        break;
-      case 'months':
-        endTime.setMonth(endTime.getMonth() + duration.value);
-        break;
+      case "minutes":
+        endTime.setMinutes(endTime.getMinutes() + duration.value)
+        break
+      case "hours":
+        endTime.setHours(endTime.getHours() + duration.value)
+        break
+      case "days":
+        endTime.setDate(endTime.getDate() + duration.value)
+        break
+      case "weeks":
+        endTime.setDate(endTime.getDate() + duration.value * 7)
+        break
+      case "months":
+        endTime.setMonth(endTime.getMonth() + duration.value)
+        break
     }
 
-    return endTime;
+    return endTime
   }
 
   private calculateServiceEndTime(serviceBooking: any): Date {
-    const startTime = serviceBooking.scheduledDate;
-    return this.calculateEndTime(startTime, serviceBooking.duration);
+    const startTime = serviceBooking.scheduledDate
+    return this.calculateEndTime(startTime, serviceBooking.duration)
   }
 
   private generateTimeSlots(): TimeSlot[] {
-    const slots: TimeSlot[] = [];
+    const slots: TimeSlot[] = []
 
     for (let hour = 9; hour < 18; hour++) {
       slots.push({
-        start: `${hour.toString().padStart(2, '0')}:00`,
-        end: `${(hour + 1).toString().padStart(2, '0')}:00`,
-      });
+        start: `${hour.toString().padStart(2, "0")}:00`,
+        end: `${(hour + 1).toString().padStart(2, "0")}:00`,
+      })
     }
 
-    return slots;
+    return slots
   }
 
   private parseTimeSlot(date: Date, timeStr: string): Date {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    const result = new Date(date);
-    result.setHours(hours, minutes, 0, 0);
-    return result;
+    const [hours, minutes] = timeStr.split(":").map(Number)
+    const result = new Date(date)
+    result.setHours(hours, minutes, 0, 0)
+    return result
   }
 }

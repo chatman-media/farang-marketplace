@@ -1,15 +1,14 @@
 // Test setup file
-import { config } from 'dotenv';
-import { vi } from 'vitest';
+import { config } from "dotenv"
+import { vi } from "vitest"
 
 // Load test environment variables
-config({ path: '.env.test' });
+config({ path: ".env.test" })
 
 // Set test environment
-process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = "test"
 process.env.DATABASE_URL =
-  process.env.TEST_DATABASE_URL ||
-  'postgresql://localhost:5432/thailand_marketplace_test';
+  process.env.TEST_DATABASE_URL || "postgresql://localhost:5432/thailand_marketplace_test"
 
 // Mock console methods in tests to reduce noise
 global.console = {
@@ -19,4 +18,4 @@ global.console = {
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
-};
+}

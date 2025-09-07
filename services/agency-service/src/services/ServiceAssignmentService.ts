@@ -1,5 +1,5 @@
-import { eq, and, desc, asc, sql, gte, lte } from 'drizzle-orm';
-import { db } from '../db/connection.js';
+import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm"
+import { db } from "../db/connection.js"
 import {
   serviceAssignments,
   agencyServices,
@@ -8,66 +8,63 @@ import {
   type ServiceAssignment,
   type NewServiceAssignment,
   type ServiceAssignmentStatusType,
-} from '../db/schema.js';
+} from "../db/schema.js"
 
 export interface AssignmentFilters {
-  agencyId?: string;
-  listingId?: string;
-  bookingId?: string;
-  status?: ServiceAssignmentStatusType;
+  agencyId?: string
+  listingId?: string
+  bookingId?: string
+  status?: ServiceAssignmentStatusType
   dateRange?: {
-    start: Date;
-    end: Date;
-  };
+    start: Date
+    end: Date
+  }
 }
 
 export interface AssignmentSearchOptions {
-  page?: number;
-  limit?: number;
-  sortBy?: 'assignedAt' | 'completedAt' | 'servicePrice' | 'customerRating';
-  sortOrder?: 'asc' | 'desc';
+  page?: number
+  limit?: number
+  sortBy?: "assignedAt" | "completedAt" | "servicePrice" | "customerRating"
+  sortOrder?: "asc" | "desc"
 }
 
 export interface CreateAssignmentRequest {
-  agencyId: string;
-  agencyServiceId: string;
-  listingId: string;
-  bookingId?: string;
-  servicePrice: number;
-  commissionRate: number;
-  currency?: string;
+  agencyId: string
+  agencyServiceId: string
+  listingId: string
+  bookingId?: string
+  servicePrice: number
+  commissionRate: number
+  currency?: string
 }
 
 export class ServiceAssignmentService {
   /**
    * Create a new service assignment
    */
-  async createAssignment(
-    assignmentData: CreateAssignmentRequest
-  ): Promise<ServiceAssignment> {
+  async createAssignment(assignmentData: CreateAssignmentRequest): Promise<ServiceAssignment> {
     try {
       // Verify agency and service exist
       const [agency] = await db
         .select()
         .from(agencies)
-        .where(eq(agencies.id, assignmentData.agencyId));
+        .where(eq(agencies.id, assignmentData.agencyId))
 
       if (!agency) {
-        throw new Error('Agency not found');
+        throw new Error("Agency not found")
       }
 
       const [service] = await db
         .select()
         .from(agencyServices)
-        .where(eq(agencyServices.id, assignmentData.agencyServiceId));
+        .where(eq(agencyServices.id, assignmentData.agencyServiceId))
 
       if (!service) {
-        throw new Error('Agency service not found');
+        throw new Error("Agency service not found")
       }
 
       // Calculate commission amount
-      const commissionAmount =
-        assignmentData.servicePrice * assignmentData.commissionRate;
+      const commissionAmount = assignmentData.servicePrice * assignmentData.commissionRate
 
       const [assignment] = await db
         .insert(serviceAssignments)
@@ -79,22 +76,22 @@ export class ServiceAssignmentService {
           servicePrice: assignmentData.servicePrice.toString(),
           commissionAmount: commissionAmount.toString(),
           commissionRate: assignmentData.commissionRate.toString(),
-          currency: assignmentData.currency || 'THB',
-          status: 'active',
+          currency: assignmentData.currency || "THB",
+          status: "active",
           assignedAt: new Date(),
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning();
+        .returning()
 
       if (!assignment) {
-        throw new Error('Failed to create assignment');
+        throw new Error("Failed to create assignment")
       }
 
-      return assignment;
+      return assignment
     } catch (error) {
-      console.error('Error creating assignment:', error);
-      throw new Error('Failed to create assignment');
+      console.error("Error creating assignment:", error)
+      throw new Error("Failed to create assignment")
     }
   }
 
@@ -106,52 +103,48 @@ export class ServiceAssignmentService {
       const [assignment] = await db
         .select()
         .from(serviceAssignments)
-        .where(eq(serviceAssignments.id, id));
+        .where(eq(serviceAssignments.id, id))
 
-      return assignment || null;
+      return assignment || null
     } catch (error) {
-      console.error('Error getting assignment by ID:', error);
-      throw new Error('Failed to get assignment');
+      console.error("Error getting assignment by ID:", error)
+      throw new Error("Failed to get assignment")
     }
   }
 
   /**
    * Get assignments by agency ID
    */
-  async getAssignmentsByAgencyId(
-    agencyId: string
-  ): Promise<ServiceAssignment[]> {
+  async getAssignmentsByAgencyId(agencyId: string): Promise<ServiceAssignment[]> {
     try {
       const assignments = await db
         .select()
         .from(serviceAssignments)
         .where(eq(serviceAssignments.agencyId, agencyId))
-        .orderBy(desc(serviceAssignments.assignedAt));
+        .orderBy(desc(serviceAssignments.assignedAt))
 
-      return assignments;
+      return assignments
     } catch (error) {
-      console.error('Error getting assignments by agency ID:', error);
-      throw new Error('Failed to get assignments');
+      console.error("Error getting assignments by agency ID:", error)
+      throw new Error("Failed to get assignments")
     }
   }
 
   /**
    * Get assignments by listing ID
    */
-  async getAssignmentsByListingId(
-    listingId: string
-  ): Promise<ServiceAssignment[]> {
+  async getAssignmentsByListingId(listingId: string): Promise<ServiceAssignment[]> {
     try {
       const assignments = await db
         .select()
         .from(serviceAssignments)
         .where(eq(serviceAssignments.listingId, listingId))
-        .orderBy(desc(serviceAssignments.assignedAt));
+        .orderBy(desc(serviceAssignments.assignedAt))
 
-      return assignments;
+      return assignments
     } catch (error) {
-      console.error('Error getting assignments by listing ID:', error);
-      throw new Error('Failed to get assignments');
+      console.error("Error getting assignments by listing ID:", error)
+      throw new Error("Failed to get assignments")
     }
   }
 
@@ -167,26 +160,26 @@ export class ServiceAssignmentService {
       const updateData: any = {
         status,
         updatedAt: new Date(),
-      };
-
-      if (notes) {
-        updateData.agencyNotes = notes;
       }
 
-      if (status === 'completed') {
-        updateData.completedAt = new Date();
+      if (notes) {
+        updateData.agencyNotes = notes
+      }
+
+      if (status === "completed") {
+        updateData.completedAt = new Date()
       }
 
       const [assignment] = await db
         .update(serviceAssignments)
         .set(updateData)
         .where(eq(serviceAssignments.id, id))
-        .returning();
+        .returning()
 
-      return assignment || null;
+      return assignment || null
     } catch (error) {
-      console.error('Error updating assignment status:', error);
-      throw new Error('Failed to update assignment status');
+      console.error("Error updating assignment status:", error)
+      throw new Error("Failed to update assignment status")
     }
   }
 
@@ -200,7 +193,7 @@ export class ServiceAssignmentService {
   ): Promise<ServiceAssignment | null> {
     try {
       if (rating < 1 || rating > 5) {
-        throw new Error('Rating must be between 1 and 5');
+        throw new Error("Rating must be between 1 and 5")
       }
 
       const [assignment] = await db
@@ -211,12 +204,12 @@ export class ServiceAssignmentService {
           updatedAt: new Date(),
         })
         .where(eq(serviceAssignments.id, id))
-        .returning();
+        .returning()
 
-      return assignment || null;
+      return assignment || null
     } catch (error) {
-      console.error('Error adding customer feedback:', error);
-      throw new Error('Failed to add customer feedback');
+      console.error("Error adding customer feedback:", error)
+      throw new Error("Failed to add customer feedback")
     }
   }
 
@@ -228,87 +221,77 @@ export class ServiceAssignmentService {
     options: AssignmentSearchOptions = {}
   ): Promise<{
     assignments: (ServiceAssignment & {
-      agencyName: string | null;
-      serviceName: string | null;
-    })[];
-    total: number;
-    page: number;
-    limit: number;
-    hasMore: boolean;
+      agencyName: string | null
+      serviceName: string | null
+    })[]
+    total: number
+    page: number
+    limit: number
+    hasMore: boolean
   }> {
     try {
-      const {
-        page = 1,
-        limit = 20,
-        sortBy = 'assignedAt',
-        sortOrder = 'desc',
-      } = options;
+      const { page = 1, limit = 20, sortBy = "assignedAt", sortOrder = "desc" } = options
 
-      const offset = (page - 1) * limit;
+      const offset = (page - 1) * limit
 
       // Build where conditions
-      const conditions = [];
+      const conditions = []
 
       if (filters.agencyId) {
-        conditions.push(eq(serviceAssignments.agencyId, filters.agencyId));
+        conditions.push(eq(serviceAssignments.agencyId, filters.agencyId))
       }
 
       if (filters.listingId) {
-        conditions.push(eq(serviceAssignments.listingId, filters.listingId));
+        conditions.push(eq(serviceAssignments.listingId, filters.listingId))
       }
 
       if (filters.bookingId) {
-        conditions.push(eq(serviceAssignments.bookingId, filters.bookingId));
+        conditions.push(eq(serviceAssignments.bookingId, filters.bookingId))
       }
 
       if (filters.status) {
-        conditions.push(eq(serviceAssignments.status, filters.status));
+        conditions.push(eq(serviceAssignments.status, filters.status))
       }
 
       if (filters.dateRange) {
-        conditions.push(
-          gte(serviceAssignments.assignedAt, filters.dateRange.start)
-        );
-        conditions.push(
-          lte(serviceAssignments.assignedAt, filters.dateRange.end)
-        );
+        conditions.push(gte(serviceAssignments.assignedAt, filters.dateRange.start))
+        conditions.push(lte(serviceAssignments.assignedAt, filters.dateRange.end))
       }
 
-      const whereClause =
-        conditions.length > 0 ? and(...conditions) : undefined;
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
       // Build sort clause
-      let orderClause;
+      let orderClause
       switch (sortBy) {
-        case 'assignedAt':
+        case "assignedAt":
           orderClause =
-            sortOrder === 'asc'
+            sortOrder === "asc"
               ? asc(serviceAssignments.assignedAt)
-              : desc(serviceAssignments.assignedAt);
-          break;
-        case 'completedAt':
+              : desc(serviceAssignments.assignedAt)
+          break
+        case "completedAt":
           orderClause =
-            sortOrder === 'asc'
+            sortOrder === "asc"
               ? asc(serviceAssignments.completedAt)
-              : desc(serviceAssignments.completedAt);
-          break;
-        case 'servicePrice':
+              : desc(serviceAssignments.completedAt)
+          break
+        case "servicePrice":
           orderClause =
-            sortOrder === 'asc'
+            sortOrder === "asc"
               ? asc(serviceAssignments.servicePrice)
-              : desc(serviceAssignments.servicePrice);
-          break;
-        case 'customerRating':
+              : desc(serviceAssignments.servicePrice)
+          break
+        case "customerRating":
           orderClause =
-            sortOrder === 'asc'
+            sortOrder === "asc"
               ? asc(serviceAssignments.customerRating)
-              : desc(serviceAssignments.customerRating);
-          break;
+              : desc(serviceAssignments.customerRating)
+          break
         default:
           orderClause =
-            sortOrder === 'asc'
+            sortOrder === "asc"
               ? asc(serviceAssignments.assignedAt)
-              : desc(serviceAssignments.assignedAt);
+              : desc(serviceAssignments.assignedAt)
       }
 
       // Get total count
@@ -316,11 +299,8 @@ export class ServiceAssignmentService {
         .select({ count: sql<number>`count(*)` })
         .from(serviceAssignments)
         .leftJoin(agencies, eq(serviceAssignments.agencyId, agencies.id))
-        .leftJoin(
-          agencyServices,
-          eq(serviceAssignments.agencyServiceId, agencyServices.id)
-        )
-        .where(whereClause);
+        .leftJoin(agencyServices, eq(serviceAssignments.agencyServiceId, agencyServices.id))
+        .where(whereClause)
 
       // Get assignments with related data
       const assignmentList = await db
@@ -349,17 +329,14 @@ export class ServiceAssignmentService {
         })
         .from(serviceAssignments)
         .leftJoin(agencies, eq(serviceAssignments.agencyId, agencies.id))
-        .leftJoin(
-          agencyServices,
-          eq(serviceAssignments.agencyServiceId, agencyServices.id)
-        )
+        .leftJoin(agencyServices, eq(serviceAssignments.agencyServiceId, agencyServices.id))
         .where(whereClause)
         .orderBy(orderClause)
         .limit(limit)
-        .offset(offset);
+        .offset(offset)
 
-      const total = Number(countResult[0]?.count || 0);
-      const hasMore = offset + assignmentList.length < total;
+      const total = Number(countResult[0]?.count || 0)
+      const hasMore = offset + assignmentList.length < total
 
       return {
         assignments: assignmentList,
@@ -367,10 +344,10 @@ export class ServiceAssignmentService {
         page,
         limit,
         hasMore,
-      };
+      }
     } catch (error) {
-      console.error('Error searching assignments:', error);
-      throw new Error('Failed to search assignments');
+      console.error("Error searching assignments:", error)
+      throw new Error("Failed to search assignments")
     }
   }
 
@@ -378,20 +355,17 @@ export class ServiceAssignmentService {
    * Get assignment statistics
    */
   async getAssignmentStats(agencyId?: string): Promise<{
-    totalAssignments: number;
-    activeAssignments: number;
-    completedAssignments: number;
-    cancelledAssignments: number;
-    totalRevenue: number;
-    totalCommission: number;
-    averageRating: number;
+    totalAssignments: number
+    activeAssignments: number
+    completedAssignments: number
+    cancelledAssignments: number
+    totalRevenue: number
+    totalCommission: number
+    averageRating: number
   }> {
     try {
-      const conditions = agencyId
-        ? [eq(serviceAssignments.agencyId, agencyId)]
-        : [];
-      const whereClause =
-        conditions.length > 0 ? and(...conditions) : undefined;
+      const conditions = agencyId ? [eq(serviceAssignments.agencyId, agencyId)] : []
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
       const [stats] = await db
         .select({
@@ -404,7 +378,7 @@ export class ServiceAssignmentService {
           averageRating: sql<number>`coalesce(avg(cast(customer_rating as decimal)), 0)`,
         })
         .from(serviceAssignments)
-        .where(whereClause);
+        .where(whereClause)
 
       return {
         totalAssignments: Number(stats?.totalAssignments || 0),
@@ -414,10 +388,10 @@ export class ServiceAssignmentService {
         totalRevenue: Number(stats?.totalRevenue || 0),
         totalCommission: Number(stats?.totalCommission || 0),
         averageRating: Number(stats?.averageRating || 0),
-      };
+      }
     } catch (error) {
-      console.error('Error getting assignment stats:', error);
-      throw new Error('Failed to get assignment statistics');
+      console.error("Error getting assignment stats:", error)
+      throw new Error("Failed to get assignment statistics")
     }
   }
 }

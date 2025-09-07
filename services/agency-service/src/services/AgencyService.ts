@@ -1,5 +1,5 @@
-import { eq, and, desc, asc, sql, like, ilike, inArray } from 'drizzle-orm';
-import { db } from '../db/connection.js';
+import { eq, and, desc, asc, sql, like, ilike, inArray } from "drizzle-orm"
+import { db } from "../db/connection.js"
 import {
   agencies,
   agencyServices,
@@ -12,40 +12,40 @@ import {
   type AgencyStatusType,
   type VerificationStatusType,
   type ServiceCategoryType,
-} from '../db/schema.js';
+} from "../db/schema.js"
 import type {
   Agency as AgencyType,
   AgencyServiceType,
   ServiceCategory,
   Location,
-} from '../types/index.js';
+} from "../types/index.js"
 
 export interface AgencyFilters {
-  status?: AgencyStatusType;
-  verificationStatus?: VerificationStatusType;
-  category?: ServiceCategoryType;
+  status?: AgencyStatusType
+  verificationStatus?: VerificationStatusType
+  category?: ServiceCategoryType
   location?: {
-    city?: string;
-    region?: string;
-    country?: string;
-    radius?: number;
-  };
+    city?: string
+    region?: string
+    country?: string
+    radius?: number
+  }
   rating?: {
-    min: number;
-    max: number;
-  };
+    min: number
+    max: number
+  }
   commissionRate?: {
-    min: number;
-    max: number;
-  };
-  search?: string;
+    min: number
+    max: number
+  }
+  search?: string
 }
 
 export interface AgencySearchOptions {
-  page?: number;
-  limit?: number;
-  sortBy?: 'name' | 'rating' | 'createdAt' | 'commissionRate';
-  sortOrder?: 'asc' | 'desc';
+  page?: number
+  limit?: number
+  sortBy?: "name" | "rating" | "createdAt" | "commissionRate"
+  sortOrder?: "asc" | "desc"
 }
 
 export class AgencyService {
@@ -53,7 +53,7 @@ export class AgencyService {
    * Create a new agency
    */
   async createAgency(
-    agencyData: Omit<NewAgency, 'id' | 'createdAt' | 'updatedAt'>
+    agencyData: Omit<NewAgency, "id" | "createdAt" | "updatedAt">
   ): Promise<Agency> {
     try {
       const [agency] = await db
@@ -63,16 +63,16 @@ export class AgencyService {
           createdAt: new Date(),
           updatedAt: new Date(),
         })
-        .returning();
+        .returning()
 
       if (!agency) {
-        throw new Error('Failed to create agency');
+        throw new Error("Failed to create agency")
       }
 
-      return agency;
+      return agency
     } catch (error) {
-      console.error('Error creating agency:', error);
-      throw new Error('Failed to create agency');
+      console.error("Error creating agency:", error)
+      throw new Error("Failed to create agency")
     }
   }
 
@@ -81,15 +81,12 @@ export class AgencyService {
    */
   async getAgencyById(id: string): Promise<Agency | null> {
     try {
-      const [agency] = await db
-        .select()
-        .from(agencies)
-        .where(eq(agencies.id, id));
+      const [agency] = await db.select().from(agencies).where(eq(agencies.id, id))
 
-      return agency || null;
+      return agency || null
     } catch (error) {
-      console.error('Error getting agency by ID:', error);
-      throw new Error('Failed to get agency');
+      console.error("Error getting agency by ID:", error)
+      throw new Error("Failed to get agency")
     }
   }
 
@@ -98,15 +95,12 @@ export class AgencyService {
    */
   async getAgencyByUserId(userId: string): Promise<Agency | null> {
     try {
-      const [agency] = await db
-        .select()
-        .from(agencies)
-        .where(eq(agencies.userId, userId));
+      const [agency] = await db.select().from(agencies).where(eq(agencies.userId, userId))
 
-      return agency || null;
+      return agency || null
     } catch (error) {
-      console.error('Error getting agency by user ID:', error);
-      throw new Error('Failed to get agency');
+      console.error("Error getting agency by user ID:", error)
+      throw new Error("Failed to get agency")
     }
   }
 
@@ -115,7 +109,7 @@ export class AgencyService {
    */
   async updateAgency(
     id: string,
-    updates: Partial<Omit<Agency, 'id' | 'createdAt'>>
+    updates: Partial<Omit<Agency, "id" | "createdAt">>
   ): Promise<Agency | null> {
     try {
       const [agency] = await db
@@ -125,12 +119,12 @@ export class AgencyService {
           updatedAt: new Date(),
         })
         .where(eq(agencies.id, id))
-        .returning();
+        .returning()
 
-      return agency || null;
+      return agency || null
     } catch (error) {
-      console.error('Error updating agency:', error);
-      throw new Error('Failed to update agency');
+      console.error("Error updating agency:", error)
+      throw new Error("Failed to update agency")
     }
   }
 
@@ -139,12 +133,12 @@ export class AgencyService {
    */
   async deleteAgency(id: string): Promise<boolean> {
     try {
-      const result = await db.delete(agencies).where(eq(agencies.id, id));
+      const result = await db.delete(agencies).where(eq(agencies.id, id))
 
-      return result.length > 0;
+      return result.length > 0
     } catch (error) {
-      console.error('Error deleting agency:', error);
-      throw new Error('Failed to delete agency');
+      console.error("Error deleting agency:", error)
+      throw new Error("Failed to delete agency")
     }
   }
 
@@ -155,95 +149,76 @@ export class AgencyService {
     filters: AgencyFilters = {},
     options: AgencySearchOptions = {}
   ): Promise<{
-    agencies: Agency[];
-    total: number;
-    page: number;
-    limit: number;
-    hasMore: boolean;
+    agencies: Agency[]
+    total: number
+    page: number
+    limit: number
+    hasMore: boolean
   }> {
     try {
-      const {
-        page = 1,
-        limit = 20,
-        sortBy = 'createdAt',
-        sortOrder = 'desc',
-      } = options;
+      const { page = 1, limit = 20, sortBy = "createdAt", sortOrder = "desc" } = options
 
-      const offset = (page - 1) * limit;
+      const offset = (page - 1) * limit
 
       // Build where conditions
-      const conditions = [];
+      const conditions = []
 
       if (filters.status) {
-        conditions.push(eq(agencies.status, filters.status));
+        conditions.push(eq(agencies.status, filters.status))
       }
 
       if (filters.verificationStatus) {
-        conditions.push(
-          eq(agencies.verificationStatus, filters.verificationStatus)
-        );
+        conditions.push(eq(agencies.verificationStatus, filters.verificationStatus))
       }
 
       if (filters.search) {
         conditions.push(
           sql`(${ilike(agencies.name, `%${filters.search}%`)} OR ${ilike(agencies.description, `%${filters.search}%`)})`
-        );
+        )
       }
 
       if (filters.rating) {
         if (filters.rating.min !== undefined) {
-          conditions.push(sql`${agencies.rating} >= ${filters.rating.min}`);
+          conditions.push(sql`${agencies.rating} >= ${filters.rating.min}`)
         }
         if (filters.rating.max !== undefined) {
-          conditions.push(sql`${agencies.rating} <= ${filters.rating.max}`);
+          conditions.push(sql`${agencies.rating} <= ${filters.rating.max}`)
         }
       }
 
       if (filters.commissionRate) {
         if (filters.commissionRate.min !== undefined) {
-          conditions.push(
-            sql`${agencies.commissionRate} >= ${filters.commissionRate.min}`
-          );
+          conditions.push(sql`${agencies.commissionRate} >= ${filters.commissionRate.min}`)
         }
         if (filters.commissionRate.max !== undefined) {
-          conditions.push(
-            sql`${agencies.commissionRate} <= ${filters.commissionRate.max}`
-          );
+          conditions.push(sql`${agencies.commissionRate} <= ${filters.commissionRate.max}`)
         }
       }
 
-      const whereClause =
-        conditions.length > 0 ? and(...conditions) : undefined;
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
       // Build sort clause
-      let orderClause;
+      let orderClause
       switch (sortBy) {
-        case 'name':
+        case "name":
+          orderClause = sortOrder === "asc" ? asc(agencies.name) : desc(agencies.name)
+          break
+        case "rating":
+          orderClause = sortOrder === "asc" ? asc(agencies.rating) : desc(agencies.rating)
+          break
+        case "commissionRate":
           orderClause =
-            sortOrder === 'asc' ? asc(agencies.name) : desc(agencies.name);
-          break;
-        case 'rating':
-          orderClause =
-            sortOrder === 'asc' ? asc(agencies.rating) : desc(agencies.rating);
-          break;
-        case 'commissionRate':
-          orderClause =
-            sortOrder === 'asc'
-              ? asc(agencies.commissionRate)
-              : desc(agencies.commissionRate);
-          break;
+            sortOrder === "asc" ? asc(agencies.commissionRate) : desc(agencies.commissionRate)
+          break
         default:
-          orderClause =
-            sortOrder === 'asc'
-              ? asc(agencies.createdAt)
-              : desc(agencies.createdAt);
+          orderClause = sortOrder === "asc" ? asc(agencies.createdAt) : desc(agencies.createdAt)
       }
 
       // Get total count
       const countResult = await db
         .select({ count: sql<number>`count(*)` })
         .from(agencies)
-        .where(whereClause);
+        .where(whereClause)
 
       // Get agencies
       const agencyList = await db
@@ -252,10 +227,10 @@ export class AgencyService {
         .where(whereClause)
         .orderBy(orderClause)
         .limit(limit)
-        .offset(offset);
+        .offset(offset)
 
-      const total = Number(countResult[0]?.count || 0);
-      const hasMore = offset + agencyList.length < total;
+      const total = Number(countResult[0]?.count || 0)
+      const hasMore = offset + agencyList.length < total
 
       return {
         agencies: agencyList,
@@ -263,73 +238,64 @@ export class AgencyService {
         page,
         limit,
         hasMore,
-      };
+      }
     } catch (error) {
-      console.error('Error searching agencies:', error);
-      throw new Error('Failed to search agencies');
+      console.error("Error searching agencies:", error)
+      throw new Error("Failed to search agencies")
     }
   }
 
   /**
    * Verify agency
    */
-  async verifyAgency(
-    id: string,
-    verificationNotes?: string
-  ): Promise<Agency | null> {
+  async verifyAgency(id: string, verificationNotes?: string): Promise<Agency | null> {
     try {
       const [agency] = await db
         .update(agencies)
         .set({
-          verificationStatus: 'verified',
+          verificationStatus: "verified",
           isVerified: true,
           verifiedAt: new Date(),
           verificationNotes,
           updatedAt: new Date(),
         })
         .where(eq(agencies.id, id))
-        .returning();
+        .returning()
 
-      return agency || null;
+      return agency || null
     } catch (error) {
-      console.error('Error verifying agency:', error);
-      throw new Error('Failed to verify agency');
+      console.error("Error verifying agency:", error)
+      throw new Error("Failed to verify agency")
     }
   }
 
   /**
    * Reject agency verification
    */
-  async rejectAgencyVerification(
-    id: string,
-    reason: string
-  ): Promise<Agency | null> {
+  async rejectAgencyVerification(id: string, reason: string): Promise<Agency | null> {
     try {
       const [agency] = await db
         .update(agencies)
         .set({
-          verificationStatus: 'rejected',
+          verificationStatus: "rejected",
           isVerified: false,
           verificationNotes: reason,
           updatedAt: new Date(),
         })
         .where(eq(agencies.id, id))
-        .returning();
+        .returning()
 
-      return agency || null;
+      return agency || null
     } catch (error) {
-      console.error('Error rejecting agency verification:', error);
-      throw new Error('Failed to reject agency verification');
+      console.error("Error rejecting agency verification:", error)
+      throw new Error("Failed to reject agency verification")
     }
   }
 
   /**
    * Update agency status
    */
-  async updateAgencyStatus(
-    id: string,
-    status: AgencyStatusType
-  ): Promise<Agency | null> {
+  async updateAgencyStatus(id: string, status: AgencyStatusType): Promise<Agency | null> {
     try {
       const [agency] = await db
         .update(agencies)
@@ -338,12 +304,12 @@ export class AgencyService {
           updatedAt: new Date(),
         })
         .where(eq(agencies.id, id))
-        .returning();
+        .returning()
 
-      return agency || null;
+      return agency || null
     } catch (error) {
-      console.error('Error updating agency status:', error);
-      throw new Error('Failed to update agency status');
+      console.error("Error updating agency status:", error)
+      throw new Error("Failed to update agency status")
     }
   }
 
@@ -351,18 +317,18 @@ export class AgencyService {
    * Get agency statistics
    */
   async getAgencyStats(id: string): Promise<{
-    totalServices: number;
-    activeAssignments: number;
-    completedAssignments: number;
-    totalCommissionEarned: number;
-    averageRating: number;
+    totalServices: number
+    activeAssignments: number
+    completedAssignments: number
+    totalCommissionEarned: number
+    averageRating: number
   }> {
     try {
       // Get total services
       const servicesResult = await db
         .select({ totalServices: sql<number>`count(*)` })
         .from(agencyServices)
-        .where(eq(agencyServices.agencyId, id));
+        .where(eq(agencyServices.agencyId, id))
 
       // Get assignment stats
       const [assignmentStats] = await db
@@ -371,7 +337,7 @@ export class AgencyService {
           completedAssignments: sql<number>`count(*) filter (where status = 'completed')`,
         })
         .from(serviceAssignments)
-        .where(eq(serviceAssignments.agencyId, id));
+        .where(eq(serviceAssignments.agencyId, id))
 
       // Get commission stats
       const [commissionStats] = await db
@@ -379,31 +345,22 @@ export class AgencyService {
           totalCommissionEarned: sql<number>`coalesce(sum(amount), 0)`,
         })
         .from(commissionPayments)
-        .where(
-          and(
-            eq(commissionPayments.agencyId, id),
-            eq(commissionPayments.status, 'paid')
-          )
-        );
+        .where(and(eq(commissionPayments.agencyId, id), eq(commissionPayments.status, "paid")))
 
       // Get agency rating
-      const agency = await this.getAgencyById(id);
-      const averageRating = agency ? Number(agency.rating) : 0;
+      const agency = await this.getAgencyById(id)
+      const averageRating = agency ? Number(agency.rating) : 0
 
       return {
         totalServices: Number(servicesResult[0]?.totalServices || 0),
         activeAssignments: Number(assignmentStats?.activeAssignments || 0),
-        completedAssignments: Number(
-          assignmentStats?.completedAssignments || 0
-        ),
-        totalCommissionEarned: Number(
-          commissionStats?.totalCommissionEarned || 0
-        ),
+        completedAssignments: Number(assignmentStats?.completedAssignments || 0),
+        totalCommissionEarned: Number(commissionStats?.totalCommissionEarned || 0),
         averageRating,
-      };
+      }
     } catch (error) {
-      console.error('Error getting agency stats:', error);
-      throw new Error('Failed to get agency statistics');
+      console.error("Error getting agency stats:", error)
+      throw new Error("Failed to get agency statistics")
     }
   }
 }

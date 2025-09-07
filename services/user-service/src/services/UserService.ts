@@ -1,13 +1,13 @@
-import { UserRepository } from '../repositories/UserRepository';
-import { UserEntity } from '../models/User';
+import { UserRepository } from "../repositories/UserRepository"
+import { UserEntity } from "../models/User"
 import {
   UserRole,
   UserProfile,
   User,
   VerificationStatus,
   Location,
-} from '@marketplace/shared-types';
-import { z } from 'zod';
+} from "@marketplace/shared-types"
+import { z } from "zod"
 
 const UpdateUserSchema = z.object({
   email: z.email().optional(),
@@ -37,30 +37,30 @@ const UpdateUserSchema = z.object({
     })
     .optional(),
   isActive: z.boolean().optional(),
-});
+})
 
 export interface CreateUserData {
-  email: string;
-  password: string;
-  phone?: string;
-  telegramId?: string;
-  role?: UserRole;
+  email: string
+  password: string
+  phone?: string
+  telegramId?: string
+  role?: UserRole
   profile: {
-    firstName: string;
-    lastName: string;
-    location?: Location;
-    socialProfiles?: any[];
-    primaryAuthProvider?: any;
-  };
+    firstName: string
+    lastName: string
+    location?: Location
+    socialProfiles?: any[]
+    primaryAuthProvider?: any
+  }
 }
 
 export interface UpdateUserData {
-  email?: string;
-  phone?: string;
-  telegramId?: string;
-  role?: UserRole;
-  profile?: Partial<UserProfile>;
-  isActive?: boolean;
+  email?: string
+  phone?: string
+  telegramId?: string
+  role?: UserRole
+  profile?: Partial<UserProfile>
+  isActive?: boolean
 }
 
 export class UserService {
@@ -76,30 +76,28 @@ export class UserService {
         reviewsCount: 0,
         verificationStatus: VerificationStatus.UNVERIFIED,
         socialProfiles: [],
-        primaryAuthProvider: 'email' as any,
+        primaryAuthProvider: "email" as any,
       },
-    });
+    })
 
     // Check if email already exists
-    const existingUser = await this.userRepository.findByEmail(
-      validatedData.email
-    );
+    const existingUser = await this.userRepository.findByEmail(validatedData.email)
     if (existingUser) {
-      throw new Error('User with this email already exists');
+      throw new Error("User with this email already exists")
     }
 
     // Check if telegram ID already exists (if provided)
     if (validatedData.telegramId) {
       const existingTelegramUser = await this.userRepository.findByTelegramId(
         validatedData.telegramId
-      );
+      )
       if (existingTelegramUser) {
-        throw new Error('User with this Telegram ID already exists');
+        throw new Error("User with this Telegram ID already exists")
       }
     }
 
     // Hash password
-    const passwordHash = await UserEntity.hashPassword(validatedData.password);
+    const passwordHash = await UserEntity.hashPassword(validatedData.password)
 
     // Create user
     const userEntity = await this.userRepository.create({
@@ -115,175 +113,157 @@ export class UserService {
         reviewsCount: 0,
         verificationStatus: VerificationStatus.UNVERIFIED,
         socialProfiles: [],
-        primaryAuthProvider: 'email' as any,
+        primaryAuthProvider: "email" as any,
         ...(validatedData.profile.avatar && {
           avatar: validatedData.profile.avatar,
         }),
         ...(validatedData.profile.location && {
           location: {
             ...validatedData.profile.location,
-            region: 'Unknown',
+            region: "Unknown",
           },
         }),
       },
-    });
+    })
 
-    return userEntity.toPublicUser();
+    return userEntity.toPublicUser()
   }
 
   async getUserById(id: string): Promise<User | null> {
-    const userEntity = await this.userRepository.findById(id);
-    return userEntity ? userEntity.toPublicUser() : null;
+    const userEntity = await this.userRepository.findById(id)
+    return userEntity ? userEntity.toPublicUser() : null
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    const userEntity = await this.userRepository.findByEmail(email);
-    return userEntity ? userEntity.toPublicUser() : null;
+    const userEntity = await this.userRepository.findByEmail(email)
+    return userEntity ? userEntity.toPublicUser() : null
   }
 
   async getUserByTelegramId(telegramId: string): Promise<User | null> {
-    const userEntity = await this.userRepository.findByTelegramId(telegramId);
-    return userEntity ? userEntity.toPublicUser() : null;
+    const userEntity = await this.userRepository.findByTelegramId(telegramId)
+    return userEntity ? userEntity.toPublicUser() : null
   }
 
   async updateUser(userId: string, updateData: any): Promise<User | null> {
     try {
       // Validate update data
-      const validatedData = UpdateUserSchema.parse(updateData);
+      const validatedData = UpdateUserSchema.parse(updateData)
 
       // Check for email conflicts if email is being updated
       if (validatedData.email) {
-        const existingEmailUser = await this.userRepository.existsByEmail(
-          validatedData.email
-        );
+        const existingEmailUser = await this.userRepository.existsByEmail(validatedData.email)
         if (existingEmailUser) {
           // Check if it's not the same user
-          const existingUser = await this.userRepository.findByEmail(
-            validatedData.email
-          );
+          const existingUser = await this.userRepository.findByEmail(validatedData.email)
           if (existingUser && existingUser.id !== userId) {
-            throw new Error('Email already in use by another user');
+            throw new Error("Email already in use by another user")
           }
         }
       }
 
       // Check for telegram ID conflicts if telegram ID is being updated
       if (validatedData.telegramId) {
-        const existingTelegramUser =
-          await this.userRepository.existsByTelegramId(
-            validatedData.telegramId
-          );
+        const existingTelegramUser = await this.userRepository.existsByTelegramId(
+          validatedData.telegramId
+        )
         if (existingTelegramUser) {
           // Check if it's not the same user
-          const existingUser = await this.userRepository.findByTelegramId(
-            validatedData.telegramId
-          );
+          const existingUser = await this.userRepository.findByTelegramId(validatedData.telegramId)
           if (existingUser && existingUser.id !== userId) {
-            throw new Error('Telegram ID already in use by another user');
+            throw new Error("Telegram ID already in use by another user")
           }
         }
       }
 
       // Handle profile updates by merging with existing profile
-      const updatePayload: any = { ...validatedData };
+      const updatePayload: any = { ...validatedData }
       if (validatedData.profile) {
-        const currentUser = await this.userRepository.findById(userId);
+        const currentUser = await this.userRepository.findById(userId)
         if (currentUser) {
           updatePayload.profile = {
             ...currentUser.profile,
             ...validatedData.profile,
-          } as UserProfile;
+          } as UserProfile
         }
       }
 
-      const updatedUser = await this.userRepository.update(
-        userId,
-        updatePayload
-      );
-      return updatedUser ? updatedUser.toPublicUser() : null;
+      const updatedUser = await this.userRepository.update(userId, updatePayload)
+      return updatedUser ? updatedUser.toPublicUser() : null
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new Error(`Validation error: ${error.message}`);
+        throw new Error(`Validation error: ${error.message}`)
       }
-      throw error;
+      throw error
     }
   }
 
-  async changePassword(
-    id: string,
-    currentPassword: string,
-    newPassword: string
-  ): Promise<boolean> {
+  async changePassword(id: string, currentPassword: string, newPassword: string): Promise<boolean> {
     // Validate password change data
-    UserEntity.validatePasswordChange({ currentPassword, newPassword });
+    UserEntity.validatePasswordChange({ currentPassword, newPassword })
 
     // Get user entity
-    const userEntity = await this.userRepository.findById(id);
+    const userEntity = await this.userRepository.findById(id)
     if (!userEntity) {
-      throw new Error('User not found');
+      throw new Error("User not found")
     }
 
     // Verify current password
-    const isCurrentPasswordValid =
-      await userEntity.validatePassword(currentPassword);
+    const isCurrentPasswordValid = await userEntity.validatePassword(currentPassword)
     if (!isCurrentPasswordValid) {
-      throw new Error('Current password is incorrect');
+      throw new Error("Current password is incorrect")
     }
 
     // Hash new password and update
-    const newPasswordHash = await UserEntity.hashPassword(newPassword);
-    return this.userRepository.updatePassword(id, newPasswordHash);
+    const newPasswordHash = await UserEntity.hashPassword(newPassword)
+    return this.userRepository.updatePassword(id, newPasswordHash)
   }
 
   async deleteUser(id: string): Promise<boolean> {
-    return this.userRepository.delete(id);
+    return this.userRepository.delete(id)
   }
 
   async activateUser(id: string): Promise<User | null> {
-    const userEntity = await this.userRepository.update(id, { isActive: true });
-    return userEntity ? userEntity.toPublicUser() : null;
+    const userEntity = await this.userRepository.update(id, { isActive: true })
+    return userEntity ? userEntity.toPublicUser() : null
   }
 
   async deactivateUser(id: string): Promise<User | null> {
     const userEntity = await this.userRepository.update(id, {
       isActive: false,
-    });
-    return userEntity ? userEntity.toPublicUser() : null;
+    })
+    return userEntity ? userEntity.toPublicUser() : null
   }
 
   async updateUserRole(id: string, role: UserRole): Promise<User | null> {
-    const userEntity = await this.userRepository.update(id, { role });
-    return userEntity ? userEntity.toPublicUser() : null;
+    const userEntity = await this.userRepository.update(id, { role })
+    return userEntity ? userEntity.toPublicUser() : null
   }
 
   async verifyUser(id: string): Promise<User | null> {
-    const userEntity = await this.userRepository.findById(id);
+    const userEntity = await this.userRepository.findById(id)
     if (!userEntity) {
-      return null;
+      return null
     }
 
-    userEntity.setVerificationStatus(VerificationStatus.VERIFIED);
+    userEntity.setVerificationStatus(VerificationStatus.VERIFIED)
     const updatedEntity = await this.userRepository.update(id, {
       profile: userEntity.profile,
-    });
-    return updatedEntity ? updatedEntity.toPublicUser() : null;
+    })
+    return updatedEntity ? updatedEntity.toPublicUser() : null
   }
 
   async getUserStats() {
-    return this.userRepository.getUserStats();
+    return this.userRepository.getUserStats()
   }
 
   // Authentication helper method (for use by auth service)
-  async validateUserCredentials(
-    email: string,
-    password: string
-  ): Promise<UserEntity | null> {
-    const userEntity = await this.userRepository.findByEmail(email);
+  async validateUserCredentials(email: string, password: string): Promise<UserEntity | null> {
+    const userEntity = await this.userRepository.findByEmail(email)
     if (!userEntity || !userEntity.isActive) {
-      return null;
+      return null
     }
 
-    const isPasswordValid = await userEntity.validatePassword(password);
-    return isPasswordValid ? userEntity : null;
+    const isPasswordValid = await userEntity.validatePassword(password)
+    return isPasswordValid ? userEntity : null
   }
 }

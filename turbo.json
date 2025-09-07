@@ -48,12 +48,7 @@
     },
     "type-check": {
       "dependsOn": ["^build"],
-      "inputs": [
-        "src/**/*.ts",
-        "src/**/*.tsx",
-        "tsconfig.json",
-        "package.json"
-      ],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "tsconfig.json", "package.json"],
       "outputs": []
     },
     "test": {

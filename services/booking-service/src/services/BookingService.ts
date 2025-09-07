@@ -1,5 +1,5 @@
-import { eq, and, gte, lte, or, desc, asc, count, sql } from 'drizzle-orm';
-import { db } from '../db/connection.js';
+import { eq, and, gte, lte, or, desc, asc, count, sql } from "drizzle-orm"
+import { db } from "../db/connection.js"
 import {
   bookings,
   serviceBookings,
@@ -9,7 +9,7 @@ import {
   type BookingStatus,
   type BookingType,
   type PaymentStatus,
-} from '../db/schema.js';
+} from "../db/schema.js"
 import type {
   Booking,
   ServiceBooking,
@@ -18,17 +18,17 @@ import type {
   BookingFilters,
   ServiceBookingFilters,
   UpdateStatusRequest,
-} from '@marketplace/shared-types';
-import { AvailabilityService } from './AvailabilityService';
-import { PricingService } from './PricingService';
+} from "@marketplace/shared-types"
+import { AvailabilityService } from "./AvailabilityService"
+import { PricingService } from "./PricingService"
 
 export class BookingService {
-  private availabilityService: AvailabilityService;
-  private pricingService: PricingService;
+  private availabilityService: AvailabilityService
+  private pricingService: PricingService
 
   constructor() {
-    this.availabilityService = new AvailabilityService();
-    this.pricingService = new PricingService();
+    this.availabilityService = new AvailabilityService()
+    this.pricingService = new PricingService()
   }
 
   // Create a new booking
@@ -43,10 +43,10 @@ export class BookingService {
         request.listingId,
         new Date(request.checkIn),
         request.checkOut ? new Date(request.checkOut) : undefined
-      );
+      )
 
       if (!isAvailable) {
-        throw new Error('Selected dates are not available');
+        throw new Error("Selected dates are not available")
       }
 
       // 2. Calculate pricing
@@ -55,7 +55,7 @@ export class BookingService {
         checkIn: request.checkIn,
         checkOut: request.checkOut,
         guests: request.guests,
-      });
+      })
 
       // 3. Create booking record
       const [newBooking] = await tx
@@ -64,7 +64,7 @@ export class BookingService {
           listingId: request.listingId,
           guestId,
           hostId,
-          type: 'accommodation' as const,
+          type: "accommodation" as const,
           checkIn: new Date(request.checkIn),
           checkOut: request.checkOut ? new Date(request.checkOut) : null,
           guests: request.guests,
@@ -75,32 +75,26 @@ export class BookingService {
           currency: pricing.currency,
           specialRequests: request.specialRequests,
         })
-        .returning();
+        .returning()
 
       // 4. Create availability conflict
       await this.availabilityService.createConflict(
         request.listingId,
         new Date(request.checkIn),
-        request.checkOut
-          ? new Date(request.checkOut)
-          : new Date(request.checkIn),
-        'booking',
+        request.checkOut ? new Date(request.checkOut) : new Date(request.checkIn),
+        "booking",
         newBooking.id,
         guestId
-      );
+      )
 
       // 5. Record status history
-      await this.recordStatusChange(
-        newBooking.id,
-        null,
-        'pending',
-        'Booking created',
-        guestId,
-        { automaticChange: true, systemReason: 'booking_creation' }
-      );
+      await this.recordStatusChange(newBooking.id, null, "pending", "Booking created", guestId, {
+        automaticChange: true,
+        systemReason: "booking_creation",
+      })
 
-      return this.mapBookingFromDb(newBooking);
-    });
+      return this.mapBookingFromDb(newBooking)
+    })
   }
 
   // Create a service booking
@@ -111,17 +105,14 @@ export class BookingService {
   ): Promise<ServiceBooking> {
     return db.transaction(async (tx) => {
       // 1. Check service provider availability
-      const isAvailable =
-        await this.availabilityService.checkServiceAvailability(
-          providerId,
-          new Date(request.scheduledDate),
-          request.duration
-        );
+      const isAvailable = await this.availabilityService.checkServiceAvailability(
+        providerId,
+        new Date(request.scheduledDate),
+        request.duration
+      )
 
       if (!isAvailable) {
-        throw new Error(
-          'Service provider is not available at the requested time'
-        );
+        throw new Error("Service provider is not available at the requested time")
       }
 
       // 2. Calculate pricing for service
@@ -130,7 +121,7 @@ export class BookingService {
         serviceType: request.serviceType,
         duration: request.duration,
         deliveryMethod: request.deliveryMethod,
-      });
+      })
 
       // 3. Create main booking record
       const [newBooking] = await tx
@@ -139,7 +130,7 @@ export class BookingService {
           listingId: request.listingId,
           guestId,
           hostId: providerId,
-          type: 'service' as const,
+          type: "service" as const,
           checkIn: new Date(request.scheduledDate),
           checkOut: null,
           guests: 1,
@@ -150,7 +141,7 @@ export class BookingService {
           currency: pricing.currency,
           specialRequests: request.specialRequests,
         })
-        .returning();
+        .returning()
 
       // 4. Create service booking record
       const [newServiceBooking] = await tx
@@ -169,20 +160,23 @@ export class BookingService {
           communicationPreference: request.communicationPreference,
           timezone: request.timezone,
         })
-        .returning();
+        .returning()
 
       // 5. Record status history
       await this.recordStatusChange(
         newBooking.id,
         null,
-        'pending',
-        'Service booking created',
+        "pending",
+        "Service booking created",
         guestId,
-        { automaticChange: true, systemReason: 'service_booking_creation' }
-      );
+        {
+          automaticChange: true,
+          systemReason: "service_booking_creation",
+        }
+      )
 
-      return this.mapServiceBookingFromDb(newBooking, newServiceBooking);
-    });
+      return this.mapServiceBookingFromDb(newBooking, newServiceBooking)
+    })
   }
 
   // Update booking status
@@ -197,14 +191,14 @@ export class BookingService {
         .select()
         .from(bookings)
         .where(eq(bookings.id, bookingId))
-        .limit(1);
+        .limit(1)
 
       if (!currentBooking) {
-        throw new Error('Booking not found');
+        throw new Error("Booking not found")
       }
 
       // 2. Validate status transition
-      this.validateStatusTransition(currentBooking.status, request.status);
+      this.validateStatusTransition(currentBooking.status, request.status)
 
       // 3. Update booking
       const [updatedBooking] = await tx
@@ -212,66 +206,53 @@ export class BookingService {
         .set({
           status: request.status,
           updatedAt: new Date(),
-          ...(request.status === 'confirmed' && { confirmedAt: new Date() }),
-          ...(request.status === 'completed' && { completedAt: new Date() }),
-          ...(request.status === 'cancelled' && {
+          ...(request.status === "confirmed" && { confirmedAt: new Date() }),
+          ...(request.status === "completed" && { completedAt: new Date() }),
+          ...(request.status === "cancelled" && {
             cancellationDate: new Date(),
-            cancellationReason: 'user_request',
+            cancellationReason: "user_request",
           }),
         })
         .where(eq(bookings.id, bookingId))
-        .returning();
+        .returning()
 
       // 4. Record status history
       await this.recordStatusChange(
         bookingId,
         currentBooking.status,
         request.status,
-        request.reason || 'Status updated',
+        request.reason || "Status updated",
         userId
-      );
+      )
 
       // 5. Handle status-specific logic
-      await this.handleStatusChange(
-        updatedBooking,
-        currentBooking.status,
-        request.status
-      );
+      await this.handleStatusChange(updatedBooking, currentBooking.status, request.status)
 
-      return this.mapBookingFromDb(updatedBooking);
-    });
+      return this.mapBookingFromDb(updatedBooking)
+    })
   }
 
   // Get booking by ID
   async getBookingById(bookingId: string): Promise<Booking | null> {
-    const [booking] = await db
-      .select()
-      .from(bookings)
-      .where(eq(bookings.id, bookingId))
-      .limit(1);
+    const [booking] = await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1)
 
-    return booking ? this.mapBookingFromDb(booking) : null;
+    return booking ? this.mapBookingFromDb(booking) : null
   }
 
   // Get service booking by ID
-  async getServiceBookingById(
-    bookingId: string
-  ): Promise<ServiceBooking | null> {
+  async getServiceBookingById(bookingId: string): Promise<ServiceBooking | null> {
     const result = await db
       .select()
       .from(bookings)
       .leftJoin(serviceBookings, eq(bookings.id, serviceBookings.bookingId))
       .where(eq(bookings.id, bookingId))
-      .limit(1);
+      .limit(1)
 
     if (!result[0] || !result[0].service_bookings) {
-      return null;
+      return null
     }
 
-    return this.mapServiceBookingFromDb(
-      result[0].bookings,
-      result[0].service_bookings
-    );
+    return this.mapServiceBookingFromDb(result[0].bookings, result[0].service_bookings)
   }
 
   // Search bookings with filters
@@ -280,20 +261,20 @@ export class BookingService {
     page: number = 1,
     limit: number = 20
   ): Promise<{
-    bookings: Booking[];
-    total: number;
-    page: number;
-    limit: number;
-    hasMore: boolean;
+    bookings: Booking[]
+    total: number
+    page: number
+    limit: number
+    hasMore: boolean
   }> {
-    const offset = (page - 1) * limit;
-    const conditions = this.buildBookingFilters(filters);
+    const offset = (page - 1) * limit
+    const conditions = this.buildBookingFilters(filters)
 
     // Get total count
     const [{ count: totalCount }] = await db
       .select({ count: count() })
       .from(bookings)
-      .where(conditions);
+      .where(conditions)
 
     // Get bookings
     const bookingResults = await db
@@ -302,7 +283,7 @@ export class BookingService {
       .where(conditions)
       .orderBy(desc(bookings.createdAt))
       .limit(limit)
-      .offset(offset);
+      .offset(offset)
 
     return {
       bookings: bookingResults.map(this.mapBookingFromDb),
@@ -310,7 +291,7 @@ export class BookingService {
       page,
       limit,
       hasMore: offset + bookingResults.length < totalCount,
-    };
+    }
   }
 
   // Get booking status history
@@ -319,45 +300,39 @@ export class BookingService {
       .select()
       .from(bookingStatusHistory)
       .where(eq(bookingStatusHistory.bookingId, bookingId))
-      .orderBy(asc(bookingStatusHistory.changedAt));
+      .orderBy(asc(bookingStatusHistory.changedAt))
   }
 
   // Private helper methods
-  private validateStatusTransition(
-    currentStatus: string,
-    newStatus: string
-  ): void {
+  private validateStatusTransition(currentStatus: string, newStatus: string): void {
     // Validate that statuses are valid enum values
     const validStatuses: BookingStatus[] = [
-      'pending',
-      'confirmed',
-      'active',
-      'completed',
-      'cancelled',
-      'disputed',
-    ];
+      "pending",
+      "confirmed",
+      "active",
+      "completed",
+      "cancelled",
+      "disputed",
+    ]
     if (
       !validStatuses.includes(currentStatus as BookingStatus) ||
       !validStatuses.includes(newStatus as BookingStatus)
     ) {
-      throw new Error('Invalid booking status');
+      throw new Error("Invalid booking status")
     }
 
     const validTransitions: Record<BookingStatus, BookingStatus[]> = {
-      pending: ['confirmed', 'cancelled'],
-      confirmed: ['active', 'cancelled'],
-      active: ['completed', 'cancelled', 'disputed'],
-      completed: ['disputed'],
+      pending: ["confirmed", "cancelled"],
+      confirmed: ["active", "cancelled"],
+      active: ["completed", "cancelled", "disputed"],
+      completed: ["disputed"],
       cancelled: [],
-      disputed: ['cancelled'], // Disputed bookings can only be cancelled
-    };
+      disputed: ["cancelled"], // Disputed bookings can only be cancelled
+    }
 
-    const allowedStatuses =
-      validTransitions[currentStatus as BookingStatus] || [];
+    const allowedStatuses = validTransitions[currentStatus as BookingStatus] || []
     if (!allowedStatuses.includes(newStatus as BookingStatus)) {
-      throw new Error(
-        `Invalid status transition from ${currentStatus} to ${newStatus}`
-      );
+      throw new Error(`Invalid status transition from ${currentStatus} to ${newStatus}`)
     }
   }
 
@@ -376,7 +351,7 @@ export class BookingService {
       reason,
       changedBy,
       metadata,
-    });
+    })
   }
 
   private async handleStatusChange(
@@ -386,21 +361,21 @@ export class BookingService {
   ): Promise<void> {
     // Handle status-specific business logic
     switch (toStatus) {
-      case 'cancelled':
+      case "cancelled":
         // Remove availability conflict when booking is cancelled
-        await this.removeAvailabilityConflict(booking.id);
-        break;
-      case 'confirmed':
+        await this.removeAvailabilityConflict(booking.id)
+        break
+      case "confirmed":
         // Create availability conflict when booking is confirmed
-        await this.createAvailabilityConflict(booking);
-        break;
-      case 'disputed':
+        await this.createAvailabilityConflict(booking)
+        break
+      case "disputed":
         // Create dispute record when booking is disputed
-        await this.createDispute(booking.id, fromStatus, toStatus);
-        break;
-      case 'completed':
+        await this.createDispute(booking.id, fromStatus, toStatus)
+        break
+      case "completed":
         // Handle completion logic, reviews, etc.
-        break;
+        break
     }
   }
 
@@ -408,18 +383,16 @@ export class BookingService {
     await db.insert(availabilityConflicts).values({
       listingId: booking.listingId,
       bookingId: booking.id,
-      conflictType: 'booking',
+      conflictType: "booking",
       startDate: booking.checkIn,
       endDate: booking.checkOut || booking.checkIn,
-      reason: 'Confirmed booking',
+      reason: "Confirmed booking",
       createdBy: booking.hostId, // Host creates the conflict
-    });
+    })
   }
 
   private async removeAvailabilityConflict(bookingId: string): Promise<void> {
-    await db
-      .delete(availabilityConflicts)
-      .where(eq(availabilityConflicts.bookingId, bookingId));
+    await db.delete(availabilityConflicts).where(eq(availabilityConflicts.bookingId, bookingId))
   }
 
   private async createDispute(
@@ -428,44 +401,40 @@ export class BookingService {
     toStatus: string
   ): Promise<void> {
     // Get booking details to find who initiated the dispute
-    const [booking] = await db
-      .select()
-      .from(bookings)
-      .where(eq(bookings.id, bookingId))
-      .limit(1);
+    const [booking] = await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1)
 
     if (booking) {
       await db.insert(disputes).values({
         bookingId,
         initiatedBy: booking.guestId, // Guest initiates the dispute
-        disputeType: 'cancellation',
-        title: 'Booking Status Dispute',
+        disputeType: "cancellation",
+        title: "Booking Status Dispute",
         description: `Status changed from ${fromStatus} to ${toStatus}`,
-      });
+      })
     }
   }
 
   private buildBookingFilters(filters: BookingFilters) {
-    const conditions = [];
+    const conditions = []
 
     if (filters.status) {
-      conditions.push(eq(bookings.status, filters.status));
+      conditions.push(eq(bookings.status, filters.status))
     }
 
     if (filters.type) {
-      conditions.push(eq(bookings.type, filters.type));
+      conditions.push(eq(bookings.type, filters.type))
     }
 
     if (filters.guestId) {
-      conditions.push(eq(bookings.guestId, filters.guestId));
+      conditions.push(eq(bookings.guestId, filters.guestId))
     }
 
     if (filters.hostId) {
-      conditions.push(eq(bookings.hostId, filters.hostId));
+      conditions.push(eq(bookings.hostId, filters.hostId))
     }
 
     if (filters.paymentStatus) {
-      conditions.push(eq(bookings.paymentStatus, filters.paymentStatus as any));
+      conditions.push(eq(bookings.paymentStatus, filters.paymentStatus as any))
     }
 
     if (filters.dateRange) {
@@ -474,7 +443,7 @@ export class BookingService {
           gte(bookings.checkIn, new Date(filters.dateRange.startDate)),
           lte(bookings.checkIn, new Date(filters.dateRange.endDate))
         )
-      );
+      )
     }
 
     if (filters.priceRange) {
@@ -483,10 +452,10 @@ export class BookingService {
           gte(bookings.totalPrice, filters.priceRange.min.toString()),
           lte(bookings.totalPrice, filters.priceRange.max.toString())
         )
-      );
+      )
     }
 
-    return conditions.length > 0 ? and(...conditions) : undefined;
+    return conditions.length > 0 ? and(...conditions) : undefined
   }
 
   private mapBookingFromDb(dbBooking: any): Booking {
@@ -506,14 +475,11 @@ export class BookingService {
       specialRequests: dbBooking.specialRequests,
       createdAt: dbBooking.createdAt.toISOString(),
       updatedAt: dbBooking.updatedAt.toISOString(),
-    };
+    }
   }
 
-  private mapServiceBookingFromDb(
-    dbBooking: any,
-    dbServiceBooking: any
-  ): ServiceBooking {
-    const baseBooking = this.mapBookingFromDb(dbBooking);
+  private mapServiceBookingFromDb(dbBooking: any, dbServiceBooking: any): ServiceBooking {
+    const baseBooking = this.mapBookingFromDb(dbBooking)
 
     return {
       ...baseBooking,
@@ -529,6 +495,6 @@ export class BookingService {
       milestones: dbServiceBooking.milestones,
       communicationPreference: dbServiceBooking.communicationPreference,
       timezone: dbServiceBooking.timezone,
-    };
+    }
   }
 }

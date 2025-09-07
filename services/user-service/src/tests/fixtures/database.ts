@@ -1,7 +1,7 @@
-import { UserRole, VerificationStatus } from '@marketplace/shared-types';
-import { UserEntity } from '../../models/User';
-import { pool, query } from '../../database/connection';
-import { runMigrations } from '../../database/migrate';
+import { UserRole, VerificationStatus } from "@marketplace/shared-types"
+import { UserEntity } from "../../models/User"
+import { pool, query } from "../../database/connection"
+import { runMigrations } from "../../database/migrate"
 
 /**
  * Database fixtures for testing
@@ -11,158 +11,158 @@ import { runMigrations } from '../../database/migrate';
 export const userFixtures = {
   // Standard user fixture
   standardUser: {
-    id: '123e4567-e89b-12d3-a456-426614174000',
-    email: 'john.doe@example.com',
-    passwordHash: '$2a$12$hashedpassword123',
-    phone: '+1234567890',
-    telegramId: 'johndoe123',
+    id: "123e4567-e89b-12d3-a456-426614174000",
+    email: "john.doe@example.com",
+    passwordHash: "$2a$12$hashedpassword123",
+    phone: "+1234567890",
+    telegramId: "johndoe123",
     role: UserRole.USER,
     profile: {
-      firstName: 'John',
-      lastName: 'Doe',
+      firstName: "John",
+      lastName: "Doe",
       rating: 4.5,
       reviewsCount: 10,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: 'email' as any,
+      primaryAuthProvider: "email" as any,
       location: {
         latitude: 40.7128,
         longitude: -74.006,
-        address: '123 Main St',
-        city: 'New York',
-        country: 'USA',
-        region: 'NY',
+        address: "123 Main St",
+        city: "New York",
+        country: "USA",
+        region: "NY",
       },
     },
     isActive: true,
-    createdAt: new Date('2023-01-01T00:00:00Z'),
-    updatedAt: new Date('2023-01-01T00:00:00Z'),
+    createdAt: new Date("2023-01-01T00:00:00Z"),
+    updatedAt: new Date("2023-01-01T00:00:00Z"),
   },
 
   // Agency user fixture
   agencyUser: {
-    id: '456e7890-e89b-12d3-a456-426614174001',
-    email: 'agency@example.com',
-    passwordHash: '$2a$12$hashedpassword456',
-    phone: '+1987654321',
-    telegramId: 'agency123',
+    id: "456e7890-e89b-12d3-a456-426614174001",
+    email: "agency@example.com",
+    passwordHash: "$2a$12$hashedpassword456",
+    phone: "+1987654321",
+    telegramId: "agency123",
     role: UserRole.AGENCY,
     profile: {
-      firstName: 'Agency',
-      lastName: 'Manager',
+      firstName: "Agency",
+      lastName: "Manager",
       rating: 4.8,
       reviewsCount: 50,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: 'email' as any,
+      primaryAuthProvider: "email" as any,
       location: {
         latitude: 34.0522,
         longitude: -118.2437,
-        address: '789 Business Ave',
-        city: 'Los Angeles',
-        country: 'USA',
-        region: 'CA',
+        address: "789 Business Ave",
+        city: "Los Angeles",
+        country: "USA",
+        region: "CA",
       },
     },
     isActive: true,
-    createdAt: new Date('2023-01-02T00:00:00Z'),
-    updatedAt: new Date('2023-01-02T00:00:00Z'),
+    createdAt: new Date("2023-01-02T00:00:00Z"),
+    updatedAt: new Date("2023-01-02T00:00:00Z"),
   },
 
   // Manager user fixture
   managerUser: {
-    id: '789e0123-e89b-12d3-a456-426614174002',
-    email: 'manager@example.com',
-    passwordHash: '$2a$12$hashedpassword789',
+    id: "789e0123-e89b-12d3-a456-426614174002",
+    email: "manager@example.com",
+    passwordHash: "$2a$12$hashedpassword789",
     phone: undefined,
     telegramId: undefined,
     role: UserRole.MANAGER,
     profile: {
-      firstName: 'Site',
-      lastName: 'Manager',
+      firstName: "Site",
+      lastName: "Manager",
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: 'email' as any,
+      primaryAuthProvider: "email" as any,
     },
     isActive: true,
-    createdAt: new Date('2023-01-03T00:00:00Z'),
-    updatedAt: new Date('2023-01-03T00:00:00Z'),
+    createdAt: new Date("2023-01-03T00:00:00Z"),
+    updatedAt: new Date("2023-01-03T00:00:00Z"),
   },
 
   // Admin user fixture
   adminUser: {
-    id: '012e3456-e89b-12d3-a456-426614174003',
-    email: 'admin@example.com',
-    passwordHash: '$2a$12$hashedpasswordabc',
+    id: "012e3456-e89b-12d3-a456-426614174003",
+    email: "admin@example.com",
+    passwordHash: "$2a$12$hashedpasswordabc",
     phone: undefined,
     telegramId: undefined,
     role: UserRole.ADMIN,
     profile: {
-      firstName: 'System',
-      lastName: 'Admin',
+      firstName: "System",
+      lastName: "Admin",
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: 'email' as any,
+      primaryAuthProvider: "email" as any,
     },
     isActive: true,
-    createdAt: new Date('2023-01-04T00:00:00Z'),
-    updatedAt: new Date('2023-01-04T00:00:00Z'),
+    createdAt: new Date("2023-01-04T00:00:00Z"),
+    updatedAt: new Date("2023-01-04T00:00:00Z"),
   },
 
   // Unverified user fixture
   unverifiedUser: {
-    id: '345e6789-e89b-12d3-a456-426614174004',
-    email: 'unverified@example.com',
-    passwordHash: '$2a$12$hashedpassworddef',
+    id: "345e6789-e89b-12d3-a456-426614174004",
+    email: "unverified@example.com",
+    passwordHash: "$2a$12$hashedpassworddef",
     phone: undefined,
     telegramId: undefined,
     role: UserRole.USER,
     profile: {
-      firstName: 'Unverified',
-      lastName: 'User',
+      firstName: "Unverified",
+      lastName: "User",
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: 'email' as any,
+      primaryAuthProvider: "email" as any,
     },
     isActive: true,
-    createdAt: new Date('2023-01-05T00:00:00Z'),
-    updatedAt: new Date('2023-01-05T00:00:00Z'),
+    createdAt: new Date("2023-01-05T00:00:00Z"),
+    updatedAt: new Date("2023-01-05T00:00:00Z"),
   },
 
   // Inactive user fixture
   inactiveUser: {
-    id: '678e9012-e89b-12d3-a456-426614174005',
-    email: 'inactive@example.com',
-    passwordHash: '$2a$12$hashedpasswordghi',
+    id: "678e9012-e89b-12d3-a456-426614174005",
+    email: "inactive@example.com",
+    passwordHash: "$2a$12$hashedpasswordghi",
     phone: undefined,
     telegramId: undefined,
     role: UserRole.USER,
     profile: {
-      firstName: 'Inactive',
-      lastName: 'User',
+      firstName: "Inactive",
+      lastName: "User",
       rating: 3.2,
       reviewsCount: 5,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: 'email' as any,
+      primaryAuthProvider: "email" as any,
     },
     isActive: false,
-    createdAt: new Date('2023-01-06T00:00:00Z'),
-    updatedAt: new Date('2023-01-06T00:00:00Z'),
+    createdAt: new Date("2023-01-06T00:00:00Z"),
+    updatedAt: new Date("2023-01-06T00:00:00Z"),
   },
-};
+}
 
 /**
  * Create UserEntity instances from fixtures
  */
 export const createUserEntities = () => {
-  const entities: Record<string, UserEntity> = {};
+  const entities: Record<string, UserEntity> = {}
 
   Object.entries(userFixtures).forEach(([key, fixture]) => {
     entities[key] = new UserEntity(
@@ -172,17 +172,17 @@ export const createUserEntities = () => {
       fixture.role,
       fixture.profile,
       fixture.profile.socialProfiles || [],
-      fixture.profile.primaryAuthProvider || ('email' as any),
-      'phone' in fixture ? fixture.phone : undefined,
-      'telegramId' in fixture ? fixture.telegramId : undefined,
+      fixture.profile.primaryAuthProvider || ("email" as any),
+      "phone" in fixture ? fixture.phone : undefined,
+      "telegramId" in fixture ? fixture.telegramId : undefined,
       fixture.isActive,
       fixture.createdAt,
       fixture.updatedAt
-    );
-  });
+    )
+  })
 
-  return entities;
-};
+  return entities
+}
 
 /**
  * Database row format fixtures (snake_case for database compatibility)
@@ -213,65 +213,65 @@ export const databaseRowFixtures = {
     created_at: userFixtures.agencyUser.createdAt,
     updated_at: userFixtures.agencyUser.updatedAt,
   },
-};
+}
 
 /**
  * Test data for user creation
  */
 export const createUserTestData = {
   valid: {
-    email: 'newuser@example.com',
-    password: 'securepassword123',
+    email: "newuser@example.com",
+    password: "securepassword123",
     profile: {
-      firstName: 'New',
-      lastName: 'User',
+      firstName: "New",
+      lastName: "User",
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: 'email' as any,
+      primaryAuthProvider: "email" as any,
     },
   },
 
   validWithOptionalFields: {
-    email: 'fulluser@example.com',
-    password: 'securepassword123',
-    phone: '+1555123456',
-    telegramId: 'fulluser123',
+    email: "fulluser@example.com",
+    password: "securepassword123",
+    phone: "+1555123456",
+    telegramId: "fulluser123",
     role: UserRole.AGENCY,
     profile: {
-      firstName: 'Full',
-      lastName: 'User',
+      firstName: "Full",
+      lastName: "User",
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: 'email' as any,
+      primaryAuthProvider: "email" as any,
       location: {
         latitude: 37.7749,
         longitude: -122.4194,
-        address: '456 Market St',
-        city: 'San Francisco',
-        country: 'USA',
-        region: 'CA',
+        address: "456 Market St",
+        city: "San Francisco",
+        country: "USA",
+        region: "CA",
       },
     },
   },
 
   invalid: {
-    email: 'invalid-email',
-    password: '123', // Too short
+    email: "invalid-email",
+    password: "123", // Too short
     profile: {
-      firstName: '', // Empty
-      lastName: 'User',
+      firstName: "", // Empty
+      lastName: "User",
       rating: 0,
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: 'email' as any,
+      primaryAuthProvider: "email" as any,
     },
   },
-};
+}
 
 /**
  * Test data for user updates
@@ -279,21 +279,21 @@ export const createUserTestData = {
 export const updateUserTestData = {
   profileUpdate: {
     profile: {
-      firstName: 'Updated',
-      lastName: 'Name',
+      firstName: "Updated",
+      lastName: "Name",
       location: {
         latitude: 51.5074,
         longitude: -0.1278,
-        address: '789 Oxford St',
-        city: 'London',
-        country: 'UK',
-        region: 'London',
+        address: "789 Oxford St",
+        city: "London",
+        country: "UK",
+        region: "London",
       },
     },
   },
 
   emailUpdate: {
-    email: 'newemail@example.com',
+    email: "newemail@example.com",
   },
 
   roleUpdate: {
@@ -303,7 +303,7 @@ export const updateUserTestData = {
   statusUpdate: {
     isActive: false,
   },
-};
+}
 
 /**
  * Mock database statistics
@@ -321,7 +321,7 @@ export const mockUserStats = {
   unverifiedUsers: 25,
   pendingVerification: 10,
   rejectedVerification: 5,
-};
+}
 /**
  
 * Setup test database
@@ -330,13 +330,13 @@ export const mockUserStats = {
 export async function setupTestDatabase(): Promise<void> {
   try {
     // Run database migrations
-    await runMigrations();
+    await runMigrations()
 
     // Clear any existing test data
-    await cleanupTestDatabase();
+    await cleanupTestDatabase()
   } catch (error) {
-    console.error('Failed to setup test database:', error);
-    throw error;
+    console.error("Failed to setup test database:", error)
+    throw error
   }
 }
 
@@ -347,10 +347,10 @@ export async function setupTestDatabase(): Promise<void> {
 export async function cleanupTestDatabase(): Promise<void> {
   try {
     // Delete all users (this will cascade to related tables)
-    await query('DELETE FROM users WHERE email LIKE $1', ['%@example.com']);
-    await query('DELETE FROM users WHERE email LIKE $1', ['test%@%']);
+    await query("DELETE FROM users WHERE email LIKE $1", ["%@example.com"])
+    await query("DELETE FROM users WHERE email LIKE $1", ["test%@%"])
   } catch (error) {
-    console.error('Failed to cleanup test database:', error);
+    console.error("Failed to cleanup test database:", error)
     // Don't throw error during cleanup to avoid masking test failures
   }
 }
@@ -359,7 +359,7 @@ export async function cleanupTestDatabase(): Promise<void> {
  * Insert test user fixtures into database
  */
 export async function insertUserFixtures(): Promise<void> {
-  const fixtures = Object.values(userFixtures);
+  const fixtures = Object.values(userFixtures)
 
   for (const fixture of fixtures) {
     await query(
@@ -378,7 +378,7 @@ export async function insertUserFixtures(): Promise<void> {
         fixture.createdAt,
         fixture.updatedAt,
       ]
-    );
+    )
   }
 }
 
@@ -386,5 +386,5 @@ export async function insertUserFixtures(): Promise<void> {
  * Get test database connection for direct queries
  */
 export function getTestConnection() {
-  return pool;
+  return pool
 }
