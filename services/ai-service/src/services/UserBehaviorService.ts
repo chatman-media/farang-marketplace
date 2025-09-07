@@ -16,21 +16,28 @@ export class UserBehaviorService {
   /**
    * Track user behavior event
    */
-  async trackBehavior(behavior: Omit<UserBehavior, "id" | "timestamp">): Promise<void> {
-    const fullBehavior: UserBehavior = {
-      ...behavior,
-      id: `behavior_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: new Date(),
-    }
+  async trackBehavior(userId: string, behavior: Omit<UserBehavior, "id" | "timestamp" | "userId">): Promise<{ success: boolean; message?: string }> {
+    try {
+      const fullBehavior: UserBehavior = {
+        ...behavior,
+        userId,
+        id: `behavior_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        timestamp: new Date(),
+      }
 
-    // Add to buffer
-    const userBehaviors = this.behaviorBuffer.get(behavior.userId) || []
-    userBehaviors.push(fullBehavior)
-    this.behaviorBuffer.set(behavior.userId, userBehaviors)
+      // Add to buffer
+      const userBehaviors = this.behaviorBuffer.get(userId) || []
+      userBehaviors.push(fullBehavior)
+      this.behaviorBuffer.set(userId, userBehaviors)
 
-    // Trigger real-time analysis for important events
-    if (this.isImportantEvent(behavior.action)) {
-      await this.analyzeUserBehavior(behavior.userId)
+      // Trigger real-time analysis for important events
+      if (this.isImportantEvent(behavior.action)) {
+        await this.analyzeUserBehavior(userId)
+      }
+
+      return { success: true }
+    } catch (error) {
+      return { success: false, message: error instanceof Error ? error.message : "Unknown error" }
     }
   }
 
@@ -265,10 +272,9 @@ Focus on actionable insights that can improve user experience or business outcom
       insights.push({
         userId,
         type: "behavior",
-        insight:
-          `User shows high engagement with average of ${ 
-          Math.round(patterns.sessionPatterns.actionsPerSession) 
-          } actions per session`,
+        insight: `User shows high engagement with average of ${Math.round(
+          patterns.sessionPatterns.actionsPerSession
+        )} actions per session`,
         confidence: 0.9,
         evidence: ["High actions per session", "Consistent activity"],
         actionable: true,
@@ -567,6 +573,325 @@ Focus on actionable business insights and market opportunities.
       totalMarketInsights: this.marketInsights.length,
       lastFlush: new Date(),
     }
+  }
+
+  /**
+   * Generate user insights from behavior patterns
+   */
+  async generateUserInsights(userId: string, options: {
+    type: "preference" | "behavior" | "engagement"
+    timeframe: string
+    actionable: boolean
+  }): Promise<UserInsight[]> {
+    const behaviors = this.behaviorBuffer.get(userId) || []
+    if (behaviors.length === 0) return []
+
+    // Mock insights generation based on behavior patterns
+    const insights: UserInsight[] = []
+
+    if (options.type === "preference") {
+      const categories = behaviors.map(b => b.metadata?.["category"]).filter(Boolean)
+      const topCategory = this.getMostFrequent(categories)
+      if (topCategory) {
+        insights.push({
+          userId,
+          type: "preference",
+          insight: `User shows strong preference for ${topCategory} items`,
+          confidence: 0.8,
+          evidence: [`Prefers ${topCategory} category`],
+          actionable: options.actionable,
+          recommendations: [`Show more ${topCategory} items`, `Send ${topCategory} promotions`],
+          createdAt: new Date(),
+        })
+      }
+    }
+
+    if (options.type === "behavior") {
+      const actions = behaviors.map(b => b.action)
+      const topAction = this.getMostFrequent(actions)
+      if (topAction) {
+        insights.push({
+          userId,
+          type: "behavior",
+          insight: `User's most common action is ${topAction}`,
+          confidence: 0.7,
+          evidence: [`Frequently ${topAction}s items`],
+          actionable: options.actionable,
+          recommendations: [`Optimize ${topAction} flow`, `Recommend similar items`],
+          createdAt: new Date(),
+        })
+      }
+    }
+
+    if (options.type === "engagement") {
+      const avgDuration = behaviors.reduce((sum, b) => sum + (b.metadata?.["duration"] || 0), 0) / behaviors.length
+      insights.push({
+        userId,
+        type: "behavior",
+        insight: avgDuration > 30000 ? "High engagement user" : "Low engagement user",
+        confidence: 0.6,
+        evidence: [`Average session duration: ${Math.round(avgDuration / 1000)}s`],
+        actionable: options.actionable,
+        recommendations: avgDuration > 30000 ? ["Offer premium features"] : ["Improve UX", "Send engagement campaigns"],
+        createdAt: new Date(),
+      })
+    }
+
+    return insights
+  }
+
+  /**
+   * Analyze market trends
+   */
+  async analyzeMarketTrends(options: {
+    type: "category" | "location" | "price"
+    timeframe: string
+    location?: string
+    category?: string
+  }): Promise<MarketInsight[]> {
+    const allBehaviors = Array.from(this.behaviorBuffer.values()).flat()
+    const insights: MarketInsight[] = []
+
+    if (options.type === "category") {
+      const categories = allBehaviors.map(b => b.metadata?.["category"]).filter(Boolean)
+      const categoryCount = this.getFrequencyMap(categories)
+
+      Object.entries(categoryCount).forEach(([category, count]) => {
+        const insight: MarketInsight = {
+          id: `market_${Date.now()}_${category}`,
+          type: "trend",
+          category,
+          insight: `${category} trending with ${count} interactions in ${options.timeframe}`,
+          confidence: Math.min(count / 10, 1),
+          impact: count > 10 ? "high" : "medium",
+          data: { count, timeframe: options.timeframe },
+          recommendations: [`Increase ${category} inventory`, `Promote ${category} items`],
+          createdAt: new Date(),
+        }
+        if (options.location) insight.location = options.location
+        insights.push(insight)
+      })
+    }
+
+    if (options.type === "location") {
+      const locations = allBehaviors.map(b => b.metadata?.["location"]).filter(Boolean)
+      const locationCount = this.getFrequencyMap(locations)
+
+      Object.entries(locationCount).forEach(([location, count]) => {
+        insights.push({
+          id: `market_${Date.now()}_${location}`,
+          type: "opportunity",
+          location,
+          insight: `${location} market activity with ${count} interactions in ${options.timeframe}`,
+          confidence: Math.min(count / 10, 1),
+          impact: count > 8 ? "high" : "medium",
+          data: { count, timeframe: options.timeframe },
+          recommendations: [`Expand in ${location}`, `Localize for ${location}`],
+          createdAt: new Date(),
+        })
+      })
+    }
+
+    if (options.type === "price" && options.category) {
+      const categoryBehaviors = allBehaviors.filter(b => b.metadata?.["category"] === options.category)
+      const prices = categoryBehaviors.map(b => b.metadata?.["price"]).filter(Boolean) as number[]
+
+      if (prices.length > 0) {
+        const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length
+        insights.push({
+          id: `market_${Date.now()}_price`,
+          type: "pricing",
+          category: options.category,
+          insight: `${options.category} average price: ${avgPrice.toFixed(2)} THB`,
+          confidence: 0.7,
+          impact: "medium",
+          data: { avgPrice, priceCount: prices.length },
+          recommendations: ["Adjust pricing strategy", "Monitor competitor prices"],
+          createdAt: new Date(),
+        })
+      }
+    }
+
+    return insights
+  }
+
+  /**
+   * Get user segments
+   */
+  async getUserSegments(options: {
+    algorithm: "behavior" | "preference"
+    minSegmentSize: number
+  }): Promise<Array<{
+    id: string
+    name: string
+    description: string
+    userCount: number
+    characteristics: string[]
+    recommendations: string[]
+  }>> {
+    const allBehaviors = Array.from(this.behaviorBuffer.entries())
+    const segments: Array<{
+      id: string
+      name: string
+      description: string
+      userCount: number
+      characteristics: string[]
+      recommendations: string[]
+    }> = []
+
+    if (options.algorithm === "behavior") {
+      // Group users by most common action
+      const userActions = new Map<string, string>()
+      allBehaviors.forEach(([userId, behaviors]) => {
+        const actions = behaviors.map(b => b.action)
+        const topAction = this.getMostFrequent(actions)
+        if (topAction) userActions.set(userId, topAction)
+      })
+
+      const actionGroups = this.groupBy(Array.from(userActions.entries()), ([, action]) => action)
+
+      Object.entries(actionGroups).forEach(([action, users]) => {
+        if (users.length >= options.minSegmentSize) {
+          segments.push({
+            id: `segment_${action}`,
+            name: `${action.charAt(0).toUpperCase() + action.slice(1)} Users`,
+            description: `Users who primarily ${action} items`,
+            userCount: users.length,
+            characteristics: [`Primary action: ${action}`, `Active users: ${users.length}`],
+            recommendations: [`Optimize ${action} experience`, `Target with ${action}-focused campaigns`],
+          })
+        }
+      })
+    }
+
+    if (options.algorithm === "preference") {
+      // Group users by preferred category
+      const userCategories = new Map<string, string>()
+      allBehaviors.forEach(([userId, behaviors]) => {
+        const categories = behaviors.map(b => b.metadata?.["category"]).filter(Boolean)
+        const topCategory = this.getMostFrequent(categories)
+        if (topCategory) userCategories.set(userId, topCategory)
+      })
+
+      const categoryGroups = this.groupBy(Array.from(userCategories.entries()), ([, category]) => category)
+
+      Object.entries(categoryGroups).forEach(([category, users]) => {
+        if (users.length >= options.minSegmentSize) {
+          segments.push({
+            id: `segment_${category}`,
+            name: `${category.charAt(0).toUpperCase() + category.slice(1)} Enthusiasts`,
+            description: `Users interested in ${category} items`,
+            userCount: users.length,
+            characteristics: [`Preferred category: ${category}`, `Active users: ${users.length}`],
+            recommendations: [`Show more ${category} items`, `Send ${category} promotions`],
+          })
+        }
+      })
+    }
+
+    return segments
+  }
+
+  /**
+   * Get behavior trends over time
+   */
+  async getBehaviorTrends(options: {
+    timeframe: string
+    granularity: "daily" | "weekly"
+    category?: string
+    groupBy?: "action" | "category"
+  }): Promise<Array<{
+    period: string
+    value: number
+    change: number
+    trend: "up" | "down" | "stable"
+    breakdown?: Record<string, number>
+  }>> {
+    const allBehaviors = Array.from(this.behaviorBuffer.values()).flat()
+    let filteredBehaviors = allBehaviors
+
+    if (options.category) {
+      filteredBehaviors = allBehaviors.filter(b => b.metadata?.["category"] === options.category)
+    }
+
+    // Mock trend data
+    const trends = []
+    const periods = options.granularity === "daily" ? 7 : 4
+
+    for (let i = 0; i < periods; i++) {
+      const baseValue = 10 + Math.floor(Math.random() * 20)
+      const change = (Math.random() - 0.5) * 10
+
+      let breakdown: Record<string, number> | undefined
+      if (options.groupBy === "action") {
+        breakdown = {
+          view: Math.floor(baseValue * 0.6),
+          click: Math.floor(baseValue * 0.3),
+          book: Math.floor(baseValue * 0.1),
+        }
+      } else if (options.groupBy === "category") {
+        breakdown = {
+          electronics: Math.floor(baseValue * 0.4),
+          fashion: Math.floor(baseValue * 0.3),
+          home: Math.floor(baseValue * 0.3),
+        }
+      }
+
+      const trendDirection: "up" | "down" | "stable" = change > 2 ? "up" : change < -2 ? "down" : "stable"
+      const trendItem: {
+        period: string
+        value: number
+        change: number
+        trend: "up" | "down" | "stable"
+        breakdown?: Record<string, number>
+      } = {
+        period: options.granularity === "daily" ? `Day ${i + 1}` : `Week ${i + 1}`,
+        value: baseValue,
+        change,
+        trend: trendDirection,
+      }
+      if (breakdown) trendItem.breakdown = breakdown
+      trends.push(trendItem)
+    }
+
+    return trends
+  }
+
+  /**
+   * Helper method to get most frequent item
+   */
+  private getMostFrequent<T>(items: T[]): T | null {
+    if (items.length === 0) return null
+    const frequency = this.getFrequencyMap(items)
+    const entries = Object.entries(frequency)
+    if (entries.length === 0) return null
+    const mostFrequentEntry = entries.reduce((a, b) => (frequency[a[0]] || 0) > (frequency[b[0]] || 0) ? a : b)
+    return mostFrequentEntry[0] as T
+  }
+
+  /**
+   * Helper method to get frequency map
+   */
+  private getFrequencyMap<T>(items: T[]): Record<string, number> {
+    const frequency: Record<string, number> = {}
+    items.forEach(item => {
+      const key = String(item)
+      frequency[key] = (frequency[key] || 0) + 1
+    })
+    return frequency
+  }
+
+  /**
+   * Helper method to group by key
+   */
+  private groupBy<T>(items: T[], keyFn: (item: T) => string): Record<string, T[]> {
+    const groups: Record<string, T[]> = {}
+    items.forEach(item => {
+      const key = keyFn(item)
+      if (!groups[key]) groups[key] = []
+      groups[key].push(item)
+    })
+    return groups
   }
 
   /**

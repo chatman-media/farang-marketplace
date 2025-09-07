@@ -43,7 +43,7 @@ export class InsightsController {
         device: req.body.device,
       }
 
-      await this.userBehaviorService.trackBehavior(behavior)
+      await this.userBehaviorService.trackBehavior(req.body.userId, behavior)
 
       res.json({
         success: true,

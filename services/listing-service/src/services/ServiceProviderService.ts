@@ -167,7 +167,7 @@ export class ServiceProviderService {
 
       if (filters.location?.city) {
         conditions.push(
-          sql`${serviceProviders.primaryLocation}->>'city' ILIKE ${`%${  filters.location.city  }%`}`
+          sql`${serviceProviders.primaryLocation}->>'city' ILIKE ${`%${filters.location.city}%`}`
         )
       }
 

@@ -59,6 +59,11 @@ export class RecommendationEngine {
       // Get candidate items
       const candidates = await this.getCandidateItems(request)
 
+      // Store candidates in itemFeatures map for filtering
+      candidates.forEach((item) => {
+        this.itemFeatures.set(item.id, item)
+      })
+
       // Calculate scores using multiple algorithms
       const scores = await this.calculateScores(userProfile, candidates, request)
 
@@ -256,6 +261,8 @@ export class RecommendationEngine {
           title: `Sample ${randomCategory} item ${i}`,
           description: `Description for ${randomCategory} item ${i}`,
           category: randomCategory,
+          viewCount: Math.floor(Math.random() * 500),
+          bookingCount: Math.floor(Math.random() * 50),
         },
         categories: [randomCategory],
         location: {
@@ -593,6 +600,11 @@ Provide a score from 0 to 1 and brief reasoning. Format: "Score: 0.X - Reason"
         // Rating filter
         if (request.filters?.rating && item.rating !== undefined) {
           if (item.rating < request.filters.rating) return false
+        }
+
+        // Location filter
+        if (request.filters?.location && item.location?.city) {
+          if (item.location.city !== request.filters.location) return false
         }
 
         return true
