@@ -633,14 +633,14 @@ export class VoiceCommandService {
   /**
    * Generate unique session ID
    */
-  private generateSessionId(): string {
+  public generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
   }
 
   /**
    * Generate unique command ID
    */
-  private generateCommandId(): string {
+  public generateCommandId(): string {
     return `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
   }
 

@@ -5,7 +5,7 @@ import { VoiceCommandService } from "../services/VoiceCommandService.js"
 
 export class VoiceController {
   private speechToTextService: SpeechToTextService
-  private voiceCommandService: VoiceCommandService
+  public voiceCommandService: VoiceCommandService
 
   constructor() {
     this.speechToTextService = new SpeechToTextService()
