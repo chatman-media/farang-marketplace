@@ -3,7 +3,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { config } from 'dotenv';
-import { checkDatabaseConnection, closeDatabaseConnection } from './db/connection.js';
+import {
+  checkDatabaseConnection,
+  closeDatabaseConnection,
+} from './db/connection.js';
 
 // Import routes
 import agencyRoutes from './routes/agencies.js';
@@ -16,10 +19,15 @@ const PORT = process.env.PORT || 3005;
 
 // Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173'],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+      'http://localhost:3000',
+      'http://localhost:5173',
+    ],
+    credentials: true,
+  })
+);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -43,7 +51,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.get('/health', async (req, res) => {
   try {
     const dbConnected = await checkDatabaseConnection();
-    
+
     res.json({
       success: true,
       message: 'Agency Service is running',
@@ -74,15 +82,22 @@ app.use('*', (req, res) => {
 });
 
 // Global error handler
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Global error handler:', error);
-  
-  res.status(error.status || 500).json({
-    success: false,
-    message: error.message || 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
-  });
-});
+app.use(
+  (
+    error: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    console.error('Global error handler:', error);
+
+    res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Internal server error',
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+    });
+  }
+);
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {

@@ -15,7 +15,11 @@ export interface AuthenticatedRequest extends Request {
 /**
  * JWT Authentication Middleware
  */
-export function authenticateToken(req: AuthenticatedRequest, res: Response, next: NextFunction): any {
+export function authenticateToken(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): any {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
@@ -52,7 +56,11 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
  * Role-based authorization middleware
  */
 export function requireRole(...allowedRoles: string[]) {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): any => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ): any => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
@@ -74,7 +82,11 @@ export function requireRole(...allowedRoles: string[]) {
 /**
  * Agency ownership verification middleware
  */
-export function requireAgencyOwnership(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export function requireAgencyOwnership(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   if (!req.user) {
     return res.status(401).json({
       success: false,
@@ -83,7 +95,7 @@ export function requireAgencyOwnership(req: AuthenticatedRequest, res: Response,
   }
 
   const agencyId = req.params.agencyId || req.body.agencyId;
-  
+
   // Admin can access any agency
   if (req.user.role === 'admin') {
     return next();
@@ -105,7 +117,11 @@ export function requireAgencyOwnership(req: AuthenticatedRequest, res: Response,
 /**
  * Optional authentication middleware (doesn't fail if no token)
  */
-export function optionalAuth(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export function optionalAuth(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -137,12 +153,20 @@ export const requireAdmin = requireRole('admin');
 /**
  * Agency staff middleware (owner or manager)
  */
-export const requireAgencyStaff = requireRole('agency_owner', 'agency_manager', 'admin');
+export const requireAgencyStaff = requireRole(
+  'agency_owner',
+  'agency_manager',
+  'admin'
+);
 
 /**
  * Validate user ID matches authenticated user or admin
  */
-export function requireUserOrAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+export function requireUserOrAdmin(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   if (!req.user) {
     return res.status(401).json({
       success: false,
@@ -151,7 +175,7 @@ export function requireUserOrAdmin(req: AuthenticatedRequest, res: Response, nex
   }
 
   const userId = req.params.userId || req.body.userId;
-  
+
   if (req.user.role === 'admin' || req.user.id === userId) {
     return next();
   }

@@ -30,7 +30,9 @@ export class AgencyServiceService {
   /**
    * Create a new agency service
    */
-  async createService(serviceData: Omit<NewAgencyService, 'id' | 'createdAt' | 'updatedAt'>): Promise<AgencyService> {
+  async createService(
+    serviceData: Omit<NewAgencyService, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<AgencyService> {
     try {
       // Verify agency exists
       const [agency] = await db
@@ -183,29 +185,46 @@ export class AgencyServiceService {
 
       if (filters.priceRange) {
         if (filters.priceRange.min !== undefined) {
-          conditions.push(sql`${agencyServices.basePrice} >= ${filters.priceRange.min}`);
+          conditions.push(
+            sql`${agencyServices.basePrice} >= ${filters.priceRange.min}`
+          );
         }
         if (filters.priceRange.max !== undefined) {
-          conditions.push(sql`${agencyServices.basePrice} <= ${filters.priceRange.max}`);
+          conditions.push(
+            sql`${agencyServices.basePrice} <= ${filters.priceRange.max}`
+          );
         }
       }
 
-      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
 
       // Build sort clause
       let orderClause;
       switch (sortBy) {
         case 'name':
-          orderClause = sortOrder === 'asc' ? asc(agencyServices.name) : desc(agencyServices.name);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(agencyServices.name)
+              : desc(agencyServices.name);
           break;
         case 'basePrice':
-          orderClause = sortOrder === 'asc' ? asc(agencyServices.basePrice) : desc(agencyServices.basePrice);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(agencyServices.basePrice)
+              : desc(agencyServices.basePrice);
           break;
         case 'category':
-          orderClause = sortOrder === 'asc' ? asc(agencyServices.category) : desc(agencyServices.category);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(agencyServices.category)
+              : desc(agencyServices.category);
           break;
         default:
-          orderClause = sortOrder === 'asc' ? asc(agencyServices.createdAt) : desc(agencyServices.createdAt);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(agencyServices.createdAt)
+              : desc(agencyServices.createdAt);
       }
 
       // Get total count
@@ -262,15 +281,19 @@ export class AgencyServiceService {
   /**
    * Get services by category
    */
-  async getServicesByCategory(category: ServiceCategoryType): Promise<AgencyService[]> {
+  async getServicesByCategory(
+    category: ServiceCategoryType
+  ): Promise<AgencyService[]> {
     try {
       const services = await db
         .select()
         .from(agencyServices)
-        .where(and(
-          eq(agencyServices.category, category),
-          eq(agencyServices.isActive, true)
-        ))
+        .where(
+          and(
+            eq(agencyServices.category, category),
+            eq(agencyServices.isActive, true)
+          )
+        )
         .orderBy(asc(agencyServices.basePrice));
 
       return services;

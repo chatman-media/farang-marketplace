@@ -52,7 +52,9 @@ export class AgencyService {
   /**
    * Create a new agency
    */
-  async createAgency(agencyData: Omit<NewAgency, 'id' | 'createdAt' | 'updatedAt'>): Promise<Agency> {
+  async createAgency(
+    agencyData: Omit<NewAgency, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<Agency> {
     try {
       const [agency] = await db
         .insert(agencies)
@@ -137,9 +139,7 @@ export class AgencyService {
    */
   async deleteAgency(id: string): Promise<boolean> {
     try {
-      const result = await db
-        .delete(agencies)
-        .where(eq(agencies.id, id));
+      const result = await db.delete(agencies).where(eq(agencies.id, id));
 
       return result.length > 0;
     } catch (error) {
@@ -179,7 +179,9 @@ export class AgencyService {
       }
 
       if (filters.verificationStatus) {
-        conditions.push(eq(agencies.verificationStatus, filters.verificationStatus));
+        conditions.push(
+          eq(agencies.verificationStatus, filters.verificationStatus)
+        );
       }
 
       if (filters.search) {
@@ -199,29 +201,42 @@ export class AgencyService {
 
       if (filters.commissionRate) {
         if (filters.commissionRate.min !== undefined) {
-          conditions.push(sql`${agencies.commissionRate} >= ${filters.commissionRate.min}`);
+          conditions.push(
+            sql`${agencies.commissionRate} >= ${filters.commissionRate.min}`
+          );
         }
         if (filters.commissionRate.max !== undefined) {
-          conditions.push(sql`${agencies.commissionRate} <= ${filters.commissionRate.max}`);
+          conditions.push(
+            sql`${agencies.commissionRate} <= ${filters.commissionRate.max}`
+          );
         }
       }
 
-      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
 
       // Build sort clause
       let orderClause;
       switch (sortBy) {
         case 'name':
-          orderClause = sortOrder === 'asc' ? asc(agencies.name) : desc(agencies.name);
+          orderClause =
+            sortOrder === 'asc' ? asc(agencies.name) : desc(agencies.name);
           break;
         case 'rating':
-          orderClause = sortOrder === 'asc' ? asc(agencies.rating) : desc(agencies.rating);
+          orderClause =
+            sortOrder === 'asc' ? asc(agencies.rating) : desc(agencies.rating);
           break;
         case 'commissionRate':
-          orderClause = sortOrder === 'asc' ? asc(agencies.commissionRate) : desc(agencies.commissionRate);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(agencies.commissionRate)
+              : desc(agencies.commissionRate);
           break;
         default:
-          orderClause = sortOrder === 'asc' ? asc(agencies.createdAt) : desc(agencies.createdAt);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(agencies.createdAt)
+              : desc(agencies.createdAt);
       }
 
       // Get total count
@@ -258,7 +273,10 @@ export class AgencyService {
   /**
    * Verify agency
    */
-  async verifyAgency(id: string, verificationNotes?: string): Promise<Agency | null> {
+  async verifyAgency(
+    id: string,
+    verificationNotes?: string
+  ): Promise<Agency | null> {
     try {
       const [agency] = await db
         .update(agencies)
@@ -282,7 +300,10 @@ export class AgencyService {
   /**
    * Reject agency verification
    */
-  async rejectAgencyVerification(id: string, reason: string): Promise<Agency | null> {
+  async rejectAgencyVerification(
+    id: string,
+    reason: string
+  ): Promise<Agency | null> {
     try {
       const [agency] = await db
         .update(agencies)
@@ -305,7 +326,10 @@ export class AgencyService {
   /**
    * Update agency status
    */
-  async updateAgencyStatus(id: string, status: AgencyStatusType): Promise<Agency | null> {
+  async updateAgencyStatus(
+    id: string,
+    status: AgencyStatusType
+  ): Promise<Agency | null> {
     try {
       const [agency] = await db
         .update(agencies)
@@ -355,10 +379,12 @@ export class AgencyService {
           totalCommissionEarned: sql<number>`coalesce(sum(amount), 0)`,
         })
         .from(commissionPayments)
-        .where(and(
-          eq(commissionPayments.agencyId, id),
-          eq(commissionPayments.status, 'paid')
-        ));
+        .where(
+          and(
+            eq(commissionPayments.agencyId, id),
+            eq(commissionPayments.status, 'paid')
+          )
+        );
 
       // Get agency rating
       const agency = await this.getAgencyById(id);
@@ -367,8 +393,12 @@ export class AgencyService {
       return {
         totalServices: Number(servicesResult[0]?.totalServices || 0),
         activeAssignments: Number(assignmentStats?.activeAssignments || 0),
-        completedAssignments: Number(assignmentStats?.completedAssignments || 0),
-        totalCommissionEarned: Number(commissionStats?.totalCommissionEarned || 0),
+        completedAssignments: Number(
+          assignmentStats?.completedAssignments || 0
+        ),
+        totalCommissionEarned: Number(
+          commissionStats?.totalCommissionEarned || 0
+        ),
         averageRating,
       };
     } catch (error) {

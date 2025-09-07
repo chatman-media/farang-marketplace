@@ -42,7 +42,9 @@ export class ServiceAssignmentService {
   /**
    * Create a new service assignment
    */
-  async createAssignment(assignmentData: CreateAssignmentRequest): Promise<ServiceAssignment> {
+  async createAssignment(
+    assignmentData: CreateAssignmentRequest
+  ): Promise<ServiceAssignment> {
     try {
       // Verify agency and service exist
       const [agency] = await db
@@ -64,7 +66,8 @@ export class ServiceAssignmentService {
       }
 
       // Calculate commission amount
-      const commissionAmount = assignmentData.servicePrice * assignmentData.commissionRate;
+      const commissionAmount =
+        assignmentData.servicePrice * assignmentData.commissionRate;
 
       const [assignment] = await db
         .insert(serviceAssignments)
@@ -115,7 +118,9 @@ export class ServiceAssignmentService {
   /**
    * Get assignments by agency ID
    */
-  async getAssignmentsByAgencyId(agencyId: string): Promise<ServiceAssignment[]> {
+  async getAssignmentsByAgencyId(
+    agencyId: string
+  ): Promise<ServiceAssignment[]> {
     try {
       const assignments = await db
         .select()
@@ -133,7 +138,9 @@ export class ServiceAssignmentService {
   /**
    * Get assignments by listing ID
    */
-  async getAssignmentsByListingId(listingId: string): Promise<ServiceAssignment[]> {
+  async getAssignmentsByListingId(
+    listingId: string
+  ): Promise<ServiceAssignment[]> {
     try {
       const assignments = await db
         .select()
@@ -259,29 +266,49 @@ export class ServiceAssignmentService {
       }
 
       if (filters.dateRange) {
-        conditions.push(gte(serviceAssignments.assignedAt, filters.dateRange.start));
-        conditions.push(lte(serviceAssignments.assignedAt, filters.dateRange.end));
+        conditions.push(
+          gte(serviceAssignments.assignedAt, filters.dateRange.start)
+        );
+        conditions.push(
+          lte(serviceAssignments.assignedAt, filters.dateRange.end)
+        );
       }
 
-      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
 
       // Build sort clause
       let orderClause;
       switch (sortBy) {
         case 'assignedAt':
-          orderClause = sortOrder === 'asc' ? asc(serviceAssignments.assignedAt) : desc(serviceAssignments.assignedAt);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(serviceAssignments.assignedAt)
+              : desc(serviceAssignments.assignedAt);
           break;
         case 'completedAt':
-          orderClause = sortOrder === 'asc' ? asc(serviceAssignments.completedAt) : desc(serviceAssignments.completedAt);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(serviceAssignments.completedAt)
+              : desc(serviceAssignments.completedAt);
           break;
         case 'servicePrice':
-          orderClause = sortOrder === 'asc' ? asc(serviceAssignments.servicePrice) : desc(serviceAssignments.servicePrice);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(serviceAssignments.servicePrice)
+              : desc(serviceAssignments.servicePrice);
           break;
         case 'customerRating':
-          orderClause = sortOrder === 'asc' ? asc(serviceAssignments.customerRating) : desc(serviceAssignments.customerRating);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(serviceAssignments.customerRating)
+              : desc(serviceAssignments.customerRating);
           break;
         default:
-          orderClause = sortOrder === 'asc' ? asc(serviceAssignments.assignedAt) : desc(serviceAssignments.assignedAt);
+          orderClause =
+            sortOrder === 'asc'
+              ? asc(serviceAssignments.assignedAt)
+              : desc(serviceAssignments.assignedAt);
       }
 
       // Get total count
@@ -289,7 +316,10 @@ export class ServiceAssignmentService {
         .select({ count: sql<number>`count(*)` })
         .from(serviceAssignments)
         .leftJoin(agencies, eq(serviceAssignments.agencyId, agencies.id))
-        .leftJoin(agencyServices, eq(serviceAssignments.agencyServiceId, agencyServices.id))
+        .leftJoin(
+          agencyServices,
+          eq(serviceAssignments.agencyServiceId, agencyServices.id)
+        )
         .where(whereClause);
 
       // Get assignments with related data
@@ -319,7 +349,10 @@ export class ServiceAssignmentService {
         })
         .from(serviceAssignments)
         .leftJoin(agencies, eq(serviceAssignments.agencyId, agencies.id))
-        .leftJoin(agencyServices, eq(serviceAssignments.agencyServiceId, agencyServices.id))
+        .leftJoin(
+          agencyServices,
+          eq(serviceAssignments.agencyServiceId, agencyServices.id)
+        )
         .where(whereClause)
         .orderBy(orderClause)
         .limit(limit)
@@ -354,8 +387,11 @@ export class ServiceAssignmentService {
     averageRating: number;
   }> {
     try {
-      const conditions = agencyId ? [eq(serviceAssignments.agencyId, agencyId)] : [];
-      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+      const conditions = agencyId
+        ? [eq(serviceAssignments.agencyId, agencyId)]
+        : [];
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
 
       const [stats] = await db
         .select({

@@ -8,7 +8,9 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/marketplace_agencies',
+    url:
+      process.env.DATABASE_URL ||
+      'postgresql://user:password@localhost:5432/marketplace_agencies',
   },
   verbose: true,
   strict: true,

@@ -48,18 +48,18 @@ describe('Agency Service Logic Tests', () => {
       const testCases = [
         { rate: 0.05, valid: true }, // 5%
         { rate: 0.15, valid: true }, // 15%
-        { rate: 0.30, valid: true }, // 30%
+        { rate: 0.3, valid: true }, // 30%
         { rate: 0.01, valid: false }, // 1% - too low
-        { rate: 0.50, valid: false }, // 50% - too high
+        { rate: 0.5, valid: false }, // 50% - too high
         { rate: -0.05, valid: false }, // negative
       ];
 
       testCases.forEach(({ rate, valid }) => {
         if (valid) {
           expect(rate).toBeGreaterThanOrEqual(0.05);
-          expect(rate).toBeLessThanOrEqual(0.30);
+          expect(rate).toBeLessThanOrEqual(0.3);
         } else {
-          expect(rate < 0.05 || rate > 0.30).toBe(true);
+          expect(rate < 0.05 || rate > 0.3).toBe(true);
         }
       });
     });
@@ -74,11 +74,23 @@ describe('Agency Service Logic Tests', () => {
       };
 
       Object.entries(validTransitions).forEach(([from, toStates]) => {
-        toStates.forEach(to => {
+        toStates.forEach((to) => {
           expect(typeof from).toBe('string');
           expect(typeof to).toBe('string');
-          expect(['pending', 'active', 'suspended', 'inactive', 'rejected']).toContain(from);
-          expect(['pending', 'active', 'suspended', 'inactive', 'rejected']).toContain(to);
+          expect([
+            'pending',
+            'active',
+            'suspended',
+            'inactive',
+            'rejected',
+          ]).toContain(from);
+          expect([
+            'pending',
+            'active',
+            'suspended',
+            'inactive',
+            'rejected',
+          ]).toContain(to);
         });
       });
     });
@@ -92,7 +104,7 @@ describe('Agency Service Logic Tests', () => {
         category: 'delivery',
         search: 'test agency',
         rating: { min: 3.0, max: 5.0 },
-        commissionRate: { min: 0.10, max: 0.25 },
+        commissionRate: { min: 0.1, max: 0.25 },
         location: {
           city: 'Bangkok',
           region: 'Bangkok',
@@ -102,8 +114,16 @@ describe('Agency Service Logic Tests', () => {
       };
 
       // Validate filter structure
-      expect(['pending', 'active', 'suspended', 'inactive', 'rejected']).toContain(validFilters.status);
-      expect(['pending', 'verified', 'rejected', 'expired']).toContain(validFilters.verificationStatus);
+      expect([
+        'pending',
+        'active',
+        'suspended',
+        'inactive',
+        'rejected',
+      ]).toContain(validFilters.status);
+      expect(['pending', 'verified', 'rejected', 'expired']).toContain(
+        validFilters.verificationStatus
+      );
       expect(validFilters.rating.min).toBeGreaterThanOrEqual(0);
       expect(validFilters.rating.max).toBeLessThanOrEqual(5);
       expect(validFilters.commissionRate.min).toBeGreaterThanOrEqual(0);
@@ -135,8 +155,8 @@ describe('Agency Service Logic Tests', () => {
     it('should calculate commission amounts correctly', () => {
       const testCases = [
         { servicePrice: 1000, rate: 0.15, expectedCommission: 150 },
-        { servicePrice: 500, rate: 0.10, expectedCommission: 50 },
-        { servicePrice: 2000, rate: 0.20, expectedCommission: 400 },
+        { servicePrice: 500, rate: 0.1, expectedCommission: 50 },
+        { servicePrice: 2000, rate: 0.2, expectedCommission: 400 },
         { servicePrice: 100, rate: 0.05, expectedCommission: 5 },
       ];
 
@@ -150,8 +170,8 @@ describe('Agency Service Logic Tests', () => {
 
     it('should handle different pricing models', () => {
       const pricingModels = ['fixed', 'hourly', 'per_item', 'percentage'];
-      
-      pricingModels.forEach(model => {
+
+      pricingModels.forEach((model) => {
         expect(typeof model).toBe('string');
         expect(model.length).toBeGreaterThan(0);
       });
@@ -161,7 +181,8 @@ describe('Agency Service Logic Tests', () => {
         fixed: (basePrice: number) => basePrice,
         hourly: (basePrice: number, hours: number) => basePrice * hours,
         per_item: (basePrice: number, quantity: number) => basePrice * quantity,
-        percentage: (totalValue: number, percentage: number) => totalValue * percentage,
+        percentage: (totalValue: number, percentage: number) =>
+          totalValue * percentage,
       };
 
       expect(calculations.fixed(100)).toBe(100);
@@ -196,14 +217,22 @@ describe('Agency Service Logic Tests', () => {
 
     it('should calculate coverage area distances', () => {
       // Simple distance calculation for testing
-      const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+      const calculateDistance = (
+        lat1: number,
+        lon1: number,
+        lat2: number,
+        lon2: number
+      ): number => {
         const R = 6371; // Earth's radius in km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
       };
 
@@ -228,10 +257,10 @@ describe('Agency Service Logic Tests', () => {
         'financial',
         'marketing',
         'consulting',
-        'other'
+        'other',
       ];
 
-      validCategories.forEach(category => {
+      validCategories.forEach((category) => {
         expect(typeof category).toBe('string');
         expect(category.length).toBeGreaterThan(0);
       });
@@ -257,14 +286,16 @@ describe('Agency Service Logic Tests', () => {
         other: ['description'],
       };
 
-      Object.entries(categoryRequirements).forEach(([category, requirements]) => {
-        expect(Array.isArray(requirements)).toBe(true);
-        expect(requirements.length).toBeGreaterThan(0);
-        requirements.forEach(req => {
-          expect(typeof req).toBe('string');
-          expect(req.length).toBeGreaterThan(0);
-        });
-      });
+      Object.entries(categoryRequirements).forEach(
+        ([category, requirements]) => {
+          expect(Array.isArray(requirements)).toBe(true);
+          expect(requirements.length).toBeGreaterThan(0);
+          requirements.forEach((req) => {
+            expect(typeof req).toBe('string');
+            expect(req.length).toBeGreaterThan(0);
+          });
+        }
+      );
     });
   });
 
@@ -281,8 +312,10 @@ describe('Agency Service Logic Tests', () => {
       };
 
       // Calculate derived metrics
-      const completionRate = mockMetrics.completedOrders / mockMetrics.totalOrders;
-      const cancellationRate = mockMetrics.cancelledOrders / mockMetrics.totalOrders;
+      const completionRate =
+        mockMetrics.completedOrders / mockMetrics.totalOrders;
+      const cancellationRate =
+        mockMetrics.cancelledOrders / mockMetrics.totalOrders;
 
       expect(completionRate).toBeCloseTo(0.933, 2);
       expect(cancellationRate).toBeCloseTo(0.033, 2);
@@ -293,8 +326,9 @@ describe('Agency Service Logic Tests', () => {
 
     it('should validate rating calculations', () => {
       const ratings = [5, 4, 5, 3, 4, 5, 4, 3, 5, 4];
-      const averageRating = ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
-      
+      const averageRating =
+        ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
+
       expect(averageRating).toBe(4.2);
       expect(averageRating).toBeGreaterThanOrEqual(1);
       expect(averageRating).toBeLessThanOrEqual(5);
@@ -324,10 +358,13 @@ describe('Agency Service Logic Tests', () => {
       const validationErrors = [
         { field: 'name', message: 'Name is required' },
         { field: 'email', message: 'Valid email is required' },
-        { field: 'commissionRate', message: 'Commission rate must be between 5% and 30%' },
+        {
+          field: 'commissionRate',
+          message: 'Commission rate must be between 5% and 30%',
+        },
       ];
 
-      validationErrors.forEach(error => {
+      validationErrors.forEach((error) => {
         expect(error.field).toBeTruthy();
         expect(error.message).toBeTruthy();
         expect(typeof error.field).toBe('string');

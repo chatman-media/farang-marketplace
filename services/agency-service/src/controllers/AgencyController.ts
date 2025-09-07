@@ -40,7 +40,8 @@ export class AgencyController {
       console.error('Error creating agency:', error);
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to create agency',
+        message:
+          error instanceof Error ? error.message : 'Failed to create agency',
       });
     }
   }
@@ -83,7 +84,8 @@ export class AgencyController {
       console.error('Error getting agency:', error);
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to get agency',
+        message:
+          error instanceof Error ? error.message : 'Failed to get agency',
       });
     }
   }
@@ -110,7 +112,8 @@ export class AgencyController {
       console.error('Error getting user agency:', error);
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to get agency',
+        message:
+          error instanceof Error ? error.message : 'Failed to get agency',
       });
     }
   }
@@ -156,7 +159,8 @@ export class AgencyController {
       console.error('Error updating agency:', error);
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to update agency',
+        message:
+          error instanceof Error ? error.message : 'Failed to update agency',
       });
     }
   }
@@ -199,7 +203,8 @@ export class AgencyController {
       console.error('Error deleting agency:', error);
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete agency',
+        message:
+          error instanceof Error ? error.message : 'Failed to delete agency',
       });
     }
   }
@@ -223,21 +228,29 @@ export class AgencyController {
         verificationStatus: req.query.verificationStatus as any,
         category: req.query.category as any,
         search: req.query.search as string,
-        rating: req.query.minRating ? {
-          min: parseFloat(req.query.minRating as string),
-          max: req.query.maxRating ? parseFloat(req.query.maxRating as string) : 5,
-        } : undefined,
-        commissionRate: req.query.minCommission ? {
-          min: parseFloat(req.query.minCommission as string),
-          max: req.query.maxCommission ? parseFloat(req.query.maxCommission as string) : 1,
-        } : undefined,
+        rating: req.query.minRating
+          ? {
+              min: parseFloat(req.query.minRating as string),
+              max: req.query.maxRating
+                ? parseFloat(req.query.maxRating as string)
+                : 5,
+            }
+          : undefined,
+        commissionRate: req.query.minCommission
+          ? {
+              min: parseFloat(req.query.minCommission as string),
+              max: req.query.maxCommission
+                ? parseFloat(req.query.maxCommission as string)
+                : 1,
+            }
+          : undefined,
       };
 
       const options = {
         page: req.query.page ? parseInt(req.query.page as string) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
-        sortBy: req.query.sortBy as any || 'createdAt',
-        sortOrder: req.query.sortOrder as any || 'desc',
+        sortBy: (req.query.sortBy as any) || 'createdAt',
+        sortOrder: (req.query.sortOrder as any) || 'desc',
       };
 
       const result = await this.agencyService.searchAgencies(filters, options);
@@ -250,7 +263,8 @@ export class AgencyController {
       console.error('Error searching agencies:', error);
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to search agencies',
+        message:
+          error instanceof Error ? error.message : 'Failed to search agencies',
       });
     }
   }
@@ -278,7 +292,10 @@ export class AgencyController {
       }
       const { verificationNotes } = req.body;
 
-      const agency = await this.agencyService.verifyAgency(id, verificationNotes);
+      const agency = await this.agencyService.verifyAgency(
+        id,
+        verificationNotes
+      );
 
       if (!agency) {
         return res.status(404).json({
@@ -296,7 +313,8 @@ export class AgencyController {
       console.error('Error verifying agency:', error);
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to verify agency',
+        message:
+          error instanceof Error ? error.message : 'Failed to verify agency',
       });
     }
   }
@@ -304,7 +322,10 @@ export class AgencyController {
   /**
    * Reject agency verification (admin only)
    */
-  async rejectAgencyVerification(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async rejectAgencyVerification(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<any> {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -324,7 +345,10 @@ export class AgencyController {
       }
       const { reason } = req.body;
 
-      const agency = await this.agencyService.rejectAgencyVerification(id, reason);
+      const agency = await this.agencyService.rejectAgencyVerification(
+        id,
+        reason
+      );
 
       if (!agency) {
         return res.status(404).json({
@@ -342,7 +366,10 @@ export class AgencyController {
       console.error('Error rejecting agency verification:', error);
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to reject agency verification',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to reject agency verification',
       });
     }
   }
@@ -378,7 +405,10 @@ export class AgencyController {
       console.error('Error getting agency stats:', error);
       res.status(500).json({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to get agency statistics',
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get agency statistics',
       });
     }
   }
@@ -386,21 +416,44 @@ export class AgencyController {
 
 // Validation rules
 export const createAgencyValidation = [
-  body('name').isLength({ min: 2, max: 255 }).withMessage('Name must be between 2 and 255 characters'),
-  body('description').isLength({ min: 10, max: 2000 }).withMessage('Description must be between 10 and 2000 characters'),
+  body('name')
+    .isLength({ min: 2, max: 255 })
+    .withMessage('Name must be between 2 and 255 characters'),
+  body('description')
+    .isLength({ min: 10, max: 2000 })
+    .withMessage('Description must be between 10 and 2000 characters'),
   body('email').isEmail().withMessage('Valid email is required'),
-  body('phone').isMobilePhone('any').withMessage('Valid phone number is required'),
-  body('primaryLocation').isObject().withMessage('Primary location is required'),
-  body('commissionRate').optional().isFloat({ min: 0.01, max: 0.5 }).withMessage('Commission rate must be between 1% and 50%'),
+  body('phone')
+    .isMobilePhone('any')
+    .withMessage('Valid phone number is required'),
+  body('primaryLocation')
+    .isObject()
+    .withMessage('Primary location is required'),
+  body('commissionRate')
+    .optional()
+    .isFloat({ min: 0.01, max: 0.5 })
+    .withMessage('Commission rate must be between 1% and 50%'),
 ];
 
 export const updateAgencyValidation = [
   param('id').isUUID().withMessage('Valid agency ID is required'),
-  body('name').optional().isLength({ min: 2, max: 255 }).withMessage('Name must be between 2 and 255 characters'),
-  body('description').optional().isLength({ min: 10, max: 2000 }).withMessage('Description must be between 10 and 2000 characters'),
+  body('name')
+    .optional()
+    .isLength({ min: 2, max: 255 })
+    .withMessage('Name must be between 2 and 255 characters'),
+  body('description')
+    .optional()
+    .isLength({ min: 10, max: 2000 })
+    .withMessage('Description must be between 10 and 2000 characters'),
   body('email').optional().isEmail().withMessage('Valid email is required'),
-  body('phone').optional().isMobilePhone('any').withMessage('Valid phone number is required'),
-  body('commissionRate').optional().isFloat({ min: 0.01, max: 0.5 }).withMessage('Commission rate must be between 1% and 50%'),
+  body('phone')
+    .optional()
+    .isMobilePhone('any')
+    .withMessage('Valid phone number is required'),
+  body('commissionRate')
+    .optional()
+    .isFloat({ min: 0.01, max: 0.5 })
+    .withMessage('Commission rate must be between 1% and 50%'),
 ];
 
 export const agencyIdValidation = [
@@ -409,10 +462,15 @@ export const agencyIdValidation = [
 
 export const verifyAgencyValidation = [
   param('id').isUUID().withMessage('Valid agency ID is required'),
-  body('verificationNotes').optional().isLength({ max: 1000 }).withMessage('Verification notes must be less than 1000 characters'),
+  body('verificationNotes')
+    .optional()
+    .isLength({ max: 1000 })
+    .withMessage('Verification notes must be less than 1000 characters'),
 ];
 
 export const rejectAgencyValidation = [
   param('id').isUUID().withMessage('Valid agency ID is required'),
-  body('reason').isLength({ min: 10, max: 1000 }).withMessage('Rejection reason must be between 10 and 1000 characters'),
+  body('reason')
+    .isLength({ min: 10, max: 1000 })
+    .withMessage('Rejection reason must be between 10 and 1000 characters'),
 ];
