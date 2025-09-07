@@ -332,6 +332,7 @@ export interface SendMessageResponse {
 export interface SendEmailRequest {
   customerId: string
   leadId?: string
+  channel: CommunicationChannel
   to: string
   subject: string
   content: string
@@ -345,6 +346,7 @@ export interface SendEmailRequest {
 export interface SendTelegramRequest {
   customerId: string
   leadId?: string
+  channel: CommunicationChannel
   chatId: string
   content: string
   templateId?: string
@@ -358,6 +360,7 @@ export interface SendTelegramRequest {
 export interface SendWhatsAppRequest {
   customerId: string
   leadId?: string
+  channel: CommunicationChannel
   phoneNumber: string
   content: string
   templateId?: string
@@ -371,6 +374,7 @@ export interface SendWhatsAppRequest {
 export interface SendLineRequest {
   customerId: string
   leadId?: string
+  channel: CommunicationChannel
   userId: string
   content: string
   templateId?: string
