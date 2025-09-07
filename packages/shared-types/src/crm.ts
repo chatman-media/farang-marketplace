@@ -7,6 +7,7 @@ export interface Customer {
   phone?: string
   telegramId?: string
   whatsappId?: string
+  lineId?: string
   firstName: string
   lastName: string
   preferredLanguage: string
@@ -144,6 +145,7 @@ export enum CommunicationChannel {
   EMAIL = "email",
   TELEGRAM = "telegram",
   WHATSAPP = "whatsapp",
+  LINE = "line",
   SMS = "sms",
   PHONE = "phone",
   IN_APP = "in_app",
@@ -251,6 +253,8 @@ export interface CreateCustomerRequest {
   phone?: string
   telegramId?: string
   whatsappId?: string
+  lineId?: string
+  userId?: string
   firstName: string
   lastName: string
   preferredLanguage?: string
@@ -312,4 +316,80 @@ export interface CRMAnalytics {
   responseRate: number
   topPerformingCampaigns: Campaign[]
   recentActivity: CommunicationHistory[]
+}
+
+// Communication Service Types
+export interface SendMessageResponse {
+  success: boolean
+  messageId?: string
+  historyId?: string
+  channel?: CommunicationChannel
+  status: string
+  sentAt?: Date
+  error?: string
+}
+
+export interface SendEmailRequest {
+  customerId: string
+  leadId?: string
+  to: string
+  subject: string
+  content: string
+  templateId?: string
+  templateVariables?: Record<string, any>
+  campaignId?: string
+  priority?: LeadPriority
+  scheduleAt?: Date
+}
+
+export interface SendTelegramRequest {
+  customerId: string
+  leadId?: string
+  chatId: string
+  content: string
+  templateId?: string
+  templateVariables?: Record<string, any>
+  campaignId?: string
+  priority?: LeadPriority
+  scheduleAt?: Date
+  quickReplies?: string[]
+}
+
+export interface SendWhatsAppRequest {
+  customerId: string
+  leadId?: string
+  phoneNumber: string
+  content: string
+  templateId?: string
+  templateVariables?: Record<string, any>
+  campaignId?: string
+  priority?: LeadPriority
+  scheduleAt?: Date
+  mediaUrl?: string
+}
+
+export interface SendLineRequest {
+  customerId: string
+  leadId?: string
+  userId: string
+  content: string
+  templateId?: string
+  templateVariables?: Record<string, any>
+  campaignId?: string
+  priority?: LeadPriority
+  scheduleAt?: Date
+  quickReplies?: string[]
+}
+
+export interface UnifiedSendRequest {
+  customerId: string
+  leadId?: string
+  content: string
+  subject?: string
+  channel?: CommunicationChannel
+  templateId?: string
+  templateVariables?: Record<string, any>
+  campaignId?: string
+  priority?: LeadPriority
+  scheduleAt?: Date
 }
