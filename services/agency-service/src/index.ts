@@ -10,6 +10,9 @@ import {
 
 // Import routes
 import agencyRoutes from './routes/agencies.js';
+import serviceRoutes from './routes/services.js';
+import assignmentRoutes from './routes/assignments.js';
+import bookingIntegrationRoutes from './routes/booking-integration.js';
 
 // Load environment variables
 config();
@@ -71,6 +74,9 @@ app.get('/health', async (req, res) => {
 
 // API routes
 app.use('/api/agencies', agencyRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/assignments', assignmentRoutes);
+app.use('/api/booking-integration', bookingIntegrationRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

@@ -37,6 +37,13 @@ A comprehensive agency management service for the Thailand Marketplace platform,
 - **Performance-Based**: Commission adjustments based on performance metrics
 - **Automated Calculations**: Real-time commission calculation and tracking
 
+### 🔗 Booking Integration
+- **Smart Matching**: AI-powered agency matching based on location, rating, and price
+- **Auto-Assignment**: Automatic assignment to best matching agencies
+- **Real-Time Tracking**: Live status updates and progress monitoring
+- **Commission Management**: Automated commission calculation and payment tracking
+- **Multi-Criteria Scoring**: Advanced scoring algorithm considering multiple factors
+
 ## 🛠️ Installation
 
 ### Prerequisites
@@ -112,6 +119,40 @@ POST   /api/agencies/:id/reject   # Reject agency verification
 ### Statistics and Analytics
 ```
 GET    /api/agencies/:id/stats    # Get agency statistics
+```
+
+### Service Management
+```
+POST   /api/services              # Create new service
+GET    /api/services/search       # Search services with filters
+GET    /api/services/:id          # Get service by ID
+PUT    /api/services/:id          # Update service
+DELETE /api/services/:id          # Delete service
+GET    /api/services/agency/:agencyId  # Get services by agency
+PATCH  /api/services/:id/toggle-status  # Toggle service status
+PATCH  /api/services/agency/:agencyId/bulk-update-prices  # Bulk update prices
+```
+
+### Service Assignments
+```
+POST   /api/assignments           # Create new assignment
+GET    /api/assignments/search    # Search assignments
+GET    /api/assignments/stats     # Get assignment statistics
+GET    /api/assignments/:id       # Get assignment by ID
+PATCH  /api/assignments/:id/status  # Update assignment status
+POST   /api/assignments/:id/feedback  # Add customer feedback
+GET    /api/assignments/agency/:agencyId  # Get assignments by agency
+GET    /api/assignments/listing/:listingId  # Get assignments by listing
+```
+
+### Booking Integration
+```
+GET    /api/booking-integration/categories  # Get service categories
+POST   /api/booking-integration/find-matches  # Find matching agencies
+POST   /api/booking-integration/assign-service  # Assign service to agency
+POST   /api/booking-integration/auto-assign  # Auto-assign best match
+GET    /api/booking-integration/assignment/:id/status  # Get assignment status
+POST   /api/booking-integration/assignment/:id/commission  # Calculate commission
 ```
 
 ## 🧪 Testing
