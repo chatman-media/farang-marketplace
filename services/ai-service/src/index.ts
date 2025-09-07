@@ -22,6 +22,7 @@ import { InsightsController } from "./controllers/InsightsController.js"
 import { createRecommendationRoutes } from "./routes/recommendations.js"
 import { createContentAnalysisRoutes } from "./routes/content-analysis.js"
 import { createInsightsRoutes } from "./routes/insights.js"
+import marketplaceIntegrationRoutes from "./routes/marketplace-integration.js"
 
 // Import middleware
 import { optionalAuth } from "./middleware/auth.js"
@@ -82,6 +83,7 @@ app.get("/health", (req, res) => {
       recommendations: "operational",
       contentAnalysis: "operational",
       userBehavior: "operational",
+      marketplaceIntegration: "operational",
     },
   })
 })
@@ -119,6 +121,7 @@ app.get("/status", optionalAuth, (req, res) => {
 app.use("/api/recommendations", createRecommendationRoutes(recommendationController))
 app.use("/api/content-analysis", createContentAnalysisRoutes(contentAnalysisController))
 app.use("/api/insights", createInsightsRoutes(insightsController))
+app.use("/api/marketplace", marketplaceIntegrationRoutes)
 
 // AI Provider management endpoints (admin only)
 app.get("/api/providers", (req, res) => {

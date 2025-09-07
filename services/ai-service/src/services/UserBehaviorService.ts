@@ -486,6 +486,17 @@ Focus on actionable business insights and market opportunities.
   }
 
   /**
+   * Get user behaviors
+   */
+  getUserBehaviors(userId: string, options?: { limit?: number }): UserBehavior[] {
+    const behaviors = this.behaviorBuffer.get(userId) || []
+    if (options?.limit) {
+      return behaviors.slice(-options.limit) // Get most recent behaviors
+    }
+    return behaviors
+  }
+
+  /**
    * Get market insights
    */
   getMarketInsights(filters?: {

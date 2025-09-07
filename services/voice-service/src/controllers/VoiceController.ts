@@ -63,7 +63,7 @@ export class VoiceController {
       const userId = req.user?.id
       const sessionId = (req.headers["x-session-id"] as string) || this.generateSessionId()
 
-      let result: VoiceCommandResponse | undefined
+      let result: VoiceCommandResponse
 
       if (audioData) {
         // Process audio command

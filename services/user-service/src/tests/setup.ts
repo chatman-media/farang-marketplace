@@ -1,11 +1,16 @@
 import { vi, beforeEach } from "vitest"
+import dotenv from "dotenv"
 
-// Mock environment variables
+// Load test environment variables
+dotenv.config({ path: ".env.test" })
+
+// Mock environment variables with correct values
 process.env.DB_HOST = "localhost"
 process.env.DB_PORT = "5432"
-process.env.DB_NAME = "marketplace_test"
-process.env.DB_USER = "postgres"
-process.env.DB_PASSWORD = "postgres"
+process.env.DB_NAME = "marketplace"
+process.env.DB_USER = "marketplace_user"
+process.env.DB_PASSWORD = "marketplace_pass"
+process.env.NODE_ENV = "test"
 
 // Note: bcrypt is not mocked to allow real password hashing in tests
 

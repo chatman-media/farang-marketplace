@@ -4,8 +4,7 @@ import { UserEntity } from "../../models/User"
 import { UserRole, VerificationStatus } from "@marketplace/shared-types"
 import { testUserData } from "../setup"
 
-// Mock the UserRepository
-vi.mock("../../repositories/UserRepository")
+// Skip mocking for now - use real repository in integration tests
 
 describe("UserService Integration Tests", () => {
   let userService: UserService

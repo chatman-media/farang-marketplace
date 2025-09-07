@@ -148,7 +148,7 @@ router.post("/search", optionalAuth, validateVoiceRequest, async (req, res) => {
       currentPage: req.headers.referer || "/search",
     }
 
-    let result: VoiceCommandResponse | undefined
+    let result: VoiceCommandResponse
     if (audioData) {
       result = await voiceController.voiceCommandService.processVoiceCommand(
         typeof audioData === "string" ? audioData : Buffer.from(audioData),
@@ -200,7 +200,7 @@ router.post("/listing/create", authenticateToken, validateVoiceRequest, async (r
       currentPage: "/listings/create",
     }
 
-    let result: VoiceCommandResponse | undefined
+    let result: VoiceCommandResponse
     if (audioData) {
       result = await voiceController.voiceCommandService.processVoiceCommand(
         typeof audioData === "string" ? audioData : Buffer.from(audioData),
@@ -252,7 +252,7 @@ router.post("/navigate", optionalAuth, validateVoiceRequest, async (req, res) =>
       currentPage: req.headers.referer || "/",
     }
 
-    let result
+    let result: VoiceCommandResponse
     if (audioData) {
       result = await voiceController.voiceCommandService.processVoiceCommand(
         typeof audioData === "string" ? audioData : Buffer.from(audioData),

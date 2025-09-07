@@ -471,7 +471,10 @@ export class RecommendationEngine {
 
       return 0.5 // Default score if parsing fails
     } catch (error) {
-      console.error("AI scoring failed:", error)
+      // Only log in non-test environments
+      if (process.env["NODE_ENV"] !== "test") {
+        console.error("AI scoring failed:", error)
+      }
       return 0.5 // Fallback score
     }
   }
