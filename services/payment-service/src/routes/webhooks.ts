@@ -63,6 +63,13 @@ router.post(
 );
 
 /**
+ * @route POST /api/webhooks/stripe
+ * @desc Handle Stripe payment webhooks
+ * @access Public (with signature verification)
+ */
+router.post('/stripe', webhookController.handleStripeWebhook);
+
+/**
  * @route GET /api/webhooks/health
  * @desc Webhook health check
  * @access Public

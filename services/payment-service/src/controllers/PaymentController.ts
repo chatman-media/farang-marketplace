@@ -138,6 +138,72 @@ export class PaymentController {
   };
 
   /**
+   * Process Stripe payment
+   */
+  processStripePayment = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        res.status(400).json({
+          error: 'Validation Error',
+          message: 'Invalid Stripe payment data',
+          details: errors.array(),
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
+      const { paymentId } = req.params;
+      const { paymentMethodId, customerId } = req.body;
+
+      const payment = await this.paymentService.processStripePayment(
+        paymentId,
+        paymentMethodId,
+        customerId
+      );
+
+      res.json({
+        success: true,
+        data: payment,
+        message: 'Stripe payment processed successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Process Stripe payment error:', error);
+      res.status(500).json({
+        error: 'Payment Processing Error',
+        message: error instanceof Error ? error.message : 'Failed to process Stripe payment',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  };
+
+  /**
+   * Confirm Stripe payment
+   */
+  confirmStripePayment = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { paymentId } = req.params;
+
+      const payment = await this.paymentService.confirmStripePayment(paymentId);
+
+      res.json({
+        success: true,
+        data: payment,
+        message: 'Stripe payment confirmed successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error('Confirm Stripe payment error:', error);
+      res.status(500).json({
+        error: 'Payment Confirmation Error',
+        message: error instanceof Error ? error.message : 'Failed to confirm Stripe payment',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  };
+
+  /**
    * Get payment by ID
    */
   getPayment = async (req: Request, res: Response): Promise<void> => {

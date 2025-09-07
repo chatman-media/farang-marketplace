@@ -8,6 +8,7 @@ import {
 } from '../db/schema.js';
 import { eq, and, desc, gte, lte, sql } from 'drizzle-orm';
 import { TonService } from './TonService.js';
+import { StripeService } from './StripeService.js';
 import type {
   Payment,
   NewPayment,
@@ -57,9 +58,11 @@ export interface PaymentSearchResult {
 
 export class PaymentService {
   private tonService: TonService;
+  private stripeService: StripeService;
 
   constructor() {
     this.tonService = new TonService();
+    this.stripeService = new StripeService();
   }
 
   /**
@@ -208,6 +211,144 @@ export class PaymentService {
         paymentId,
         'failed',
         `Payment failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Process Stripe payment
+   */
+  async processStripePayment(
+    paymentId: string,
+    paymentMethodId: string,
+    customerId?: string
+  ): Promise<Payment> {
+    try {
+      const payment = await this.getPaymentById(paymentId);
+      if (!payment) {
+        throw new Error('Payment not found');
+      }
+
+      if (payment.status !== 'pending') {
+        throw new Error('Payment is not in pending status');
+      }
+
+      // Convert amount to Stripe format (cents)
+      const stripeAmount = this.stripeService.convertToStripeAmount(
+        parseFloat(payment.amount),
+        payment.currency
+      );
+
+      // Update payment status to processing
+      await this.updatePaymentStatus(
+        paymentId,
+        'processing',
+        'Stripe payment initiated'
+      );
+
+      // Create Stripe payment intent
+      const stripeResponse = await this.stripeService.createPaymentIntent({
+        amount: stripeAmount,
+        currency: payment.currency,
+        paymentMethod: paymentMethodId,
+        customerId,
+        description: `Payment for booking ${payment.bookingId}`,
+        metadata: {
+          paymentId,
+          bookingId: payment.bookingId,
+          payerId: payment.payerId,
+        },
+      });
+
+      // Update payment with Stripe data
+      const [updatedPayment] = await db
+        .update(payments)
+        .set({
+          stripePaymentIntentId: stripeResponse.paymentIntentId,
+          stripeChargeId: stripeResponse.chargeId,
+          status: stripeResponse.status,
+          updatedAt: new Date(),
+        })
+        .where(eq(payments.id, paymentId))
+        .returning();
+
+      // Create transaction record
+      await this.createTransaction({
+        paymentId,
+        type: 'payment',
+        amount: payment.amount,
+        currency: payment.currency,
+        stripePaymentIntentId: stripeResponse.paymentIntentId,
+        stripeChargeId: stripeResponse.chargeId,
+        description: 'Stripe payment transaction',
+        metadata: {
+          paymentMethodId,
+          customerId,
+          clientSecret: stripeResponse.clientSecret,
+        },
+      });
+
+      return updatedPayment;
+    } catch (error) {
+      console.error('Failed to process Stripe payment:', error);
+      await this.updatePaymentStatus(
+        paymentId,
+        'failed',
+        `Stripe payment failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Confirm Stripe payment intent
+   */
+  async confirmStripePayment(paymentId: string): Promise<Payment> {
+    try {
+      const payment = await this.getPaymentById(paymentId);
+      if (!payment) {
+        throw new Error('Payment not found');
+      }
+
+      if (!payment.stripePaymentIntentId) {
+        throw new Error('No Stripe payment intent found');
+      }
+
+      // Confirm payment intent
+      const stripeResponse = await this.stripeService.confirmPaymentIntent(
+        payment.stripePaymentIntentId
+      );
+
+      // Update payment status
+      const [updatedPayment] = await db
+        .update(payments)
+        .set({
+          status: stripeResponse.status,
+          stripeChargeId: stripeResponse.chargeId,
+          updatedAt: new Date(),
+        })
+        .where(eq(payments.id, paymentId))
+        .returning();
+
+      // Create confirmation transaction record
+      await this.createTransaction({
+        paymentId,
+        type: 'confirmation',
+        amount: payment.amount,
+        currency: payment.currency,
+        stripePaymentIntentId: stripeResponse.paymentIntentId,
+        stripeChargeId: stripeResponse.chargeId,
+        description: 'Stripe payment confirmation',
+      });
+
+      return updatedPayment;
+    } catch (error) {
+      console.error('Failed to confirm Stripe payment:', error);
+      await this.updatePaymentStatus(
+        paymentId,
+        'failed',
+        `Stripe confirmation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
       throw error;
     }

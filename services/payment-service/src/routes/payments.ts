@@ -41,8 +41,17 @@ router.post(
         'ton_connect',
         'jetton_usdt',
         'jetton_usdc',
-        'credit_card',
+        'stripe_card',
+        'stripe_sepa',
+        'stripe_ideal',
+        'stripe_sofort',
+        'wise_transfer',
+        'revolut_pay',
+        'paypal',
         'bank_transfer',
+        'promptpay',
+        'truemoney',
+        'rabbit_linepay',
       ])
       .withMessage('Invalid payment method'),
     body('description')
@@ -72,6 +81,42 @@ router.post(
       .withMessage('From address must be a valid TON address'),
   ],
   paymentController.processTonPayment
+);
+
+/**
+ * @route POST /api/payments/:paymentId/process-stripe
+ * @desc Process Stripe payment
+ * @access Private (payer only)
+ */
+router.post(
+  '/:paymentId/process-stripe',
+  authMiddleware,
+  [
+    param('paymentId').isUUID().withMessage('Payment ID must be a valid UUID'),
+    body('paymentMethodId')
+      .isString()
+      .isLength({ min: 1 })
+      .withMessage('Payment method ID is required'),
+    body('customerId')
+      .optional()
+      .isString()
+      .withMessage('Customer ID must be a string'),
+  ],
+  paymentController.processStripePayment
+);
+
+/**
+ * @route POST /api/payments/:paymentId/confirm-stripe
+ * @desc Confirm Stripe payment intent
+ * @access Private (payer only)
+ */
+router.post(
+  '/:paymentId/confirm-stripe',
+  authMiddleware,
+  [
+    param('paymentId').isUUID().withMessage('Payment ID must be a valid UUID'),
+  ],
+  paymentController.confirmStripePayment
 );
 
 /**

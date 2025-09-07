@@ -6,8 +6,9 @@ A comprehensive payment processing service with TON blockchain integration for t
 
 ### 💳 Payment Processing
 - **TON Blockchain Integration**: Native support for TON wallet payments
-- **Multi-Currency Support**: TON, USDT, USDC, USD, THB
-- **Payment Methods**: TON Wallet, TON Connect, Jettons, Credit Cards
+- **Stripe Integration**: Credit cards, SEPA, iDEAL, SOFORT payments
+- **Multi-Currency Support**: TON, USDT, USDC, USD, THB, EUR
+- **Payment Methods**: TON Wallet, TON Connect, Jettons, Credit Cards, Bank Transfers
 - **Real-time Confirmation**: Blockchain transaction monitoring
 - **Automatic Status Updates**: Smart payment lifecycle management
 
@@ -36,6 +37,7 @@ A comprehensive payment processing service with TON blockchain integration for t
 ### Services
 - **PaymentService**: Core payment processing logic
 - **TonService**: TON blockchain integration and wallet management
+- **StripeService**: Stripe payment processing and webhook handling
 - **WebhookController**: External payment notification handling
 
 ## 🛠️ Installation
@@ -89,6 +91,14 @@ TON_WALLET_MNEMONIC=your-wallet-mnemonic-phrase
 TON_WALLET_ADDRESS=your-ton-wallet-address
 ```
 
+#### Stripe Integration
+```env
+STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
+STRIPE_PUBLISHABLE_KEY=pk_test_your-stripe-publishable-key
+STRIPE_WEBHOOK_SECRET=whsec_your-stripe-webhook-secret
+STRIPE_RETURN_URL=https://your-domain.com/payment/return
+```
+
 #### Security
 ```env
 JWT_SECRET=your-super-secret-jwt-key
@@ -104,12 +114,15 @@ GET    /api/payments/search       # Search payments with filters
 GET    /api/payments/:id          # Get payment by ID
 PATCH  /api/payments/:id/status   # Update payment status
 POST   /api/payments/:id/process-ton # Process TON payment
+POST   /api/payments/:id/process-stripe # Process Stripe payment
+POST   /api/payments/:id/confirm-stripe # Confirm Stripe payment
 GET    /api/payments/:id/transactions # Get payment transaction history
 ```
 
 ### Webhooks
 ```
 POST   /api/webhooks/ton          # TON blockchain webhooks
+POST   /api/webhooks/stripe       # Stripe payment webhooks
 POST   /api/webhooks/payment      # Generic payment webhooks
 POST   /api/webhooks/refund       # Refund processing webhooks
 GET    /api/webhooks/health       # Webhook health check

@@ -67,8 +67,17 @@ describe('Payment API Tests', () => {
         'ton_connect',
         'jetton_usdt',
         'jetton_usdc',
-        'credit_card',
+        'stripe_card',
+        'stripe_sepa',
+        'stripe_ideal',
+        'stripe_sofort',
+        'wise_transfer',
+        'revolut_pay',
+        'paypal',
         'bank_transfer',
+        'promptpay',
+        'truemoney',
+        'rabbit_linepay',
       ];
       expect(validMethods).toContain(mockRequest.body.paymentMethod);
 
@@ -142,6 +151,32 @@ describe('Payment API Tests', () => {
 
       // Validate amount
       expect(mockRequest.body.amount).toMatch(/^\d+\.\d{1,8}$/);
+    });
+
+    it('should validate Stripe payment processing request', () => {
+      mockRequest.params = {
+        paymentId: '123e4567-e89b-12d3-a456-426614174002',
+      };
+
+      mockRequest.body = {
+        paymentMethodId: 'pm_1234567890abcdef',
+        customerId: 'cus_1234567890abcdef',
+      };
+
+      // Validate payment ID
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      expect(uuidRegex.test(mockRequest.params.paymentId)).toBe(true);
+
+      // Validate Stripe payment method ID
+      expect(mockRequest.body.paymentMethodId).toMatch(/^pm_/);
+      expect(mockRequest.body.paymentMethodId.length).toBeGreaterThan(10);
+
+      // Validate optional customer ID
+      if (mockRequest.body.customerId) {
+        expect(mockRequest.body.customerId).toMatch(/^cus_/);
+        expect(mockRequest.body.customerId.length).toBeGreaterThan(10);
+      }
     });
 
     it('should validate payment status update request', () => {

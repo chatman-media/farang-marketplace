@@ -50,6 +50,7 @@ export const transactionTypeEnum = pgEnum('transaction_type', [
   'commission',
   'withdrawal',
   'deposit',
+  'confirmation'
 ]);
 
 export const refundStatusEnum = pgEnum('refund_status', [
@@ -155,6 +156,10 @@ export const transactions = pgTable(
     gasUsed: decimal('gas_used', { precision: 20, scale: 8 }),
     gasFee: decimal('gas_fee', { precision: 20, scale: 8 }),
 
+    // Stripe Details
+    stripePaymentIntentId: varchar('stripe_payment_intent_id', { length: 255 }),
+    stripeChargeId: varchar('stripe_charge_id', { length: 255 }),
+
     // Status and Metadata
     status: varchar('status', { length: 20 }).notNull().default('pending'),
     description: text('description'),
@@ -230,6 +235,9 @@ export const disputes = pgTable(
     assignedTo: uuid('assigned_to'),
     resolution: text('resolution'),
     resolutionAmount: decimal('resolution_amount', { precision: 12, scale: 2 }),
+
+    // External References
+    externalDisputeId: varchar('external_dispute_id', { length: 255 }),
 
     // Metadata
     metadata: jsonb('metadata'),
