@@ -1,0 +1,500 @@
+import { db } from '../db/connection.js';
+import {
+  payments,
+  transactions,
+  refunds,
+  disputes,
+  paymentMethods,
+} from '../db/schema.js';
+import { eq, and, desc, gte, lte, sql } from 'drizzle-orm';
+import { TonService } from './TonService.js';
+import type {
+  Payment,
+  NewPayment,
+  Transaction,
+  NewTransaction,
+  Refund,
+  NewRefund,
+  Dispute,
+  NewDispute,
+  PaymentStatus,
+  PaymentMethodType,
+} from '../db/schema.js';
+
+export interface CreatePaymentRequest {
+  bookingId: string;
+  payerId: string;
+  payeeId: string;
+  amount: string;
+  currency?: string;
+  fiatAmount?: number;
+  fiatCurrency?: string;
+  paymentMethod: PaymentMethodType;
+  description?: string;
+  metadata?: any;
+  tonWalletAddress?: string;
+}
+
+export interface PaymentSearchFilters {
+  status?: PaymentStatus;
+  payerId?: string;
+  payeeId?: string;
+  bookingId?: string;
+  paymentMethod?: PaymentMethodType;
+  startDate?: Date;
+  endDate?: Date;
+  minAmount?: number;
+  maxAmount?: number;
+}
+
+export interface PaymentSearchResult {
+  payments: Payment[];
+  total: number;
+  page: number;
+  limit: number;
+  hasMore: boolean;
+}
+
+export class PaymentService {
+  private tonService: TonService;
+
+  constructor() {
+    this.tonService = new TonService();
+  }
+
+  /**
+   * Initialize the payment service
+   */
+  async initialize(): Promise<void> {
+    try {
+      await this.tonService.initializeWallet();
+      console.log('Payment service initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize payment service:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create a new payment
+   */
+  async createPayment(request: CreatePaymentRequest): Promise<Payment> {
+    try {
+      // Calculate expiration time (30 minutes by default)
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 30);
+
+      // Calculate fees
+      const platformFeeRate = 0.03; // 3%
+      const processingFeeRate = 0.005; // 0.5%
+
+      const amount = parseFloat(request.amount);
+      const platformFee = amount * platformFeeRate;
+      const processingFee = amount * processingFeeRate;
+      const totalFees = platformFee + processingFee;
+
+      // For TON payments, convert fiat to TON if needed
+      let tonAmount = request.amount;
+      if (request.paymentMethod.includes('ton') && request.fiatAmount) {
+        tonAmount = await this.tonService.calculateTonAmount(
+          request.fiatAmount,
+          request.fiatCurrency
+        );
+      }
+
+      const newPayment: NewPayment = {
+        bookingId: request.bookingId,
+        payerId: request.payerId,
+        payeeId: request.payeeId,
+        amount: request.amount,
+        currency: request.currency || 'TON',
+        fiatAmount: request.fiatAmount?.toString(),
+        fiatCurrency: request.fiatCurrency || 'USD',
+        paymentMethod: request.paymentMethod,
+        status: 'pending',
+        tonAmount,
+        tonWalletAddress: request.tonWalletAddress,
+        platformFee: platformFee.toString(),
+        processingFee: processingFee.toString(),
+        totalFees: totalFees.toString(),
+        description: request.description,
+        metadata: request.metadata,
+        expiresAt,
+        requiredConfirmations: 3,
+      };
+
+      const [payment] = await db
+        .insert(payments)
+        .values(newPayment)
+        .returning();
+
+      // Create initial transaction record
+      await this.createTransaction({
+        paymentId: payment.id,
+        type: 'payment',
+        amount: request.amount,
+        currency: request.currency || 'TON',
+        description: 'Payment initiated',
+        metadata: { paymentMethod: request.paymentMethod },
+      });
+
+      console.log(`Payment created: ${payment.id}`);
+      return payment;
+    } catch (error) {
+      console.error('Failed to create payment:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Process TON payment
+   */
+  async processTonPayment(
+    paymentId: string,
+    fromAddress: string
+  ): Promise<Payment> {
+    try {
+      const payment = await this.getPaymentById(paymentId);
+      if (!payment) {
+        throw new Error('Payment not found');
+      }
+
+      if (payment.status !== 'pending') {
+        throw new Error('Payment is not in pending status');
+      }
+
+      // Update payment status to processing
+      await this.updatePaymentStatus(
+        paymentId,
+        'processing',
+        'TON payment initiated'
+      );
+
+      // Send TON payment
+      const txHash = await this.tonService.sendPayment({
+        toAddress: payment.tonWalletAddress || process.env.TON_WALLET_ADDRESS!,
+        amount: payment.tonAmount || payment.amount,
+        comment: `Payment for booking ${payment.bookingId}`,
+      });
+
+      // Update payment with transaction hash
+      const [updatedPayment] = await db
+        .update(payments)
+        .set({
+          tonTransactionHash: txHash,
+          updatedAt: new Date(),
+        })
+        .where(eq(payments.id, paymentId))
+        .returning();
+
+      // Create transaction record
+      await this.createTransaction({
+        paymentId,
+        type: 'payment',
+        amount: payment.tonAmount || payment.amount,
+        currency: 'TON',
+        tonTransactionHash: txHash,
+        description: 'TON payment transaction',
+        metadata: { fromAddress },
+      });
+
+      // Start monitoring for confirmations
+      this.monitorPaymentConfirmation(paymentId, txHash);
+
+      return updatedPayment;
+    } catch (error) {
+      console.error('Failed to process TON payment:', error);
+      await this.updatePaymentStatus(
+        paymentId,
+        'failed',
+        `Payment failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Monitor payment confirmation
+   */
+  private async monitorPaymentConfirmation(
+    paymentId: string,
+    txHash: string
+  ): Promise<void> {
+    try {
+      const payment = await this.getPaymentById(paymentId);
+      if (!payment) return;
+
+      const requiredConfirmations = payment.requiredConfirmations || 3;
+      const confirmed = await this.tonService.waitForConfirmation(
+        txHash,
+        requiredConfirmations,
+        30 * 60 * 1000 // 30 minutes timeout
+      );
+
+      if (confirmed) {
+        await this.updatePaymentStatus(
+          paymentId,
+          'confirmed',
+          'Payment confirmed on blockchain'
+        );
+
+        // Auto-complete payment after confirmation
+        setTimeout(async () => {
+          await this.updatePaymentStatus(
+            paymentId,
+            'completed',
+            'Payment completed'
+          );
+        }, 5000);
+      } else {
+        await this.updatePaymentStatus(
+          paymentId,
+          'failed',
+          'Payment confirmation timeout'
+        );
+      }
+    } catch (error) {
+      console.error('Failed to monitor payment confirmation:', error);
+      await this.updatePaymentStatus(
+        paymentId,
+        'failed',
+        `Confirmation monitoring failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Update payment status
+   */
+  async updatePaymentStatus(
+    paymentId: string,
+    status: PaymentStatus,
+    reason?: string
+  ): Promise<Payment> {
+    try {
+      const updateData: any = {
+        status,
+        updatedAt: new Date(),
+      };
+
+      // Set timestamps based on status
+      if (status === 'confirmed') {
+        updateData.confirmedAt = new Date();
+      } else if (status === 'completed') {
+        updateData.completedAt = new Date();
+      }
+
+      const [updatedPayment] = await db
+        .update(payments)
+        .set(updateData)
+        .where(eq(payments.id, paymentId))
+        .returning();
+
+      // Create transaction record for status change
+      await this.createTransaction({
+        paymentId,
+        type: 'payment',
+        amount: '0',
+        currency: updatedPayment.currency,
+        description: reason || `Payment status updated to ${status}`,
+        metadata: { statusChange: { from: updatedPayment.status, to: status } },
+      });
+
+      console.log(`Payment ${paymentId} status updated to ${status}`);
+      return updatedPayment;
+    } catch (error) {
+      console.error('Failed to update payment status:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get payment by ID
+   */
+  async getPaymentById(paymentId: string): Promise<Payment | null> {
+    try {
+      const [payment] = await db
+        .select()
+        .from(payments)
+        .where(eq(payments.id, paymentId))
+        .limit(1);
+
+      return payment || null;
+    } catch (error) {
+      console.error('Failed to get payment:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Search payments with filters
+   */
+  async searchPayments(
+    filters: PaymentSearchFilters,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<PaymentSearchResult> {
+    try {
+      const offset = (page - 1) * limit;
+      const conditions = [];
+
+      // Build filter conditions
+      if (filters.status) {
+        conditions.push(eq(payments.status, filters.status));
+      }
+      if (filters.payerId) {
+        conditions.push(eq(payments.payerId, filters.payerId));
+      }
+      if (filters.payeeId) {
+        conditions.push(eq(payments.payeeId, filters.payeeId));
+      }
+      if (filters.bookingId) {
+        conditions.push(eq(payments.bookingId, filters.bookingId));
+      }
+      if (filters.paymentMethod) {
+        conditions.push(eq(payments.paymentMethod, filters.paymentMethod));
+      }
+      if (filters.startDate) {
+        conditions.push(gte(payments.createdAt, filters.startDate));
+      }
+      if (filters.endDate) {
+        conditions.push(lte(payments.createdAt, filters.endDate));
+      }
+
+      const whereClause =
+        conditions.length > 0 ? and(...conditions) : undefined;
+
+      // Get payments
+      const paymentResults = await db
+        .select()
+        .from(payments)
+        .where(whereClause)
+        .orderBy(desc(payments.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      // Get total count
+      const [{ count }] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(payments)
+        .where(whereClause);
+
+      return {
+        payments: paymentResults,
+        total: count,
+        page,
+        limit,
+        hasMore: offset + paymentResults.length < count,
+      };
+    } catch (error) {
+      console.error('Failed to search payments:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create transaction record
+   */
+  async createTransaction(transaction: NewTransaction): Promise<Transaction> {
+    try {
+      const [newTransaction] = await db
+        .insert(transactions)
+        .values(transaction)
+        .returning();
+
+      return newTransaction;
+    } catch (error) {
+      console.error('Failed to create transaction:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create refund
+   */
+  async createRefund(refundData: NewRefund): Promise<Refund> {
+    try {
+      const [refund] = await db.insert(refunds).values(refundData).returning();
+
+      // Update payment status if full refund
+      const payment = await this.getPaymentById(refundData.paymentId);
+      if (
+        payment &&
+        parseFloat(refundData.amount) >= parseFloat(payment.amount)
+      ) {
+        await this.updatePaymentStatus(
+          payment.id,
+          'refunded',
+          'Full refund processed'
+        );
+      }
+
+      return refund;
+    } catch (error) {
+      console.error('Failed to create refund:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create dispute
+   */
+  async createDispute(disputeData: NewDispute): Promise<Dispute> {
+    try {
+      const [dispute] = await db
+        .insert(disputes)
+        .values(disputeData)
+        .returning();
+
+      // Update payment status to disputed
+      await this.updatePaymentStatus(
+        disputeData.paymentId,
+        'disputed',
+        'Payment disputed'
+      );
+
+      return dispute;
+    } catch (error) {
+      console.error('Failed to create dispute:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get payment transactions
+   */
+  async getPaymentTransactions(paymentId: string): Promise<Transaction[]> {
+    try {
+      return await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.paymentId, paymentId))
+        .orderBy(desc(transactions.createdAt));
+    } catch (error) {
+      console.error('Failed to get payment transactions:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Validate payment method
+   */
+  validatePaymentMethod(method: PaymentMethodType, data: any): boolean {
+    switch (method) {
+      case 'ton_wallet':
+      case 'ton_connect':
+        return (
+          data.tonWalletAddress &&
+          this.tonService.validateAddress(data.tonWalletAddress)
+        );
+      case 'jetton_usdt':
+      case 'jetton_usdc':
+        return (
+          data.tonWalletAddress &&
+          this.tonService.validateAddress(data.tonWalletAddress)
+        );
+      default:
+        return false;
+    }
+  }
+}

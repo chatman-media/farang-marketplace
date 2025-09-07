@@ -18,11 +18,12 @@ describe('Booking API Validation Tests', () => {
       expect(validBookingRequest.listingId).toBeDefined();
       expect(validBookingRequest.checkIn).toBeDefined();
       expect(validBookingRequest.guests).toBeGreaterThan(0);
-      
+
       // Validate UUID format
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       expect(uuidRegex.test(validBookingRequest.listingId)).toBe(true);
-      
+
       // Validate date format (ISO 8601)
       const dateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/;
       expect(dateRegex.test(validBookingRequest.checkIn)).toBe(true);
@@ -48,14 +49,22 @@ describe('Booking API Validation Tests', () => {
       expect(validServiceRequest.serviceType).toBeDefined();
       expect(validServiceRequest.scheduledDate).toBeDefined();
       expect(validServiceRequest.duration).toBeDefined();
-      
+
       // Validate service type enum
-      const validServiceTypes = ['consultation', 'project', 'hourly', 'package', 'subscription'];
+      const validServiceTypes = [
+        'consultation',
+        'project',
+        'hourly',
+        'package',
+        'subscription',
+      ];
       expect(validServiceTypes).toContain(validServiceRequest.serviceType);
-      
+
       // Validate duration structure
       expect(validServiceRequest.duration.value).toBeGreaterThan(0);
-      expect(['minutes', 'hours', 'days', 'weeks', 'months']).toContain(validServiceRequest.duration.unit);
+      expect(['minutes', 'hours', 'days', 'weeks', 'months']).toContain(
+        validServiceRequest.duration.unit
+      );
     });
 
     it('should validate booking status update request', () => {
@@ -65,9 +74,16 @@ describe('Booking API Validation Tests', () => {
       };
 
       // Validate status enum
-      const validStatuses = ['pending', 'confirmed', 'active', 'completed', 'cancelled', 'disputed'];
+      const validStatuses = [
+        'pending',
+        'confirmed',
+        'active',
+        'completed',
+        'cancelled',
+        'disputed',
+      ];
       expect(validStatuses).toContain(statusUpdateRequest.status);
-      
+
       // Validate reason is string
       expect(typeof statusUpdateRequest.reason).toBe('string');
       expect(statusUpdateRequest.reason.length).toBeGreaterThan(0);
@@ -99,7 +115,7 @@ describe('Booking API Validation Tests', () => {
       expect(mockBookingResponse.listingId).toBeDefined();
       expect(mockBookingResponse.status).toBeDefined();
       expect(mockBookingResponse.totalPrice).toBeGreaterThan(0);
-      
+
       // Validate types
       expect(typeof mockBookingResponse.id).toBe('string');
       expect(typeof mockBookingResponse.totalPrice).toBe('number');
@@ -114,7 +130,7 @@ describe('Booking API Validation Tests', () => {
             status: 'confirmed',
             totalPrice: 3531,
             createdAt: '2024-01-15T10:00:00.000Z',
-          }
+          },
         ],
         total: 1,
         page: 1,
@@ -128,7 +144,7 @@ describe('Booking API Validation Tests', () => {
       expect(typeof mockSearchResponse.page).toBe('number');
       expect(typeof mockSearchResponse.limit).toBe('number');
       expect(typeof mockSearchResponse.hasMore).toBe('boolean');
-      
+
       // Validate pagination logic
       expect(mockSearchResponse.total).toBeGreaterThanOrEqual(0);
       expect(mockSearchResponse.page).toBeGreaterThan(0);
@@ -140,10 +156,10 @@ describe('Booking API Validation Tests', () => {
     it('should validate date range logic', () => {
       const checkIn = new Date('2024-03-01T14:00:00Z');
       const checkOut = new Date('2024-03-03T11:00:00Z');
-      
+
       // Check-out should be after check-in
       expect(checkOut.getTime()).toBeGreaterThan(checkIn.getTime());
-      
+
       // Calculate nights
       const diffTime = checkOut.getTime() - checkIn.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -153,13 +169,13 @@ describe('Booking API Validation Tests', () => {
     it('should validate guest count limits', () => {
       const validGuestCounts = [1, 2, 5, 10, 20];
       const invalidGuestCounts = [0, -1, 21, 100];
-      
-      validGuestCounts.forEach(count => {
+
+      validGuestCounts.forEach((count) => {
         expect(count).toBeGreaterThan(0);
         expect(count).toBeLessThanOrEqual(20);
       });
-      
-      invalidGuestCounts.forEach(count => {
+
+      invalidGuestCounts.forEach((count) => {
         expect(count <= 0 || count > 20).toBe(true);
       });
     });
@@ -169,10 +185,10 @@ describe('Booking API Validation Tests', () => {
       const serviceFees = 300;
       const taxes = 231;
       const totalPrice = basePrice + serviceFees + taxes;
-      
+
       expect(totalPrice).toBe(3531);
       expect(totalPrice).toBeGreaterThan(basePrice);
-      
+
       // Validate percentage calculations
       const platformFeeRate = 0.03; // 3%
       const calculatedServiceFee = basePrice * platformFeeRate;
@@ -181,14 +197,17 @@ describe('Booking API Validation Tests', () => {
 
     it('should validate service duration calculations', () => {
       const duration = { value: 2, unit: 'hours' };
-      
+
       // Convert to minutes
-      const totalMinutes = duration.unit === 'hours' ? duration.value * 60 : duration.value;
+      const totalMinutes =
+        duration.unit === 'hours' ? duration.value * 60 : duration.value;
       expect(totalMinutes).toBe(120);
-      
+
       // Validate duration limits
       expect(duration.value).toBeGreaterThan(0);
-      expect(['minutes', 'hours', 'days', 'weeks', 'months']).toContain(duration.unit);
+      expect(['minutes', 'hours', 'days', 'weeks', 'months']).toContain(
+        duration.unit
+      );
     });
   });
 
@@ -201,7 +220,7 @@ describe('Booking API Validation Tests', () => {
           {
             field: 'guests',
             message: 'Number of guests must be between 1 and 20',
-          }
+          },
         ],
         timestamp: '2024-01-15T10:00:00.000Z',
       };
@@ -210,7 +229,7 @@ describe('Booking API Validation Tests', () => {
       expect(mockErrorResponse.error).toBeDefined();
       expect(mockErrorResponse.message).toBeDefined();
       expect(mockErrorResponse.timestamp).toBeDefined();
-      
+
       // Validate error details
       expect(Array.isArray(mockErrorResponse.details)).toBe(true);
       if (mockErrorResponse.details.length > 0) {

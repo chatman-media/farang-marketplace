@@ -10,10 +10,10 @@ import {
 import { z } from 'zod';
 
 const UpdateUserSchema = z.object({
-  email: z.string().email().optional(),
+  email: z.email().optional(),
   phone: z.string().optional(),
   telegramId: z.string().optional(),
-  role: z.nativeEnum(UserRole).optional(),
+  role: z.enum(UserRole).optional(),
   profile: z
     .object({
       firstName: z.string().optional(),
@@ -31,7 +31,7 @@ const UpdateUserSchema = z.object({
         .optional(),
       rating: z.number().min(0).max(5).optional(),
       reviewsCount: z.number().min(0).optional(),
-      verificationStatus: z.nativeEnum(VerificationStatus).optional(),
+      verificationStatus: z.enum(VerificationStatus).optional(),
       socialProfiles: z.array(z.any()).optional(),
       primaryAuthProvider: z.any().optional(),
     })

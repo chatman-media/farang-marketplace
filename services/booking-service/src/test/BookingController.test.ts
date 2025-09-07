@@ -32,9 +32,10 @@ describe('BookingController Logic Tests', () => {
       expect(mockRequest.body.listingId).toBeDefined();
       expect(mockRequest.body.checkIn).toBeDefined();
       expect(mockRequest.body.guests).toBeGreaterThan(0);
-      
+
       // Validate UUID format
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       expect(uuidRegex.test(mockRequest.body.listingId)).toBe(true);
     });
 
@@ -53,12 +54,20 @@ describe('BookingController Logic Tests', () => {
       };
 
       // Validate service type
-      const validServiceTypes = ['consultation', 'project', 'hourly', 'package', 'subscription'];
+      const validServiceTypes = [
+        'consultation',
+        'project',
+        'hourly',
+        'package',
+        'subscription',
+      ];
       expect(validServiceTypes).toContain(mockRequest.body.serviceType);
-      
+
       // Validate duration
       expect(mockRequest.body.duration.value).toBeGreaterThan(0);
-      expect(['minutes', 'hours', 'days', 'weeks', 'months']).toContain(mockRequest.body.duration.unit);
+      expect(['minutes', 'hours', 'days', 'weeks', 'months']).toContain(
+        mockRequest.body.duration.unit
+      );
     });
 
     it('should validate status update request', () => {
@@ -66,17 +75,25 @@ describe('BookingController Logic Tests', () => {
         status: 'confirmed',
         reason: 'Payment received',
       };
-      
+
       mockRequest.params = {
         bookingId: '123e4567-e89b-12d3-a456-426614174002',
       };
 
       // Validate status
-      const validStatuses = ['pending', 'confirmed', 'active', 'completed', 'cancelled', 'disputed'];
+      const validStatuses = [
+        'pending',
+        'confirmed',
+        'active',
+        'completed',
+        'cancelled',
+        'disputed',
+      ];
       expect(validStatuses).toContain(mockRequest.body.status);
-      
+
       // Validate booking ID format
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       expect(uuidRegex.test(mockRequest.params.bookingId)).toBe(true);
     });
   });
@@ -115,7 +132,7 @@ describe('BookingController Logic Tests', () => {
             status: 'confirmed',
             totalPrice: 3531,
             createdAt: '2024-01-15T10:00:00.000Z',
-          }
+          },
         ],
         total: 1,
         page: 1,
@@ -139,7 +156,7 @@ describe('BookingController Logic Tests', () => {
           {
             field: 'guests',
             message: 'Number of guests must be between 1 and 20',
-          }
+          },
         ],
         timestamp: '2024-01-15T10:00:00.000Z',
       };
@@ -158,7 +175,7 @@ describe('BookingController Logic Tests', () => {
       expect(mockRequest.user).toBeDefined();
       expect(mockRequest.user.id).toBeDefined();
       expect(mockRequest.user.role).toBeDefined();
-      
+
       // Test user ID format
       expect(typeof mockRequest.user.id).toBe('string');
       expect(mockRequest.user.id.length).toBeGreaterThan(0);
@@ -192,15 +209,20 @@ describe('BookingController Logic Tests', () => {
       // Validate pagination parameters
       const page = parseInt(mockRequest.query.page);
       const limit = parseInt(mockRequest.query.limit);
-      
+
       expect(page).toBeGreaterThan(0);
       expect(limit).toBeGreaterThan(0);
       expect(limit).toBeLessThanOrEqual(100);
-      
+
       // Validate sort parameters
-      const validSortFields = ['createdAt', 'updatedAt', 'totalPrice', 'status'];
+      const validSortFields = [
+        'createdAt',
+        'updatedAt',
+        'totalPrice',
+        'status',
+      ];
       const validSortOrders = ['asc', 'desc'];
-      
+
       expect(validSortFields).toContain(mockRequest.query.sortBy);
       expect(validSortOrders).toContain(mockRequest.query.sortOrder);
     });
@@ -217,13 +239,28 @@ describe('BookingController Logic Tests', () => {
 
       // Validate status filter
       if (mockRequest.query.status) {
-        const validStatuses = ['pending', 'confirmed', 'active', 'completed', 'cancelled', 'disputed'];
+        const validStatuses = [
+          'pending',
+          'confirmed',
+          'active',
+          'completed',
+          'cancelled',
+          'disputed',
+        ];
         expect(validStatuses).toContain(mockRequest.query.status);
       }
 
       // Validate type filter
       if (mockRequest.query.type) {
-        const validTypes = ['accommodation', 'transportation', 'tour', 'activity', 'dining', 'event', 'service'];
+        const validTypes = [
+          'accommodation',
+          'transportation',
+          'tour',
+          'activity',
+          'dining',
+          'event',
+          'service',
+        ];
         expect(validTypes).toContain(mockRequest.query.type);
       }
 
