@@ -106,11 +106,11 @@ export class CommunicationService {
           result = await this.telegramService.sendMessage({
             customerId: request.customerId,
             leadId: request.leadId,
+            channel: CommunicationChannel.TELEGRAM,
             chatId: contactInfo.value,
             content: request.content,
             templateId: request.templateId,
             templateVariables: request.templateVariables,
-
             scheduleAt: request.scheduleAt,
           })
           break
@@ -119,11 +119,11 @@ export class CommunicationService {
           result = await this.whatsappService.sendMessage({
             customerId: request.customerId,
             leadId: request.leadId,
+            channel: CommunicationChannel.WHATSAPP,
             phoneNumber: contactInfo.value,
             content: request.content,
             templateId: request.templateId,
             templateVariables: request.templateVariables,
-
             scheduleAt: request.scheduleAt,
           })
           break
@@ -132,6 +132,7 @@ export class CommunicationService {
           result = await this.lineService.sendMessage({
             customerId: request.customerId,
             leadId: request.leadId,
+            channel: CommunicationChannel.LINE,
             userId: contactInfo.value,
             content: request.content,
             templateId: request.templateId,
