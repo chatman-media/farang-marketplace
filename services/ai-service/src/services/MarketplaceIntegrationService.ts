@@ -1,6 +1,4 @@
-import type {
-  UserBehavior,
-} from "../models/index.js"
+import type { UserBehavior } from "../models/index.js"
 import { AIProviderService } from "./AIProviderService.js"
 import { RecommendationEngine } from "./RecommendationEngine.js"
 import { UserBehaviorService } from "./UserBehaviorService.js"
@@ -102,7 +100,7 @@ export class MarketplaceIntegrationService {
   private recommendationEngine: RecommendationEngine
   private userBehaviorService: UserBehaviorService
   private contentAnalysisService: ContentAnalysisService
-  
+
   // Cache for frequently accessed data
   private priceCache: Map<string, PricingSuggestion> = new Map()
   private fraudCache: Map<string, FraudDetectionResult> = new Map()
@@ -163,7 +161,7 @@ export class MarketplaceIntegrationService {
         },
         fraudIndicators: {
           score: fraudResult.riskScore,
-          flags: fraudResult.flags.map(f => f.type),
+          flags: fraudResult.flags.map((f) => f.type),
           severity: fraudResult.riskLevel === "critical" ? "high" : fraudResult.riskLevel,
           recommendations: [fraudResult.recommendations.action],
         },
@@ -187,7 +185,7 @@ export class MarketplaceIntegrationService {
   ): Promise<PricingSuggestion> {
     try {
       // Check cache first
-      const cacheKey = `${listingId}_${currentPrice || 'no_price'}`
+      const cacheKey = `${listingId}_${currentPrice || "no_price"}`
       const cached = this.priceCache.get(cacheKey)
       if (cached && cached.validUntil > new Date()) {
         return cached
@@ -195,7 +193,7 @@ export class MarketplaceIntegrationService {
 
       // Analyze market data
       const marketData = await this.analyzeMarketData(listingId, marketContext)
-      
+
       // Generate AI-powered pricing suggestions
       const aiSuggestion = await this.generateAIPricingSuggestion(
         listingId,
@@ -275,9 +273,10 @@ export class MarketplaceIntegrationService {
   ): Promise<FraudDetectionResult> {
     try {
       // Check cache first
-      const cacheKey = `${userId}_${listingId || 'no_listing'}`
+      const cacheKey = `${userId}_${listingId || "no_listing"}`
       const cached = this.fraudCache.get(cacheKey)
-      if (cached && Date.now() - cached.createdAt.getTime() < 5 * 60 * 1000) { // 5 minutes
+      if (cached && Date.now() - cached.createdAt.getTime() < 5 * 60 * 1000) {
+        // 5 minutes
         return cached
       }
 
@@ -344,7 +343,10 @@ User ID: ${userId}
 Listing ID: ${listingId}
 Booking Data: ${JSON.stringify(bookingData)}
 User Insights: ${JSON.stringify(userInsights.slice(0, 5))}
-Recent Behaviors: ${userBehaviors.slice(0, 10).map(b => `${b.action} on ${b.entityType}`).join(", ")}
+Recent Behaviors: ${userBehaviors
+        .slice(0, 10)
+        .map((b) => `${b.action} on ${b.entityType}`)
+        .join(", ")}
 
 Generate recommendations for:
 1. Booking optimization (timing, duration, add-ons)
@@ -397,7 +399,7 @@ Provide JSON response with recommendations array containing action, confidence, 
       return {
         suggestedPrice: pricingSuggestion.suggestedPrice,
         priceRange: pricingSuggestion.priceRange,
-        factors: pricingSuggestion.factors.map(f => f.factor),
+        factors: pricingSuggestion.factors.map((f) => f.factor),
         confidence: pricingSuggestion.confidence,
       }
     } catch (error) {
@@ -485,7 +487,11 @@ Provide JSON response with: suggestedPrice, priceRange (min/max), confidence (0-
         metadata: {},
       })
 
-      const aiSuggestion = this.parseAIPricingSuggestion(response.response, currentPrice, marketData)
+      const aiSuggestion = this.parseAIPricingSuggestion(
+        response.response,
+        currentPrice,
+        marketData
+      )
 
       return aiSuggestion
     } catch (error) {
@@ -523,7 +529,12 @@ Provide JSON response with: suggestedPrice, priceRange (min/max), confidence (0-
 User ID: ${userId}
 Listing ID: ${listingId || "N/A"}
 Transaction Data: ${JSON.stringify(transactionData || {})}
-User Behaviors: ${userBehaviors?.slice(0, 10).map(b => `${b.action} on ${b.entityType}`).join(", ") || "No behaviors"}
+User Behaviors: ${
+        userBehaviors
+          ?.slice(0, 10)
+          .map((b) => `${b.action} on ${b.entityType}`)
+          .join(", ") || "No behaviors"
+      }
 
 Analyze for:
 1. Suspicious patterns
@@ -589,7 +600,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
       case "critical":
         return "block"
       case "high":
-        return flags.some(f => f.type.includes("payment")) ? "verify" : "review"
+        return flags.some((f) => f.type.includes("payment")) ? "verify" : "review"
       case "medium":
         return "review"
       default:
@@ -612,15 +623,15 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     steps.push("Verify user identity with government ID")
 
     // Additional steps based on flags
-    if (flags.some(f => f.type.includes("payment"))) {
+    if (flags.some((f) => f.type.includes("payment"))) {
       steps.push("Verify payment method ownership")
     }
 
-    if (flags.some(f => f.type.includes("location"))) {
+    if (flags.some((f) => f.type.includes("location"))) {
       steps.push("Confirm current location via phone verification")
     }
 
-    if (flags.some(f => f.type.includes("rapid") || f.type.includes("excessive"))) {
+    if (flags.some((f) => f.type.includes("rapid") || f.type.includes("excessive"))) {
       steps.push("Implement temporary rate limiting")
     }
 
@@ -635,14 +646,16 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   /**
    * Analyze user behavior for fraud detection
    */
-  private async analyzeBehaviorForFraud(userBehaviors: UserBehavior[]): Promise<FraudDetectionResult["flags"]> {
+  private async analyzeBehaviorForFraud(
+    userBehaviors: UserBehavior[]
+  ): Promise<FraudDetectionResult["flags"]> {
     const flags: FraudDetectionResult["flags"] = []
 
     if (userBehaviors.length === 0) return flags
 
     // Check for excessive activity
     const recentBehaviors = userBehaviors.filter(
-      b => Date.now() - b.timestamp.getTime() < 60 * 60 * 1000 // Last hour
+      (b) => Date.now() - b.timestamp.getTime() < 60 * 60 * 1000 // Last hour
     )
 
     if (recentBehaviors.length > 50) {
@@ -655,7 +668,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     }
 
     // Check for rapid booking attempts
-    const bookingAttempts = userBehaviors.filter(b => b.action === "book")
+    const bookingAttempts = userBehaviors.filter((b) => b.action === "book")
     if (bookingAttempts.length > 10) {
       flags.push({
         type: "rapid_booking_attempts",
@@ -671,7 +684,9 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   /**
    * Analyze transaction for fraud detection
    */
-  private async analyzeTransactionForFraud(transactionData?: Record<string, any>): Promise<FraudDetectionResult["flags"]> {
+  private async analyzeTransactionForFraud(
+    transactionData?: Record<string, any>
+  ): Promise<FraudDetectionResult["flags"]> {
     const flags: FraudDetectionResult["flags"] = []
 
     if (!transactionData) return flags
@@ -882,7 +897,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     const searchHours: number[] = []
     const browsingHours: number[] = []
 
-    userBehaviors.forEach(behavior => {
+    userBehaviors.forEach((behavior) => {
       const hour = behavior.timestamp.getHours()
       hourCounts[hour]++
 
@@ -915,7 +930,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     if (hours.length === 0) return null
 
     const hourCounts = new Array(24).fill(0)
-    hours.forEach(hour => hourCounts[hour]++)
+    hours.forEach((hour) => hourCounts[hour]++)
 
     return hourCounts.indexOf(Math.max(...hourCounts))
   }
@@ -924,17 +939,11 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     const preferences: Record<string, any> = {}
 
     // Extract preferences from user behaviors
-    const categories = userBehaviors
-      .map(b => b.metadata?.["category"])
-      .filter(Boolean)
+    const categories = userBehaviors.map((b) => b.metadata?.["category"]).filter(Boolean)
 
-    const locations = userBehaviors
-      .map(b => b.metadata?.["location"])
-      .filter(Boolean)
+    const locations = userBehaviors.map((b) => b.metadata?.["location"]).filter(Boolean)
 
-    const priceRanges = userBehaviors
-      .map(b => b.metadata?.["priceRange"])
-      .filter(Boolean)
+    const priceRanges = userBehaviors.map((b) => b.metadata?.["priceRange"]).filter(Boolean)
 
     if (categories.length > 0) {
       preferences["preferredCategories"] = [...new Set(categories)]
@@ -945,8 +954,12 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     }
 
     if (priceRanges.length > 0) {
-      const avgMin = priceRanges.reduce((sum: number, range: any) => sum + (range.min || 0), 0) / priceRanges.length
-      const avgMax = priceRanges.reduce((sum: number, range: any) => sum + (range.max || 0), 0) / priceRanges.length
+      const avgMin =
+        priceRanges.reduce((sum: number, range: any) => sum + (range.min || 0), 0) /
+        priceRanges.length
+      const avgMax =
+        priceRanges.reduce((sum: number, range: any) => sum + (range.max || 0), 0) /
+        priceRanges.length
       preferences["priceRange"] = { min: avgMin, max: avgMax }
     }
 
@@ -1012,7 +1025,9 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     return 0.9 // 10% decrease during low season
   }
 
-  private calculateDemandLevel(context?: Record<string, any>): PricingSuggestion["marketData"]["demandLevel"] {
+  private calculateDemandLevel(
+    context?: Record<string, any>
+  ): PricingSuggestion["marketData"]["demandLevel"] {
     // Mock demand calculation - in real implementation, this would analyze booking patterns
     const currentHour = new Date().getHours()
 

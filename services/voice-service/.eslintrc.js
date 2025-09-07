@@ -4,19 +4,14 @@ module.exports = {
     node: true,
     es2022: true,
   },
-  extends: [
-    "eslint:recommended",
-    "@typescript-eslint/recommended",
-  ],
+  extends: ["eslint:recommended", "@typescript-eslint/recommended"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: "module",
     project: "./tsconfig.json",
   },
-  plugins: [
-    "@typescript-eslint",
-  ],
+  plugins: ["@typescript-eslint"],
   rules: {
     // TypeScript specific rules
     "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
@@ -39,9 +34,9 @@ module.exports = {
     "template-curly-spacing": "error",
     "arrow-spacing": "error",
     "comma-dangle": ["error", "always-multiline"],
-    "semi": ["error", "never"],
-    "quotes": ["error", "double"],
-    "indent": ["error", 2],
+    semi: ["error", "never"],
+    quotes: ["error", "double"],
+    indent: ["error", 2],
     "max-len": ["warn", { code: 120 }],
     "eol-last": "error",
     "no-trailing-spaces": "error",
@@ -52,19 +47,22 @@ module.exports = {
     "key-spacing": ["error", { beforeColon: false, afterColon: true }],
     "keyword-spacing": "error",
     "space-before-blocks": "error",
-    "space-before-function-paren": ["error", {
-      "anonymous": "always",
-      "named": "never",
-      "asyncArrow": "always"
-    }],
+    "space-before-function-paren": [
+      "error",
+      {
+        anonymous: "always",
+        named: "never",
+        asyncArrow: "always",
+      },
+    ],
     "space-in-parens": ["error", "never"],
     "space-infix-ops": "error",
     "space-unary-ops": "error",
     "spaced-comment": ["error", "always"],
     "brace-style": ["error", "1tbs", { allowSingleLine: true }],
-    "curly": ["error", "all"],
+    curly: ["error", "all"],
     "dot-notation": "error",
-    "eqeqeq": ["error", "always"],
+    eqeqeq: ["error", "always"],
     "no-else-return": "error",
     "no-multi-spaces": "error",
     "no-multiple-empty-lines": ["error", { max: 2, maxEOF: 1 }],
@@ -86,11 +84,5 @@ module.exports = {
       },
     },
   ],
-  ignorePatterns: [
-    "dist/",
-    "node_modules/",
-    "coverage/",
-    "*.js",
-    "*.d.ts",
-  ],
+  ignorePatterns: ["dist/", "node_modules/", "coverage/", "*.js", "*.d.ts"],
 }

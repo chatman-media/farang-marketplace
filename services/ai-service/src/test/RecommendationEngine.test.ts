@@ -74,8 +74,8 @@ describe("Recommendation Engine Tests", () => {
 
       // If results are returned, they should be valid
       if (recommendations.results.length > 0) {
-        expect(recommendations.results[0]).toHaveProperty('id')
-        expect(recommendations.results[0]).toHaveProperty('score')
+        expect(recommendations.results[0]).toHaveProperty("id")
+        expect(recommendations.results[0]).toHaveProperty("score")
       }
     })
   })

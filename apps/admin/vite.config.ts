@@ -7,7 +7,9 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "@marketplace/shared-types": fileURLToPath(new URL("../../packages/shared-types/src", import.meta.url)),
+      "@marketplace/shared-types": fileURLToPath(
+        new URL("../../packages/shared-types/src", import.meta.url)
+      ),
     },
   },
   server: {

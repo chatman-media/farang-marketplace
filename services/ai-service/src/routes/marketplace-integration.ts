@@ -8,19 +8,10 @@ const marketplaceController = new MarketplaceIntegrationController()
 
 // Validation middleware
 const bookingIntelligenceValidation = [
-  body("userId")
-    .isUUID()
-    .withMessage("User ID must be a valid UUID"),
-  body("listingId")
-    .isUUID()
-    .withMessage("Listing ID must be a valid UUID"),
-  body("bookingData")
-    .isObject()
-    .withMessage("Booking data must be an object"),
-  body("bookingData.bookingId")
-    .optional()
-    .isUUID()
-    .withMessage("Booking ID must be a valid UUID"),
+  body("userId").isUUID().withMessage("User ID must be a valid UUID"),
+  body("listingId").isUUID().withMessage("Listing ID must be a valid UUID"),
+  body("bookingData").isObject().withMessage("Booking data must be an object"),
+  body("bookingData.bookingId").optional().isUUID().withMessage("Booking ID must be a valid UUID"),
   body("bookingData.currentPrice")
     .optional()
     .isNumeric()
@@ -36,51 +27,25 @@ const bookingIntelligenceValidation = [
 ]
 
 const priceSuggestionsValidation = [
-  body("listingId")
-    .isUUID()
-    .withMessage("Listing ID must be a valid UUID"),
-  body("currentPrice")
-    .optional()
-    .isNumeric()
-    .withMessage("Current price must be a number"),
-  body("marketContext")
-    .optional()
-    .isObject()
-    .withMessage("Market context must be an object"),
+  body("listingId").isUUID().withMessage("Listing ID must be a valid UUID"),
+  body("currentPrice").optional().isNumeric().withMessage("Current price must be a number"),
+  body("marketContext").optional().isObject().withMessage("Market context must be an object"),
 ]
 
 const smartNotificationValidation = [
-  body("userId")
-    .isUUID()
-    .withMessage("User ID must be a valid UUID"),
+  body("userId").isUUID().withMessage("User ID must be a valid UUID"),
   body("type")
     .isIn(["booking_reminder", "price_alert", "recommendation", "engagement"])
     .withMessage("Type must be one of: booking_reminder, price_alert, recommendation, engagement"),
-  body("context")
-    .isObject()
-    .withMessage("Context must be an object"),
-  body("context.bookingId")
-    .optional()
-    .isUUID()
-    .withMessage("Booking ID must be a valid UUID"),
-  body("context.listingId")
-    .optional()
-    .isUUID()
-    .withMessage("Listing ID must be a valid UUID"),
+  body("context").isObject().withMessage("Context must be an object"),
+  body("context.bookingId").optional().isUUID().withMessage("Booking ID must be a valid UUID"),
+  body("context.listingId").optional().isUUID().withMessage("Listing ID must be a valid UUID"),
 ]
 
 const fraudDetectionValidation = [
-  body("userId")
-    .isUUID()
-    .withMessage("User ID must be a valid UUID"),
-  body("listingId")
-    .optional()
-    .isUUID()
-    .withMessage("Listing ID must be a valid UUID"),
-  body("transactionData")
-    .optional()
-    .isObject()
-    .withMessage("Transaction data must be an object"),
+  body("userId").isUUID().withMessage("User ID must be a valid UUID"),
+  body("listingId").optional().isUUID().withMessage("Listing ID must be a valid UUID"),
+  body("transactionData").optional().isObject().withMessage("Transaction data must be an object"),
   body("transactionData.amount")
     .optional()
     .isNumeric()
@@ -96,14 +61,8 @@ const analyticsValidation = [
     .optional()
     .isIn(["1d", "7d", "30d", "90d", "1y"])
     .withMessage("Timeframe must be one of: 1d, 7d, 30d, 90d, 1y"),
-  query("category")
-    .optional()
-    .isString()
-    .withMessage("Category must be a string"),
-  query("location")
-    .optional()
-    .isString()
-    .withMessage("Location must be a string"),
+  query("category").optional().isString().withMessage("Category must be a string"),
+  query("location").optional().isString().withMessage("Location must be a string"),
 ]
 
 // Public routes (no authentication required)
@@ -134,17 +93,9 @@ router.post(
 )
 
 // Fraud Detection
-router.post(
-  "/fraud-detection",
-  fraudDetectionValidation,
-  marketplaceController.detectFraud
-)
+router.post("/fraud-detection", fraudDetectionValidation, marketplaceController.detectFraud)
 
 // Analytics (admin/moderator only)
-router.get(
-  "/analytics",
-  analyticsValidation,
-  marketplaceController.getMarketplaceAnalytics
-)
+router.get("/analytics", analyticsValidation, marketplaceController.getMarketplaceAnalytics)
 
 export default router

@@ -92,12 +92,12 @@ export class CommunicationService {
           result = await this.emailService.sendEmail({
             customerId: request.customerId,
             leadId: request.leadId,
+            channel: CommunicationChannel.EMAIL,
             to: contactInfo.value,
             subject: request.subject || "Message from Thailand Marketplace",
             content: request.content,
             templateId: request.templateId,
             templateVariables: request.templateVariables,
-
             scheduleAt: request.scheduleAt,
           })
           break

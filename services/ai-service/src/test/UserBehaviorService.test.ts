@@ -109,9 +109,7 @@ describe("User Behavior Service Tests", () => {
 
       // Should detect electronics preference
       const electronicsInsight = insights.find(
-        (insight) =>
-          insight.type === "preference" &&
-          insight.insight.includes("electronics")
+        (insight) => insight.type === "preference" && insight.insight.includes("electronics")
       )
       expect(electronicsInsight).toBeDefined()
       expect(electronicsInsight!.confidence).toBeGreaterThan(0.5)
@@ -382,7 +380,7 @@ describe("User Behavior Service Tests", () => {
 
       // Should have category-based segments
       const hasElectronicsSegment = segments.some((s) =>
-        s.characteristics.some(char => char.includes("electronics"))
+        s.characteristics.some((char) => char.includes("electronics"))
       )
       expect(hasElectronicsSegment).toBe(true)
     })
