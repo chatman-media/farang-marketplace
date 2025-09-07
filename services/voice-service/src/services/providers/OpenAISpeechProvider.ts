@@ -1,9 +1,9 @@
-import type { 
-  SpeechToTextProvider, 
-  VoiceRequest, 
-  VoiceResponse, 
-  ProviderConfig, 
-  ProviderUsage 
+import type {
+  ProviderConfig,
+  ProviderUsage,
+  SpeechToTextProvider,
+  VoiceRequest,
+  VoiceResponse,
 } from "../../models/index.js"
 
 export class OpenAISpeechProvider implements SpeechToTextProvider {
@@ -30,7 +30,7 @@ export class OpenAISpeechProvider implements SpeechToTextProvider {
 
       // In a real implementation, this would use OpenAI Whisper API
       const response = await this.callOpenAIWhisperAPI(request)
-      
+
       this.usage.lastUsed = new Date()
       this.usage.totalDuration += Date.now() - startTime
       this.usage.costEstimate = (this.usage.costEstimate || 0) + this.calculateCost(request)
@@ -62,7 +62,7 @@ export class OpenAISpeechProvider implements SpeechToTextProvider {
 
   private async callOpenAIWhisperAPI(request: VoiceRequest): Promise<VoiceResponse> {
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 300))
+    await new Promise((resolve) => setTimeout(resolve, 300))
 
     // Mock OpenAI Whisper API response
     const mockResponse = {
@@ -168,14 +168,14 @@ export class OpenAISpeechProvider implements SpeechToTextProvider {
 
   private calculateCost(request: VoiceRequest): number {
     // OpenAI Whisper pricing: $0.006 per minute
-    const audioSize = Buffer.isBuffer(request.audioData) 
-      ? request.audioData.length 
-      : Buffer.from(request.audioData, 'base64').length
-    
+    const audioSize = Buffer.isBuffer(request.audioData)
+      ? request.audioData.length
+      : Buffer.from(request.audioData, "base64").length
+
     // Rough estimate: 1KB ≈ 1 second of audio
     const estimatedDuration = audioSize / 1024
     const minutes = estimatedDuration / 60
-    
+
     return minutes * 0.006
   }
 

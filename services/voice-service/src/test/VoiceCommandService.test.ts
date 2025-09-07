@@ -1,12 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest"
-import { VoiceCommandService } from "../services/VoiceCommandService.js"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { SpeechToTextService } from "../services/SpeechToTextService.js"
-import { 
-  createMockAudioBuffer, 
-  mockVoiceRequest,
-  mockSession,
-  delay
-} from "./setup.js"
+import { VoiceCommandService } from "../services/VoiceCommandService.js"
+import { createMockAudioBuffer, delay } from "./setup.js"
 
 describe("Voice Command Service Tests", () => {
   let voiceCommandService: VoiceCommandService
@@ -28,18 +23,18 @@ describe("Voice Command Service Tests", () => {
     })
 
     it("should generate unique session IDs", () => {
-      const sessionId1 = voiceCommandService["generateSessionId"]()
-      const sessionId2 = voiceCommandService["generateSessionId"]()
-      
+      const sessionId1 = voiceCommandService.generateSessionId()
+      const sessionId2 = voiceCommandService.generateSessionId()
+
       expect(sessionId1).toBeDefined()
       expect(sessionId2).toBeDefined()
       expect(sessionId1).not.toBe(sessionId2)
     })
 
     it("should generate unique command IDs", () => {
-      const commandId1 = voiceCommandService["generateCommandId"]()
-      const commandId2 = voiceCommandService["generateCommandId"]()
-      
+      const commandId1 = voiceCommandService.generateCommandId()
+      const commandId2 = voiceCommandService.generateCommandId()
+
       expect(commandId1).toBeDefined()
       expect(commandId2).toBeDefined()
       expect(commandId1).not.toBe(commandId2)
@@ -49,7 +44,7 @@ describe("Voice Command Service Tests", () => {
   describe("Voice Command Processing", () => {
     it("should process voice command from audio", async () => {
       const audioBuffer = createMockAudioBuffer(2048)
-      
+
       const result = await voiceCommandService.processVoiceCommand(
         audioBuffer,
         "test-user",
@@ -65,7 +60,7 @@ describe("Voice Command Service Tests", () => {
 
     it("should handle audio transcription failure", async () => {
       const emptyAudio = Buffer.alloc(0)
-      
+
       const result = await voiceCommandService.processVoiceCommand(
         emptyAudio,
         "test-user",
@@ -292,7 +287,7 @@ describe("Voice Command Service Tests", () => {
   describe("Session Management", () => {
     it("should create and manage sessions", async () => {
       const sessionId = "test-session-123"
-      
+
       await voiceCommandService.processTextCommand(
         "Hello",
         "test-user",
@@ -302,32 +297,24 @@ describe("Voice Command Service Tests", () => {
       )
 
       const session = voiceCommandService.getSession(sessionId)
-      
+
       expect(session).toBeDefined()
-      expect(session!.id).toBe(sessionId)
-      expect(session!.userId).toBe("test-user")
-      expect(session!.commands.length).toBe(1)
+      expect(session?.id).toBe(sessionId)
+      expect(session?.userId).toBe("test-user")
+      expect(session?.commands.length).toBe(1)
     })
 
     it("should track command history in sessions", async () => {
       const sessionId = "test-session-history"
-      
-      await voiceCommandService.processTextCommand(
-        "Find apartments",
-        "test-user",
-        sessionId
-      )
-      
-      await voiceCommandService.processTextCommand(
-        "Go to home",
-        "test-user",
-        sessionId
-      )
+
+      await voiceCommandService.processTextCommand("Find apartments", "test-user", sessionId)
+
+      await voiceCommandService.processTextCommand("Go to home", "test-user", sessionId)
 
       const session = voiceCommandService.getSession(sessionId)
-      
+
       expect(session).toBeDefined()
-      expect(session!.commands.length).toBe(2)
+      expect(session?.commands.length).toBe(2)
       expect(session?.commands[0]?.command).toContain("apartments")
       expect(session?.commands[1]?.command).toContain("home")
     })
@@ -335,24 +322,20 @@ describe("Voice Command Service Tests", () => {
     it("should update session activity time", async () => {
       const sessionId = "test-session-activity"
       const startTime = new Date()
-      
+
       await delay(100) // Small delay
-      
-      await voiceCommandService.processTextCommand(
-        "Test command",
-        "test-user",
-        sessionId
-      )
+
+      await voiceCommandService.processTextCommand("Test command", "test-user", sessionId)
 
       const session = voiceCommandService.getSession(sessionId)
-      
+
       expect(session).toBeDefined()
-      expect(session!.lastActivity.getTime()).toBeGreaterThan(startTime.getTime())
+      expect(session?.lastActivity.getTime()).toBeGreaterThan(startTime.getTime())
     })
 
     it("should get session statistics", () => {
       const stats = voiceCommandService.getSessionStats()
-      
+
       expect(stats).toBeDefined()
       expect(stats.totalSessions).toBeGreaterThanOrEqual(0)
       expect(stats.activeSessions).toBeGreaterThanOrEqual(0)
@@ -361,11 +344,7 @@ describe("Voice Command Service Tests", () => {
 
     it("should clean up expired sessions", async () => {
       // Create a session
-      await voiceCommandService.processTextCommand(
-        "Test",
-        "test-user",
-        "test-session-cleanup"
-      )
+      await voiceCommandService.processTextCommand("Test", "test-user", "test-session-cleanup")
 
       let session = voiceCommandService.getSession("test-session-cleanup")
       expect(session).toBeDefined()
@@ -387,7 +366,7 @@ describe("Voice Command Service Tests", () => {
   describe("Listing Creation Flow", () => {
     it("should handle listing creation flow", async () => {
       const sessionId = "test-listing-flow"
-      
+
       // Start listing creation
       const startResult = await voiceCommandService.processTextCommand(
         "Create a new listing",
@@ -417,14 +396,11 @@ describe("Voice Command Service Tests", () => {
 
     it("should handle listing creation cancellation", async () => {
       const sessionId = "test-listing-cancel"
-      
+
       // Start listing creation
-      await voiceCommandService.processTextCommand(
-        "Create a new listing",
-        "test-user",
-        sessionId,
-        { type: "listing" }
-      )
+      await voiceCommandService.processTextCommand("Create a new listing", "test-user", sessionId, {
+        type: "listing",
+      })
 
       // Cancel
       const cancelResult = await voiceCommandService.processTextCommand(
@@ -444,11 +420,7 @@ describe("Voice Command Service Tests", () => {
 
   describe("Error Handling", () => {
     it("should handle empty text commands", async () => {
-      const result = await voiceCommandService.processTextCommand(
-        "",
-        "test-user",
-        "test-session"
-      )
+      const result = await voiceCommandService.processTextCommand("", "test-user", "test-session")
 
       expect(result.success).toBe(false)
       expect(result.action).toBe("unknown")
@@ -456,7 +428,7 @@ describe("Voice Command Service Tests", () => {
 
     it("should handle very long commands", async () => {
       const longCommand = "a".repeat(10000)
-      
+
       const result = await voiceCommandService.processTextCommand(
         longCommand,
         "test-user",
@@ -482,16 +454,16 @@ describe("Voice Command Service Tests", () => {
   describe("Performance", () => {
     it("should process commands quickly", async () => {
       const startTime = Date.now()
-      
+
       const result = await voiceCommandService.processTextCommand(
         "Find apartments",
         "test-user",
         "test-session"
       )
-      
+
       const endTime = Date.now()
       const processingTime = endTime - startTime
-      
+
       expect(result.success).toBe(true)
       expect(processingTime).toBeLessThan(1000) // Should complete within 1 second
     })
@@ -506,16 +478,12 @@ describe("Voice Command Service Tests", () => {
       ]
 
       const promises = commands.map((command, index) =>
-        voiceCommandService.processTextCommand(
-          command,
-          "test-user",
-          `test-session-${index}`
-        )
+        voiceCommandService.processTextCommand(command, "test-user", `test-session-${index}`)
       )
 
       const results = await Promise.all(promises)
 
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).toBeDefined()
         expect(typeof result.success).toBe("boolean")
       })

@@ -1,15 +1,13 @@
 import type {
+  LanguageSupport,
+  ProviderUsage,
+  SpeechToTextProvider,
   VoiceRequest,
   VoiceResponse,
-  SpeechToTextProvider,
-  ProviderConfig,
-  ProviderUsage,
-  VoiceError,
-  LanguageSupport
 } from "../models/index.js"
-import { MockSpeechProvider } from "./providers/MockSpeechProvider.js"
-import { GoogleSpeechProvider } from "./providers/GoogleSpeechProvider.js"
 import { AzureSpeechProvider } from "./providers/AzureSpeechProvider.js"
+import { GoogleSpeechProvider } from "./providers/GoogleSpeechProvider.js"
+import { MockSpeechProvider } from "./providers/MockSpeechProvider.js"
 import { OpenAISpeechProvider } from "./providers/OpenAISpeechProvider.js"
 
 export class SpeechToTextService {
@@ -32,24 +30,33 @@ export class SpeechToTextService {
     } else {
       // Production providers
       if (process.env.GOOGLE_SPEECH_API_KEY && process.env.GOOGLE_CLOUD_PROJECT_ID) {
-        this.providers.set("google", new GoogleSpeechProvider({
-          apiKey: process.env.GOOGLE_SPEECH_API_KEY,
-          projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-        }))
+        this.providers.set(
+          "google",
+          new GoogleSpeechProvider({
+            apiKey: process.env.GOOGLE_SPEECH_API_KEY,
+            projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+          })
+        )
       }
 
       if (process.env.AZURE_SPEECH_KEY && process.env.AZURE_SPEECH_REGION) {
-        this.providers.set("azure", new AzureSpeechProvider({
-          apiKey: process.env.AZURE_SPEECH_KEY,
-          region: process.env.AZURE_SPEECH_REGION,
-        }))
+        this.providers.set(
+          "azure",
+          new AzureSpeechProvider({
+            apiKey: process.env.AZURE_SPEECH_KEY,
+            region: process.env.AZURE_SPEECH_REGION,
+          })
+        )
       }
 
       if (process.env.OPENAI_API_KEY) {
-        this.providers.set("openai", new OpenAISpeechProvider({
-          apiKey: process.env.OPENAI_API_KEY,
-          organization: process.env.OPENAI_ORGANIZATION,
-        }))
+        this.providers.set(
+          "openai",
+          new OpenAISpeechProvider({
+            apiKey: process.env.OPENAI_API_KEY,
+            organization: process.env.OPENAI_ORGANIZATION,
+          })
+        )
       }
 
       // Always add mock provider for testing
@@ -141,7 +148,7 @@ export class SpeechToTextService {
 
       // Perform transcription
       const response = await provider.transcribe(request)
-      
+
       // Update usage statistics
       this.updateUsage(provider.name, Date.now() - startTime, true)
 
@@ -152,7 +159,7 @@ export class SpeechToTextService {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error"
-      
+
       // Update error statistics
       const provider = await this.getBestProvider(request.language)
       if (provider) {
@@ -176,14 +183,13 @@ export class SpeechToTextService {
     // In test environment, prefer mock provider
     if (process.env.NODE_ENV === "test" && this.providers.has("mock")) {
       const mockProvider = this.providers.get("mock")!
-      if (mockProvider.enabled && await mockProvider.isAvailable()) {
+      if (mockProvider.enabled && (await mockProvider.isAvailable())) {
         return mockProvider
       }
     }
 
     // Get providers that support the language
-    const supportedProviders = this.supportedLanguages
-      .find(l => l.code === lang)?.providers || []
+    const supportedProviders = this.supportedLanguages.find((l) => l.code === lang)?.providers || []
 
     // Sort providers by priority and availability
     const availableProviders: Array<{ provider: SpeechToTextProvider; priority: number }> = []
@@ -212,10 +218,10 @@ export class SpeechToTextService {
     }
 
     // Check audio size
-    const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760")
+    const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10)
     const audioSize = Buffer.isBuffer(request.audioData)
       ? request.audioData.length
-      : Buffer.from(request.audioData, 'base64').length
+      : Buffer.from(request.audioData, "base64").length
 
     if (audioSize > maxSize) {
       throw new Error(`Audio file too large. Maximum size: ${maxSize} bytes`)
@@ -228,7 +234,7 @@ export class SpeechToTextService {
     // Check language support
     if (request.language) {
       const isSupported = this.supportedLanguages.some(
-        l => l.code === request.language && l.enabled
+        (l) => l.code === request.language && l.enabled
       )
       if (!isSupported) {
         throw new Error(`Language ${request.language} is not supported`)
@@ -258,7 +264,7 @@ export class SpeechToTextService {
    * Get supported languages
    */
   getSupportedLanguages(): LanguageSupport[] {
-    return this.supportedLanguages.filter(lang => lang.enabled)
+    return this.supportedLanguages.filter((lang) => lang.enabled)
   }
 
   /**
@@ -276,16 +282,14 @@ export class SpeechToTextService {
    * Check if language is supported
    */
   isLanguageSupported(languageCode: string): boolean {
-    return this.supportedLanguages.some(
-      lang => lang.code === languageCode && lang.enabled
-    )
+    return this.supportedLanguages.some((lang) => lang.code === languageCode && lang.enabled)
   }
 
   /**
    * Get available providers for language
    */
   getProvidersForLanguage(languageCode: string): string[] {
-    const language = this.supportedLanguages.find(l => l.code === languageCode)
+    const language = this.supportedLanguages.find((l) => l.code === languageCode)
     return language?.providers || []
   }
 

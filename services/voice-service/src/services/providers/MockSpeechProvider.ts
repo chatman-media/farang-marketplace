@@ -1,9 +1,9 @@
-import type { 
-  SpeechToTextProvider, 
-  VoiceRequest, 
-  VoiceResponse, 
-  ProviderConfig, 
-  ProviderUsage 
+import type {
+  ProviderConfig,
+  ProviderUsage,
+  SpeechToTextProvider,
+  VoiceRequest,
+  VoiceResponse,
 } from "../../models/index.js"
 
 export class MockSpeechProvider implements SpeechToTextProvider {
@@ -20,7 +20,7 @@ export class MockSpeechProvider implements SpeechToTextProvider {
 
   async transcribe(request: VoiceRequest): Promise<VoiceResponse> {
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 100))
 
     this.usage.requestCount++
     this.usage.lastUsed = new Date()
@@ -65,23 +65,11 @@ export class MockSpeechProvider implements SpeechToTextProvider {
     if (language === "th-TH") {
       switch (context) {
         case "search":
-          return [
-            "ค้นหาบ้านให้เช่าในกรุงเทพ",
-            "หาคอนโดใกล้รถไฟฟ้า",
-            "ต้องการห้องพักราคาไม่เกิน 15000 บาท",
-          ]
+          return ["ค้นหาบ้านให้เช่าในกรุงเทพ", "หาคอนโดใกล้รถไฟฟ้า", "ต้องการห้องพักราคาไม่เกิน 15000 บาท"]
         case "listing":
-          return [
-            "ต้องการลงประกาศขายบ้าน",
-            "มีคอนโดให้เช่าในสุขุมวิท",
-            "ห้องพักสำหรับนักศึกษา ราคา 8000 บาท",
-          ]
+          return ["ต้องการลงประกาศขายบ้าน", "มีคอนโดให้เช่าในสุขุมวิท", "ห้องพักสำหรับนักศึกษา ราคา 8000 บาท"]
         case "navigation":
-          return [
-            "ไปหน้าหลัก",
-            "ดูประวัติการจอง",
-            "เปิดโปรไฟล์ของฉัน",
-          ]
+          return ["ไปหน้าหลัก", "ดูประวัติการจอง", "เปิดโปรไฟล์ของฉัน"]
         default:
           return ["สวัสดีครับ ต้องการความช่วยเหลืออะไรครับ"]
       }
@@ -122,11 +110,7 @@ export class MockSpeechProvider implements SpeechToTextProvider {
           "Contact the owner",
         ]
       default:
-        return [
-          "Hello, how can I help you?",
-          "What would you like to do?",
-          "I'm listening",
-        ]
+        return ["Hello, how can I help you?", "What would you like to do?", "I'm listening"]
     }
   }
 
@@ -138,8 +122,8 @@ export class MockSpeechProvider implements SpeechToTextProvider {
   }> {
     const words = text.split(" ")
     let currentTime = 0
-    
-    return words.map(word => {
+
+    return words.map((word) => {
       const duration = word.length * 0.1 + 0.2 // Rough estimate
       const wordInfo = {
         word,

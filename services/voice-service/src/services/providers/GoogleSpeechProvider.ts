@@ -1,9 +1,9 @@
-import type { 
-  SpeechToTextProvider, 
-  VoiceRequest, 
-  VoiceResponse, 
-  ProviderConfig, 
-  ProviderUsage 
+import type {
+  ProviderConfig,
+  ProviderUsage,
+  SpeechToTextProvider,
+  VoiceRequest,
+  VoiceResponse,
 } from "../../models/index.js"
 
 export class GoogleSpeechProvider implements SpeechToTextProvider {
@@ -31,7 +31,7 @@ export class GoogleSpeechProvider implements SpeechToTextProvider {
       // In a real implementation, this would use Google Cloud Speech-to-Text API
       // For now, we'll simulate the API call
       const response = await this.callGoogleSpeechAPI(request)
-      
+
       this.usage.lastUsed = new Date()
       this.usage.totalDuration += Date.now() - startTime
       this.usage.costEstimate = (this.usage.costEstimate || 0) + this.calculateCost(request)
@@ -64,7 +64,7 @@ export class GoogleSpeechProvider implements SpeechToTextProvider {
 
   private async callGoogleSpeechAPI(request: VoiceRequest): Promise<VoiceResponse> {
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 200))
+    await new Promise((resolve) => setTimeout(resolve, 200))
 
     // Mock Google Speech API response structure
     const mockResponse = {
@@ -168,14 +168,14 @@ export class GoogleSpeechProvider implements SpeechToTextProvider {
   private calculateCost(request: VoiceRequest): number {
     // Google Cloud Speech-to-Text pricing (approximate)
     // Standard model: $0.006 per 15 seconds
-    const audioSize = Buffer.isBuffer(request.audioData) 
-      ? request.audioData.length 
-      : Buffer.from(request.audioData, 'base64').length
-    
+    const audioSize = Buffer.isBuffer(request.audioData)
+      ? request.audioData.length
+      : Buffer.from(request.audioData, "base64").length
+
     // Rough estimate: 1KB ≈ 1 second of audio
     const estimatedDuration = audioSize / 1024
     const billingUnits = Math.ceil(estimatedDuration / 15)
-    
+
     return billingUnits * 0.006
   }
 

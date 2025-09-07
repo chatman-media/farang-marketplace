@@ -1,13 +1,14 @@
 import { Router } from "express"
 import multer from "multer"
 import { VoiceController } from "../controllers/VoiceController.js"
-import { 
-  optionalAuth, 
-  authenticateToken, 
-  voiceRateLimit, 
-  validateAudioFile, 
-  validateVoiceRequest 
+import {
+  authenticateToken,
+  optionalAuth,
+  validateAudioFile,
+  validateVoiceRequest,
+  voiceRateLimit,
 } from "../middleware/auth.js"
+import type { VoiceCommandResponse } from "../models/index.js"
 
 const router = Router()
 const voiceController = new VoiceController()
@@ -16,12 +17,12 @@ const voiceController = new VoiceController()
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760"), // 10MB default
+    fileSize: parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10), // 10MB default
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     const allowedMimeTypes = [
       "audio/wav",
-      "audio/wave", 
+      "audio/wave",
       "audio/x-wav",
       "audio/mpeg",
       "audio/mp3",
@@ -31,7 +32,7 @@ const upload = multer({
       "audio/m4a",
       "audio/x-m4a",
     ]
-    
+
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true)
     } else {
@@ -85,32 +86,21 @@ router.post(
  * @desc Get supported languages
  * @access Public
  */
-router.get(
-  "/languages",
-  voiceController.getSupportedLanguages.bind(voiceController)
-)
+router.get("/languages", voiceController.getSupportedLanguages.bind(voiceController))
 
 /**
  * @route GET /api/voice/session/:sessionId?
  * @desc Get session information
  * @access Public (with optional auth)
  */
-router.get(
-  "/session/:sessionId?",
-  optionalAuth,
-  voiceController.getSession.bind(voiceController)
-)
+router.get("/session/:sessionId?", optionalAuth, voiceController.getSession.bind(voiceController))
 
 /**
  * @route GET /api/voice/stats
  * @desc Get voice service statistics
  * @access Private (admin only)
  */
-router.get(
-  "/stats",
-  authenticateToken,
-  voiceController.getStats.bind(voiceController)
-)
+router.get("/stats", authenticateToken, voiceController.getStats.bind(voiceController))
 
 /**
  * @route GET /api/voice/providers/stats
@@ -139,10 +129,7 @@ router.post(
  * @desc Health check endpoint
  * @access Public
  */
-router.get(
-  "/health",
-  voiceController.healthCheck.bind(voiceController)
-)
+router.get("/health", voiceController.healthCheck.bind(voiceController))
 
 // Voice search specific routes
 /**
@@ -150,56 +137,51 @@ router.get(
  * @desc Voice-powered search
  * @access Public (with optional auth)
  */
-router.post(
-  "/search",
-  optionalAuth,
-  validateVoiceRequest,
-  async (req, res) => {
-    try {
-      const { audioData, text, language } = req.body
-      const userId = req.user?.id
-      const sessionId = req.headers["x-session-id"] as string
+router.post("/search", optionalAuth, validateVoiceRequest, async (req, res) => {
+  try {
+    const { audioData, text, language } = req.body
+    const userId = req.user?.id
+    const sessionId = req.headers["x-session-id"] as string
 
-      const context = {
-        type: "search" as const,
-        currentPage: req.headers.referer || "/search",
-      }
-
-      let result
-      if (audioData) {
-        result = await voiceController["voiceCommandService"].processVoiceCommand(
-          typeof audioData === "string" ? audioData : Buffer.from(audioData),
-          userId,
-          sessionId,
-          context,
-          language
-        )
-      } else if (text) {
-        result = await voiceController["voiceCommandService"].processTextCommand(
-          text,
-          userId,
-          sessionId,
-          context,
-          language
-        )
-      } else {
-        res.status(400).json({
-          success: false,
-          error: "Either audioData or text is required",
-        })
-        return
-      }
-
-      res.json(result)
-    } catch (error) {
-      console.error("Voice search error:", error)
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : "Internal server error",
-      })
+    const context = {
+      type: "search" as const,
+      currentPage: req.headers.referer || "/search",
     }
+
+    let result: VoiceCommandResponse | undefined
+    if (audioData) {
+      result = await voiceController.voiceCommandService.processVoiceCommand(
+        typeof audioData === "string" ? audioData : Buffer.from(audioData),
+        userId,
+        sessionId,
+        context,
+        language
+      )
+    } else if (text) {
+      result = await voiceController.voiceCommandService.processTextCommand(
+        text,
+        userId,
+        sessionId,
+        context,
+        language
+      )
+    } else {
+      res.status(400).json({
+        success: false,
+        error: "Either audioData or text is required",
+      })
+      return
+    }
+
+    res.json(result)
+  } catch (error) {
+    console.error("Voice search error:", error)
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Internal server error",
+    })
   }
-)
+})
 
 // Voice listing creation routes
 /**
@@ -207,56 +189,51 @@ router.post(
  * @desc Voice-assisted listing creation
  * @access Private (authenticated users only)
  */
-router.post(
-  "/listing/create",
-  authenticateToken,
-  validateVoiceRequest,
-  async (req, res) => {
-    try {
-      const { audioData, text, language } = req.body
-      const userId = req.user!.id
-      const sessionId = req.headers["x-session-id"] as string
+router.post("/listing/create", authenticateToken, validateVoiceRequest, async (req, res) => {
+  try {
+    const { audioData, text, language } = req.body
+    const userId = req.user?.id
+    const sessionId = req.headers["x-session-id"] as string
 
-      const context = {
-        type: "listing" as const,
-        currentPage: "/listings/create",
-      }
-
-      let result
-      if (audioData) {
-        result = await voiceController["voiceCommandService"].processVoiceCommand(
-          typeof audioData === "string" ? audioData : Buffer.from(audioData),
-          userId,
-          sessionId,
-          context,
-          language
-        )
-      } else if (text) {
-        result = await voiceController["voiceCommandService"].processTextCommand(
-          text,
-          userId,
-          sessionId,
-          context,
-          language
-        )
-      } else {
-        res.status(400).json({
-          success: false,
-          error: "Either audioData or text is required",
-        })
-        return
-      }
-
-      res.json(result)
-    } catch (error) {
-      console.error("Voice listing creation error:", error)
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : "Internal server error",
-      })
+    const context = {
+      type: "listing" as const,
+      currentPage: "/listings/create",
     }
+
+    let result: VoiceCommandResponse | undefined
+    if (audioData) {
+      result = await voiceController.voiceCommandService.processVoiceCommand(
+        typeof audioData === "string" ? audioData : Buffer.from(audioData),
+        userId,
+        sessionId,
+        context,
+        language
+      )
+    } else if (text) {
+      result = await voiceController.voiceCommandService.processTextCommand(
+        text,
+        userId,
+        sessionId,
+        context,
+        language
+      )
+    } else {
+      res.status(400).json({
+        success: false,
+        error: "Either audioData or text is required",
+      })
+      return
+    }
+
+    res.json(result)
+  } catch (error) {
+    console.error("Voice listing creation error:", error)
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Internal server error",
+    })
   }
-)
+})
 
 // Voice navigation routes
 /**
@@ -264,55 +241,50 @@ router.post(
  * @desc Voice navigation commands
  * @access Public (with optional auth)
  */
-router.post(
-  "/navigate",
-  optionalAuth,
-  validateVoiceRequest,
-  async (req, res) => {
-    try {
-      const { audioData, text, language } = req.body
-      const userId = req.user?.id
-      const sessionId = req.headers["x-session-id"] as string
+router.post("/navigate", optionalAuth, validateVoiceRequest, async (req, res) => {
+  try {
+    const { audioData, text, language } = req.body
+    const userId = req.user?.id
+    const sessionId = req.headers["x-session-id"] as string
 
-      const context = {
-        type: "navigation" as const,
-        currentPage: req.headers.referer || "/",
-      }
-
-      let result
-      if (audioData) {
-        result = await voiceController["voiceCommandService"].processVoiceCommand(
-          typeof audioData === "string" ? audioData : Buffer.from(audioData),
-          userId,
-          sessionId,
-          context,
-          language
-        )
-      } else if (text) {
-        result = await voiceController["voiceCommandService"].processTextCommand(
-          text,
-          userId,
-          sessionId,
-          context,
-          language
-        )
-      } else {
-        res.status(400).json({
-          success: false,
-          error: "Either audioData or text is required",
-        })
-        return
-      }
-
-      res.json(result)
-    } catch (error) {
-      console.error("Voice navigation error:", error)
-      res.status(500).json({
-        success: false,
-        error: error instanceof Error ? error.message : "Internal server error",
-      })
+    const context = {
+      type: "navigation" as const,
+      currentPage: req.headers.referer || "/",
     }
+
+    let result
+    if (audioData) {
+      result = await voiceController.voiceCommandService.processVoiceCommand(
+        typeof audioData === "string" ? audioData : Buffer.from(audioData),
+        userId,
+        sessionId,
+        context,
+        language
+      )
+    } else if (text) {
+      result = await voiceController.voiceCommandService.processTextCommand(
+        text,
+        userId,
+        sessionId,
+        context,
+        language
+      )
+    } else {
+      res.status(400).json({
+        success: false,
+        error: "Either audioData or text is required",
+      })
+      return
+    }
+
+    res.json(result)
+  } catch (error) {
+    console.error("Voice navigation error:", error)
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Internal server error",
+    })
   }
-)
+})
 
 export default router

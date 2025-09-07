@@ -1,11 +1,10 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { SpeechToTextService } from "../services/SpeechToTextService.js"
-import { 
-  createMockAudioBuffer, 
-  createMockAudioBase64, 
+import {
+  createMockAudioBase64,
+  createMockAudioBuffer,
+  expectToBeWithinRange,
   mockVoiceRequest,
-  delay,
-  expectToBeWithinRange
 } from "./setup.js"
 
 describe("Speech-to-Text Service Tests", () => {
@@ -22,7 +21,7 @@ describe("Speech-to-Text Service Tests", () => {
   describe("Service Initialization", () => {
     it("should initialize with mock provider in test environment", () => {
       expect(speechToTextService).toBeDefined()
-      
+
       const languages = speechToTextService.getSupportedLanguages()
       expect(languages).toBeDefined()
       expect(languages.length).toBeGreaterThan(0)
@@ -30,8 +29,8 @@ describe("Speech-to-Text Service Tests", () => {
 
     it("should support multiple languages", () => {
       const languages = speechToTextService.getSupportedLanguages()
-      
-      const languageCodes = languages.map(lang => lang.code)
+
+      const languageCodes = languages.map((lang) => lang.code)
       expect(languageCodes).toContain("th-TH")
       expect(languageCodes).toContain("en-US")
       expect(languageCodes).toContain("en-GB")
@@ -39,8 +38,8 @@ describe("Speech-to-Text Service Tests", () => {
 
     it("should have enabled languages", () => {
       const languages = speechToTextService.getSupportedLanguages()
-      
-      languages.forEach(lang => {
+
+      languages.forEach((lang) => {
         expect(lang.enabled).toBe(true)
         expect(lang.confidence).toBeGreaterThan(0)
         expect(lang.providers).toBeDefined()
@@ -52,7 +51,7 @@ describe("Speech-to-Text Service Tests", () => {
   describe("Audio Transcription", () => {
     it("should transcribe audio buffer successfully", async () => {
       const audioBuffer = createMockAudioBuffer(2048)
-      
+
       const request = {
         audioData: audioBuffer,
         language: "en-US",
@@ -64,7 +63,7 @@ describe("Speech-to-Text Service Tests", () => {
 
       expect(result.success).toBe(true)
       expect(result.transcription).toBeDefined()
-      expect(result.transcription!.length).toBeGreaterThan(0)
+      expect(result.transcription?.length).toBeGreaterThan(0)
       expect(result.confidence).toBeGreaterThan(0)
       expect(result.language).toBe("en-US")
       expect(result.provider).toBeDefined()
@@ -73,7 +72,7 @@ describe("Speech-to-Text Service Tests", () => {
 
     it("should transcribe base64 audio successfully", async () => {
       const audioBase64 = createMockAudioBase64(2048)
-      
+
       const request = {
         audioData: audioBase64,
         language: "th-TH",
@@ -87,7 +86,7 @@ describe("Speech-to-Text Service Tests", () => {
       expect(result.transcription).toBeDefined()
       expect(result.language).toBe("th-TH")
       expect(result.alternatives).toBeDefined()
-      expect(result.alternatives!.length).toBeGreaterThan(0)
+      expect(result.alternatives?.length).toBeGreaterThan(0)
     })
 
     it("should handle different audio formats", async () => {
@@ -114,12 +113,12 @@ describe("Speech-to-Text Service Tests", () => {
 
       expect(result.success).toBe(true)
       expect(result.alternatives).toBeDefined()
-      
-      const firstAlternative = result.alternatives![0]
+
+      const firstAlternative = result.alternatives?.[0]
       if (firstAlternative?.words) {
         expect(firstAlternative.words.length).toBeGreaterThan(0)
-        
-        firstAlternative.words.forEach(word => {
+
+        firstAlternative.words.forEach((word) => {
           expect(word.word).toBeDefined()
           expect(word.startTime).toBeGreaterThanOrEqual(0)
           expect(word.endTime).toBeGreaterThan(word.startTime)
@@ -176,7 +175,7 @@ describe("Speech-to-Text Service Tests", () => {
 
     it("should handle audio file too large", async () => {
       const largeAudio = createMockAudioBuffer(20 * 1024 * 1024) // 20MB
-      
+
       const request = {
         audioData: largeAudio,
         language: "en-US",
@@ -190,7 +189,7 @@ describe("Speech-to-Text Service Tests", () => {
 
     it("should handle audio file too small", async () => {
       const tinyAudio = createMockAudioBuffer(50) // 50 bytes
-      
+
       const request = {
         audioData: tinyAudio,
         language: "en-US",
@@ -223,11 +222,11 @@ describe("Speech-to-Text Service Tests", () => {
       }
 
       const result = await speechToTextService.transcribe(request)
-      
+
       // Should either succeed or fail gracefully
       expect(result).toBeDefined()
       expect(typeof result.success).toBe("boolean")
-      
+
       if (!result.success) {
         expect(result.error).toBeDefined()
       }
@@ -237,14 +236,14 @@ describe("Speech-to-Text Service Tests", () => {
   describe("Provider Management", () => {
     it("should get provider statistics", () => {
       const stats = speechToTextService.getProviderStats()
-      
+
       expect(stats).toBeDefined()
       expect(typeof stats).toBe("object")
-      
+
       // Should have at least the mock provider
       expect(Object.keys(stats).length).toBeGreaterThan(0)
-      
-      Object.values(stats).forEach(providerStats => {
+
+      Object.values(stats).forEach((providerStats) => {
         expect(providerStats.requestCount).toBeGreaterThanOrEqual(0)
         expect(providerStats.totalDuration).toBeGreaterThanOrEqual(0)
         expect(providerStats.errorCount).toBeGreaterThanOrEqual(0)
@@ -254,11 +253,11 @@ describe("Speech-to-Text Service Tests", () => {
 
     it("should check provider health", async () => {
       const health = await speechToTextService.getProviderHealth()
-      
+
       expect(health).toBeDefined()
       expect(typeof health).toBe("object")
       expect(Object.keys(health).length).toBeGreaterThan(0)
-      
+
       // Mock provider should be healthy
       expect(health.mock).toBe(true)
     })
@@ -266,7 +265,7 @@ describe("Speech-to-Text Service Tests", () => {
     it("should enable/disable providers", () => {
       const result = speechToTextService.setProviderEnabled("mock", false)
       expect(result).toBe(true)
-      
+
       const invalidResult = speechToTextService.setProviderEnabled("nonexistent", false)
       expect(invalidResult).toBe(false)
     })
@@ -275,12 +274,12 @@ describe("Speech-to-Text Service Tests", () => {
   describe("Performance", () => {
     it("should process audio within reasonable time", async () => {
       const startTime = Date.now()
-      
+
       const result = await speechToTextService.transcribe(mockVoiceRequest)
-      
+
       const endTime = Date.now()
       const processingTime = endTime - startTime
-      
+
       expect(result.success).toBe(true)
       expect(processingTime).toBeLessThan(5000) // Should complete within 5 seconds
       expect(result.processingTime).toBeDefined()
@@ -288,16 +287,18 @@ describe("Speech-to-Text Service Tests", () => {
     })
 
     it("should handle concurrent requests", async () => {
-      const requests = Array(5).fill(null).map(() => 
-        speechToTextService.transcribe({
-          ...mockVoiceRequest,
-          audioData: createMockAudioBuffer(),
-        })
-      )
+      const requests = Array(5)
+        .fill(null)
+        .map(() =>
+          speechToTextService.transcribe({
+            ...mockVoiceRequest,
+            audioData: createMockAudioBuffer(),
+          })
+        )
 
       const results = await Promise.all(requests)
 
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.success).toBe(true)
         expect(result.transcription).toBeDefined()
       })

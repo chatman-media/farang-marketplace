@@ -157,7 +157,15 @@ export interface AudioFormat {
 }
 
 export interface AudioEncoding {
-  type: "LINEAR16" | "FLAC" | "MULAW" | "AMR" | "AMR_WB" | "OGG_OPUS" | "SPEEX_WITH_HEADER_BYTE" | "WEBM_OPUS"
+  type:
+    | "LINEAR16"
+    | "FLAC"
+    | "MULAW"
+    | "AMR"
+    | "AMR_WB"
+    | "OGG_OPUS"
+    | "SPEEX_WITH_HEADER_BYTE"
+    | "WEBM_OPUS"
   sampleRateHertz: number
   audioChannelCount: number
   languageCode: string
@@ -188,7 +196,7 @@ export interface LanguageSupport {
 }
 
 // Voice Command Intents
-export type VoiceIntentType = 
+export type VoiceIntentType =
   | "search"
   | "navigate"
   | "create_listing"
@@ -251,7 +259,7 @@ export interface VoiceError {
   timestamp: Date
 }
 
-export type VoiceErrorCode = 
+export type VoiceErrorCode =
   | "AUDIO_FORMAT_UNSUPPORTED"
   | "AUDIO_TOO_LARGE"
   | "AUDIO_TOO_SHORT"

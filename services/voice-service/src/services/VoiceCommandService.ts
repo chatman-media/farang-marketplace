@@ -1,17 +1,13 @@
 import type {
   VoiceCommand,
-  VoiceIntent,
-  VoiceEntity,
   VoiceCommandResponse,
   VoiceContext,
-  NavigationCommand,
-  ListingCreationCommand,
-  SearchCommand,
+  VoiceEntity,
+  VoiceIntent,
   VoiceIntentType,
   VoiceSession,
-  SessionState
 } from "../models/index.js"
-import { SpeechToTextService } from "./SpeechToTextService.js"
+import type { SpeechToTextService } from "./SpeechToTextService.js"
 
 export class VoiceCommandService {
   private speechToTextService: SpeechToTextService
@@ -79,7 +75,7 @@ export class VoiceCommandService {
     language?: string
   ): Promise<VoiceCommandResponse> {
     const session = this.getOrCreateSession(sessionId || this.generateSessionId(), userId, language)
-    
+
     // Analyze intent and entities
     const intent = this.analyzeIntent(text, language)
     const entities = this.extractEntities(text, language)
@@ -183,9 +179,9 @@ export class VoiceCommandService {
   /**
    * Analyze intent from text
    */
-  private analyzeIntent(text: string, language?: string): VoiceIntent {
+  private analyzeIntent(text: string, _language?: string): VoiceIntent {
     const normalizedText = text.toLowerCase().trim()
-    
+
     for (const [intentType, patterns] of this.intentPatterns) {
       for (const pattern of patterns) {
         const match = normalizedText.match(pattern)
@@ -210,14 +206,17 @@ export class VoiceCommandService {
   /**
    * Extract entities from text
    */
-  private extractEntities(text: string, language?: string): VoiceEntity[] {
+  private extractEntities(text: string, _language?: string): VoiceEntity[] {
     const entities: VoiceEntity[] = []
     const normalizedText = text.toLowerCase()
 
     // Extract common entities
     const entityPatterns = [
       // Locations
-      { type: "location", patterns: [/(?:in|at|near)\s+([a-zA-Z\s]+)/gi, /(?:ใน|ที่|ใกล้)\s*([ก-๙\s]+)/gi] },
+      {
+        type: "location",
+        patterns: [/(?:in|at|near)\s+([a-zA-Z\s]+)/gi, /(?:ใน|ที่|ใกล้)\s*([ก-๙\s]+)/gi],
+      },
       // Prices
       { type: "price", patterns: [/(\d+(?:,\d{3})*)\s*(?:baht|บาท|dollars?|\$)/gi] },
       // Numbers
@@ -249,7 +248,10 @@ export class VoiceCommandService {
   /**
    * Execute command based on intent
    */
-  private async executeCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
+  private async executeCommand(
+    command: VoiceCommand,
+    session: VoiceSession
+  ): Promise<VoiceCommandResponse> {
     switch (command.intent.name) {
       case "search":
         return this.executeSearchCommand(command, session)
@@ -273,17 +275,20 @@ export class VoiceCommandService {
   /**
    * Execute search command
    */
-  private async executeSearchCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
+  private async executeSearchCommand(
+    command: VoiceCommand,
+    _session: VoiceSession
+  ): Promise<VoiceCommandResponse> {
     const query = command.intent.parameters?.query || command.command
-    const location = command.entities.find(e => e.type === "location")?.value
-    const priceEntity = command.entities.find(e => e.type === "price")?.value
-    const propertyType = command.entities.find(e => e.type === "property_type")?.value
+    const location = command.entities.find((e) => e.type === "location")?.value
+    const priceEntity = command.entities.find((e) => e.type === "price")?.value
+    const propertyType = command.entities.find((e) => e.type === "property_type")?.value
 
     // Build search filters
     const filters: any = {}
     if (location) filters.location = location
     if (priceEntity) {
-      const price = parseInt(priceEntity.replace(/[^\d]/g, ""))
+      const price = parseInt(priceEntity.replace(/[^\d]/g, ""), 10)
       filters.priceRange = { min: 0, max: price }
     }
     if (propertyType) filters.category = propertyType
@@ -294,7 +299,11 @@ export class VoiceCommandService {
         query,
         filters,
       },
-      speechText: this.generateSpeechResponse("search", command.language, { query, location, propertyType }),
+      speechText: this.generateSpeechResponse("search", command.language, {
+        query,
+        location,
+        propertyType,
+      }),
       redirectUrl: `/search?q=${encodeURIComponent(query)}${location ? `&location=${encodeURIComponent(location)}` : ""}`,
       success: true,
     }
@@ -303,23 +312,26 @@ export class VoiceCommandService {
   /**
    * Execute navigation command
    */
-  private async executeNavigationCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
+  private async executeNavigationCommand(
+    command: VoiceCommand,
+    _session: VoiceSession
+  ): Promise<VoiceCommandResponse> {
     const target = command.intent.parameters?.query?.toLowerCase() || ""
 
     const navigationMap: Record<string, string> = {
-      "home": "/",
-      "หน้าหลัก": "/",
-      "หน้าแรก": "/",
-      "search": "/search",
-      "ค้นหา": "/search",
-      "profile": "/profile",
-      "โปรไฟล์": "/profile",
-      "bookings": "/bookings",
-      "การจอง": "/bookings",
-      "listings": "/listings",
-      "ประกาศ": "/listings",
-      "back": "back",
-      "กลับ": "back",
+      home: "/",
+      หน้าหลัก: "/",
+      หน้าแรก: "/",
+      search: "/search",
+      ค้นหา: "/search",
+      profile: "/profile",
+      โปรไฟล์: "/profile",
+      bookings: "/bookings",
+      การจอง: "/bookings",
+      listings: "/listings",
+      ประกาศ: "/listings",
+      back: "back",
+      กลับ: "back",
     }
 
     const url = navigationMap[target] || "/"
@@ -336,7 +348,10 @@ export class VoiceCommandService {
   /**
    * Execute listing creation command
    */
-  private async executeListingCreationCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
+  private async executeListingCreationCommand(
+    command: VoiceCommand,
+    session: VoiceSession
+  ): Promise<VoiceCommandResponse> {
     // Update session state for listing creation flow
     session.state = {
       currentFlow: "listing_creation",
@@ -358,7 +373,10 @@ export class VoiceCommandService {
   /**
    * Execute booking command
    */
-  private async executeBookingCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
+  private async executeBookingCommand(
+    command: VoiceCommand,
+    _session: VoiceSession
+  ): Promise<VoiceCommandResponse> {
     const query = command.intent.parameters?.query || ""
 
     return {
@@ -373,7 +391,10 @@ export class VoiceCommandService {
   /**
    * Execute help command
    */
-  private async executeHelpCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
+  private async executeHelpCommand(
+    command: VoiceCommand,
+    _session: VoiceSession
+  ): Promise<VoiceCommandResponse> {
     return {
       action: "help",
       data: {
@@ -393,7 +414,10 @@ export class VoiceCommandService {
   /**
    * Execute confirm command
    */
-  private async executeConfirmCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
+  private async executeConfirmCommand(
+    command: VoiceCommand,
+    session: VoiceSession
+  ): Promise<VoiceCommandResponse> {
     if (session.state?.awaitingInput) {
       // Handle confirmation based on current flow
       switch (session.state.currentFlow) {
@@ -420,7 +444,10 @@ export class VoiceCommandService {
   /**
    * Execute cancel command
    */
-  private async executeCancelCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
+  private async executeCancelCommand(
+    command: VoiceCommand,
+    session: VoiceSession
+  ): Promise<VoiceCommandResponse> {
     // Reset session state
     session.state = {
       awaitingInput: false,
@@ -436,7 +463,10 @@ export class VoiceCommandService {
   /**
    * Execute unknown command
    */
-  private async executeUnknownCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
+  private async executeUnknownCommand(
+    command: VoiceCommand,
+    _session: VoiceSession
+  ): Promise<VoiceCommandResponse> {
     return {
       action: "unknown",
       data: { originalCommand: command.command },
@@ -491,7 +521,7 @@ export class VoiceCommandService {
       },
     }
 
-    return responses[action]?.[lang] || responses[action]?.["en"] || "Command processed"
+    return responses[action]?.[lang] || responses[action]?.en || "Command processed"
   }
 
   /**
@@ -574,7 +604,7 @@ export class VoiceCommandService {
       },
     }
 
-    return prompts[step]?.[lang] || prompts[step]?.["en"] || "Please continue"
+    return prompts[step]?.[lang] || prompts[step]?.en || "Please continue"
   }
 
   /**

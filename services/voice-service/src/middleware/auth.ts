@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express"
+import type { NextFunction, Request, Response } from "express"
 import jwt from "jsonwebtoken"
 
 interface JWTPayload {
@@ -62,7 +62,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 /**
  * Optional authentication middleware - doesn't fail if no token
  */
-export const optionalAuth = (req: Request, res: Response, next: NextFunction): void => {
+export const optionalAuth = (req: Request, _res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization
   const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null
 
@@ -126,7 +126,7 @@ export const voiceRateLimit = (maxRequests: number = 100, windowMs: number = 600
   return (req: Request, res: Response, next: NextFunction): void => {
     const identifier = req.user?.id || req.ip || "anonymous"
     const now = Date.now()
-    
+
     // Clean up expired entries
     for (const [key, value] of requests.entries()) {
       if (now > value.resetTime) {
@@ -135,7 +135,7 @@ export const voiceRateLimit = (maxRequests: number = 100, windowMs: number = 600
     }
 
     const userRequests = requests.get(identifier)
-    
+
     if (!userRequests) {
       requests.set(identifier, {
         count: 1,
@@ -174,7 +174,7 @@ export const validateAudioFile = (req: Request, res: Response, next: NextFunctio
   }
 
   // Check file size
-  const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760") // 10MB default
+  const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10) // 10MB default
   if (file.size > maxSize) {
     res.status(400).json({
       success: false,
@@ -244,11 +244,10 @@ export const validateVoiceRequest = (req: Request, res: Response, next: NextFunc
     }
 
     // Check audio data size
-    const audioSize = typeof audioData === "string" 
-      ? Buffer.from(audioData, "base64").length 
-      : audioData.length
+    const audioSize =
+      typeof audioData === "string" ? Buffer.from(audioData, "base64").length : audioData.length
 
-    const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760")
+    const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10)
     if (audioSize > maxSize) {
       res.status(400).json({
         success: false,
@@ -273,7 +272,12 @@ export const validateVoiceRequest = (req: Request, res: Response, next: NextFunc
 /**
  * Error handling middleware
  */
-export const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction): void => {
+export const errorHandler = (
+  error: Error,
+  _req: Request,
+  res: Response,
+  _next: NextFunction
+): void => {
   console.error("Voice service error:", error)
 
   // Handle specific error types

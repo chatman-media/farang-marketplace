@@ -1,7 +1,7 @@
-import { Request, Response } from "express"
+import type { Request, Response } from "express"
+import type { VoiceCommandResponse, VoiceContext, VoiceRequest } from "../models/index.js"
 import { SpeechToTextService } from "../services/SpeechToTextService.js"
 import { VoiceCommandService } from "../services/VoiceCommandService.js"
-import type { VoiceRequest, VoiceContext } from "../models/index.js"
 
 export class VoiceController {
   private speechToTextService: SpeechToTextService
@@ -17,7 +17,8 @@ export class VoiceController {
    */
   async transcribe(req: Request, res: Response): Promise<void> {
     try {
-      const { audioData, language, format, sampleRate, channels, encoding, context } = req.body as VoiceRequest & { context?: VoiceContext }
+      const { audioData, language, format, sampleRate, channels, encoding, context } =
+        req.body as VoiceRequest & { context?: VoiceContext }
       const userId = req.user?.id
       const sessionId = req.headers["x-session-id"] as string
 
@@ -60,9 +61,9 @@ export class VoiceController {
     try {
       const { audioData, text, language, context } = req.body
       const userId = req.user?.id
-      const sessionId = req.headers["x-session-id"] as string || this.generateSessionId()
+      const sessionId = (req.headers["x-session-id"] as string) || this.generateSessionId()
 
-      let result
+      let result: VoiceCommandResponse | undefined
 
       if (audioData) {
         // Process audio command
@@ -103,7 +104,7 @@ export class VoiceController {
   /**
    * Get supported languages
    */
-  async getSupportedLanguages(req: Request, res: Response): Promise<void> {
+  async getSupportedLanguages(_req: Request, res: Response): Promise<void> {
     try {
       const languages = this.speechToTextService.getSupportedLanguages()
       res.json({
@@ -122,11 +123,11 @@ export class VoiceController {
   /**
    * Get provider statistics
    */
-  async getProviderStats(req: Request, res: Response): Promise<void> {
+  async getProviderStats(_req: Request, res: Response): Promise<void> {
     try {
       const stats = this.speechToTextService.getProviderStats()
       const health = await this.speechToTextService.getProviderHealth()
-      
+
       res.json({
         success: true,
         stats,
@@ -146,7 +147,7 @@ export class VoiceController {
    */
   async getSession(req: Request, res: Response): Promise<void> {
     try {
-      const sessionId = req.params.sessionId || req.headers["x-session-id"] as string
+      const sessionId = req.params.sessionId || (req.headers["x-session-id"] as string)
 
       if (!sessionId) {
         res.status(400).json({
@@ -157,7 +158,7 @@ export class VoiceController {
       }
 
       const session = this.voiceCommandService.getSession(sessionId)
-      
+
       if (!session) {
         res.status(404).json({
           success: false,
@@ -182,7 +183,7 @@ export class VoiceController {
   /**
    * Get voice service statistics
    */
-  async getStats(req: Request, res: Response): Promise<void> {
+  async getStats(_req: Request, res: Response): Promise<void> {
     try {
       const sessionStats = this.voiceCommandService.getSessionStats()
       const providerStats = this.speechToTextService.getProviderStats()
@@ -208,10 +209,10 @@ export class VoiceController {
   /**
    * Health check endpoint
    */
-  async healthCheck(req: Request, res: Response): Promise<void> {
+  async healthCheck(_req: Request, res: Response): Promise<void> {
     try {
       const health = await this.speechToTextService.getProviderHealth()
-      const hasHealthyProvider = Object.values(health).some(isHealthy => isHealthy)
+      const hasHealthyProvider = Object.values(health).some((isHealthy) => isHealthy)
 
       res.status(hasHealthyProvider ? 200 : 503).json({
         success: hasHealthyProvider,
@@ -236,7 +237,7 @@ export class VoiceController {
       const file = req.file
       const { language, context } = req.body
       const userId = req.user?.id
-      const sessionId = req.headers["x-session-id"] as string || this.generateSessionId()
+      const sessionId = (req.headers["x-session-id"] as string) || this.generateSessionId()
 
       if (!file) {
         res.status(400).json({
@@ -268,10 +269,10 @@ export class VoiceController {
   /**
    * Clean up expired sessions
    */
-  async cleanupSessions(req: Request, res: Response): Promise<void> {
+  async cleanupSessions(_req: Request, res: Response): Promise<void> {
     try {
       this.voiceCommandService.cleanupSessions()
-      
+
       res.json({
         success: true,
         message: "Sessions cleaned up successfully",

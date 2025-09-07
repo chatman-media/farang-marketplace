@@ -1,9 +1,9 @@
-import type { 
-  SpeechToTextProvider, 
-  VoiceRequest, 
-  VoiceResponse, 
-  ProviderConfig, 
-  ProviderUsage 
+import type {
+  ProviderConfig,
+  ProviderUsage,
+  SpeechToTextProvider,
+  VoiceRequest,
+  VoiceResponse,
 } from "../../models/index.js"
 
 export class AzureSpeechProvider implements SpeechToTextProvider {
@@ -30,7 +30,7 @@ export class AzureSpeechProvider implements SpeechToTextProvider {
 
       // In a real implementation, this would use Azure Cognitive Services Speech SDK
       const response = await this.callAzureSpeechAPI(request)
-      
+
       this.usage.lastUsed = new Date()
       this.usage.totalDuration += Date.now() - startTime
       this.usage.costEstimate = (this.usage.costEstimate || 0) + this.calculateCost(request)
@@ -62,7 +62,7 @@ export class AzureSpeechProvider implements SpeechToTextProvider {
 
   private async callAzureSpeechAPI(request: VoiceRequest): Promise<VoiceResponse> {
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 250))
+    await new Promise((resolve) => setTimeout(resolve, 250))
 
     // Mock Azure Speech API response
     const mockResponse = {
@@ -168,14 +168,14 @@ export class AzureSpeechProvider implements SpeechToTextProvider {
   private calculateCost(request: VoiceRequest): number {
     // Azure Speech Services pricing (approximate)
     // Standard: $1 per hour of audio processed
-    const audioSize = Buffer.isBuffer(request.audioData) 
-      ? request.audioData.length 
-      : Buffer.from(request.audioData, 'base64').length
-    
+    const audioSize = Buffer.isBuffer(request.audioData)
+      ? request.audioData.length
+      : Buffer.from(request.audioData, "base64").length
+
     // Rough estimate: 1KB ≈ 1 second of audio
     const estimatedDuration = audioSize / 1024
     const hours = estimatedDuration / 3600
-    
+
     return hours * 1.0
   }
 
@@ -220,7 +220,7 @@ export class AzureSpeechProvider implements SpeechToTextProvider {
   getAvailableRegions(): string[] {
     return [
       "eastus",
-      "eastus2", 
+      "eastus2",
       "westus",
       "westus2",
       "centralus",

@@ -1,5 +1,5 @@
-import { beforeAll, afterAll, beforeEach } from "vitest"
 import dotenv from "dotenv"
+import { afterAll, beforeAll, beforeEach } from "vitest"
 
 // Load test environment variables
 dotenv.config({ path: ".env.test" })
@@ -7,27 +7,27 @@ dotenv.config({ path: ".env.test" })
 // Global test setup
 beforeAll(async () => {
   console.log("🧪 Setting up Voice Service tests...")
-  
+
   // Set test environment
   process.env.NODE_ENV = "test"
-  
+
   // Mock environment variables if not set
   if (!process.env.JWT_SECRET) {
     process.env.JWT_SECRET = "test-jwt-secret"
   }
-  
+
   if (!process.env.MAX_AUDIO_FILE_SIZE) {
     process.env.MAX_AUDIO_FILE_SIZE = "1048576" // 1MB for tests
   }
-  
+
   if (!process.env.DEFAULT_LANGUAGE) {
     process.env.DEFAULT_LANGUAGE = "en-US"
   }
-  
+
   if (!process.env.SUPPORTED_LANGUAGES) {
     process.env.SUPPORTED_LANGUAGES = "th-TH,en-US,en-GB"
   }
-  
+
   console.log("✅ Voice Service test environment ready")
 })
 
@@ -38,10 +38,10 @@ beforeEach(() => {
 
 afterAll(async () => {
   console.log("🧹 Cleaning up Voice Service tests...")
-  
+
   // Cleanup any resources
   // Close database connections, clear caches, etc.
-  
+
   console.log("✅ Voice Service test cleanup complete")
 })
 
@@ -63,12 +63,12 @@ export const createMockJWT = (payload: any = {}): string => {
     exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour
     ...payload,
   }
-  
+
   // Simple mock JWT (not cryptographically secure, just for testing)
   const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64")
   const payloadStr = Buffer.from(JSON.stringify(defaultPayload)).toString("base64")
   const signature = "mock-signature"
-  
+
   return `${header}.${payloadStr}.${signature}`
 }
 
@@ -159,15 +159,21 @@ export const mockSession = {
 
 // Test helper functions
 export const delay = (ms: number): Promise<void> => {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export const expectToBeWithinRange = (actual: number, expected: number, tolerance: number = 0.1): void => {
+export const expectToBeWithinRange = (
+  actual: number,
+  expected: number,
+  tolerance: number = 0.1
+): void => {
   const diff = Math.abs(actual - expected)
   const maxDiff = expected * tolerance
-  
+
   if (diff > maxDiff) {
-    throw new Error(`Expected ${actual} to be within ${tolerance * 100}% of ${expected}, but difference was ${diff}`)
+    throw new Error(
+      `Expected ${actual} to be within ${tolerance * 100}% of ${expected}, but difference was ${diff}`
+    )
   }
 }
 
@@ -194,14 +200,18 @@ export const restoreConsole = () => {
 }
 
 // Audio format helpers
-export const createWAVHeader = (dataSize: number, sampleRate: number = 44100, channels: number = 1): Buffer => {
+export const createWAVHeader = (
+  dataSize: number,
+  sampleRate: number = 44100,
+  channels: number = 1
+): Buffer => {
   const header = Buffer.alloc(44)
-  
+
   // RIFF header
   header.write("RIFF", 0)
   header.writeUInt32LE(36 + dataSize, 4)
   header.write("WAVE", 8)
-  
+
   // fmt chunk
   header.write("fmt ", 12)
   header.writeUInt32LE(16, 16) // chunk size
@@ -211,27 +221,30 @@ export const createWAVHeader = (dataSize: number, sampleRate: number = 44100, ch
   header.writeUInt32LE(sampleRate * channels * 2, 28) // byte rate
   header.writeUInt16LE(channels * 2, 32) // block align
   header.writeUInt16LE(16, 34) // bits per sample
-  
+
   // data chunk
   header.write("data", 36)
   header.writeUInt32LE(dataSize, 40)
-  
+
   return header
 }
 
-export const createMockWAVFile = (durationSeconds: number = 1, sampleRate: number = 44100): Buffer => {
+export const createMockWAVFile = (
+  durationSeconds: number = 1,
+  sampleRate: number = 44100
+): Buffer => {
   const channels = 1
   const bytesPerSample = 2
   const dataSize = Math.floor(durationSeconds * sampleRate * channels * bytesPerSample)
-  
+
   const header = createWAVHeader(dataSize, sampleRate, channels)
   const data = Buffer.alloc(dataSize)
-  
+
   // Fill with simple sine wave data
   for (let i = 0; i < dataSize; i += 2) {
-    const sample = Math.sin(2 * Math.PI * 440 * (i / 2) / sampleRate) * 32767
+    const sample = Math.sin((2 * Math.PI * 440 * (i / 2)) / sampleRate) * 32767
     data.writeInt16LE(Math.floor(sample), i)
   }
-  
+
   return Buffer.concat([header, data])
 }
