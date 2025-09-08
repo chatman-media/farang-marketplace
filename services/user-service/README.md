@@ -9,6 +9,10 @@ control for the marketplace platform.
 - Role-based access control (User, Agency, Manager, Admin)
 - Password hashing and validation
 - User verification system
+- **Multi-language support** (English, Russian, Thai, Chinese, Arabic)
+- **International phone number validation**
+- **Multi-channel notifications** (Email, SMS, Telegram, WhatsApp, LINE, Push)
+- **User preferences management** (language, currency, timezone, notification channels)
 - Comprehensive validation using Zod schemas
 - Database migrations for PostgreSQL
 

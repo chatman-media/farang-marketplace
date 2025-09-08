@@ -57,7 +57,7 @@ export interface SmartNotification {
   userId: string
   type: "booking_reminder" | "price_alert" | "recommendation" | "engagement"
   priority: "low" | "medium" | "high" | "urgent"
-  channel: "email" | "push" | "sms" | "in_app"
+  channel: "email" | "push" | "sms" | "in_app" | "telegram" | "whatsapp" | "line"
   timing: {
     sendAt: Date
     timezone: string
@@ -959,11 +959,12 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     type: SmartNotification["type"],
   ): Promise<SmartNotification["channel"]> {
     // In a real implementation, this would analyze user preferences and engagement rates
+    // For Thailand market, prioritize popular local channels
     const channelPreferences = {
-      booking_reminder: "push",
-      price_alert: "email",
-      recommendation: "in_app",
-      engagement: "push",
+      booking_reminder: "line", // LINE is most popular in Thailand
+      price_alert: "telegram", // Telegram for quick alerts
+      recommendation: "whatsapp", // WhatsApp for personalized recommendations
+      engagement: "push", // Push for general engagement
     } as const
 
     return channelPreferences[type] || "in_app"

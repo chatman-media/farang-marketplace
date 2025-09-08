@@ -71,6 +71,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
 
   // Register routes
   await app.register(import("./routes/listings"), { prefix: "/api/listings" })
+  await app.register(import("./routes/realEstate"), { prefix: "/api" })
 
   // Import controllers for Fastify routes
   const { ServiceProviderController } = await import("./controllers/ServiceProviderController")

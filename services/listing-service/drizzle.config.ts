@@ -6,9 +6,9 @@ config()
 export default {
   schema: "./src/db/schema.ts",
   out: "./drizzle",
-  driver: "pg",
+  dialect: "postgresql",
   dbCredentials: {
-    connectionString: process.env.DATABASE_URL || "postgresql://localhost:5432/thailand_marketplace",
+    url: process.env.DATABASE_URL || "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace",
   },
   verbose: true,
   strict: true,

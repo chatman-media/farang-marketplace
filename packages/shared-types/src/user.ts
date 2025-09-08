@@ -34,6 +34,20 @@ export interface SocialProfile {
   connectedAt: string
 }
 
+export interface UserPreferences {
+  language: string // Preferred language (en, ru, th, cn, ar)
+  currency: string // Preferred currency (THB, USD, EUR, etc.)
+  timezone?: string // User timezone
+  notifications: {
+    email: boolean // Email notifications
+    push: boolean // Push notifications
+    sms: boolean // SMS notifications
+    telegram: boolean // Telegram notifications
+    whatsapp: boolean // WhatsApp notifications
+    line: boolean // LINE notifications
+  }
+}
+
 export interface UserProfile {
   firstName: string
   lastName: string
@@ -44,6 +58,7 @@ export interface UserProfile {
   verificationStatus: VerificationStatus
   socialProfiles: SocialProfile[]
   primaryAuthProvider: AuthProvider
+  preferences?: UserPreferences
 }
 
 export interface User {

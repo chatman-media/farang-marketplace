@@ -1,8 +1,39 @@
 import * as bcrypt from "bcryptjs"
 import { z } from "zod"
-import { User, UserRole, UserProfile, VerificationStatus, SocialProfile, AuthProvider } from "@marketplace/shared-types"
+import {
+  User,
+  UserRole,
+  UserProfile,
+  VerificationStatus,
+  SocialProfile,
+  AuthProvider,
+  UserPreferences,
+} from "@marketplace/shared-types"
 
 // Validation schemas
+export const UserPreferencesSchema = z.object({
+  language: z.string().min(2).max(5).default("en"),
+  currency: z.string().min(3).max(3).default("USD"),
+  timezone: z.string().optional(),
+  notifications: z
+    .object({
+      email: z.boolean().default(true),
+      push: z.boolean().default(true),
+      sms: z.boolean().default(false),
+      telegram: z.boolean().default(false),
+      whatsapp: z.boolean().default(false),
+      line: z.boolean().default(false),
+    })
+    .default({
+      email: true,
+      push: true,
+      sms: false,
+      telegram: false,
+      whatsapp: false,
+      line: false,
+    }),
+})
+
 export const UserProfileSchema = z.object({
   firstName: z.string().min(1, "First name is required").max(50),
   lastName: z.string().min(1, "Last name is required").max(50),
@@ -19,6 +50,7 @@ export const UserProfileSchema = z.object({
   rating: z.number().min(0).max(5).default(0),
   reviewsCount: z.number().min(0).default(0),
   verificationStatus: z.nativeEnum(VerificationStatus).default(VerificationStatus.UNVERIFIED),
+  preferences: UserPreferencesSchema.optional(),
 })
 
 export const CreateUserSchema = z.object({
@@ -26,7 +58,7 @@ export const CreateUserSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   phone: z
     .string()
-    .regex(/^\+?[\d\s\-()]+$/, "Invalid phone format")
+    .regex(/^\+?[1-9]\d{6,14}$/, "Invalid international phone format")
     .optional(),
   telegramId: z.string().optional(),
   role: z.nativeEnum(UserRole).default(UserRole.USER),

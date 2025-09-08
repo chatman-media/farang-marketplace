@@ -1,6 +1,6 @@
 import { UserRepository } from "../repositories/UserRepository"
 import { UserEntity } from "../models/User"
-import { UserRole, UserProfile, User, VerificationStatus, Location } from "@marketplace/shared-types"
+import { UserRole, UserProfile, User, VerificationStatus, Location, UserPreferences } from "@marketplace/shared-types"
 import { z } from "zod"
 
 const UpdateUserSchema = z.object({
@@ -28,6 +28,26 @@ const UpdateUserSchema = z.object({
       verificationStatus: z.enum(VerificationStatus).optional(),
       socialProfiles: z.array(z.any()).optional(),
       primaryAuthProvider: z.any().optional(),
+      preferences: z
+        .object({
+          language: z.enum(["en", "ru", "th", "cn", "ar"]).optional(),
+          currency: z
+            .string()
+            .regex(/^[A-Z]{3}$/, "Invalid currency format")
+            .optional(),
+          timezone: z.string().optional(),
+          notifications: z
+            .object({
+              email: z.boolean().optional(),
+              push: z.boolean().optional(),
+              sms: z.boolean().optional(),
+              telegram: z.boolean().optional(),
+              whatsapp: z.boolean().optional(),
+              line: z.boolean().optional(),
+            })
+            .optional(),
+        })
+        .optional(),
     })
     .optional(),
   isActive: z.boolean().optional(),
@@ -91,6 +111,32 @@ export class UserService {
     // Hash password
     const passwordHash = await UserEntity.hashPassword(validatedData.password)
 
+    // Create default preferences
+    const defaultPreferences = {
+      language: "en",
+      currency: "USD",
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+        telegram: false,
+        whatsapp: false,
+        line: false,
+      },
+    }
+
+    // Merge user preferences with defaults
+    const preferences = validatedData.profile.preferences
+      ? {
+          ...defaultPreferences,
+          ...validatedData.profile.preferences,
+          notifications: {
+            ...defaultPreferences.notifications,
+            ...(validatedData.profile.preferences.notifications || {}),
+          },
+        }
+      : defaultPreferences
+
     // Create user
     const userEntity = await this.userRepository.create({
       email: validatedData.email,
@@ -106,6 +152,7 @@ export class UserService {
         verificationStatus: VerificationStatus.UNVERIFIED,
         socialProfiles: [],
         primaryAuthProvider: "email" as any,
+        preferences,
         ...(validatedData.profile.avatar && {
           avatar: validatedData.profile.avatar,
         }),
@@ -170,10 +217,25 @@ export class UserService {
       if (validatedData.profile) {
         const currentUser = await this.userRepository.findById(userId)
         if (currentUser) {
-          updatePayload.profile = {
+          // Deep merge preferences if they exist
+          const mergedProfile = {
             ...currentUser.profile,
             ...validatedData.profile,
           } as UserProfile
+
+          // Handle preferences merging specifically
+          if ((validatedData.profile as any).preferences) {
+            mergedProfile.preferences = {
+              ...currentUser.profile.preferences,
+              ...(validatedData.profile as any).preferences,
+              notifications: {
+                ...currentUser.profile.preferences?.notifications,
+                ...(validatedData.profile as any).preferences.notifications,
+              },
+            }
+          }
+
+          updatePayload.profile = mergedProfile
         }
       }
 

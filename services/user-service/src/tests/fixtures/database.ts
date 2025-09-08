@@ -1,4 +1,4 @@
-import { UserRole, VerificationStatus } from "@marketplace/shared-types"
+import { UserRole, VerificationStatus, AuthProvider } from "@marketplace/shared-types"
 import { UserEntity } from "../../models/User"
 import { pool, query } from "../../database/connection"
 import { runMigrations } from "../../database/migrate"
@@ -24,7 +24,7 @@ export const userFixtures = {
       reviewsCount: 10,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: "email" as any,
+      primaryAuthProvider: AuthProvider.EMAIL,
       location: {
         latitude: 40.7128,
         longitude: -74.006,
@@ -54,7 +54,7 @@ export const userFixtures = {
       reviewsCount: 50,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: "email" as any,
+      primaryAuthProvider: AuthProvider.EMAIL,
       location: {
         latitude: 34.0522,
         longitude: -118.2437,
@@ -84,7 +84,7 @@ export const userFixtures = {
       reviewsCount: 0,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: "email" as any,
+      primaryAuthProvider: AuthProvider.EMAIL,
     },
     isActive: true,
     createdAt: new Date("2023-01-03T00:00:00Z"),
@@ -106,7 +106,7 @@ export const userFixtures = {
       reviewsCount: 0,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: "email" as any,
+      primaryAuthProvider: AuthProvider.EMAIL,
     },
     isActive: true,
     createdAt: new Date("2023-01-04T00:00:00Z"),
@@ -128,7 +128,7 @@ export const userFixtures = {
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: "email" as any,
+      primaryAuthProvider: AuthProvider.EMAIL,
     },
     isActive: true,
     createdAt: new Date("2023-01-05T00:00:00Z"),
@@ -150,7 +150,7 @@ export const userFixtures = {
       reviewsCount: 5,
       verificationStatus: VerificationStatus.VERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: "email" as any,
+      primaryAuthProvider: AuthProvider.EMAIL,
     },
     isActive: false,
     createdAt: new Date("2023-01-06T00:00:00Z"),
@@ -172,7 +172,7 @@ export const createUserEntities = () => {
       fixture.role,
       fixture.profile,
       fixture.profile.socialProfiles || [],
-      fixture.profile.primaryAuthProvider || ("email" as any),
+      fixture.profile.primaryAuthProvider || AuthProvider.EMAIL,
       "phone" in fixture ? fixture.phone : undefined,
       "telegramId" in fixture ? fixture.telegramId : undefined,
       fixture.isActive,
@@ -229,7 +229,7 @@ export const createUserTestData = {
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: "email" as any,
+      primaryAuthProvider: AuthProvider.EMAIL,
     },
   },
 
@@ -246,7 +246,7 @@ export const createUserTestData = {
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: "email" as any,
+      primaryAuthProvider: AuthProvider.EMAIL,
       location: {
         latitude: 37.7749,
         longitude: -122.4194,
@@ -268,7 +268,7 @@ export const createUserTestData = {
       reviewsCount: 0,
       verificationStatus: VerificationStatus.UNVERIFIED,
       socialProfiles: [],
-      primaryAuthProvider: "email" as any,
+      primaryAuthProvider: AuthProvider.EMAIL,
     },
   },
 }

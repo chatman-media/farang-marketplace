@@ -21,6 +21,23 @@ const UpdateProfileSchema = z.object({
       region: z.string(),
     })
     .optional(),
+  preferences: z
+    .object({
+      language: z.string().min(2).max(5).optional(),
+      currency: z.string().min(3).max(3).optional(),
+      timezone: z.string().optional(),
+      notifications: z
+        .object({
+          email: z.boolean().optional(),
+          push: z.boolean().optional(),
+          sms: z.boolean().optional(),
+          telegram: z.boolean().optional(),
+          whatsapp: z.boolean().optional(),
+          line: z.boolean().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 })
 
 const VerificationRequestSchema = z.object({

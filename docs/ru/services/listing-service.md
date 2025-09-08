@@ -2,15 +2,17 @@
 
 ## 📋 Обзор
 
-Listing Service - это сервис управления объявлениями недвижимости с интегрированным ИИ-поиском и рекомендациями. Он обеспечивает создание, управление и поиск объявлений о недвижимости с поддержкой геолокации, фильтрации и персонализированных рекомендаций.
+Listing Service - это универсальный сервис управления объявлениями для Thailand Marketplace с поддержкой множественных категорий товаров и услуг. Включает специализированную поддержку недвижимости в стиле Airbnb + Avito с интегрированным ИИ-поиском и рекомендациями. Обеспечивает создание, управление и поиск объявлений с поддержкой геолокации, фильтрации и персонализированных рекомендаций.
 
 ## 🔧 Технические характеристики
 
-- **Порт разработки**: 3002
-- **База данных**: PostgreSQL (listing_service_db)
+- **Порт разработки**: 3003
+- **База данных**: PostgreSQL (thailand_marketplace)
 - **ORM**: Drizzle ORM
-- **Поиск**: Elasticsearch + ИИ векторный поиск
+- **Фреймворк**: Fastify 5.x
+- **Поиск**: Расширенная фильтрация + планируется Elasticsearch + ИИ векторный поиск
 - **Тестирование**: Vitest (4 теста)
+- **Категории**: Недвижимость, транспорт, туры, активности, рестораны, шоппинг, услуги, события, автомобили, товары
 - **Покрытие тестами**: 90%+
 
 ## 🏗️ Архитектура
@@ -20,72 +22,229 @@ Listing Service - это сервис управления объявления�
 services/listing-service/
 ├── src/
 │   ├── controllers/     # Контроллеры API
+│   │   ├── ListingController.ts      # Общие листинги
+│   │   ├── RealEstateController.ts   # Недвижимость
+│   │   ├── ServiceProviderController.ts # Поставщики услуг
+│   │   └── AISearchController.ts     # ИИ поиск
 │   ├── middleware/      # Промежуточное ПО
-│   ├── models/         # Модели данных
 │   ├── routes/         # Маршруты API
+│   │   ├── listings.ts      # Общие маршруты
+│   │   ├── realEstate.ts    # Маршруты недвижимости
+│   │   └── serviceProviders.ts # Маршруты поставщиков
 │   ├── services/       # Бизнес-логика
-│   │   ├── ai/         # ИИ сервисы
-│   │   ├── search/     # Поисковые сервисы
-│   │   └── geo/        # Геолокационные сервисы
-│   ├── utils/          # Утилиты
-│   ├── db/             # Конфигурация БД
-│   └── types/          # TypeScript типы
-├── tests/              # Тесты
+│   │   ├── ListingService.ts     # Общие листинги
+│   │   ├── RealEstateService.ts  # Недвижимость
+│   │   └── ServiceProviderService.ts # Поставщики
+│   ├── ai/             # ИИ сервисы
+│   ├── db/             # База данных
+│   │   ├── schema.ts        # Схема БД
+│   │   ├── connection.ts    # Подключение
+│   │   └── migrations/      # Миграции
+│   └── test/           # Тесты
 ├── AI_SEARCH_API.md    # Документация ИИ поиска
 └── package.json
 ```
 
 ### Модель данных
 
-#### Listing (Объявление)
+#### Основные категории листингов
+```typescript
+enum ListingCategory {
+  ACCOMMODATION = "accommodation",     // Размещение
+  REAL_ESTATE = "real_estate",        // Недвижимость
+  TRANSPORTATION = "transportation",   // Транспорт
+  TOURS = "tours",                    // Туры
+  ACTIVITIES = "activities",          // Активности
+  DINING = "dining",                  // Рестораны
+  SHOPPING = "shopping",              // Шоппинг
+  SERVICES = "services",              // Услуги
+  EVENTS = "events",                  // События
+  VEHICLES = "vehicles",              // Автомобили
+  PRODUCTS = "products",              // Товары
+}
+```
+
+#### Базовый Listing (Объявление)
 ```typescript
 interface Listing {
   id: string;                    // UUID
-  title: string;                 // Заголовок объявления
-  description: string;           // Подробное описание
-  type: PropertyType;            // CONDO, HOUSE, VILLA, APARTMENT, etc.
-  category: ListingCategory;     // RENT, SALE, SHORT_TERM
-  price: number;                 // Цена в основной валюте
-  currency: Currency;            // THB, USD, EUR, etc.
-  pricePerSqm?: number;         // Цена за кв.м
-  
-  // Характеристики недвижимости
-  bedrooms: number;
-  bathrooms: number;
-  area: number;                  // Площадь в кв.м
-  floorArea?: number;           // Жилая площадь
-  landArea?: number;            // Площадь участка
-  floor?: number;               // Этаж
-  totalFloors?: number;         // Всего этажей
-  
-  // Геолокация
-  location: Location;
-  address: Address;
-  coordinates: GeoPoint;
-  
-  // Медиа
-  images: ListingImage[];
-  videos?: ListingVideo[];
-  virtualTour?: string;         // URL виртуального тура
-  
-  // Удобства и особенности
-  amenities: Amenity[];
-  features: Feature[];
-  
-  // Метаданные
   ownerId: string;              // ID владельца
-  agencyId?: string;            // ID агентства
-  agentId?: string;             // ID агента
-  status: ListingStatus;        // ACTIVE, INACTIVE, SOLD, RENTED
-  visibility: Visibility;       // PUBLIC, PRIVATE, AGENCY_ONLY
-  
-  // ИИ данные
-  aiDescription?: string;       // ИИ-генерированное описание
-  aiTags: string[];            // ИИ теги для поиска
-  searchVector: number[];       // Векторное представление для поиска
-  
-  // Статистика
-  views: number;
+  title: string;                // Заголовок объявления
+  description: string;          // Подробное описание
+  category: ListingCategory;    // Категория листинга
+  type: ListingType;           // Тип в рамках категории
+  status: ListingStatus;       // Статус объявления
+  price: number;               // Цена в основной валюте
+  currency: Currency;          // THB, USD, EUR, etc.
+
+  // Местоположение
+  location: Location;
+
+  // Медиафайлы
+  images: string[];            // Массив URL изображений
+  videos?: string[];           // Массив URL видео
+  mainImage: string;           // Главное изображение
+
+  // Метаданные
+  tags: string[];              // Теги для поиска
+  views: number;               // Количество просмотров
+  favorites: number;           // Количество добавлений в избранное
+  inquiries: number;           // Количество запросов
+  averageRating: number;       // Средний рейтинг
+  reviewCount: number;         // Количество отзывов
+
+  // Временные метки
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt?: Date;
+}
+```
+
+#### RealEstate (Недвижимость) - Специализированная модель
+```typescript
+interface RealEstate {
+  id: string;
+  listingId: string;           // Связь с основным листингом
+
+  // Основные характеристики
+  propertyType: PropertyType;   // CONDO, HOUSE, VILLA, APARTMENT, etc.
+  propertyStatus: PropertyStatus; // AVAILABLE, RENTED, SOLD, etc.
+  listingPurpose: ListingPurpose; // RENT, SALE, SHORT_TERM_RENTAL, etc.
+
+  // Физические характеристики
+  bedrooms: number;
+  bathrooms: number;           // Может быть 2.5, etc.
+  area: number;                // Общая площадь в кв.м
+  livingArea?: number;         // Жилая площадь
+  landArea?: number;           // Площадь участка
+  floor?: number;              // Этаж
+  totalFloors?: number;        // Всего этажей в здании
+
+  // Детали здания
+  buildingType?: BuildingType;  // LOW_RISE, MID_RISE, HIGH_RISE, etc.
+  buildingAge?: number;         // Возраст здания в годах
+  yearBuilt?: number;           // Год постройки
+  yearRenovated?: number;       // Год ремонта
+
+  // Состояние и меблировка
+  furnishing: Furnishing;       // UNFURNISHED, PARTIALLY_FURNISHED, etc.
+  condition: string;            // excellent, good, fair, needs_renovation
+
+  // Виды и ориентация
+  views: ViewType[];            // Массив типов видов
+  orientation?: Orientation;    // Ориентация по сторонам света
+  balconies: number;            // Количество балконов
+  terraces: number;             // Количество террас
+
+  // Ценообразование
+  price: number;                // Основная цена
+  pricePerSqm?: number;         // Цена за кв.м
+  currency: Currency;           // Валюта
+  priceType: PriceType;         // FIXED, NEGOTIABLE, AUCTION, etc.
+
+  // Арендные ставки (стиль Airbnb)
+  dailyRate?: number;           // Суточная ставка
+  weeklyRate?: number;          // Недельная ставка
+  monthlyRate?: number;         // Месячная ставка
+  yearlyRate?: number;          // Годовая ставка
+
+  // Дополнительные расходы
+  maintenanceFee?: number;      // Плата за обслуживание
+  commonAreaFee?: number;       // Плата за общие зоны
+  securityDeposit?: number;     // Залог
+  cleaningFee?: number;         // Плата за уборку
+
+  // Коммунальные услуги
+  electricityIncluded: boolean;
+  waterIncluded: boolean;
+  internetIncluded: boolean;
+  cableIncluded: boolean;
+  gasIncluded: boolean;
+
+  // Парковка
+  parkingSpaces: number;        // Количество парковочных мест
+  parkingType?: string;         // covered, open, garage, street
+  parkingFee?: number;          // Плата за парковку
+
+  // Связанные данные
+  amenities?: PropertyAmenities; // Удобства
+  rules?: PropertyRules;        // Правила (для краткосрочной аренды)
+}
+```
+
+#### PropertyAmenities (Удобства недвижимости)
+```typescript
+interface PropertyAmenities {
+  // Удобства здания
+  hasElevator: boolean;         // Лифт
+  hasSwimmingPool: boolean;     // Бассейн
+  hasFitnessCenter: boolean;    // Фитнес-центр
+  hasSauna: boolean;            // Сауна
+  hasGarden: boolean;           // Сад
+  hasPlayground: boolean;       // Детская площадка
+  hasSecurity: boolean;         // Охрана
+  hasCCTV: boolean;             // Видеонаблюдение
+  hasKeyCard: boolean;          // Карточный доступ
+  hasReception: boolean;        // Ресепшн
+  hasConcierge: boolean;        // Консьерж
+
+  // Удобства квартиры/дома
+  hasAirConditioning: boolean;  // Кондиционер
+  hasHeating: boolean;          // Отопление
+  hasWashingMachine: boolean;   // Стиральная машина
+  hasDryer: boolean;            // Сушилка
+  hasDishwasher: boolean;       // Посудомоечная машина
+  hasWifi: boolean;             // Wi-Fi
+  hasBalcony: boolean;          // Балкон
+  hasTerrace: boolean;          // Терраса
+  hasFireplace: boolean;        // Камин
+
+  // Доступность
+  isWheelchairAccessible: boolean; // Доступность для инвалидных колясок
+
+  // Политика домашних животных
+  petsAllowed: boolean;         // Разрешены ли питомцы
+  catsAllowed: boolean;         // Разрешены ли кошки
+  dogsAllowed: boolean;         // Разрешены ли собаки
+  petDeposit?: number;          // Залог за питомца
+}
+```
+
+#### PropertyRules (Правила недвижимости - стиль Airbnb)
+```typescript
+interface PropertyRules {
+  // Правила заезда/выезда (для краткосрочной аренды)
+  checkInTime?: string;         // Время заезда "15:00"
+  checkOutTime?: string;        // Время выезда "11:00"
+  selfCheckIn: boolean;         // Самостоятельный заезд
+  keypadEntry: boolean;         // Вход по коду
+
+  // Правила для гостей
+  maxGuests?: number;           // Максимальное количество гостей
+  infantsAllowed: boolean;      // Разрешены ли младенцы
+  childrenAllowed: boolean;     // Разрешены ли дети
+  eventsAllowed: boolean;       // Разрешены ли мероприятия
+  partiesAllowed: boolean;      // Разрешены ли вечеринки
+  smokingAllowed: boolean;      // Разрешено ли курение
+
+  // Тишина и поведение
+  quietHoursStart?: string;     // Начало тихих часов "22:00"
+  quietHoursEnd?: string;       // Конец тихих часов "08:00"
+
+  // Политика отмены
+  cancellationPolicy: "flexible" | "moderate" | "strict";
+
+  // Домашние правила
+  houseRules?: string;          // Текстовые правила дома
+  additionalRules: string[];    // Дополнительные правила
+
+  // Безопасность
+  hasSmokeDetektor: boolean;    // Детектор дыма
+  hasCarbonMonoxideDetector: boolean; // Детектор угарного газа
+  hasFireExtinguisher: boolean; // Огнетушитель
+  hasFirstAidKit: boolean;      // Аптечка
+  hasSecurityCamera: boolean;   // Камера безопасности
+}
   favorites: number;
   inquiries: number;
   
@@ -154,43 +313,10 @@ interface ListingImage {
 
 ## 🌐 API Endpoints
 
-### Управление объявлениями
+### Общие листинги
 
 #### POST /api/listings
-Создание нового объявления
-
-**Запрос:**
-```json
-{
-  "title": "Luxury Condo in Bangkok",
-  "description": "Beautiful 2-bedroom condo with city view",
-  "type": "CONDO",
-  "category": "RENT",
-  "price": 45000,
-  "currency": "THB",
-  "bedrooms": 2,
-  "bathrooms": 2,
-  "area": 85,
-  "location": {
-    "country": "TH",
-    "province": "Bangkok",
-    "city": "Bangkok",
-    "district": "Sukhumvit",
-    "coordinates": {
-      "lat": 13.7563,
-      "lng": 100.5018
-    }
-  },
-  "amenities": ["POOL", "GYM", "PARKING", "SECURITY"],
-  "images": [
-    {
-      "url": "https://example.com/image1.jpg",
-      "type": "EXTERIOR",
-      "order": 1
-    }
-  ]
-}
-```
+Создание нового общего объявления (для всех категорий кроме недвижимости)
 
 #### GET /api/listings/:id
 Получение объявления по ID
@@ -206,16 +332,110 @@ interface ListingImage {
 
 **Параметры запроса:**
 ```
-?type=CONDO
-&category=RENT
-&minPrice=20000
-&maxPrice=50000
-&bedrooms=2
-&location=Bangkok
-&amenities=POOL,GYM
+?category=vehicles
+&type=car
+&minPrice=500000
+&maxPrice=2000000
+&city=Bangkok
 &page=1
 &limit=20
 &sort=price_asc
+```
+
+### Недвижимость (Real Estate)
+
+#### POST /api/real-estate
+Создание объявления недвижимости
+
+**Запрос:**
+```json
+{
+  "title": "Современная квартира в центре Бангкока",
+  "description": "Просторная 2-комнатная квартира с видом на город...",
+  "propertyType": "condo",
+  "listingPurpose": "rent",
+  "bedrooms": 2,
+  "bathrooms": 2,
+  "area": 65,
+  "floor": 15,
+  "totalFloors": 30,
+  "furnishing": "fully_furnished",
+  "condition": "excellent",
+  "views": ["city", "pool"],
+  "orientation": "south",
+  "price": 25000,
+  "currency": "THB",
+  "priceType": "fixed",
+  "monthlyRate": 25000,
+  "securityDeposit": 50000,
+  "electricityIncluded": false,
+  "waterIncluded": true,
+  "internetIncluded": true,
+  "parkingSpaces": 1,
+  "location": {
+    "address": "123 Sukhumvit Road",
+    "city": "Bangkok",
+    "region": "Bangkok",
+    "country": "Thailand",
+    "latitude": 13.7563,
+    "longitude": 100.5018
+  },
+  "images": [
+    "https://example.com/image1.jpg",
+    "https://example.com/image2.jpg"
+  ],
+  "amenities": {
+    "hasSwimmingPool": true,
+    "hasFitnessCenter": true,
+    "hasElevator": true,
+    "hasSecurity": true,
+    "hasAirConditioning": true,
+    "hasWifi": true,
+    "petsAllowed": false
+  },
+  "rules": {
+    "maxGuests": 4,
+    "checkInTime": "15:00",
+    "checkOutTime": "11:00",
+    "smokingAllowed": false,
+    "partiesAllowed": false,
+    "cancellationPolicy": "moderate"
+  }
+}
+```
+
+#### GET /api/real-estate/:id
+Получение объявления недвижимости по ID
+
+#### PUT /api/real-estate/:id
+Обновление объявления недвижимости
+
+#### DELETE /api/real-estate/:id
+Удаление объявления недвижимости
+
+#### GET /api/real-estate
+Поиск недвижимости с фильтрами
+
+**Параметры запроса:**
+```
+?propertyType=condo,apartment
+&listingPurpose=rent,short_term_rental
+&minPrice=20000
+&maxPrice=50000
+&minBedrooms=2
+&maxBedrooms=3
+&minArea=50
+&maxArea=100
+&furnishing=fully_furnished
+&city=Bangkok
+&hasSwimmingPool=true
+&hasFitnessCenter=true
+&hasElevator=true
+&petsAllowed=false
+&page=1
+&limit=20
+&sortBy=price
+&sortOrder=asc
 ```
 
 ### Поиск и фильтрация

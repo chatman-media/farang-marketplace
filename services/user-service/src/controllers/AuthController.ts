@@ -13,7 +13,7 @@ const RegisterSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   phone: z
     .string()
-    .regex(/^\+?[\d\s\-\(\)]+$/, "Invalid phone format")
+    .regex(/^\+?[1-9]\d{6,14}$/, "Invalid international phone format")
     .optional(),
   telegramId: z.string().optional(),
   profile: z.object({

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
 import { UserEntity } from "../../models/User"
-import { UserRole, VerificationStatus } from "@marketplace/shared-types"
+import { UserRole, VerificationStatus, AuthProvider } from "@marketplace/shared-types"
 import { testUserData } from "../setup"
 
 // bcrypt is used directly for real password hashing in tests
@@ -24,10 +24,10 @@ describe("UserEntity", () => {
         reviewsCount: 10,
         verificationStatus: VerificationStatus.VERIFIED,
         socialProfiles: [],
-        primaryAuthProvider: "email" as any,
+        primaryAuthProvider: AuthProvider.EMAIL,
       },
       [],
-      "email" as any,
+      AuthProvider.EMAIL,
       "+1234567890",
       "telegram123",
       true,
@@ -99,7 +99,7 @@ describe("UserEntity", () => {
         reviewsCount: 0,
         verificationStatus: VerificationStatus.UNVERIFIED,
         socialProfiles: [],
-        primaryAuthProvider: "email" as any,
+        primaryAuthProvider: AuthProvider.EMAIL,
       })
 
       const isValid = await testUser.validatePassword(password)
@@ -116,7 +116,7 @@ describe("UserEntity", () => {
         reviewsCount: 0,
         verificationStatus: VerificationStatus.UNVERIFIED,
         socialProfiles: [],
-        primaryAuthProvider: "email" as any,
+        primaryAuthProvider: AuthProvider.EMAIL,
       })
 
       const isValid = await testUser.validatePassword("wrongpassword")
@@ -307,7 +307,7 @@ describe("UserEntity", () => {
         expect(() => UserEntity.validateCreateData(data)).toThrow()
       })
 
-      const validPhones = ["+1234567890", "123-456-7890", "(123) 456-7890", "+66 12 345 6789"]
+      const validPhones = ["+1234567890", "+66123456789", "+44123456789", "+81123456789"]
 
       validPhones.forEach((phone) => {
         const data = { ...testUserData.validCreateData, phone }
