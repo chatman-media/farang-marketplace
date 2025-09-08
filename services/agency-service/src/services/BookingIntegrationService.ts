@@ -1,6 +1,6 @@
-import { ServiceAssignmentService } from "./ServiceAssignmentService.js"
-import { AgencyServiceService } from "./AgencyServiceService.js"
-import { AgencyService } from "./AgencyService.js"
+import { ServiceAssignmentService } from "./ServiceAssignmentService"
+import { AgencyServiceService } from "./AgencyServiceService"
+import { AgencyService } from "./AgencyService"
 
 export interface BookingServiceRequest {
   bookingId: string
@@ -78,7 +78,7 @@ export class BookingIntegrationService {
           limit: 50,
           sortBy: "basePrice",
           sortOrder: "asc",
-        }
+        },
       )
 
       const matches: AgencyServiceMatch[] = []
@@ -108,7 +108,7 @@ export class BookingIntegrationService {
         // Calculate distance (simplified - in real implementation would use geolocation)
         const distance = this.calculateDistance(
           request.location.coordinates,
-          (agency.primaryLocation as any)?.coordinates
+          (agency.primaryLocation as any)?.coordinates,
         )
 
         // Calculate match score
@@ -150,7 +150,7 @@ export class BookingIntegrationService {
    */
   async assignServiceToAgency(
     bookingRequest: BookingServiceRequest,
-    agencyMatch: AgencyServiceMatch
+    agencyMatch: AgencyServiceMatch,
   ): Promise<ServiceAssignmentResult> {
     try {
       // Create service assignment
@@ -182,9 +182,7 @@ export class BookingIntegrationService {
   /**
    * Auto-assign best matching agency
    */
-  async autoAssignBestMatch(
-    request: BookingServiceRequest
-  ): Promise<ServiceAssignmentResult | null> {
+  async autoAssignBestMatch(request: BookingServiceRequest): Promise<ServiceAssignmentResult | null> {
     try {
       const matches = await this.findMatchingAgencies(request)
 
@@ -210,7 +208,7 @@ export class BookingIntegrationService {
    */
   async calculateCommission(
     assignmentId: string,
-    finalPrice: number
+    finalPrice: number,
   ): Promise<{
     commissionAmount: number
     agencyEarnings: number
@@ -290,7 +288,7 @@ export class BookingIntegrationService {
    */
   private calculateDistance(
     coord1?: { latitude: number; longitude: number },
-    coord2?: { latitude: number; longitude: number }
+    coord2?: { latitude: number; longitude: number },
   ): number {
     if (!coord1 || !coord2) return 999 // Default high distance
 

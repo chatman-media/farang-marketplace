@@ -10,7 +10,7 @@ import type {
   AIMetrics,
   AIError,
   PromptTemplate,
-} from "./types.js"
+} from "./types"
 
 export abstract class BaseAIProvider implements AIProviderInterface {
   protected provider: AIProvider
@@ -29,7 +29,7 @@ export abstract class BaseAIProvider implements AIProviderInterface {
       maxTokens?: number
       temperature?: number
       timeout?: number
-    }
+    },
   ) {
     this.provider = provider
     this.apiKey = config.apiKey
@@ -57,8 +57,7 @@ export abstract class BaseAIProvider implements AIProviderInterface {
   protected updateMetrics(responseTime: number, tokensUsed: number, isError: boolean = false) {
     this.metrics.requestCount++
     this.metrics.averageResponseTime =
-      (this.metrics.averageResponseTime * (this.metrics.requestCount - 1) + responseTime) /
-      this.metrics.requestCount
+      (this.metrics.averageResponseTime * (this.metrics.requestCount - 1) + responseTime) / this.metrics.requestCount
 
     if (isError) {
       this.metrics.errorRate =
@@ -86,17 +85,14 @@ export abstract class BaseAIProvider implements AIProviderInterface {
       const placeholder = `{${variable}}`
       prompt = prompt.replace(
         new RegExp(placeholder, "g"),
-        typeof value === "object" ? JSON.stringify(value) : String(value || "")
+        typeof value === "object" ? JSON.stringify(value) : String(value || ""),
       )
     })
 
     return prompt
   }
 
-  protected async executeWithMetrics<T>(
-    operation: () => Promise<T>,
-    estimatedTokens: number = 100
-  ): Promise<T> {
+  protected async executeWithMetrics<T>(operation: () => Promise<T>, estimatedTokens: number = 100): Promise<T> {
     const startTime = Date.now()
 
     try {

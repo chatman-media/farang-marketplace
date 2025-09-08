@@ -82,9 +82,7 @@ export class StripeService {
       }
     } catch (error) {
       console.error("Stripe payment intent creation failed:", error)
-      throw new Error(
-        `Payment processing failed: ${error instanceof Error ? error.message : "Unknown error"}`
-      )
+      throw new Error(`Payment processing failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
@@ -103,9 +101,7 @@ export class StripeService {
       }
     } catch (error) {
       console.error("Stripe payment confirmation failed:", error)
-      throw new Error(
-        `Payment confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`
-      )
+      throw new Error(`Payment confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
@@ -117,9 +113,7 @@ export class StripeService {
       return await this.stripe.paymentIntents.retrieve(paymentIntentId)
     } catch (error) {
       console.error("Failed to retrieve payment intent:", error)
-      throw new Error(
-        `Failed to retrieve payment: ${error instanceof Error ? error.message : "Unknown error"}`
-      )
+      throw new Error(`Failed to retrieve payment: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
@@ -142,9 +136,7 @@ export class StripeService {
       })
     } catch (error) {
       console.error("Stripe refund creation failed:", error)
-      throw new Error(
-        `Refund processing failed: ${error instanceof Error ? error.message : "Unknown error"}`
-      )
+      throw new Error(`Refund processing failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
@@ -172,19 +164,14 @@ export class StripeService {
       })
     } catch (error) {
       console.error("Stripe customer creation failed:", error)
-      throw new Error(
-        `Customer creation failed: ${error instanceof Error ? error.message : "Unknown error"}`
-      )
+      throw new Error(`Customer creation failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
   /**
    * Create a payment method for a customer
    */
-  async createPaymentMethod(
-    customerId: string,
-    paymentMethodData: any
-  ): Promise<Stripe.PaymentMethod> {
+  async createPaymentMethod(customerId: string, paymentMethodData: any): Promise<Stripe.PaymentMethod> {
     try {
       const paymentMethod = await this.stripe.paymentMethods.create(paymentMethodData)
 
@@ -196,9 +183,7 @@ export class StripeService {
       return paymentMethod
     } catch (error) {
       console.error("Stripe payment method creation failed:", error)
-      throw new Error(
-        `Payment method creation failed: ${error instanceof Error ? error.message : "Unknown error"}`
-      )
+      throw new Error(`Payment method creation failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
@@ -290,11 +275,7 @@ export class StripeService {
         "stripe_sepa" as PaymentMethodType,
         "stripe_sofort" as PaymentMethodType,
       ],
-      NL: [
-        "stripe_card" as PaymentMethodType,
-        "stripe_sepa" as PaymentMethodType,
-        "stripe_ideal" as PaymentMethodType,
-      ],
+      NL: ["stripe_card" as PaymentMethodType, "stripe_sepa" as PaymentMethodType, "stripe_ideal" as PaymentMethodType],
       FR: ["stripe_card" as PaymentMethodType, "stripe_sepa" as PaymentMethodType],
       TH: ["stripe_card" as PaymentMethodType],
       // Add more countries as needed

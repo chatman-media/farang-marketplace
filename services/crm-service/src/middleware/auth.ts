@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express"
+import { FastifyRequest, FastifyReply } from "fastify"
 import jwt from "jsonwebtoken"
 
-interface AuthenticatedRequest extends Request {
+interface AuthenticatedRequest extends FastifyRequest {
   user?: {
     id: string
     role: string
@@ -9,32 +9,26 @@ interface AuthenticatedRequest extends Request {
   }
 }
 
-export const authenticateToken = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): void => {
-  const authHeader = req.headers["authorization"]
+export const authenticateToken = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  const authHeader = request.headers["authorization"]
   const token = authHeader && authHeader.split(" ")[1]
 
   if (!token) {
-    res.status(401).json({
+    return reply.status(401).send({
       error: "Unauthorized",
       message: "Access token is required",
     })
-    return
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret") as any
-    req.user = {
+    ;(request as AuthenticatedRequest).user = {
       id: decoded.id || decoded.userId,
       role: decoded.role || "user",
       email: decoded.email,
     }
-    next()
   } catch (error) {
-    res.status(403).json({
+    return reply.status(403).send({
       error: "Forbidden",
       message: "Invalid or expired token",
     })
@@ -42,23 +36,22 @@ export const authenticateToken = (
 }
 
 export const requireRole = (roles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-    if (!req.user) {
-      res.status(401).json({
+  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const authRequest = request as AuthenticatedRequest
+    if (!authRequest.user) {
+      return reply.status(401).send({
         error: "Unauthorized",
         message: "Authentication required",
       })
-      return
     }
 
-    if (!roles.includes(req.user.role)) {
-      res.status(403).json({
+    if (!roles.includes(authRequest.user.role)) {
+      return reply.status(403).send({
         error: "Forbidden",
         message: `Access denied. Required roles: ${roles.join(", ")}`,
       })
-      return
     }
-
-    next()
   }
 }
+
+export type { AuthenticatedRequest }

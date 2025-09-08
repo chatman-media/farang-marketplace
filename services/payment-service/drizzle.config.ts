@@ -9,8 +9,7 @@ export default {
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url:
-      process.env.DATABASE_URL || "postgresql://user:password@localhost:5432/marketplace_payments",
+    url: process.env.DATABASE_URL || "postgresql://user:password@localhost:5432/marketplace_payments",
   },
   verbose: true,
   strict: true,

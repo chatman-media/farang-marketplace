@@ -1,67 +1,76 @@
-import { Router } from "express"
+import { FastifyInstance, FastifyPluginAsync } from "fastify"
 import { ProfileController } from "../controllers/ProfileController"
 import { UserService } from "../services/UserService"
 import { UserRepository } from "../repositories/UserRepository"
-import { AuthMiddleware } from "../middleware/auth"
+import { FastifyAuthMiddleware } from "../middleware/auth"
 import { authService } from "./auth"
-
-// Create router
-const router = Router()
 
 // Initialize dependencies
 const userRepository = new UserRepository()
 const userService = new UserService(userRepository)
 const profileController = new ProfileController(userService)
-const authMiddleware = new AuthMiddleware(authService)
+const authMiddleware = new FastifyAuthMiddleware(authService)
 
-// Multer error handler middleware
-const handleMulterError = (error: any, req: any, res: any, next: any) => {
-  if (error.code === "LIMIT_FILE_SIZE") {
-    return res.status(400).json({
-      error: {
-        code: "FILE_TOO_LARGE",
-        message: "File size exceeds the 5MB limit",
-        timestamp: new Date().toISOString(),
-        requestId: req.headers["x-request-id"] || "unknown",
-      },
-    })
-  }
+const profileRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
+  // Profile management routes (all require authentication)
+  fastify.get(
+    "/",
+    {
+      preHandler: [authMiddleware.requireAuth()],
+    },
+    profileController.getProfile,
+  )
 
-  if (error.message === "Only image files are allowed") {
-    return res.status(400).json({
-      error: {
-        code: "INVALID_FILE_TYPE",
-        message: "Only image files are allowed",
-        timestamp: new Date().toISOString(),
-        requestId: req.headers["x-request-id"] || "unknown",
-      },
-    })
-  }
+  fastify.put(
+    "/",
+    {
+      preHandler: [authMiddleware.requireAuth()],
+    },
+    profileController.updateProfile,
+  )
 
-  next(error)
+  fastify.post(
+    "/avatar",
+    {
+      preHandler: [authMiddleware.requireAuth()],
+    },
+    profileController.uploadAvatar,
+  )
+
+  // Verification routes
+  fastify.post(
+    "/verification/request",
+    {
+      preHandler: [authMiddleware.requireAuth()],
+    },
+    profileController.requestVerification,
+  )
+
+  // Admin/Manager routes for verification management
+  fastify.post(
+    "/verification/:userId/approve",
+    {
+      preHandler: [authMiddleware.requireAuth()],
+    },
+    profileController.approveVerification,
+  )
+
+  fastify.post(
+    "/verification/:userId/reject",
+    {
+      preHandler: [authMiddleware.requireAuth()],
+    },
+    profileController.rejectVerification,
+  )
+
+  // Get user profile by ID (for admins/managers or own profile)
+  fastify.get(
+    "/:userId",
+    {
+      preHandler: [authMiddleware.requireAuth()],
+    },
+    profileController.getUserProfile,
+  )
 }
 
-// All profile routes require authentication
-router.use(authMiddleware.requireAuth())
-
-// Profile management routes
-router.get("/", profileController.getProfile)
-router.put("/", profileController.updateProfile)
-router.post(
-  "/avatar",
-  ProfileController.getUploadMiddleware(),
-  handleMulterError,
-  profileController.uploadAvatar
-)
-
-// Verification routes
-router.post("/verification/request", profileController.requestVerification)
-
-// Admin/Manager routes for verification management
-router.post("/verification/:userId/approve", profileController.approveVerification)
-router.post("/verification/:userId/reject", profileController.rejectVerification)
-
-// Get user profile by ID (for admins/managers or own profile)
-router.get("/:userId", profileController.getUserProfile)
-
-export default router
+export default profileRoutes

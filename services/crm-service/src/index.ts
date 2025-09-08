@@ -1,92 +1,138 @@
-import express from "express"
-import cors from "cors"
-import helmet from "helmet"
-import dotenv from "dotenv"
-import crmRoutes from "./routes/crm"
+import Fastify from "fastify"
+import { config } from "dotenv"
+import { z } from "zod"
 
 // Load environment variables
-dotenv.config()
+config()
 
-const app = express()
-const PORT = process.env.PORT || 3007
+// Environment validation
+const envSchema = z.object({
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  PORT: z.string().transform(Number).default(3007),
+  CORS_ORIGIN: z.string().default("*"),
+  JWT_SECRET: z.string(),
+  DATABASE_URL: z.string(),
+})
 
-// Security middleware
-app.use(helmet())
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || "*",
+const env = envSchema.parse(process.env)
+
+// Create Fastify app function
+const createApp = async () => {
+  const app = Fastify({
+    logger: env.NODE_ENV === "development",
+    bodyLimit: 10 * 1024 * 1024, // 10MB
+  })
+
+  // Register plugins
+  await app.register(import("@fastify/helmet"))
+  await app.register(import("@fastify/cors"), {
+    origin: env.CORS_ORIGIN === "*" ? true : env.CORS_ORIGIN.split(","),
     credentials: true,
   })
-)
 
-// Body parsing middleware
-app.use(express.json({ limit: "10mb" }))
-app.use(express.urlencoded({ extended: true, limit: "10mb" }))
-
-// Request logging middleware
-app.use((req, res, next) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`)
-  }
-  next()
-})
-
-// Routes
-app.use("/api/crm", crmRoutes)
-
-// Root endpoint
-app.get("/", (req, res) => {
-  res.json({
-    service: "CRM Service",
-    version: "1.0.0",
-    status: "running",
-    timestamp: new Date().toISOString(),
+  // Root endpoint
+  app.get("/", async () => {
+    return {
+      service: "CRM Service",
+      version: "2.0.0",
+      status: "running",
+      timestamp: new Date().toISOString(),
+      framework: "Fastify 5.x",
+      features: [
+        "Multi-channel communication",
+        "Customer management",
+        "Lead tracking",
+        "Campaign automation",
+        "Analytics dashboard",
+      ],
+    }
   })
-})
 
-// 404 handler
-app.use("*", (req, res) => {
-  res.status(404).json({
-    error: "Not Found",
-    message: `Route ${req.method} ${req.originalUrl} not found`,
-    timestamp: new Date().toISOString(),
+  // Health check endpoint
+  app.get("/health", async () => {
+    return {
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      service: "crm-service",
+      version: "2.0.0",
+      environment: env.NODE_ENV,
+    }
   })
-})
 
-// Global error handler
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Global error handler:", error)
+  // Register routes
+  await app.register(import("./routes/crm"), { prefix: "/api/crm" })
 
-  res.status(error.status || 500).json({
-    error: error.name || "Internal Server Error",
-    message: error.message || "An unexpected error occurred",
-    timestamp: new Date().toISOString(),
-    ...(process.env.NODE_ENV === "development" && { stack: error.stack }),
+  // Global error handler
+  app.setErrorHandler(async (error, _request, reply) => {
+    app.log.error(error)
+
+    if (error.validation) {
+      return reply.status(400).send({
+        error: "Validation Error",
+        message: error.message,
+        details: error.validation,
+        timestamp: new Date().toISOString(),
+      })
+    }
+
+    if (error.statusCode) {
+      return reply.status(error.statusCode).send({
+        error: error.name,
+        message: error.message,
+        timestamp: new Date().toISOString(),
+      })
+    }
+
+    return reply.status(500).send({
+      error: "Internal Server Error",
+      message: env.NODE_ENV === "production" ? "Something went wrong" : error.message,
+      timestamp: new Date().toISOString(),
+      ...(env.NODE_ENV === "development" && { stack: error.stack }),
+    })
   })
-})
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`🚀 CRM Service running on port ${PORT}`)
-  console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`)
-  console.log(`🔗 API Base URL: http://localhost:${PORT}/api/crm`)
-})
+  return app
+}
 
 // Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("SIGTERM received, shutting down gracefully")
-  server.close(() => {
-    console.log("Process terminated")
-    process.exit(0)
-  })
-})
+let appInstance: any = null
 
-process.on("SIGINT", () => {
-  console.log("SIGINT received, shutting down gracefully")
-  server.close(() => {
-    console.log("Process terminated")
+const gracefulShutdown = async (signal: string) => {
+  console.log(`${signal} received, shutting down gracefully`)
+  try {
+    if (appInstance) {
+      await appInstance.close()
+    }
+    console.log("CRM Service shut down successfully")
     process.exit(0)
-  })
-})
+  } catch (error) {
+    console.error("Error during shutdown:", error)
+    process.exit(1)
+  }
+}
 
-export default app
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"))
+process.on("SIGINT", () => gracefulShutdown("SIGINT"))
+
+// Start the application
+const startApp = async () => {
+  appInstance = await createApp()
+  await appInstance.listen({
+    port: env.PORT,
+    host: "0.0.0.0",
+  })
+
+  console.log(`🚀 CRM Service v2.0 running on port ${env.PORT}`)
+  console.log(`📊 Environment: ${env.NODE_ENV}`)
+  console.log(`🔗 API Base URL: http://localhost:${env.PORT}/api/crm`)
+  console.log(`💚 Health check: http://localhost:${env.PORT}/health`)
+}
+
+if (require.main === module) {
+  startApp().catch((error) => {
+    console.error("Failed to start CRM Service:", error)
+    process.exit(1)
+  })
+}
+
+export { createApp, env }

@@ -1,8 +1,8 @@
 import { Worker, Job } from "bullmq"
-import { redis } from "../index.js"
-import { PaymentService } from "../../services/PaymentService.js"
-import { db } from "../../db/connection.js"
-import { payments, refunds } from "../../db/schema.js"
+import { redis } from "../index"
+import { PaymentService } from "../../services/PaymentService"
+import { db } from "../../db/connection"
+import { payments, refunds } from "../../db/schema"
 import { eq, and, lt, inArray } from "drizzle-orm"
 
 const paymentService = new PaymentService()
@@ -55,9 +55,9 @@ async function retryFailedPayments(job: Job) {
       .from(payments)
       .where(
         and(
-          eq(payments.status, "failed")
+          eq(payments.status, "failed"),
           // Note: retryCount and retryAfter fields need to be added to schema
-        )
+        ),
       )
       .limit(batchSize)
 
@@ -90,22 +90,14 @@ async function processRefunds(job: Job) {
     console.log("💸 Processing pending refunds...")
 
     // Find pending refunds
-    const pendingRefunds = await db
-      .select()
-      .from(refunds)
-      .where(eq(refunds.status, "pending"))
-      .limit(batchSize)
+    const pendingRefunds = await db.select().from(refunds).where(eq(refunds.status, "pending")).limit(batchSize)
 
     let processed = 0
 
     for (const refund of pendingRefunds) {
       try {
         // Process refund based on original payment method
-        const payment = await db
-          .select()
-          .from(payments)
-          .where(eq(payments.id, refund.paymentId))
-          .limit(1)
+        const payment = await db.select().from(payments).where(eq(payments.id, refund.paymentId)).limit(1)
 
         if (payment.length > 0) {
           const originalPayment = payment[0]
@@ -153,11 +145,7 @@ async function autoCompletePayments(job: Job) {
 
     for (const payment of confirmedPayments) {
       try {
-        await paymentService.updatePaymentStatus(
-          payment.id,
-          "completed",
-          "Auto-completed after confirmation delay"
-        )
+        await paymentService.updatePaymentStatus(payment.id, "completed", "Auto-completed after confirmation delay")
         completed++
       } catch (error) {
         console.error(`Failed to complete payment ${payment.id}:`, error)
@@ -191,7 +179,7 @@ const paymentLifecycleWorker = new Worker(
         throw new Error(`Unknown job type: ${type}`)
     }
   },
-  { connection: redis }
+  { connection: redis },
 )
 
 console.log("🔄 Payment lifecycle job processors loaded")

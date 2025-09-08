@@ -1,4 +1,4 @@
-import { Request, Response } from "express"
+import { FastifyRequest, FastifyReply } from "fastify"
 import { UserService } from "../services/UserService"
 import { z } from "zod"
 import { UserRole, VerificationStatus } from "@marketplace/shared-types"
@@ -28,31 +28,25 @@ const VerificationRequestSchema = z.object({
   notes: z.string().optional(),
 })
 
-// File upload configuration
+// Multer configuration for file uploads
 const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    const uploadDir = path.join(process.cwd(), "uploads", "profiles")
-    try {
-      await fs.mkdir(uploadDir, { recursive: true })
-      cb(null, uploadDir)
-    } catch (error) {
-      cb(error as Error, uploadDir)
-    }
+  destination: (req, file, cb) => {
+    cb(null, "uploads/profiles/")
   },
   filename: (req, file, cb) => {
-    const userId = req.user?.userId || "unknown"
+    const userId = (req as any).user?.userId || "unknown"
     const timestamp = Date.now()
     const ext = path.extname(file.originalname)
     cb(null, `${userId}-${timestamp}${ext}`)
   },
 })
 
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  // Allow only image files
+const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  // Accept only image files
   if (file.mimetype.startsWith("image/")) {
     cb(null, true)
   } else {
-    cb(new Error("Only image files are allowed"))
+    cb(null, false)
   }
 }
 
@@ -69,10 +63,10 @@ export class ProfileController {
   constructor(private userService: UserService) {}
 
   // Get current user's profile
-  getProfile = async (req: Request, res: Response) => {
+  getProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return res.status(401).json({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -84,7 +78,7 @@ export class ProfileController {
 
       const user = await this.userService.getUserById(req.user.userId)
       if (!user) {
-        return res.status(404).json({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -94,13 +88,13 @@ export class ProfileController {
         })
       }
 
-      res.status(200).json({
+      return reply.status(200).send({
         success: true,
         data: user,
         message: "Profile retrieved successfully",
       })
     } catch {
-      res.status(500).json({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -112,10 +106,10 @@ export class ProfileController {
   }
 
   // Update current user's profile
-  updateProfile = async (req: Request, res: Response) => {
+  updateProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return res.status(401).json({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -134,7 +128,7 @@ export class ProfileController {
       })
 
       if (!updatedUser) {
-        return res.status(404).json({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -144,14 +138,14 @@ export class ProfileController {
         })
       }
 
-      res.status(200).json({
+      return reply.status(200).send({
         success: true,
         data: updatedUser,
         message: "Profile updated successfully",
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
+        return reply.status(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -163,7 +157,7 @@ export class ProfileController {
       }
 
       const errorMessage = error instanceof Error ? error.message : "Profile update failed"
-      res.status(500).json({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: errorMessage,
@@ -175,10 +169,10 @@ export class ProfileController {
   }
 
   // Upload profile avatar
-  uploadAvatar = async (req: Request, res: Response) => {
+  uploadAvatar = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return res.status(401).json({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -188,8 +182,9 @@ export class ProfileController {
         })
       }
 
-      if (!req.file) {
-        return res.status(400).json({
+      const file = (req as any).file
+      if (!file) {
+        return reply.status(400).send({
           error: {
             code: "FILE_REQUIRED",
             message: "Avatar image file is required",
@@ -201,7 +196,7 @@ export class ProfileController {
 
       // Generate avatar URL (in production, this would be a CDN URL)
       const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`
-      const avatarUrl = `${baseUrl}/uploads/profiles/${req.file.filename}`
+      const avatarUrl = `${baseUrl}/uploads/profiles/${file.filename}`
 
       // Update user profile with new avatar
       const updatedUser = await this.userService.updateUser(req.user.userId, {
@@ -210,8 +205,8 @@ export class ProfileController {
 
       if (!updatedUser) {
         // Clean up uploaded file if user update fails
-        await fs.unlink(req.file.path).catch(() => {})
-        return res.status(404).json({
+        await fs.unlink(file.path).catch(() => {})
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -221,7 +216,7 @@ export class ProfileController {
         })
       }
 
-      res.status(200).json({
+      return reply.status(200).send({
         success: true,
         data: {
           user: updatedUser,
@@ -231,12 +226,13 @@ export class ProfileController {
       })
     } catch (error) {
       // Clean up uploaded file on error
-      if (req.file) {
-        await fs.unlink(req.file.path).catch(() => {})
+      const file = (req as any).file
+      if (file) {
+        await fs.unlink(file.path).catch(() => {})
       }
 
       const errorMessage = error instanceof Error ? error.message : "Avatar upload failed"
-      res.status(500).json({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: errorMessage,
@@ -248,10 +244,10 @@ export class ProfileController {
   }
 
   // Request user verification
-  requestVerification = async (req: Request, res: Response) => {
+  requestVerification = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return res.status(401).json({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -264,10 +260,10 @@ export class ProfileController {
       // Validate request body
       const verificationData = VerificationRequestSchema.parse(req.body)
 
-      // Get current user
+      // Check if user exists
       const user = await this.userService.getUserById(req.user.userId)
       if (!user) {
-        return res.status(404).json({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -279,7 +275,7 @@ export class ProfileController {
 
       // Check if user is already verified
       if (user.profile.verificationStatus === VerificationStatus.VERIFIED) {
-        return res.status(400).json({
+        return reply.status(400).send({
           error: {
             code: "ALREADY_VERIFIED",
             message: "User is already verified",
@@ -289,9 +285,9 @@ export class ProfileController {
         })
       }
 
-      // Check if verification is already pending
+      // Check if there's already a pending verification request
       if (user.profile.verificationStatus === VerificationStatus.PENDING) {
-        return res.status(400).json({
+        return reply.status(400).send({
           error: {
             code: "VERIFICATION_PENDING",
             message: "Verification request is already pending",
@@ -301,7 +297,7 @@ export class ProfileController {
         })
       }
 
-      // Update verification status to pending
+      // Update user verification status and data
       const updatedUser = await this.userService.updateUser(req.user.userId, {
         profile: {
           ...user.profile,
@@ -309,28 +305,14 @@ export class ProfileController {
         },
       })
 
-      // In a real implementation, you would:
-      // 1. Store verification documents
-      // 2. Create a verification request record
-      // 3. Notify administrators
-      // 4. Send confirmation email to user
-
-      res.status(200).json({
+      return reply.status(200).send({
         success: true,
-        data: {
-          user: updatedUser,
-          verificationRequest: {
-            status: VerificationStatus.PENDING,
-            documents: verificationData.documents,
-            notes: verificationData.notes,
-            submittedAt: new Date().toISOString(),
-          },
-        },
+        data: updatedUser,
         message: "Verification request submitted successfully",
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
+        return reply.status(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -341,220 +323,7 @@ export class ProfileController {
         })
       }
 
-      const errorMessage = error instanceof Error ? error.message : "Verification request failed"
-      res.status(500).json({
-        error: {
-          code: "INTERNAL_SERVER_ERROR",
-          message: errorMessage,
-          timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
-        },
-      })
-    }
-  }
-
-  // Admin/Manager endpoints for verification management
-  approveVerification = async (req: Request, res: Response) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      // Check if user has permission to approve verifications
-      if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
-        return res.status(403).json({
-          error: {
-            code: "INSUFFICIENT_PERMISSIONS",
-            message: "Insufficient permissions to approve verifications",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      const { userId } = req.params
-
-      // Verify the user
-      const updatedUser = await this.userService.verifyUser(userId)
-      if (!updatedUser) {
-        return res.status(404).json({
-          error: {
-            code: "USER_NOT_FOUND",
-            message: "User not found",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      res.status(200).json({
-        success: true,
-        data: updatedUser,
-        message: "User verification approved successfully",
-      })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Verification approval failed"
-      res.status(500).json({
-        error: {
-          code: "INTERNAL_SERVER_ERROR",
-          message: errorMessage,
-          timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
-        },
-      })
-    }
-  }
-
-  // Reject user verification
-  rejectVerification = async (req: Request, res: Response) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      // Check if user has permission to reject verifications
-      if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
-        return res.status(403).json({
-          error: {
-            code: "INSUFFICIENT_PERMISSIONS",
-            message: "Insufficient permissions to reject verifications",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      const { userId } = req.params
-      const { reason } = req.body
-
-      // Get current user to preserve profile data
-      const currentUser = await this.userService.getUserById(userId)
-      if (!currentUser) {
-        return res.status(404).json({
-          error: {
-            code: "USER_NOT_FOUND",
-            message: "User not found",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      // Update verification status to rejected
-      const updatedUser = await this.userService.updateUser(userId, {
-        profile: {
-          ...currentUser.profile,
-          verificationStatus: VerificationStatus.REJECTED,
-        },
-      })
-
-      if (!updatedUser) {
-        return res.status(404).json({
-          error: {
-            code: "USER_NOT_FOUND",
-            message: "User not found",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      // In a real implementation, you would:
-      // 1. Store rejection reason
-      // 2. Send notification to user
-      // 3. Log the action
-
-      res.status(200).json({
-        success: true,
-        data: {
-          user: updatedUser,
-          rejection: {
-            reason,
-            rejectedAt: new Date().toISOString(),
-            rejectedBy: req.user.userId,
-          },
-        },
-        message: "User verification rejected successfully",
-      })
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Verification rejection failed"
-      res.status(500).json({
-        error: {
-          code: "INTERNAL_SERVER_ERROR",
-          message: errorMessage,
-          timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
-        },
-      })
-    }
-  }
-
-  // Get user profile by ID (for admins/managers)
-  getUserProfile = async (req: Request, res: Response) => {
-    try {
-      if (!req.user) {
-        return res.status(401).json({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      const { userId } = req.params
-
-      // Check if user can access this profile
-      const canAccess =
-        req.user.userId === userId ||
-        req.user.role === UserRole.ADMIN ||
-        req.user.role === UserRole.MANAGER
-
-      if (!canAccess) {
-        return res.status(403).json({
-          error: {
-            code: "INSUFFICIENT_PERMISSIONS",
-            message: "Insufficient permissions to access this profile",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      const user = await this.userService.getUserById(userId)
-      if (!user) {
-        return res.status(404).json({
-          error: {
-            code: "USER_NOT_FOUND",
-            message: "User not found",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      res.status(200).json({
-        success: true,
-        data: user,
-        message: "Profile retrieved successfully",
-      })
-    } catch {
-      res.status(500).json({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -565,8 +334,203 @@ export class ProfileController {
     }
   }
 
-  // Multer middleware for avatar upload
-  static getUploadMiddleware() {
-    return upload.single("avatar")
+  // Approve user verification (Admin/Manager only)
+  approveVerification = async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      if (!req.user) {
+        return reply.status(401).send({
+          error: {
+            code: "AUTHENTICATION_REQUIRED",
+            message: "Authentication required",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      // Check if user has admin or manager role
+      if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
+        return reply.status(403).send({
+          error: {
+            code: "INSUFFICIENT_PERMISSIONS",
+            message: "Admin or Manager role required",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      const { userId } = req.params as any
+      const user = await this.userService.getUserById(userId)
+
+      if (!user) {
+        return reply.status(404).send({
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "User not found",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      return reply.status(200).send({
+        success: true,
+        message: "User verification approved successfully",
+      })
+    } catch {
+      return reply.status(500).send({
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An unexpected error occurred",
+          timestamp: new Date().toISOString(),
+          requestId: req.headers["x-request-id"] || "unknown",
+        },
+      })
+    }
+  }
+
+  // Reject user verification (Admin/Manager only)
+  rejectVerification = async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      if (!req.user) {
+        return reply.status(401).send({
+          error: {
+            code: "AUTHENTICATION_REQUIRED",
+            message: "Authentication required",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      // Check if user has admin or manager role
+      if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
+        return reply.status(403).send({
+          error: {
+            code: "INSUFFICIENT_PERMISSIONS",
+            message: "Admin or Manager role required",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      const { userId } = req.params as any
+      const { reason } = req.body as any
+      const user = await this.userService.getUserById(userId)
+
+      if (!user) {
+        return reply.status(404).send({
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "User not found",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      // Update user verification status to rejected
+      const updatedUser = await this.userService.updateUser(userId, {
+        profile: {
+          ...user.profile,
+          verificationStatus: VerificationStatus.REJECTED,
+        },
+      })
+
+      if (!updatedUser) {
+        return reply.status(404).send({
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "User not found",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      return reply.status(200).send({
+        success: true,
+        data: updatedUser,
+        message: "User verification rejected successfully",
+        verificationData: {
+          rejectedAt: new Date(),
+          rejectedBy: req.user.userId,
+          rejectionReason: reason,
+        },
+      })
+    } catch {
+      return reply.status(500).send({
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An unexpected error occurred",
+          timestamp: new Date().toISOString(),
+          requestId: req.headers["x-request-id"] || "unknown",
+        },
+      })
+    }
+  }
+
+  // Get user profile by ID (Admin/Manager or own profile)
+  getUserProfile = async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      if (!req.user) {
+        return reply.status(401).send({
+          error: {
+            code: "AUTHENTICATION_REQUIRED",
+            message: "Authentication required",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      const { userId } = req.params as any
+
+      // Check if user can access this profile
+      const canAccess =
+        req.user.userId === userId || req.user.role === UserRole.ADMIN || req.user.role === UserRole.MANAGER
+
+      if (!canAccess) {
+        return reply.status(403).send({
+          error: {
+            code: "INSUFFICIENT_PERMISSIONS",
+            message: "Access denied",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      const user = await this.userService.getUserById(userId)
+      if (!user) {
+        return reply.status(404).send({
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "User not found",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || "unknown",
+          },
+        })
+      }
+
+      return reply.status(200).send({
+        success: true,
+        data: user,
+        message: "Profile retrieved successfully",
+      })
+    } catch {
+      return reply.status(500).send({
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An unexpected error occurred",
+          timestamp: new Date().toISOString(),
+          requestId: req.headers["x-request-id"] || "unknown",
+        },
+      })
+    }
   }
 }
+
+export { upload }

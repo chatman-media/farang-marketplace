@@ -130,8 +130,8 @@ export const createApp = async (): Promise<FastifyInstance> => {
   })
 
   // Register routes
-  await app.register(import("./routes/payments.js"), { prefix: "/api/v1" })
-  await app.register(import("./routes/webhooks.js"), { prefix: "/api/v1" })
+  await app.register(import("./routes/payments"), { prefix: "/api/v1" })
+  await app.register(import("./routes/webhooks"), { prefix: "/api/v1" })
 
   // Global error handler
   app.setErrorHandler(async (error, request, reply) => {
@@ -175,11 +175,11 @@ export const gracefulShutdown = async (app: FastifyInstance, signal: string) => 
 
   try {
     // Close database connections
-    const { closeDatabaseConnection } = await import("./db/connection.js")
+    const { closeDatabaseConnection } = await import("./db/connection")
     await closeDatabaseConnection()
 
     // Shutdown job queues
-    const { shutdownJobs } = await import("./jobs/index.js")
+    const { shutdownJobs } = await import("./jobs/index")
     await shutdownJobs()
 
     // Close Fastify

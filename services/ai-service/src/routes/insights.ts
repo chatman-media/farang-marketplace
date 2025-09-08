@@ -5,13 +5,8 @@ import {
   userInsightsValidation,
   marketInsightsValidation,
   behaviorTrendsValidation,
-} from "../controllers/InsightsController.js"
-import {
-  authenticateToken,
-  requireAdmin,
-  requireResourceAccess,
-  roleBasedRateLimit,
-} from "../middleware/auth.js"
+} from "../controllers/InsightsController"
+import { authenticateToken, requireAdmin, requireResourceAccess, roleBasedRateLimit } from "../middleware/auth"
 
 const router = Router()
 
@@ -21,24 +16,20 @@ export const createInsightsRoutes = (insightsController: InsightsController) => 
   router.use(roleBasedRateLimit)
 
   // Behavior tracking
-  router.post(
-    "/behavior",
-    trackBehaviorValidation,
-    insightsController.trackBehavior.bind(insightsController)
-  )
+  router.post("/behavior", trackBehaviorValidation, insightsController.trackBehavior.bind(insightsController))
 
   // User insights
   router.get(
     "/user/:userId",
     userInsightsValidation,
     requireResourceAccess("user"),
-    insightsController.getUserInsights.bind(insightsController)
+    insightsController.getUserInsights.bind(insightsController),
   )
   router.post(
     "/user/:userId/analyze",
     userInsightsValidation,
     requireResourceAccess("user"),
-    insightsController.analyzeUserBehavior.bind(insightsController)
+    insightsController.analyzeUserBehavior.bind(insightsController),
   )
 
   // Behavior statistics
@@ -49,19 +40,15 @@ export const createInsightsRoutes = (insightsController: InsightsController) => 
     "/market",
     requireAdmin,
     marketInsightsValidation,
-    insightsController.getMarketInsights.bind(insightsController)
+    insightsController.getMarketInsights.bind(insightsController),
   )
-  router.post(
-    "/market/generate",
-    requireAdmin,
-    insightsController.generateMarketInsights.bind(insightsController)
-  )
+  router.post("/market/generate", requireAdmin, insightsController.generateMarketInsights.bind(insightsController))
   router.get("/segments", requireAdmin, insightsController.getUserSegments.bind(insightsController))
   router.get(
     "/trends",
     requireAdmin,
     behaviorTrendsValidation,
-    insightsController.getBehaviorTrends.bind(insightsController)
+    insightsController.getBehaviorTrends.bind(insightsController),
   )
 
   return router

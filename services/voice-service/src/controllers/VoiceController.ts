@@ -1,7 +1,7 @@
 import type { Request, Response } from "express"
-import type { VoiceCommandResponse, VoiceContext, VoiceRequest } from "../models/index.js"
-import { SpeechToTextService } from "../services/SpeechToTextService.js"
-import { VoiceCommandService } from "../services/VoiceCommandService.js"
+import type { VoiceCommandResponse, VoiceContext, VoiceRequest } from "../models/index"
+import { SpeechToTextService } from "../services/SpeechToTextService"
+import { VoiceCommandService } from "../services/VoiceCommandService"
 
 export class VoiceController {
   private speechToTextService: SpeechToTextService
@@ -17,8 +17,9 @@ export class VoiceController {
    */
   async transcribe(req: Request, res: Response): Promise<void> {
     try {
-      const { audioData, language, format, sampleRate, channels, encoding, context } =
-        req.body as VoiceRequest & { context?: VoiceContext }
+      const { audioData, language, format, sampleRate, channels, encoding, context } = req.body as VoiceRequest & {
+        context?: VoiceContext
+      }
       const userId = req.user?.id
       const sessionId = req.headers["x-session-id"] as string
 
@@ -72,17 +73,11 @@ export class VoiceController {
           userId,
           sessionId,
           context,
-          language
+          language,
         )
       } else if (text) {
         // Process text command
-        result = await this.voiceCommandService.processTextCommand(
-          text,
-          userId,
-          sessionId,
-          context,
-          language
-        )
+        result = await this.voiceCommandService.processTextCommand(text, userId, sessionId, context, language)
       } else {
         res.status(400).json({
           success: false,
@@ -253,7 +248,7 @@ export class VoiceController {
         userId,
         sessionId,
         context ? JSON.parse(context) : undefined,
-        language
+        language,
       )
 
       res.json(result)

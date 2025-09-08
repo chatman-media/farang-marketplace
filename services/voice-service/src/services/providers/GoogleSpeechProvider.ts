@@ -4,7 +4,7 @@ import type {
   SpeechToTextProvider,
   VoiceRequest,
   VoiceResponse,
-} from "../../models/index.js"
+} from "../../models/index"
 
 export class GoogleSpeechProvider implements SpeechToTextProvider {
   name = "google"

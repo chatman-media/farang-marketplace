@@ -1,181 +1,344 @@
-import { body, param, query } from "express-validator"
-import {
-  CustomerStatus,
-  LeadStatus,
-  LeadPriority,
-  LeadSource,
-  CommunicationChannel,
-} from "@marketplace/shared-types"
+import { CustomerStatus, LeadStatus, LeadPriority, LeadSource, CommunicationChannel } from "@marketplace/shared-types"
 
-// Customer validation
-export const validateCreateCustomer = [
-  body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
-  body("firstName")
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("First name is required and must be 1-100 characters"),
-  body("lastName")
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("Last name is required and must be 1-100 characters"),
-  body("phone")
-    .optional()
-    .matches(/^\+?[\d\s\-\(\)]+$/)
-    .withMessage("Invalid phone number format"),
-  body("telegramId")
-    .optional()
-    .isString()
-    .isLength({ max: 100 })
-    .withMessage("Telegram ID must be a string with max 100 characters"),
-  body("whatsappId")
-    .optional()
-    .isString()
-    .isLength({ max: 100 })
-    .withMessage("WhatsApp ID must be a string with max 100 characters"),
-  body("preferredLanguage")
-    .optional()
-    .matches(/^[a-z]{2}$/)
-    .withMessage("Preferred language must be a 2-letter language code"),
-  body("preferredChannel")
-    .optional()
-    .isIn(Object.values(CommunicationChannel))
-    .withMessage("Invalid communication channel"),
-  body("tags").optional().isArray().withMessage("Tags must be an array"),
-  body("tags.*")
-    .optional()
-    .isString()
-    .isLength({ min: 1, max: 50 })
-    .withMessage("Each tag must be a string with 1-50 characters"),
-  body("customFields").optional().isObject().withMessage("Custom fields must be an object"),
-]
+// Customer validation schemas
+export const createCustomerSchema = {
+  body: {
+    type: "object",
+    required: ["email", "firstName", "lastName"],
+    properties: {
+      email: {
+        type: "string",
+        format: "email",
+        description: "Valid email is required",
+      },
+      firstName: {
+        type: "string",
+        minLength: 1,
+        maxLength: 100,
+        description: "First name is required and must be 1-100 characters",
+      },
+      lastName: {
+        type: "string",
+        minLength: 1,
+        maxLength: 100,
+        description: "Last name is required and must be 1-100 characters",
+      },
+      phone: {
+        type: "string",
+        pattern: "^\\+?[\\d\\s\\-\\(\\)]+$",
+        description: "Invalid phone number format",
+      },
+      telegramId: {
+        type: "string",
+        maxLength: 100,
+        description: "Telegram ID must be a string with max 100 characters",
+      },
+      whatsappId: {
+        type: "string",
+        maxLength: 100,
+        description: "WhatsApp ID must be a string with max 100 characters",
+      },
+      preferredLanguage: {
+        type: "string",
+        pattern: "^[a-z]{2}$",
+        description: "Preferred language must be a 2-letter language code",
+      },
+      preferredChannel: {
+        type: "string",
+        enum: Object.values(CommunicationChannel),
+        description: "Invalid communication channel",
+      },
+      tags: {
+        type: "array",
+        items: {
+          type: "string",
+          minLength: 1,
+          maxLength: 50,
+        },
+        description: "Tags must be an array of strings with 1-50 characters each",
+      },
+      customFields: {
+        type: "object",
+        description: "Custom fields must be an object",
+      },
+    },
+    additionalProperties: false,
+  },
+}
 
-export const validateUpdateCustomer = [
-  param("id").isUUID().withMessage("Valid customer ID is required"),
-  body("email").optional().isEmail().normalizeEmail().withMessage("Valid email is required"),
-  body("firstName")
-    .optional()
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("First name must be 1-100 characters"),
-  body("lastName")
-    .optional()
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("Last name must be 1-100 characters"),
-  body("phone")
-    .optional()
-    .matches(/^\+?[\d\s\-\(\)]+$/)
-    .withMessage("Invalid phone number format"),
-  body("status")
-    .optional()
-    .isIn(Object.values(CustomerStatus))
-    .withMessage("Invalid customer status"),
-  body("leadScore")
-    .optional()
-    .isInt({ min: 0, max: 100 })
-    .withMessage("Lead score must be between 0 and 100"),
-  body("preferredLanguage")
-    .optional()
-    .matches(/^[a-z]{2}$/)
-    .withMessage("Preferred language must be a 2-letter language code"),
-  body("preferredChannel")
-    .optional()
-    .isIn(Object.values(CommunicationChannel))
-    .withMessage("Invalid communication channel"),
-  body("tags").optional().isArray().withMessage("Tags must be an array"),
-  body("customFields").optional().isObject().withMessage("Custom fields must be an object"),
-]
+export const updateCustomerSchema = {
+  params: {
+    type: "object",
+    required: ["id"],
+    properties: {
+      id: {
+        type: "string",
+        format: "uuid",
+        description: "Valid customer ID is required",
+      },
+    },
+    additionalProperties: false,
+  },
+  body: {
+    type: "object",
+    properties: {
+      email: {
+        type: "string",
+        format: "email",
+        description: "Valid email is required",
+      },
+      firstName: {
+        type: "string",
+        minLength: 1,
+        maxLength: 100,
+        description: "First name must be 1-100 characters",
+      },
+      lastName: {
+        type: "string",
+        minLength: 1,
+        maxLength: 100,
+        description: "Last name must be 1-100 characters",
+      },
+      phone: {
+        type: "string",
+        pattern: "^\\+?[\\d\\s\\-\\(\\)]+$",
+        description: "Invalid phone number format",
+      },
+      status: {
+        type: "string",
+        enum: Object.values(CustomerStatus),
+        description: "Invalid customer status",
+      },
+      leadScore: {
+        type: "integer",
+        minimum: 0,
+        maximum: 100,
+        description: "Lead score must be between 0 and 100",
+      },
+      preferredLanguage: {
+        type: "string",
+        pattern: "^[a-z]{2}$",
+        description: "Preferred language must be a 2-letter language code",
+      },
+      preferredChannel: {
+        type: "string",
+        enum: Object.values(CommunicationChannel),
+        description: "Invalid communication channel",
+      },
+      tags: {
+        type: "array",
+        items: {
+          type: "string",
+          minLength: 1,
+          maxLength: 50,
+        },
+        description: "Tags must be an array",
+      },
+      customFields: {
+        type: "object",
+        description: "Custom fields must be an object",
+      },
+    },
+    additionalProperties: false,
+  },
+}
 
-// Lead validation
-export const validateCreateLead = [
-  body("customerId").isUUID().withMessage("Valid customer ID is required"),
-  body("listingId").optional().isUUID().withMessage("Listing ID must be a valid UUID"),
-  body("source").isIn(Object.values(LeadSource)).withMessage("Valid lead source is required"),
-  body("priority")
-    .optional()
-    .isIn(Object.values(LeadPriority))
-    .withMessage("Invalid lead priority"),
-  body("value").optional().isFloat({ min: 0 }).withMessage("Lead value must be a positive number"),
-  body("notes")
-    .optional()
-    .isString()
-    .isLength({ max: 5000 })
-    .withMessage("Notes must be a string with max 5000 characters"),
-  body("followUpDate")
-    .optional()
-    .isISO8601()
-    .toDate()
-    .custom((value) => {
-      if (new Date(value) < new Date()) {
-        throw new Error("Follow-up date cannot be in the past")
-      }
-      return true
-    })
-    .withMessage("Follow-up date must be a valid future date"),
-]
+// Lead validation schemas
+export const createLeadSchema = {
+  body: {
+    type: "object",
+    required: ["customerId", "source"],
+    properties: {
+      customerId: {
+        type: "string",
+        format: "uuid",
+        description: "Valid customer ID is required",
+      },
+      listingId: {
+        type: "string",
+        format: "uuid",
+        description: "Listing ID must be a valid UUID",
+      },
+      source: {
+        type: "string",
+        enum: Object.values(LeadSource),
+        description: "Valid lead source is required",
+      },
+      priority: {
+        type: "string",
+        enum: Object.values(LeadPriority),
+        description: "Invalid lead priority",
+      },
+      value: {
+        type: "number",
+        minimum: 0,
+        description: "Lead value must be a positive number",
+      },
+      notes: {
+        type: "string",
+        maxLength: 5000,
+        description: "Notes must be a string with max 5000 characters",
+      },
+      followUpDate: {
+        type: "string",
+        format: "date-time",
+        description: "Follow-up date must be a valid future date",
+      },
+    },
+    additionalProperties: false,
+  },
+}
 
-export const validateUpdateLead = [
-  param("id").isUUID().withMessage("Valid lead ID is required"),
-  body("customerId").optional().isUUID().withMessage("Customer ID must be a valid UUID"),
-  body("listingId").optional().isUUID().withMessage("Listing ID must be a valid UUID"),
-  body("source").optional().isIn(Object.values(LeadSource)).withMessage("Invalid lead source"),
-  body("status").optional().isIn(Object.values(LeadStatus)).withMessage("Invalid lead status"),
-  body("priority")
-    .optional()
-    .isIn(Object.values(LeadPriority))
-    .withMessage("Invalid lead priority"),
-  body("assignedTo").optional().isUUID().withMessage("Assigned to must be a valid UUID"),
-  body("value").optional().isFloat({ min: 0 }).withMessage("Lead value must be a positive number"),
-  body("notes")
-    .optional()
-    .isString()
-    .isLength({ max: 5000 })
-    .withMessage("Notes must be a string with max 5000 characters"),
-  body("followUpDate")
-    .optional()
-    .isISO8601()
-    .toDate()
-    .custom((value) => {
-      if (new Date(value) < new Date()) {
-        throw new Error("Follow-up date cannot be in the past")
-      }
-      return true
-    })
-    .withMessage("Follow-up date must be a valid future date"),
-]
+export const updateLeadSchema = {
+  params: {
+    type: "object",
+    required: ["id"],
+    properties: {
+      id: {
+        type: "string",
+        format: "uuid",
+        description: "Valid lead ID is required",
+      },
+    },
+    additionalProperties: false,
+  },
+  body: {
+    type: "object",
+    properties: {
+      customerId: {
+        type: "string",
+        format: "uuid",
+        description: "Customer ID must be a valid UUID",
+      },
+      listingId: {
+        type: "string",
+        format: "uuid",
+        description: "Listing ID must be a valid UUID",
+      },
+      source: {
+        type: "string",
+        enum: Object.values(LeadSource),
+        description: "Invalid lead source",
+      },
+      status: {
+        type: "string",
+        enum: Object.values(LeadStatus),
+        description: "Invalid lead status",
+      },
+      priority: {
+        type: "string",
+        enum: Object.values(LeadPriority),
+        description: "Invalid lead priority",
+      },
+      assignedTo: {
+        type: "string",
+        format: "uuid",
+        description: "Assigned to must be a valid UUID",
+      },
+      value: {
+        type: "number",
+        minimum: 0,
+        description: "Lead value must be a positive number",
+      },
+      notes: {
+        type: "string",
+        maxLength: 5000,
+        description: "Notes must be a string with max 5000 characters",
+      },
+      followUpDate: {
+        type: "string",
+        format: "date-time",
+        description: "Follow-up date must be a valid future date",
+      },
+    },
+    additionalProperties: false,
+  },
+}
 
-// Query validation
-export const validateCustomerQuery = [
-  query("status")
-    .optional()
-    .isIn(Object.values(CustomerStatus))
-    .withMessage("Invalid customer status"),
-  query("search")
-    .optional()
-    .isString()
-    .isLength({ min: 1, max: 100 })
-    .withMessage("Search term must be 1-100 characters"),
-  query("page").optional().isInt({ min: 1 }).withMessage("Page must be a positive integer"),
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be between 1 and 100"),
-]
+// Query validation schemas
+export const customerQuerySchema = {
+  querystring: {
+    type: "object",
+    properties: {
+      status: {
+        type: "string",
+        enum: Object.values(CustomerStatus),
+        description: "Invalid customer status",
+      },
+      search: {
+        type: "string",
+        minLength: 1,
+        maxLength: 100,
+        description: "Search term must be 1-100 characters",
+      },
+      page: {
+        type: "integer",
+        minimum: 1,
+        description: "Page must be a positive integer",
+      },
+      limit: {
+        type: "integer",
+        minimum: 1,
+        maximum: 100,
+        description: "Limit must be between 1 and 100",
+      },
+    },
+    additionalProperties: false,
+  },
+}
 
-export const validateLeadQuery = [
-  query("status").optional().isIn(Object.values(LeadStatus)).withMessage("Invalid lead status"),
-  query("priority")
-    .optional()
-    .isIn(Object.values(LeadPriority))
-    .withMessage("Invalid lead priority"),
-  query("assignedTo").optional().isUUID().withMessage("Assigned to must be a valid UUID"),
-  query("customerId").optional().isUUID().withMessage("Customer ID must be a valid UUID"),
-  query("page").optional().isInt({ min: 1 }).withMessage("Page must be a positive integer"),
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be between 1 and 100"),
-]
+export const leadQuerySchema = {
+  querystring: {
+    type: "object",
+    properties: {
+      status: {
+        type: "string",
+        enum: Object.values(LeadStatus),
+        description: "Invalid lead status",
+      },
+      priority: {
+        type: "string",
+        enum: Object.values(LeadPriority),
+        description: "Invalid lead priority",
+      },
+      assignedTo: {
+        type: "string",
+        format: "uuid",
+        description: "Assigned to must be a valid UUID",
+      },
+      customerId: {
+        type: "string",
+        format: "uuid",
+        description: "Customer ID must be a valid UUID",
+      },
+      page: {
+        type: "integer",
+        minimum: 1,
+        description: "Page must be a positive integer",
+      },
+      limit: {
+        type: "integer",
+        minimum: 1,
+        maximum: 100,
+        description: "Limit must be between 1 and 100",
+      },
+    },
+    additionalProperties: false,
+  },
+}
 
-// Parameter validation
-export const validateUUIDParam = [param("id").isUUID().withMessage("Valid ID is required")]
+// Parameter validation schemas
+export const uuidParamSchema = {
+  params: {
+    type: "object",
+    required: ["id"],
+    properties: {
+      id: {
+        type: "string",
+        format: "uuid",
+        description: "Valid ID is required",
+      },
+    },
+    additionalProperties: false,
+  },
+}

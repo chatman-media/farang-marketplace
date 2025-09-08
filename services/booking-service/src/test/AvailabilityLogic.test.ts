@@ -66,10 +66,7 @@ describe("Availability Service Logic", () => {
     })
 
     it("should calculate end time correctly", () => {
-      const calculateEndTime = (
-        startTime: Date,
-        duration: { value: number; unit: string }
-      ): Date => {
+      const calculateEndTime = (startTime: Date, duration: { value: number; unit: string }): Date => {
         const endTime = new Date(startTime)
 
         switch (duration.unit) {
@@ -140,11 +137,7 @@ describe("Availability Service Logic", () => {
 
   describe("Availability Windows", () => {
     it("should create availability windows correctly", () => {
-      const createAvailabilityWindow = (
-        date: string,
-        available: boolean,
-        conflicts: any[] = []
-      ) => {
+      const createAvailabilityWindow = (date: string, available: boolean, conflicts: any[] = []) => {
         return {
           date,
           available,
@@ -156,9 +149,7 @@ describe("Availability Service Logic", () => {
       }
 
       const window1 = createAvailabilityWindow("2024-02-01", true)
-      const window2 = createAvailabilityWindow("2024-02-02", false, [
-        { type: "booking", reason: "Existing booking" },
-      ])
+      const window2 = createAvailabilityWindow("2024-02-02", false, [{ type: "booking", reason: "Existing booking" }])
 
       expect(window1.available).toBe(true)
       expect(window1.conflicts).toHaveLength(0)

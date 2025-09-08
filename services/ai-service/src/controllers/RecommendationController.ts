@@ -56,9 +56,7 @@ export class RecommendationController {
           availability: req.query["availability"] === "true",
         },
         limit: req.query["limit"] ? parseInt(req.query["limit"] as string) : 20,
-        diversityFactor: req.query["diversityFactor"]
-          ? parseFloat(req.query["diversityFactor"] as string)
-          : 0.3,
+        diversityFactor: req.query["diversityFactor"] ? parseFloat(req.query["diversityFactor"] as string) : 0.3,
       }
 
       const recommendations = await this.recommendationEngine.generateRecommendations(request)
@@ -293,27 +291,19 @@ export const getRecommendationsValidation = [
     .optional()
     .isIn(["listings", "services", "agencies", "users"])
     .withMessage("Invalid recommendation type"),
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be between 1 and 100"),
+  query("limit").optional().isInt({ min: 1, max: 100 }).withMessage("Limit must be between 1 and 100"),
   query("diversityFactor")
     .optional()
     .isFloat({ min: 0, max: 1 })
     .withMessage("Diversity factor must be between 0 and 1"),
-  query("minRating")
-    .optional()
-    .isFloat({ min: 0, max: 5 })
-    .withMessage("Min rating must be between 0 and 5"),
+  query("minRating").optional().isFloat({ min: 0, max: 5 }).withMessage("Min rating must be between 0 and 5"),
 ]
 
 export const updateBehaviorValidation = [
   body("action")
     .isIn(["view", "search", "click", "bookmark", "share", "contact", "book", "purchase"])
     .withMessage("Invalid action"),
-  body("entityType")
-    .isIn(["listing", "service", "agency", "user"])
-    .withMessage("Invalid entity type"),
+  body("entityType").isIn(["listing", "service", "agency", "user"]).withMessage("Invalid entity type"),
   body("entityId").isLength({ min: 1 }).withMessage("Entity ID is required"),
   body("sessionId").optional().isLength({ min: 1 }).withMessage("Session ID must not be empty"),
 ]
@@ -321,17 +311,11 @@ export const updateBehaviorValidation = [
 export const similarItemsValidation = [
   param("itemId").isLength({ min: 1 }).withMessage("Item ID is required"),
   query("type").optional().isIn(["listings", "services", "agencies"]).withMessage("Invalid type"),
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 50 })
-    .withMessage("Limit must be between 1 and 50"),
+  query("limit").optional().isInt({ min: 1, max: 50 }).withMessage("Limit must be between 1 and 50"),
 ]
 
 export const trendingItemsValidation = [
   query("category").optional().isLength({ min: 1 }).withMessage("Category must not be empty"),
   query("location").optional().isLength({ min: 1 }).withMessage("Location must not be empty"),
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be between 1 and 100"),
+  query("limit").optional().isInt({ min: 1, max: 100 }).withMessage("Limit must be between 1 and 100"),
 ]

@@ -99,7 +99,7 @@ describe("CRMService", () => {
         mockQuery.mockResolvedValueOnce({ rows: [mockCustomerData] })
 
         await expect(crmService.createCustomer(createRequest)).rejects.toThrow(
-          "Customer with this email already exists"
+          "Customer with this email already exists",
         )
       })
 
@@ -156,10 +156,9 @@ describe("CRMService", () => {
         const result = await crmService.updateCustomer("123", {})
 
         expect(result).toBeInstanceOf(Customer)
-        expect(mockQuery).toHaveBeenCalledWith(
-          expect.stringContaining("SELECT * FROM customers WHERE id = $1"),
-          ["123"]
-        )
+        expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("SELECT * FROM customers WHERE id = $1"), [
+          "123",
+        ])
       })
 
       it("should throw validation error for invalid data", async () => {
@@ -167,9 +166,7 @@ describe("CRMService", () => {
           leadScore: 150, // Invalid score
         } as UpdateCustomerRequest
 
-        await expect(crmService.updateCustomer("123", invalidRequest)).rejects.toThrow(
-          "Validation failed"
-        )
+        await expect(crmService.updateCustomer("123", invalidRequest)).rejects.toThrow("Validation failed")
       })
     })
 
@@ -182,10 +179,7 @@ describe("CRMService", () => {
         // Mock data query
         mockQuery.mockResolvedValueOnce({ rows: customers })
 
-        const result = await crmService.getCustomers(
-          { status: CustomerStatus.LEAD },
-          { page: 1, limit: 10 }
-        )
+        const result = await crmService.getCustomers({ status: CustomerStatus.LEAD }, { page: 1, limit: 10 })
 
         expect(result.customers).toHaveLength(2)
         expect(result.total).toBe(2)
@@ -200,10 +194,7 @@ describe("CRMService", () => {
 
         await crmService.getCustomers({ search: "john" })
 
-        expect(mockQuery).toHaveBeenCalledWith(
-          expect.stringContaining("ILIKE"),
-          expect.arrayContaining(["%john%"])
-        )
+        expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("ILIKE"), expect.arrayContaining(["%john%"]))
       })
     })
   })

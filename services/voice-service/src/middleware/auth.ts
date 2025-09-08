@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from "express"
+import type { FastifyRequest, FastifyReply } from "fastify"
 import jwt from "jsonwebtoken"
 
 interface JWTPayload {
@@ -9,122 +9,135 @@ interface JWTPayload {
   exp: number
 }
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string
-        email: string
-        role: string
+interface AuthenticatedUser {
+  id: string
+  email: string
+  role: string
+}
+
+declare module "fastify" {
+  interface FastifyRequest {
+    user?: AuthenticatedUser
+  }
+  interface FastifyInstance {
+    authenticateToken: (request: FastifyRequest, reply: FastifyReply) => Promise<void>
+    optionalAuth: (request: FastifyRequest, reply: FastifyReply) => Promise<void>
+    requireRole: (roles: string[]) => (request: FastifyRequest, reply: FastifyReply) => Promise<void>
+    voiceRateLimit: (request: FastifyRequest, reply: FastifyReply) => Promise<void>
+    validateVoiceRequest: (request: FastifyRequest, reply: FastifyReply) => Promise<void>
+    validateAudioFile: (request: FastifyRequest, reply: FastifyReply) => Promise<void>
+  }
+}
+
+/**
+ * Fastify plugin for authentication middleware
+ */
+export default async function authPlugin(fastify: any) {
+  /**
+   * Middleware to authenticate JWT tokens
+   */
+  fastify.decorate("authenticateToken", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const authHeader = request.headers.authorization
+      const token = authHeader && authHeader.split(" ")[1] // Bearer TOKEN
+
+      if (!token) {
+        reply.status(401)
+        return {
+          success: false,
+          message: "Access token required",
+        }
+      }
+
+      const jwtSecret = process.env.JWT_SECRET
+      if (!jwtSecret) {
+        fastify.log.error("JWT_SECRET not configured")
+        reply.status(500)
+        return {
+          success: false,
+          message: "Server configuration error",
+        }
+      }
+
+      const decoded = jwt.verify(token, jwtSecret) as JWTPayload
+      request.user = {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+      }
+    } catch (error) {
+      fastify.log.error("Token verification error:", error)
+      reply.status(403)
+      return {
+        success: false,
+        message: "Invalid or expired token",
       }
     }
-  }
-}
+  })
 
-/**
- * JWT Authentication middleware
- */
-export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers.authorization
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null
+  /**
+   * Optional authentication middleware - doesn't fail if no token provided
+   */
+  fastify.decorate("optionalAuth", async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const authHeader = request.headers.authorization
+      const token = authHeader && authHeader.split(" ")[1]
 
-  if (!token) {
-    res.status(401).json({
-      success: false,
-      error: "Access token required",
-    })
-    return
-  }
+      if (!token) {
+        // No token provided, continue without authentication
+        return
+      }
 
-  try {
-    const jwtSecret = process.env.JWT_SECRET
-    if (!jwtSecret) {
-      throw new Error("JWT_SECRET not configured")
-    }
+      const jwtSecret = process.env.JWT_SECRET
+      if (!jwtSecret) {
+        // Continue without authentication if JWT not configured
+        return
+      }
 
-    const decoded = jwt.verify(token, jwtSecret) as JWTPayload
-    req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role,
-    }
-
-    next()
-  } catch (error) {
-    console.error("Token verification error:", error)
-    res.status(403).json({
-      success: false,
-      error: "Invalid or expired token",
-    })
-  }
-}
-
-/**
- * Optional authentication middleware - doesn't fail if no token
- */
-export const optionalAuth = (req: Request, _res: Response, next: NextFunction): void => {
-  const authHeader = req.headers.authorization
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null
-
-  if (!token) {
-    next()
-    return
-  }
-
-  try {
-    const jwtSecret = process.env.JWT_SECRET
-    if (!jwtSecret) {
-      next()
+      const decoded = jwt.verify(token, jwtSecret) as JWTPayload
+      request.user = {
+        id: decoded.id,
+        email: decoded.email,
+        role: decoded.role,
+      }
+    } catch (error) {
+      // Continue without authentication if token is invalid
       return
     }
+  })
 
-    const decoded = jwt.verify(token, jwtSecret) as JWTPayload
-    req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role,
+  /**
+   * Role-based authorization middleware
+   */
+  fastify.decorate("requireRole", (roles: string[]) => {
+    return async (request: FastifyRequest, reply: FastifyReply) => {
+      if (!request.user) {
+        reply.status(401)
+        return {
+          success: false,
+          message: "Authentication required",
+        }
+      }
+
+      if (!roles.includes(request.user.role)) {
+        reply.status(403)
+        return {
+          success: false,
+          message: "Insufficient permissions",
+        }
+      }
     }
-  } catch (error) {
-    // Ignore token errors for optional auth
-    console.warn("Optional auth token error:", error)
-  }
+  })
 
-  next()
-}
-
-/**
- * Role-based authorization middleware
- */
-export const requireRole = (roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.user) {
-      res.status(401).json({
-        success: false,
-        error: "Authentication required",
-      })
-      return
-    }
-
-    if (!roles.includes(req.user.role)) {
-      res.status(403).json({
-        success: false,
-        error: "Insufficient permissions",
-      })
-      return
-    }
-
-    next()
-  }
-}
-
-/**
- * Rate limiting middleware for voice requests
- */
-export const voiceRateLimit = (maxRequests: number = 100, windowMs: number = 60000) => {
+  /**
+   * Rate limiting middleware for voice requests
+   */
   const requests = new Map<string, { count: number; resetTime: number }>()
 
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const identifier = req.user?.id || req.ip || "anonymous"
+  fastify.decorate("voiceRateLimit", async (request: FastifyRequest, reply: FastifyReply) => {
+    const maxRequests = 100
+    const windowMs = 60000 // 1 minute
+    const identifier = request.user?.id || request.ip || "anonymous"
     const now = Date.now()
 
     // Clean up expired entries
@@ -141,148 +154,149 @@ export const voiceRateLimit = (maxRequests: number = 100, windowMs: number = 600
         count: 1,
         resetTime: now + windowMs,
       })
-      next()
       return
     }
 
     if (userRequests.count >= maxRequests) {
-      res.status(429).json({
+      reply.status(429)
+      return {
         success: false,
         error: "Rate limit exceeded",
         retryAfter: Math.ceil((userRequests.resetTime - now) / 1000),
-      })
-      return
+      }
     }
 
     userRequests.count++
-    next()
-  }
-}
+  })
 
-/**
- * Audio file validation middleware
- */
-export const validateAudioFile = (req: Request, res: Response, next: NextFunction): void => {
-  const file = req.file
+  /**
+   * Audio file validation middleware
+   */
+  fastify.decorate("validateAudioFile", async (request: FastifyRequest, reply: FastifyReply) => {
+    const data = await request.file()
 
-  if (!file) {
-    res.status(400).json({
-      success: false,
-      error: "Audio file is required",
-    })
-    return
-  }
-
-  // Check file size
-  const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10) // 10MB default
-  if (file.size > maxSize) {
-    res.status(400).json({
-      success: false,
-      error: `File too large. Maximum size: ${maxSize} bytes`,
-    })
-    return
-  }
-
-  // Check file type
-  const allowedMimeTypes = [
-    "audio/wav",
-    "audio/wave",
-    "audio/x-wav",
-    "audio/mpeg",
-    "audio/mp3",
-    "audio/flac",
-    "audio/ogg",
-    "audio/webm",
-    "audio/m4a",
-    "audio/x-m4a",
-  ]
-
-  if (!allowedMimeTypes.includes(file.mimetype)) {
-    res.status(400).json({
-      success: false,
-      error: "Unsupported audio format",
-      supportedFormats: allowedMimeTypes,
-    })
-    return
-  }
-
-  next()
-}
-
-/**
- * Request validation middleware
- */
-export const validateVoiceRequest = (req: Request, res: Response, next: NextFunction): void => {
-  const { audioData, text, language } = req.body
-
-  // Must have either audio data or text
-  if (!audioData && !text) {
-    res.status(400).json({
-      success: false,
-      error: "Either audioData or text is required",
-    })
-    return
-  }
-
-  // Validate language if provided
-  if (language && typeof language !== "string") {
-    res.status(400).json({
-      success: false,
-      error: "Language must be a string",
-    })
-    return
-  }
-
-  // Validate audio data if provided
-  if (audioData) {
-    if (typeof audioData !== "string" && !Buffer.isBuffer(audioData)) {
-      res.status(400).json({
+    if (!data) {
+      reply.status(400)
+      return {
         success: false,
-        error: "Audio data must be a base64 string or buffer",
-      })
-      return
+        error: "Audio file is required",
+      }
     }
 
-    // Check audio data size
-    const audioSize =
-      typeof audioData === "string" ? Buffer.from(audioData, "base64").length : audioData.length
+    // Check file size
+    const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10) // 10MB default
+    const buffer = await data.toBuffer()
 
-    const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10)
-    if (audioSize > maxSize) {
-      res.status(400).json({
+    if (buffer.length > maxSize) {
+      reply.status(400)
+      return {
         success: false,
-        error: `Audio data too large. Maximum size: ${maxSize} bytes`,
-      })
-      return
+        error: `File too large. Maximum size: ${maxSize} bytes`,
+      }
     }
-  }
 
-  // Validate text if provided
-  if (text && typeof text !== "string") {
-    res.status(400).json({
-      success: false,
-      error: "Text must be a string",
-    })
+    // Check file type
+    const allowedMimeTypes = [
+      "audio/wav",
+      "audio/wave",
+      "audio/x-wav",
+      "audio/mpeg",
+      "audio/mp3",
+      "audio/flac",
+      "audio/ogg",
+      "audio/webm",
+      "audio/m4a",
+      "audio/x-m4a",
+    ]
+
+    if (!allowedMimeTypes.includes(data.mimetype)) {
+      reply.status(400)
+      return {
+        success: false,
+        error: "Unsupported audio format",
+        supportedFormats: allowedMimeTypes,
+      }
+    }
+
+    // Store the buffer for later use
+    ;(request as any).fileBuffer = buffer(request as any).fileInfo = {
+      filename: data.filename,
+      mimetype: data.mimetype,
+      encoding: data.encoding,
+    }
+  })
+
+  /**
+   * Request validation middleware
+   */
+  fastify.decorate("validateVoiceRequest", async (request: FastifyRequest, reply: FastifyReply) => {
+    const { audioData, text, language } = request.body as any
+
+    // Must have either audio data or text
+    if (!audioData && !text) {
+      reply.status(400)
+      return {
+        success: false,
+        error: "Either audioData or text is required",
+      }
+    }
+
+    // Validate language if provided
+    if (language && typeof language !== "string") {
+      reply.status(400)
+      return {
+        success: false,
+        error: "Language must be a string",
+      }
+    }
+
+    // Validate audio data if provided
+    if (audioData) {
+      if (typeof audioData !== "string" && !Buffer.isBuffer(audioData)) {
+        reply.status(400)
+        return {
+          success: false,
+          error: "Audio data must be a base64 string or buffer",
+        }
+      }
+
+      // Check audio data size
+      const audioSize = typeof audioData === "string" ? Buffer.from(audioData, "base64").length : audioData.length
+
+      const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10)
+      if (audioSize > maxSize) {
+        reply.status(400)
+        return {
+          success: false,
+          error: `Audio data too large. Maximum size: ${maxSize} bytes`,
+        }
+      }
+    }
+
+    // Validate text if provided
+    if (text && typeof text !== "string") {
+      reply.status(400)
+      return {
+        success: false,
+        error: "Text must be a string",
+      }
+    }
+
+    // Validation passed
     return
-  }
-
-  next()
+  })
 }
 
 /**
  * Error handling middleware
  */
-export const errorHandler = (
-  error: Error,
-  _req: Request,
-  res: Response,
-  _next: NextFunction
-): void => {
+export const errorHandler = (error: Error, _req: FastifyRequest, reply: FastifyReply): void => {
   console.error("Voice service error:", error)
 
   // Handle specific error types
   if (error.name === "JsonWebTokenError") {
-    res.status(401).json({
+    reply.status(401)
+    reply.send({
       success: false,
       error: "Invalid token",
     })
@@ -290,7 +304,8 @@ export const errorHandler = (
   }
 
   if (error.name === "TokenExpiredError") {
-    res.status(401).json({
+    reply.status(401)
+    reply.send({
       success: false,
       error: "Token expired",
     })
@@ -298,7 +313,8 @@ export const errorHandler = (
   }
 
   if (error.name === "MulterError") {
-    res.status(400).json({
+    reply.status(400)
+    reply.send({
       success: false,
       error: "File upload error",
       details: error.message,
@@ -307,7 +323,8 @@ export const errorHandler = (
   }
 
   // Default error response
-  res.status(500).json({
+  reply.status(500)
+  reply.send({
     success: false,
     error: "Internal server error",
     ...(process.env.NODE_ENV === "development" && { details: error.message }),

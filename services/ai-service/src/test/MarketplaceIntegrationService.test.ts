@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest"
-import { MarketplaceIntegrationService } from "../services/MarketplaceIntegrationService.js"
-import { AIProviderService } from "../services/AIProviderService.js"
-import { RecommendationEngine } from "../services/RecommendationEngine.js"
-import { UserBehaviorService } from "../services/UserBehaviorService.js"
-import { ContentAnalysisService } from "../services/ContentAnalysisService.js"
+import { MarketplaceIntegrationService } from "../services/MarketplaceIntegrationService"
+import { AIProviderService } from "../services/AIProviderService"
+import { RecommendationEngine } from "../services/RecommendationEngine"
+import { UserBehaviorService } from "../services/UserBehaviorService"
+import { ContentAnalysisService } from "../services/ContentAnalysisService"
 
 describe("MarketplaceIntegrationService", () => {
   let marketplaceService: MarketplaceIntegrationService
@@ -19,7 +19,7 @@ describe("MarketplaceIntegrationService", () => {
       aiProvider,
       recommendationEngine,
       userBehaviorService,
-      contentAnalysisService
+      contentAnalysisService,
     )
   })
 
@@ -34,11 +34,7 @@ describe("MarketplaceIntegrationService", () => {
         checkOut: "2024-03-17",
       }
 
-      const result = await marketplaceService.generateBookingIntelligence(
-        userId,
-        listingId,
-        bookingData
-      )
+      const result = await marketplaceService.generateBookingIntelligence(userId, listingId, bookingData)
 
       expect(result).toBeDefined()
       expect(result.userId).toBe(userId)
@@ -54,11 +50,7 @@ describe("MarketplaceIntegrationService", () => {
       const listingId = "listing-456"
       const bookingData = {}
 
-      const result = await marketplaceService.generateBookingIntelligence(
-        userId,
-        listingId,
-        bookingData
-      )
+      const result = await marketplaceService.generateBookingIntelligence(userId, listingId, bookingData)
 
       expect(result).toBeDefined()
       expect(result.userId).toBe(userId)
@@ -73,11 +65,7 @@ describe("MarketplaceIntegrationService", () => {
       const currentPrice = 1000
       const marketContext = { location: "Bangkok", category: "apartment" }
 
-      const result = await marketplaceService.generatePriceSuggestions(
-        listingId,
-        currentPrice,
-        marketContext
-      )
+      const result = await marketplaceService.generatePriceSuggestions(listingId, currentPrice, marketContext)
 
       expect(result).toBeDefined()
       expect(result.listingId).toBe(listingId)
@@ -177,11 +165,7 @@ describe("MarketplaceIntegrationService", () => {
       const listingId = "listing-456"
       const bookingData = {}
 
-      const result = await marketplaceService.generateBookingIntelligence(
-        userId,
-        listingId,
-        bookingData
-      )
+      const result = await marketplaceService.generateBookingIntelligence(userId, listingId, bookingData)
 
       expect(result).toBeDefined()
       expect(result.recommendations).toBeDefined()

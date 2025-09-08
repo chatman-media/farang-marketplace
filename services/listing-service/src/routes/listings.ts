@@ -1,48 +1,146 @@
-import { Router } from "express"
-import { ListingController } from "../controllers/ListingController.js"
-import { authMiddleware } from "../middleware/auth.js"
-import { upload, processImages, validateImageUpload } from "../middleware/upload.js"
-import { param } from "express-validator"
+import { FastifyInstance, FastifyPluginAsync } from "fastify"
+import { ListingController } from "../controllers/ListingController"
+import { authMiddleware } from "../middleware/auth"
 
-const router = Router()
 const listingController = new ListingController()
 
-// Validation for ID parameter
-const validateId = [param("id").isUUID().withMessage("Invalid listing ID format")]
+const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
+  // Vehicle listing routes
+  fastify.post(
+    "/vehicles",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+          },
+        },
+      },
+    },
+    listingController.createVehicle,
+  )
 
-// Vehicle listing routes
-router.post(
-  "/vehicles",
-  authMiddleware,
-  upload.array("images", 20),
-  validateImageUpload,
-  processImages,
-  ListingController.createVehicleValidation,
-  listingController.createVehicleListing
-)
+  fastify.get("/vehicles", listingController.getVehicles)
 
-router.get("/vehicles/search", listingController.searchVehicleListings)
+  fastify.get("/vehicles/search", listingController.searchListings)
 
-router.get("/vehicles/:id", validateId, listingController.getVehicleListing)
+  fastify.get(
+    "/vehicles/:id",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+          },
+          required: ["id"],
+        },
+      },
+    },
+    listingController.getVehicleById,
+  )
 
-// Product listing routes
-router.post(
-  "/products",
-  authMiddleware,
-  upload.array("images", 20),
-  validateImageUpload,
-  processImages,
-  ListingController.createProductValidation,
-  listingController.createProductListing
-)
+  fastify.put(
+    "/vehicles/:id",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+          },
+          required: ["id"],
+        },
+      },
+    },
+    listingController.updateVehicle,
+  )
 
-router.get("/products/search", listingController.searchProductListings)
+  fastify.delete(
+    "/vehicles/:id",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+          },
+          required: ["id"],
+        },
+      },
+    },
+    listingController.deleteVehicle,
+  )
 
-router.get("/products/:id", validateId, listingController.getProductListing)
+  // Product listing routes
+  fastify.post(
+    "/products",
+    {
+      preHandler: [authMiddleware],
+    },
+    listingController.createProduct,
+  )
 
-// General listing management routes
-router.patch("/:id/status", authMiddleware, validateId, listingController.updateListingStatus)
+  fastify.get("/products", listingController.getProducts)
 
-router.delete("/:id", authMiddleware, validateId, listingController.deleteListing)
+  fastify.get(
+    "/products/:id",
+    {
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+          },
+          required: ["id"],
+        },
+      },
+    },
+    listingController.getProductById,
+  )
 
-export default router
+  fastify.put(
+    "/products/:id",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+          },
+          required: ["id"],
+        },
+      },
+    },
+    listingController.updateProduct,
+  )
+
+  fastify.delete(
+    "/products/:id",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "string", format: "uuid" },
+          },
+          required: ["id"],
+        },
+      },
+    },
+    listingController.deleteProduct,
+  )
+
+  // General listing routes
+  fastify.get("/search", listingController.searchListings)
+
+  fastify.get("/featured", listingController.getFeaturedListings)
+}
+
+export default listingRoutes

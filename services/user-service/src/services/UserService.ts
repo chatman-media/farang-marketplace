@@ -1,12 +1,6 @@
 import { UserRepository } from "../repositories/UserRepository"
 import { UserEntity } from "../models/User"
-import {
-  UserRole,
-  UserProfile,
-  User,
-  VerificationStatus,
-  Location,
-} from "@marketplace/shared-types"
+import { UserRole, UserProfile, User, VerificationStatus, Location } from "@marketplace/shared-types"
 import { z } from "zod"
 
 const UpdateUserSchema = z.object({
@@ -88,9 +82,7 @@ export class UserService {
 
     // Check if telegram ID already exists (if provided)
     if (validatedData.telegramId) {
-      const existingTelegramUser = await this.userRepository.findByTelegramId(
-        validatedData.telegramId
-      )
+      const existingTelegramUser = await this.userRepository.findByTelegramId(validatedData.telegramId)
       if (existingTelegramUser) {
         throw new Error("User with this Telegram ID already exists")
       }
@@ -163,9 +155,7 @@ export class UserService {
 
       // Check for telegram ID conflicts if telegram ID is being updated
       if (validatedData.telegramId) {
-        const existingTelegramUser = await this.userRepository.existsByTelegramId(
-          validatedData.telegramId
-        )
+        const existingTelegramUser = await this.userRepository.existsByTelegramId(validatedData.telegramId)
         if (existingTelegramUser) {
           // Check if it's not the same user
           const existingUser = await this.userRepository.findByTelegramId(validatedData.telegramId)

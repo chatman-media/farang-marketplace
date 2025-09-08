@@ -1,5 +1,4 @@
-import { Request, Response } from "express"
-import { validationResult } from "express-validator"
+import { FastifyRequest, FastifyReply } from "fastify"
 import { CRMService } from "../services/CRMService"
 import {
   CreateCustomerRequest,
@@ -11,8 +10,8 @@ import {
   LeadPriority,
 } from "@marketplace/shared-types"
 
-// Extend Request interface to include user property
-interface AuthenticatedRequest extends Request {
+// Extend Fastify Request interface to include user property
+interface AuthenticatedRequest extends FastifyRequest {
   user?: {
     id: string
     role: string
@@ -27,418 +26,303 @@ export class CRMController {
     this.crmService = new CRMService()
   }
 
-  // Customer endpoints
-  createCustomer = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-        })
-        return
-      }
+  // Health check endpoint
+  healthCheck = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    return reply.send({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      service: "crm-service",
+      version: "2.0.0",
+      framework: "Fastify 5.x",
+    })
+  }
 
-      const customerData: CreateCustomerRequest = req.body
+  // Customer endpoints
+  createCustomer = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    try {
+      const customerData: CreateCustomerRequest = request.body as CreateCustomerRequest
       const customer = await this.crmService.createCustomer(customerData)
 
-      res.status(201).json({
+      return reply.status(201).send({
         success: true,
         data: customer.toJSON(),
         message: "Customer created successfully",
       })
     } catch (error: any) {
-      console.error("Error creating customer:", error)
-
-      if (error.message.includes("already exists")) {
-        res.status(409).json({
-          error: "Conflict",
-          message: error.message,
-        })
-      } else if (error.message.includes("Validation failed")) {
-        res.status(400).json({
-          error: "Validation Error",
-          message: error.message,
-        })
-      } else {
-        res.status(500).json({
-          error: "Internal Server Error",
-          message: "Failed to create customer",
-        })
-      }
+      request.log.error("Error creating customer:", error)
+      return reply.status(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
     }
   }
 
-  getCustomer = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  getCustomers = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const { id } = req.params
+      const query = request.query as any
+      const { page = 1, limit = 10, status, search, sortBy = "createdAt", sortOrder = "desc" } = query
+
+      const customers = await this.crmService.getCustomers(
+        {
+          status: status as CustomerStatus,
+          search,
+        },
+        {
+          page: parseInt(page),
+          limit: parseInt(limit),
+        },
+      )
+
+      return reply.send({
+        success: true,
+        data: customers,
+        message: "Customers retrieved successfully",
+      })
+    } catch (error: any) {
+      request.log.error("Error getting customers:", error)
+      return reply.status(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
+    }
+  }
+
+  getCustomer = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    try {
+      const { id } = request.params as { id: string }
       const customer = await this.crmService.getCustomerById(id)
 
       if (!customer) {
-        res.status(404).json({
+        return reply.status(404).send({
           error: "Not Found",
           message: "Customer not found",
         })
-        return
       }
 
-      res.json({
+      return reply.send({
         success: true,
         data: customer.toJSON(),
+        message: "Customer retrieved successfully",
       })
     } catch (error: any) {
-      console.error("Error getting customer:", error)
-      res.status(500).json({
+      request.log.error("Error getting customer:", error)
+      return reply.status(500).send({
         error: "Internal Server Error",
-        message: "Failed to get customer",
+        message: error.message,
       })
     }
   }
 
-  updateCustomer = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  updateCustomer = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-        })
-        return
-      }
+      const { id } = request.params as { id: string }
+      const updateData: UpdateCustomerRequest = request.body as UpdateCustomerRequest
 
-      const { id } = req.params
-      const updateData: UpdateCustomerRequest = req.body
       const customer = await this.crmService.updateCustomer(id, updateData)
 
       if (!customer) {
-        res.status(404).json({
+        return reply.status(404).send({
           error: "Not Found",
           message: "Customer not found",
         })
-        return
       }
 
-      res.json({
+      return reply.send({
         success: true,
         data: customer.toJSON(),
         message: "Customer updated successfully",
       })
     } catch (error: any) {
-      console.error("Error updating customer:", error)
-
-      if (error.message.includes("Validation failed")) {
-        res.status(400).json({
-          error: "Validation Error",
-          message: error.message,
-        })
-      } else {
-        res.status(500).json({
-          error: "Internal Server Error",
-          message: "Failed to update customer",
-        })
-      }
+      request.log.error("Error updating customer:", error)
+      return reply.status(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
     }
   }
 
-  deleteCustomer = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  deleteCustomer = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const { id } = req.params
+      const { id } = request.params as { id: string }
+      const success = await this.crmService.deleteCustomer(id)
 
-      // Only admin can delete customers
-      if (req.user?.role !== "admin") {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Only administrators can delete customers",
-        })
-        return
-      }
-
-      const deleted = await this.crmService.deleteCustomer(id)
-
-      if (!deleted) {
-        res.status(404).json({
+      if (!success) {
+        return reply.status(404).send({
           error: "Not Found",
           message: "Customer not found",
         })
-        return
       }
 
-      res.json({
+      return reply.send({
         success: true,
         message: "Customer deleted successfully",
       })
     } catch (error: any) {
-      console.error("Error deleting customer:", error)
-      res.status(500).json({
+      request.log.error("Error deleting customer:", error)
+      return reply.status(500).send({
         error: "Internal Server Error",
-        message: "Failed to delete customer",
-      })
-    }
-  }
-
-  getCustomers = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-      const { status, tags, search, page = "1", limit = "20" } = req.query
-
-      const filters: any = {}
-      if (status) filters.status = status as CustomerStatus
-      if (tags) filters.tags = Array.isArray(tags) ? (tags as string[]) : [tags as string]
-      if (search) filters.search = search as string
-
-      const pagination = {
-        page: parseInt(page as string),
-        limit: Math.min(parseInt(limit as string), 100), // Cap at 100
-      }
-
-      const result = await this.crmService.getCustomers(filters, pagination)
-
-      res.json({
-        success: true,
-        data: result.customers.map((customer) => customer.toJSON()),
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: Math.ceil(result.total / result.limit),
-        },
-      })
-    } catch (error: any) {
-      console.error("Error getting customers:", error)
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: "Failed to get customers",
+        message: error.message,
       })
     }
   }
 
   // Lead endpoints
-  createLead = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  createLead = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-        })
-        return
-      }
-
-      const leadData: CreateLeadRequest = req.body
+      const leadData: CreateLeadRequest = request.body as CreateLeadRequest
       const lead = await this.crmService.createLead(leadData)
 
-      res.status(201).json({
+      return reply.status(201).send({
         success: true,
         data: lead.toJSON(),
         message: "Lead created successfully",
       })
     } catch (error: any) {
-      console.error("Error creating lead:", error)
-
-      if (error.message.includes("not found")) {
-        res.status(404).json({
-          error: "Not Found",
-          message: error.message,
-        })
-      } else if (error.message.includes("Validation failed")) {
-        res.status(400).json({
-          error: "Validation Error",
-          message: error.message,
-        })
-      } else {
-        res.status(500).json({
-          error: "Internal Server Error",
-          message: "Failed to create lead",
-        })
-      }
+      request.log.error("Error creating lead:", error)
+      return reply.status(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
     }
   }
 
-  getLead = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  getLeads = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const { id } = req.params
+      const query = request.query as any
+      const {
+        page = 1,
+        limit = 10,
+        status,
+        priority,
+        customerId,
+        search,
+        sortBy = "createdAt",
+        sortOrder = "desc",
+      } = query
+
+      const leads = await this.crmService.getLeads(
+        {
+          status: status as LeadStatus,
+          priority: priority as LeadPriority,
+          customerId,
+        },
+        {
+          page: parseInt(page),
+          limit: parseInt(limit),
+        },
+      )
+
+      return reply.send({
+        success: true,
+        data: leads,
+        message: "Leads retrieved successfully",
+      })
+    } catch (error: any) {
+      request.log.error("Error getting leads:", error)
+      return reply.status(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
+    }
+  }
+
+  getLead = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    try {
+      const { id } = request.params as { id: string }
       const lead = await this.crmService.getLeadById(id)
 
       if (!lead) {
-        res.status(404).json({
+        return reply.status(404).send({
           error: "Not Found",
           message: "Lead not found",
         })
-        return
       }
 
-      res.json({
+      return reply.send({
         success: true,
         data: lead.toJSON(),
+        message: "Lead retrieved successfully",
       })
     } catch (error: any) {
-      console.error("Error getting lead:", error)
-      res.status(500).json({
+      request.log.error("Error getting lead:", error)
+      return reply.status(500).send({
         error: "Internal Server Error",
-        message: "Failed to get lead",
+        message: error.message,
       })
     }
   }
 
-  updateLead = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  updateLead = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-        })
-        return
-      }
+      const { id } = request.params as { id: string }
+      const updateData: UpdateLeadRequest = request.body as UpdateLeadRequest
 
-      const { id } = req.params
-      const updateData: UpdateLeadRequest = req.body
       const lead = await this.crmService.updateLead(id, updateData)
 
       if (!lead) {
-        res.status(404).json({
+        return reply.status(404).send({
           error: "Not Found",
           message: "Lead not found",
         })
-        return
       }
 
-      res.json({
+      return reply.send({
         success: true,
         data: lead.toJSON(),
         message: "Lead updated successfully",
       })
     } catch (error: any) {
-      console.error("Error updating lead:", error)
-
-      if (error.message.includes("Validation failed")) {
-        res.status(400).json({
-          error: "Validation Error",
-          message: error.message,
-        })
-      } else {
-        res.status(500).json({
-          error: "Internal Server Error",
-          message: "Failed to update lead",
-        })
-      }
+      request.log.error("Error updating lead:", error)
+      return reply.status(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
     }
   }
 
-  deleteLead = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  deleteLead = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const { id } = req.params
+      const { id } = request.params as { id: string }
+      const success = await this.crmService.deleteLead(id)
 
-      // Only admin and managers can delete leads
-      if (!["admin", "manager"].includes(req.user?.role || "")) {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Insufficient permissions to delete leads",
-        })
-        return
-      }
-
-      const deleted = await this.crmService.deleteLead(id)
-
-      if (!deleted) {
-        res.status(404).json({
+      if (!success) {
+        return reply.status(404).send({
           error: "Not Found",
           message: "Lead not found",
         })
-        return
       }
 
-      res.json({
+      return reply.send({
         success: true,
         message: "Lead deleted successfully",
       })
     } catch (error: any) {
-      console.error("Error deleting lead:", error)
-      res.status(500).json({
+      request.log.error("Error deleting lead:", error)
+      return reply.status(500).send({
         error: "Internal Server Error",
-        message: "Failed to delete lead",
-      })
-    }
-  }
-
-  getLeads = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-      const { status, priority, assignedTo, customerId, page = "1", limit = "20" } = req.query
-
-      const filters: any = {}
-      if (status) filters.status = status as LeadStatus
-      if (priority) filters.priority = priority as LeadPriority
-      if (assignedTo) filters.assignedTo = assignedTo as string
-      if (customerId) filters.customerId = customerId as string
-
-      const pagination = {
-        page: parseInt(page as string),
-        limit: Math.min(parseInt(limit as string), 100), // Cap at 100
-      }
-
-      const result = await this.crmService.getLeads(filters, pagination)
-
-      res.json({
-        success: true,
-        data: result.leads.map((lead) => lead.toJSON()),
-        pagination: {
-          total: result.total,
-          page: result.page,
-          limit: result.limit,
-          totalPages: Math.ceil(result.total / result.limit),
-        },
-      })
-    } catch (error: any) {
-      console.error("Error getting leads:", error)
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: "Failed to get leads",
+        message: error.message,
       })
     }
   }
 
   // Analytics endpoint
-  getAnalytics = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  getAnalytics = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      // Only admin and managers can view analytics
-      if (!["admin", "manager"].includes(req.user?.role || "")) {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Insufficient permissions to view analytics",
-        })
-        return
-      }
+      const query = request.query as any
+      const { startDate, endDate, groupBy = "day" } = query
 
       const analytics = await this.crmService.getCRMAnalytics()
 
-      res.json({
+      return reply.send({
         success: true,
         data: analytics,
+        message: "Analytics retrieved successfully",
       })
     } catch (error: any) {
-      console.error("Error getting analytics:", error)
-      res.status(500).json({
+      request.log.error("Error getting analytics:", error)
+      return reply.status(500).send({
         error: "Internal Server Error",
-        message: "Failed to get analytics",
-      })
-    }
-  }
-
-  // Health check
-  healthCheck = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-      res.json({
-        status: "healthy",
-        service: "crm-service",
-        timestamp: new Date().toISOString(),
-        version: "1.0.0",
-      })
-    } catch (error: any) {
-      console.error("Health check failed:", error)
-      res.status(500).json({
-        status: "unhealthy",
-        service: "crm-service",
-        error: error.message,
-        timestamp: new Date().toISOString(),
+        message: error.message,
       })
     }
   }

@@ -16,6 +16,14 @@ export class Lead implements ILead {
   priority: LeadPriority
   assignedTo?: string
   value?: number
+  propertyInterest?: string
+  estimatedValue?: number
+  probability?: number
+  currency?: string
+  stage?: string
+  campaign?: string
+  medium?: string
+  expectedCloseDate?: Date
   notes: string
   followUpDate?: Date
   createdAt: Date
@@ -30,6 +38,14 @@ export class Lead implements ILead {
     this.priority = data.priority || LeadPriority.MEDIUM
     this.assignedTo = data.assigned_to
     this.value = data.value ? parseFloat(data.value) : undefined
+    this.propertyInterest = data.property_interest
+    this.estimatedValue = data.estimated_value ? parseFloat(data.estimated_value) : undefined
+    this.probability = data.probability ? parseInt(data.probability) : undefined
+    this.currency = data.currency || "THB"
+    this.stage = data.stage
+    this.campaign = data.campaign
+    this.medium = data.medium
+    this.expectedCloseDate = data.expected_close_date ? new Date(data.expected_close_date) : undefined
     this.notes = data.notes || ""
     this.followUpDate = data.follow_up_date ? new Date(data.follow_up_date) : undefined
     this.createdAt = new Date(data.created_at)

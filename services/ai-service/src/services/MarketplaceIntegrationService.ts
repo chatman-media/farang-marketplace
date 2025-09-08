@@ -1,8 +1,8 @@
-import type { UserBehavior } from "../models/index.js"
-import { AIProviderService } from "./AIProviderService.js"
-import { RecommendationEngine } from "./RecommendationEngine.js"
-import { UserBehaviorService } from "./UserBehaviorService.js"
-import { ContentAnalysisService } from "./ContentAnalysisService.js"
+import type { UserBehavior } from "../models/index"
+import { AIProviderService } from "./AIProviderService"
+import { RecommendationEngine } from "./RecommendationEngine"
+import { UserBehaviorService } from "./UserBehaviorService"
+import { ContentAnalysisService } from "./ContentAnalysisService"
 
 export interface BookingIntelligence {
   bookingId: string
@@ -110,7 +110,7 @@ export class MarketplaceIntegrationService {
     aiProvider: AIProviderService,
     recommendationEngine: RecommendationEngine,
     userBehaviorService: UserBehaviorService,
-    contentAnalysisService: ContentAnalysisService
+    contentAnalysisService: ContentAnalysisService,
   ) {
     this.aiProvider = aiProvider
     this.recommendationEngine = recommendationEngine
@@ -124,7 +124,7 @@ export class MarketplaceIntegrationService {
   async generateBookingIntelligence(
     userId: string,
     listingId: string,
-    bookingData: Record<string, any>
+    bookingData: Record<string, any>,
   ): Promise<BookingIntelligence> {
     try {
       // Get user behavior and preferences
@@ -137,7 +137,7 @@ export class MarketplaceIntegrationService {
         listingId,
         bookingData,
         userInsights,
-        userBehaviors
+        userBehaviors,
       )
 
       // Check for fraud indicators
@@ -181,7 +181,7 @@ export class MarketplaceIntegrationService {
   async generatePriceSuggestions(
     listingId: string,
     currentPrice?: number,
-    marketContext?: Record<string, any>
+    marketContext?: Record<string, any>,
   ): Promise<PricingSuggestion> {
     try {
       // Check cache first
@@ -195,12 +195,7 @@ export class MarketplaceIntegrationService {
       const marketData = await this.analyzeMarketData(listingId, marketContext)
 
       // Generate AI-powered pricing suggestions
-      const aiSuggestion = await this.generateAIPricingSuggestion(
-        listingId,
-        currentPrice,
-        marketData,
-        marketContext
-      )
+      const aiSuggestion = await this.generateAIPricingSuggestion(listingId, currentPrice, marketData, marketContext)
 
       const suggestion: PricingSuggestion = {
         listingId,
@@ -231,7 +226,7 @@ export class MarketplaceIntegrationService {
   async createSmartNotification(
     userId: string,
     type: SmartNotification["type"],
-    context: Record<string, any>
+    context: Record<string, any>,
   ): Promise<SmartNotification> {
     try {
       // Analyze user behavior for optimal timing
@@ -269,7 +264,7 @@ export class MarketplaceIntegrationService {
   async detectFraud(
     userId: string,
     listingId?: string,
-    transactionData?: Record<string, any>
+    transactionData?: Record<string, any>,
   ): Promise<FraudDetectionResult> {
     try {
       // Check cache first
@@ -288,12 +283,7 @@ export class MarketplaceIntegrationService {
       const transactionFlags = await this.analyzeTransactionForFraud(transactionData)
 
       // AI-powered fraud detection
-      const aiAnalysis = await this.performAIFraudAnalysis(
-        userId,
-        listingId,
-        transactionData,
-        userBehaviors
-      )
+      const aiAnalysis = await this.performAIFraudAnalysis(userId, listingId, transactionData, userBehaviors)
 
       // Combine all flags
       const allFlags = [...behaviorFlags, ...transactionFlags, ...aiAnalysis.flags]
@@ -334,7 +324,7 @@ export class MarketplaceIntegrationService {
     listingId: string,
     bookingData: Record<string, any>,
     userInsights: any[],
-    userBehaviors: UserBehavior[]
+    userBehaviors: UserBehavior[],
   ): Promise<BookingIntelligence["recommendations"]> {
     try {
       const prompt = `Analyze booking data and generate intelligent recommendations:
@@ -387,14 +377,10 @@ Provide JSON response with recommendations array containing action, confidence, 
    */
   private async generatePriceOptimization(
     listingId: string,
-    bookingData: Record<string, any>
+    bookingData: Record<string, any>,
   ): Promise<BookingIntelligence["priceOptimization"]> {
     try {
-      const pricingSuggestion = await this.generatePriceSuggestions(
-        listingId,
-        bookingData["currentPrice"],
-        bookingData
-      )
+      const pricingSuggestion = await this.generatePriceSuggestions(listingId, bookingData["currentPrice"], bookingData)
 
       return {
         suggestedPrice: pricingSuggestion.suggestedPrice,
@@ -413,7 +399,7 @@ Provide JSON response with recommendations array containing action, confidence, 
    */
   private async analyzeMarketData(
     listingId: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<PricingSuggestion["marketData"]> {
     try {
       // Mock market data analysis - in real implementation, this would fetch from external APIs
@@ -422,13 +408,7 @@ Provide JSON response with recommendations array containing action, confidence, 
 
       return {
         averagePrice: basePrice * 1.1,
-        competitorPrices: [
-          basePrice * 0.9,
-          basePrice * 1.05,
-          basePrice * 1.15,
-          basePrice * 0.95,
-          basePrice * 1.2,
-        ],
+        competitorPrices: [basePrice * 0.9, basePrice * 1.05, basePrice * 1.15, basePrice * 0.95, basePrice * 1.2],
         demandLevel: this.calculateDemandLevel(context),
         seasonality: seasonalityFactor,
       }
@@ -450,7 +430,7 @@ Provide JSON response with recommendations array containing action, confidence, 
     listingId: string,
     currentPrice: number | undefined,
     marketData: PricingSuggestion["marketData"],
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<{
     price: number
     range: { min: number; max: number }
@@ -487,11 +467,7 @@ Provide JSON response with: suggestedPrice, priceRange (min/max), confidence (0-
         metadata: {},
       })
 
-      const aiSuggestion = this.parseAIPricingSuggestion(
-        response.response,
-        currentPrice,
-        marketData
-      )
+      const aiSuggestion = this.parseAIPricingSuggestion(response.response, currentPrice, marketData)
 
       return aiSuggestion
     } catch (error) {
@@ -517,7 +493,7 @@ Provide JSON response with: suggestedPrice, priceRange (min/max), confidence (0-
     userId: string,
     listingId?: string,
     transactionData?: Record<string, any>,
-    userBehaviors?: UserBehavior[]
+    userBehaviors?: UserBehavior[],
   ): Promise<{
     flags: FraudDetectionResult["flags"]
     reasoning: string
@@ -594,7 +570,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
    */
   private determineRecommendedAction(
     riskLevel: FraudDetectionResult["riskLevel"],
-    flags: FraudDetectionResult["flags"]
+    flags: FraudDetectionResult["flags"],
   ): FraudDetectionResult["recommendations"]["action"] {
     switch (riskLevel) {
       case "critical":
@@ -613,7 +589,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
    */
   private generateVerificationSteps(
     riskLevel: FraudDetectionResult["riskLevel"],
-    flags: FraudDetectionResult["flags"]
+    flags: FraudDetectionResult["flags"],
   ): string[] {
     const steps: string[] = []
 
@@ -646,16 +622,14 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   /**
    * Analyze user behavior for fraud detection
    */
-  private async analyzeBehaviorForFraud(
-    userBehaviors: UserBehavior[]
-  ): Promise<FraudDetectionResult["flags"]> {
+  private async analyzeBehaviorForFraud(userBehaviors: UserBehavior[]): Promise<FraudDetectionResult["flags"]> {
     const flags: FraudDetectionResult["flags"] = []
 
     if (userBehaviors.length === 0) return flags
 
     // Check for excessive activity
     const recentBehaviors = userBehaviors.filter(
-      (b) => Date.now() - b.timestamp.getTime() < 60 * 60 * 1000 // Last hour
+      (b) => Date.now() - b.timestamp.getTime() < 60 * 60 * 1000, // Last hour
     )
 
     if (recentBehaviors.length > 50) {
@@ -685,7 +659,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
    * Analyze transaction for fraud detection
    */
   private async analyzeTransactionForFraud(
-    transactionData?: Record<string, any>
+    transactionData?: Record<string, any>,
   ): Promise<FraudDetectionResult["flags"]> {
     const flags: FraudDetectionResult["flags"] = []
 
@@ -710,7 +684,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   private async calculateOptimalTiming(
     userId: string,
     type: SmartNotification["type"],
-    userBehaviors: UserBehavior[]
+    userBehaviors: UserBehavior[],
   ): Promise<SmartNotification["timing"]> {
     const activityPattern = this.analyzeUserActivityPattern(userBehaviors)
 
@@ -770,7 +744,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   private parseAIPricingSuggestion(
     aiResponse: string,
     currentPrice?: number,
-    marketData?: PricingSuggestion["marketData"]
+    marketData?: PricingSuggestion["marketData"],
   ): {
     price: number
     range: { min: number; max: number }
@@ -823,7 +797,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   private parseNotificationContent(
     aiResponse: string,
     type: SmartNotification["type"],
-    context: Record<string, any>
+    context: Record<string, any>,
   ): SmartNotification["content"] {
     try {
       const parsed = JSON.parse(aiResponse)
@@ -840,7 +814,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
 
   private getFallbackNotificationContent(
     type: SmartNotification["type"],
-    context: Record<string, any>
+    context: Record<string, any>,
   ): SmartNotification["content"] {
     const titles = {
       booking_reminder: "Don't forget your booking!",
@@ -954,12 +928,8 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     }
 
     if (priceRanges.length > 0) {
-      const avgMin =
-        priceRanges.reduce((sum: number, range: any) => sum + (range.min || 0), 0) /
-        priceRanges.length
-      const avgMax =
-        priceRanges.reduce((sum: number, range: any) => sum + (range.max || 0), 0) /
-        priceRanges.length
+      const avgMin = priceRanges.reduce((sum: number, range: any) => sum + (range.min || 0), 0) / priceRanges.length
+      const avgMax = priceRanges.reduce((sum: number, range: any) => sum + (range.max || 0), 0) / priceRanges.length
       preferences["priceRange"] = { min: avgMin, max: avgMax }
     }
 
@@ -968,7 +938,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
 
   private calculateNotificationPriority(
     type: SmartNotification["type"],
-    context: Record<string, any>
+    context: Record<string, any>,
   ): SmartNotification["priority"] {
     switch (type) {
       case "booking_reminder":
@@ -986,7 +956,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
 
   private async selectOptimalChannel(
     userId: string,
-    type: SmartNotification["type"]
+    type: SmartNotification["type"],
   ): Promise<SmartNotification["channel"]> {
     // In a real implementation, this would analyze user preferences and engagement rates
     const channelPreferences = {
@@ -1002,7 +972,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   private async predictEngagement(
     userId: string,
     type: SmartNotification["type"],
-    content: SmartNotification["content"]
+    content: SmartNotification["content"],
   ): Promise<number> {
     // Mock engagement prediction - in real implementation, this would use ML models
     const baseEngagement = {
@@ -1025,9 +995,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     return 0.9 // 10% decrease during low season
   }
 
-  private calculateDemandLevel(
-    context?: Record<string, any>
-  ): PricingSuggestion["marketData"]["demandLevel"] {
+  private calculateDemandLevel(context?: Record<string, any>): PricingSuggestion["marketData"]["demandLevel"] {
     // Mock demand calculation - in real implementation, this would analyze booking patterns
     const currentHour = new Date().getHours()
 

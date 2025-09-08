@@ -1,12 +1,12 @@
 import { eq, and, desc, asc, sql, ilike, inArray } from "drizzle-orm"
-import { db } from "../db/connection.js"
+import { db } from "../db/connection"
 import {
   agencyServices,
   agencies,
   type AgencyService,
   type NewAgencyService,
   type ServiceCategoryType,
-} from "../db/schema.js"
+} from "../db/schema"
 
 export interface ServiceFilters {
   agencyId?: string
@@ -30,9 +30,7 @@ export class AgencyServiceService {
   /**
    * Create a new agency service
    */
-  async createService(
-    serviceData: Omit<NewAgencyService, "id" | "createdAt" | "updatedAt">
-  ): Promise<AgencyService> {
+  async createService(serviceData: Omit<NewAgencyService, "id" | "createdAt" | "updatedAt">): Promise<AgencyService> {
     try {
       // Verify agency exists
       const [agency] = await db.select().from(agencies).where(eq(agencies.id, serviceData.agencyId))
@@ -98,7 +96,7 @@ export class AgencyServiceService {
    */
   async updateService(
     id: string,
-    updates: Partial<Omit<AgencyService, "id" | "agencyId" | "createdAt">>
+    updates: Partial<Omit<AgencyService, "id" | "agencyId" | "createdAt">>,
   ): Promise<AgencyService | null> {
     try {
       const [service] = await db
@@ -136,7 +134,7 @@ export class AgencyServiceService {
    */
   async searchServices(
     filters: ServiceFilters = {},
-    options: ServiceSearchOptions = {}
+    options: ServiceSearchOptions = {},
   ): Promise<{
     services: (AgencyService & { agencyName: string | null })[]
     total: number
@@ -166,7 +164,7 @@ export class AgencyServiceService {
 
       if (filters.search) {
         conditions.push(
-          sql`(${ilike(agencyServices.name, `%${filters.search}%`)} OR ${ilike(agencyServices.description, `%${filters.search}%`)})`
+          sql`(${ilike(agencyServices.name, `%${filters.search}%`)} OR ${ilike(agencyServices.description, `%${filters.search}%`)})`,
         )
       }
 
@@ -188,16 +186,13 @@ export class AgencyServiceService {
           orderClause = sortOrder === "asc" ? asc(agencyServices.name) : desc(agencyServices.name)
           break
         case "basePrice":
-          orderClause =
-            sortOrder === "asc" ? asc(agencyServices.basePrice) : desc(agencyServices.basePrice)
+          orderClause = sortOrder === "asc" ? asc(agencyServices.basePrice) : desc(agencyServices.basePrice)
           break
         case "category":
-          orderClause =
-            sortOrder === "asc" ? asc(agencyServices.category) : desc(agencyServices.category)
+          orderClause = sortOrder === "asc" ? asc(agencyServices.category) : desc(agencyServices.category)
           break
         default:
-          orderClause =
-            sortOrder === "asc" ? asc(agencyServices.createdAt) : desc(agencyServices.createdAt)
+          orderClause = sortOrder === "asc" ? asc(agencyServices.createdAt) : desc(agencyServices.createdAt)
       }
 
       // Get total count

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest"
-import { BookingIntegrationService } from "../services/BookingIntegrationService.js"
+import { BookingIntegrationService } from "../services/BookingIntegrationService"
 
 describe("Booking Integration Service Tests", () => {
   let bookingIntegrationService: BookingIntegrationService

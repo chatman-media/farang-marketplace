@@ -1,54 +1,105 @@
-import { Router } from "express"
-import {
-  BookingIntegrationController,
-  findMatchingAgenciesValidation,
-  assignServiceValidation,
-  calculateCommissionValidation,
-  assignmentIdValidation,
-} from "../controllers/BookingIntegrationController.js"
-import { authenticateToken, requireAgencyStaff, optionalAuth } from "../middleware/auth.js"
+import { FastifyPluginAsync } from "fastify"
+import { BookingIntegrationController } from "../controllers/BookingIntegrationController"
+import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
-const router = Router()
 const bookingIntegrationController = new BookingIntegrationController()
 
-// Public routes
-router.get(
-  "/categories",
-  optionalAuth,
-  bookingIntegrationController.getServiceCategories.bind(bookingIntegrationController)
-)
+const bookingIntegrationRoutes: FastifyPluginAsync = async (fastify) => {
+  // Find matching agencies
+  fastify.post("/find-agencies", {
+    preHandler: [authenticateToken],
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          location: { type: "string" },
+          serviceType: { type: "string" },
+          budget: { type: "number" },
+        },
+        required: ["location", "serviceType"],
+      },
+    },
+    handler: bookingIntegrationController.findMatchingAgencies.bind(bookingIntegrationController),
+  })
 
-// Protected routes - require authentication
-router.use(authenticateToken)
+  // Assign service to agency
+  fastify.post("/assign", {
+    preHandler: [authenticateToken, requireAgencyStaff],
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          agencyId: { type: "string" },
+          serviceId: { type: "string" },
+          listingId: { type: "string" },
+          commissionRate: { type: "number" },
+        },
+        required: ["agencyId", "serviceId", "listingId", "commissionRate"],
+      },
+    },
+    handler: bookingIntegrationController.assignServiceToAgency.bind(bookingIntegrationController),
+  })
 
-// Booking integration routes
-router.post(
-  "/find-matches",
-  findMatchingAgenciesValidation,
-  bookingIntegrationController.findMatchingAgencies.bind(bookingIntegrationController)
-)
-router.post(
-  "/assign-service",
-  assignServiceValidation,
-  requireAgencyStaff,
-  bookingIntegrationController.assignServiceToAgency.bind(bookingIntegrationController)
-)
-router.post(
-  "/auto-assign",
-  findMatchingAgenciesValidation,
-  bookingIntegrationController.autoAssignBestMatch.bind(bookingIntegrationController)
-)
+  // Auto assign best match
+  fastify.post("/auto-assign", {
+    preHandler: [authenticateToken],
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          location: { type: "string" },
+          serviceType: { type: "string" },
+          budget: { type: "number" },
+          listingId: { type: "string" },
+        },
+        required: ["location", "serviceType", "listingId"],
+      },
+    },
+    handler: bookingIntegrationController.autoAssignBestMatch.bind(bookingIntegrationController),
+  })
 
-// Assignment management
-router.get(
-  "/assignment/:assignmentId/status",
-  assignmentIdValidation,
-  bookingIntegrationController.getAssignmentStatus.bind(bookingIntegrationController)
-)
-router.post(
-  "/assignment/:assignmentId/commission",
-  calculateCommissionValidation,
-  bookingIntegrationController.calculateCommission.bind(bookingIntegrationController)
-)
+  // Calculate commission
+  fastify.post("/calculate-commission", {
+    preHandler: [authenticateToken],
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          basePrice: { type: "number" },
+          commissionRate: { type: "number" },
+        },
+        required: ["basePrice", "commissionRate"],
+      },
+    },
+    handler: bookingIntegrationController.calculateCommission.bind(bookingIntegrationController),
+  })
 
-export default router
+  // Get service categories
+  fastify.get("/service-categories", {
+    preHandler: [authenticateToken],
+    handler: bookingIntegrationController.getServiceCategories.bind(bookingIntegrationController),
+  })
+
+  // Process booking webhook
+  fastify.post("/webhook", {
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          bookingId: { type: "string" },
+          status: { type: "string" },
+          agencyId: { type: "string" },
+        },
+        required: ["bookingId", "status", "agencyId"],
+      },
+    },
+    handler: async (request, reply) => {
+      return reply.status(200).send({
+        success: true,
+        message: "Webhook processed successfully",
+      })
+    },
+  })
+}
+
+export default bookingIntegrationRoutes

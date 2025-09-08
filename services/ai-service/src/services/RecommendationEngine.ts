@@ -5,8 +5,8 @@ import type {
   RecommendationResponse,
   UserBehavior,
   UserPreferences,
-} from "../models/index.js"
-import { AIProviderService } from "./AIProviderService.js"
+} from "../models/index"
+import { AIProviderService } from "./AIProviderService"
 
 export interface ItemFeatures {
   id: string
@@ -90,9 +90,7 @@ export class RecommendationEngine {
       }
     } catch (error) {
       console.error("Error generating recommendations:", error)
-      throw new Error(
-        `Failed to generate recommendations: ${error instanceof Error ? error.message : "Unknown error"}`
-      )
+      throw new Error(`Failed to generate recommendations: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
@@ -183,7 +181,7 @@ export class RecommendationEngine {
         acc[behavior.action] = (acc[behavior.action] || 0) + 1
         return acc
       },
-      {} as Record<string, number>
+      {} as Record<string, number>,
     )
 
     const totalActions = behaviors.length || 1
@@ -193,8 +191,7 @@ export class RecommendationEngine {
     features.push((actionCounts["purchase"] || 0) / totalActions)
 
     // Recency of activity
-    const lastActivity =
-      behaviors.length > 0 ? Math.max(...behaviors.map((b) => b.timestamp.getTime())) : Date.now()
+    const lastActivity = behaviors.length > 0 ? Math.max(...behaviors.map((b) => b.timestamp.getTime())) : Date.now()
     const daysSinceLastActivity = (Date.now() - lastActivity) / (1000 * 60 * 60 * 24)
     features.push(Math.exp(-daysSinceLastActivity / 30)) // Exponential decay
 
@@ -218,7 +215,7 @@ export class RecommendationEngine {
 
     // Activity-based segments
     const recentBehaviors = behaviors.filter(
-      (b) => Date.now() - b.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000 // Last 7 days
+      (b) => Date.now() - b.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000, // Last 7 days
     )
 
     if (recentBehaviors.length > 20) {
@@ -250,8 +247,7 @@ export class RecommendationEngine {
     // Generate mock items for testing
     for (let i = 0; i < 100; i++) {
       const categories = ["electronics", "home", "fashion", "automotive", "services"]
-      const randomCategory =
-        categories[Math.floor(Math.random() * categories.length)] || "electronics"
+      const randomCategory = categories[Math.floor(Math.random() * categories.length)] || "electronics"
 
       mockItems.push({
         id: `item_${i}`,
@@ -308,7 +304,7 @@ export class RecommendationEngine {
   private async calculateScores(
     userProfile: UserProfile,
     candidates: ItemFeatures[],
-    request: RecommendationRequest
+    request: RecommendationRequest,
   ): Promise<RecommendationResult[]> {
     const results: RecommendationResult[] = []
 
@@ -356,19 +352,13 @@ export class RecommendationEngine {
   /**
    * Calculate collaborative filtering score
    */
-  private calculateCollaborativeFilteringScore(
-    userProfile: UserProfile,
-    item: ItemFeatures
-  ): number {
+  private calculateCollaborativeFilteringScore(userProfile: UserProfile, item: ItemFeatures): number {
     // Simplified collaborative filtering using cosine similarity
     if (userProfile.features.length !== item.features.length) {
       return 0.5 // Default score if feature dimensions don't match
     }
 
-    const dotProduct = userProfile.features.reduce(
-      (sum, val, idx) => sum + val * item.features[idx]!,
-      0
-    )
+    const dotProduct = userProfile.features.reduce((sum, val, idx) => sum + val * item.features[idx]!, 0)
     const userMagnitude = Math.sqrt(userProfile.features.reduce((sum, val) => sum + val * val, 0))
     const itemMagnitude = Math.sqrt(item.features.reduce((sum, val) => sum + val * val, 0))
 
@@ -384,9 +374,7 @@ export class RecommendationEngine {
     let score = 0
 
     // Category match
-    const categoryMatch = item.categories.some((cat) =>
-      userProfile.preferences.categories.includes(cat)
-    )
+    const categoryMatch = item.categories.some((cat) => userProfile.preferences.categories.includes(cat))
     if (categoryMatch) score += 0.4
 
     // Price match
@@ -400,7 +388,7 @@ export class RecommendationEngine {
     // Location match
     if (item.location && userProfile.preferences.locations.length > 0) {
       const locationMatch = userProfile.preferences.locations.some((loc) =>
-        item.location?.city?.toLowerCase().includes(loc.toLowerCase())
+        item.location?.city?.toLowerCase().includes(loc.toLowerCase()),
       )
       if (locationMatch) score += 0.2
     }
@@ -448,7 +436,7 @@ export class RecommendationEngine {
   private async calculateAIScore(
     userProfile: UserProfile,
     item: ItemFeatures,
-    request: RecommendationRequest
+    request: RecommendationRequest,
   ): Promise<number> {
     try {
       const prompt = this.buildAIPrompt(userProfile, item, request)
@@ -482,11 +470,7 @@ export class RecommendationEngine {
   /**
    * Build AI prompt for recommendation scoring
    */
-  private buildAIPrompt(
-    userProfile: UserProfile,
-    item: ItemFeatures,
-    request: RecommendationRequest
-  ): string {
+  private buildAIPrompt(userProfile: UserProfile, item: ItemFeatures, request: RecommendationRequest): string {
     return `
 Analyze if this item matches the user's preferences and provide a recommendation score from 0 to 1.
 
@@ -535,14 +519,12 @@ Provide a score from 0 to 1 and brief reasoning. Format: "Score: 0.X - Reason"
   private generateReasons(
     userProfile: UserProfile,
     item: ItemFeatures,
-    scores: { cf: number; cb: number; context: number; ai: number }
+    scores: { cf: number; cb: number; context: number; ai: number },
   ): string[] {
     const reasons: string[] = []
 
     if (scores.cb > 0.6) {
-      const categoryMatch = item.categories.some((cat) =>
-        userProfile.preferences.categories.includes(cat)
-      )
+      const categoryMatch = item.categories.some((cat) => userProfile.preferences.categories.includes(cat))
       if (categoryMatch) {
         reasons.push("Matches your preferred categories")
       }
@@ -572,7 +554,7 @@ Provide a score from 0 to 1 and brief reasoning. Format: "Score: 0.X - Reason"
    */
   private applyDiversityAndFiltering(
     results: RecommendationResult[],
-    request: RecommendationRequest
+    request: RecommendationRequest,
   ): RecommendationResult[] {
     let filtered = results
 
@@ -584,18 +566,13 @@ Provide a score from 0 to 1 and brief reasoning. Format: "Score: 0.X - Reason"
 
         // Category filter
         if (request.filters?.categories && request.filters.categories.length > 0) {
-          const hasCategory = item.categories.some((cat) =>
-            request.filters?.categories?.includes(cat)
-          )
+          const hasCategory = item.categories.some((cat) => request.filters?.categories?.includes(cat))
           if (!hasCategory) return false
         }
 
         // Price filter
         if (request.filters?.priceRange && item.price !== undefined) {
-          if (
-            item.price < request.filters.priceRange.min ||
-            item.price > request.filters.priceRange.max
-          ) {
+          if (item.price < request.filters.priceRange.min || item.price > request.filters.priceRange.max) {
             return false
           }
         }
@@ -626,10 +603,7 @@ Provide a score from 0 to 1 and brief reasoning. Format: "Score: 0.X - Reason"
   /**
    * Apply diversity to avoid too similar recommendations
    */
-  private applyDiversity(
-    results: RecommendationResult[],
-    diversityFactor: number
-  ): RecommendationResult[] {
+  private applyDiversity(results: RecommendationResult[], diversityFactor: number): RecommendationResult[] {
     const diverseResults: RecommendationResult[] = []
     const usedCategories = new Set<string>()
 

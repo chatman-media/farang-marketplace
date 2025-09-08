@@ -17,9 +17,10 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "express": "5.1.0",
-    "cors": "^2.8.5",
-    "helmet": "8.1.0",
+    "fastify": "^5.6.0",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/helmet": "^13.0.1",
+    "zod": "^4.1.5",
     "dotenv": "17.2.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "2.0.2",
@@ -36,8 +37,6 @@
     "audio-buffer-utils": "^5.1.2"
   },
   "devDependencies": {
-    "@types/express": "5.0.3",
-    "@types/cors": "^2.8.19",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "2.0.0",
     "@types/fluent-ffmpeg": "^2.1.27",

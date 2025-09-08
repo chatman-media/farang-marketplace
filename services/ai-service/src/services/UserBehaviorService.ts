@@ -1,5 +1,5 @@
-import type { UserBehavior, UserPreferences, UserInsight, MarketInsight } from "../models/index.js"
-import { AIProviderService } from "./AIProviderService.js"
+import type { UserBehavior, UserPreferences, UserInsight, MarketInsight } from "../models/index"
+import { AIProviderService } from "./AIProviderService"
 
 export class UserBehaviorService {
   private aiProvider: AIProviderService
@@ -18,7 +18,7 @@ export class UserBehaviorService {
    */
   async trackBehavior(
     userId: string,
-    behavior: Omit<UserBehavior, "id" | "timestamp" | "userId">
+    behavior: Omit<UserBehavior, "id" | "timestamp" | "userId">,
   ): Promise<{ success: boolean; message?: string }> {
     try {
       const fullBehavior: UserBehavior = {
@@ -124,8 +124,7 @@ export class UserBehaviorService {
 
       // Location patterns
       if (behavior.location?.city) {
-        locationPatterns[behavior.location.city] =
-          (locationPatterns[behavior.location.city] || 0) + 1
+        locationPatterns[behavior.location.city] = (locationPatterns[behavior.location.city] || 0) + 1
       }
     }
 
@@ -175,11 +174,7 @@ export class UserBehaviorService {
   /**
    * Generate AI-powered insights
    */
-  private async generateAIInsights(
-    userId: string,
-    behaviors: UserBehavior[],
-    patterns: any
-  ): Promise<UserInsight[]> {
+  private async generateAIInsights(userId: string, behaviors: UserBehavior[], patterns: any): Promise<UserInsight[]> {
     try {
       const prompt = this.buildInsightPrompt(userId, behaviors, patterns)
 
@@ -263,11 +258,7 @@ Focus on actionable insights that can improve user experience or business outcom
   /**
    * Generate statistical insights
    */
-  private generateStatisticalInsights(
-    userId: string,
-    behaviors: UserBehavior[],
-    patterns: any
-  ): UserInsight[] {
+  private generateStatisticalInsights(userId: string, behaviors: UserBehavior[], patterns: any): UserInsight[] {
     const insights: UserInsight[] = []
 
     // High engagement insight
@@ -276,7 +267,7 @@ Focus on actionable insights that can improve user experience or business outcom
         userId,
         type: "behavior",
         insight: `User shows high engagement with average of ${Math.round(
-          patterns.sessionPatterns.actionsPerSession
+          patterns.sessionPatterns.actionsPerSession,
         )} actions per session`,
         confidence: 0.9,
         evidence: ["High actions per session", "Consistent activity"],
@@ -288,7 +279,7 @@ Focus on actionable insights that can improve user experience or business outcom
 
     // Category preference insight
     const topCategory = Object.entries(patterns.categoryPreferences).sort(
-      ([, a], [, b]) => (b as number) - (a as number)
+      ([, a], [, b]) => (b as number) - (a as number),
     )[0]
 
     if (topCategory && (topCategory[1] as number) > behaviors.length * 0.3) {
@@ -305,9 +296,7 @@ Focus on actionable insights that can improve user experience or business outcom
     }
 
     // Time pattern insight
-    const topTimeSlot = Object.entries(patterns.timePatterns).sort(
-      ([, a], [, b]) => (b as number) - (a as number)
-    )[0]
+    const topTimeSlot = Object.entries(patterns.timePatterns).sort(([, a], [, b]) => (b as number) - (a as number))[0]
 
     if (topTimeSlot && (topTimeSlot[1] as number) > behaviors.length * 0.4) {
       insights.push({
@@ -317,10 +306,7 @@ Focus on actionable insights that can improve user experience or business outcom
         confidence: 0.7,
         evidence: [`${topTimeSlot[1]} actions during ${topTimeSlot[0]}`],
         actionable: true,
-        recommendations: [
-          `Send notifications during ${topTimeSlot[0]}`,
-          "Schedule promotions for peak activity time",
-        ],
+        recommendations: [`Send notifications during ${topTimeSlot[0]}`, "Schedule promotions for peak activity time"],
         createdAt: new Date(),
       })
     }
@@ -570,13 +556,10 @@ Focus on actionable business insights and market opportunities.
   getStats(): Record<string, any> {
     const totalBehaviors = Array.from(this.behaviorBuffer.values()).reduce(
       (sum, behaviors) => sum + behaviors.length,
-      0
+      0,
     )
 
-    const totalInsights = Array.from(this.userInsights.values()).reduce(
-      (sum, insights) => sum + insights.length,
-      0
-    )
+    const totalInsights = Array.from(this.userInsights.values()).reduce((sum, insights) => sum + insights.length, 0)
 
     return {
       service: "UserBehaviorService",
@@ -598,7 +581,7 @@ Focus on actionable business insights and market opportunities.
       type: "preference" | "behavior" | "engagement"
       timeframe: string
       actionable: boolean
-    }
+    },
   ): Promise<UserInsight[]> {
     const behaviors = this.behaviorBuffer.get(userId) || []
     if (behaviors.length === 0) return []
@@ -641,8 +624,7 @@ Focus on actionable business insights and market opportunities.
     }
 
     if (options.type === "engagement") {
-      const avgDuration =
-        behaviors.reduce((sum, b) => sum + (b.metadata?.["duration"] || 0), 0) / behaviors.length
+      const avgDuration = behaviors.reduce((sum, b) => sum + (b.metadata?.["duration"] || 0), 0) / behaviors.length
       insights.push({
         userId,
         type: "behavior",
@@ -650,10 +632,7 @@ Focus on actionable business insights and market opportunities.
         confidence: 0.6,
         evidence: [`Average session duration: ${Math.round(avgDuration / 1000)}s`],
         actionable: options.actionable,
-        recommendations:
-          avgDuration > 30000
-            ? ["Offer premium features"]
-            : ["Improve UX", "Send engagement campaigns"],
+        recommendations: avgDuration > 30000 ? ["Offer premium features"] : ["Improve UX", "Send engagement campaigns"],
         createdAt: new Date(),
       })
     }
@@ -714,9 +693,7 @@ Focus on actionable business insights and market opportunities.
     }
 
     if (options.type === "price" && options.category) {
-      const categoryBehaviors = allBehaviors.filter(
-        (b) => b.metadata?.["category"] === options.category
-      )
+      const categoryBehaviors = allBehaviors.filter((b) => b.metadata?.["category"] === options.category)
       const prices = categoryBehaviors.map((b) => b.metadata?.["price"]).filter(Boolean) as number[]
 
       if (prices.length > 0) {
@@ -741,10 +718,7 @@ Focus on actionable business insights and market opportunities.
   /**
    * Get user segments
    */
-  async getUserSegments(options: {
-    algorithm: "behavior" | "preference"
-    minSegmentSize: number
-  }): Promise<
+  async getUserSegments(options: { algorithm: "behavior" | "preference"; minSegmentSize: number }): Promise<
     Array<{
       id: string
       name: string
@@ -783,10 +757,7 @@ Focus on actionable business insights and market opportunities.
             description: `Users who primarily ${action} items`,
             userCount: users.length,
             characteristics: [`Primary action: ${action}`, `Active users: ${users.length}`],
-            recommendations: [
-              `Optimize ${action} experience`,
-              `Target with ${action}-focused campaigns`,
-            ],
+            recommendations: [`Optimize ${action} experience`, `Target with ${action}-focused campaigns`],
           })
         }
       })
@@ -801,10 +772,7 @@ Focus on actionable business insights and market opportunities.
         if (topCategory) userCategories.set(userId, topCategory)
       })
 
-      const categoryGroups = this.groupBy(
-        Array.from(userCategories.entries()),
-        ([, category]) => category
-      )
+      const categoryGroups = this.groupBy(Array.from(userCategories.entries()), ([, category]) => category)
 
       Object.entries(categoryGroups).forEach(([category, users]) => {
         if (users.length >= options.minSegmentSize) {
@@ -870,8 +838,7 @@ Focus on actionable business insights and market opportunities.
         }
       }
 
-      const trendDirection: "up" | "down" | "stable" =
-        change > 2 ? "up" : change < -2 ? "down" : "stable"
+      const trendDirection: "up" | "down" | "stable" = change > 2 ? "up" : change < -2 ? "down" : "stable"
       const trendItem: {
         period: string
         value: number
@@ -899,9 +866,7 @@ Focus on actionable business insights and market opportunities.
     const frequency = this.getFrequencyMap(items)
     const entries = Object.entries(frequency)
     if (entries.length === 0) return null
-    const mostFrequentEntry = entries.reduce((a, b) =>
-      (frequency[a[0]] || 0) > (frequency[b[0]] || 0) ? a : b
-    )
+    const mostFrequentEntry = entries.reduce((a, b) => ((frequency[a[0]] || 0) > (frequency[b[0]] || 0) ? a : b))
     return mostFrequentEntry[0] as T
   }
 

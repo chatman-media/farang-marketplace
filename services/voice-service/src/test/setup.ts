@@ -162,18 +162,12 @@ export const delay = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-export const expectToBeWithinRange = (
-  actual: number,
-  expected: number,
-  tolerance: number = 0.1
-): void => {
+export const expectToBeWithinRange = (actual: number, expected: number, tolerance: number = 0.1): void => {
   const diff = Math.abs(actual - expected)
   const maxDiff = expected * tolerance
 
   if (diff > maxDiff) {
-    throw new Error(
-      `Expected ${actual} to be within ${tolerance * 100}% of ${expected}, but difference was ${diff}`
-    )
+    throw new Error(`Expected ${actual} to be within ${tolerance * 100}% of ${expected}, but difference was ${diff}`)
   }
 }
 
@@ -200,11 +194,7 @@ export const restoreConsole = () => {
 }
 
 // Audio format helpers
-export const createWAVHeader = (
-  dataSize: number,
-  sampleRate: number = 44100,
-  channels: number = 1
-): Buffer => {
+export const createWAVHeader = (dataSize: number, sampleRate: number = 44100, channels: number = 1): Buffer => {
   const header = Buffer.alloc(44)
 
   // RIFF header
@@ -229,10 +219,7 @@ export const createWAVHeader = (
   return header
 }
 
-export const createMockWAVFile = (
-  durationSeconds: number = 1,
-  sampleRate: number = 44100
-): Buffer => {
+export const createMockWAVFile = (durationSeconds: number = 1, sampleRate: number = 44100): Buffer => {
   const channels = 1
   const bytesPerSample = 2
   const dataSize = Math.floor(durationSeconds * sampleRate * channels * bytesPerSample)

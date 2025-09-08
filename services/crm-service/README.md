@@ -27,10 +27,10 @@ A comprehensive Customer Relationship Management (CRM) service for the Thailand 
 ## 🛠️ Technology Stack
 
 - **Runtime**: Node.js with TypeScript
-- **Framework**: Express.js
+- **Framework**: Fastify 5.x
 - **Database**: PostgreSQL with custom query builder
 - **Authentication**: JWT-based authentication
-- **Validation**: express-validator for request validation
+- **Validation**: Fastify JSON Schema validation
 - **Testing**: Vitest with comprehensive test coverage
 - **Security**: Helmet, CORS, rate limiting
 

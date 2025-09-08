@@ -177,7 +177,7 @@ export const createUserEntities = () => {
       "telegramId" in fixture ? fixture.telegramId : undefined,
       fixture.isActive,
       fixture.createdAt,
-      fixture.updatedAt
+      fixture.updatedAt,
     )
   })
 
@@ -377,7 +377,7 @@ export async function insertUserFixtures(): Promise<void> {
         fixture.isActive,
         fixture.createdAt,
         fixture.updatedAt,
-      ]
+      ],
     )
   }
 }

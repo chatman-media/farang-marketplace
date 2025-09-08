@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest"
-import { AgencyService } from "../services/AgencyService.js"
+import { AgencyService } from "../services/AgencyService"
 
 describe("Agency Service Logic Tests", () => {
   let agencyService: AgencyService
@@ -102,12 +102,8 @@ describe("Agency Service Logic Tests", () => {
       }
 
       // Validate filter structure
-      expect(["pending", "active", "suspended", "inactive", "rejected"]).toContain(
-        validFilters.status
-      )
-      expect(["pending", "verified", "rejected", "expired"]).toContain(
-        validFilters.verificationStatus
-      )
+      expect(["pending", "active", "suspended", "inactive", "rejected"]).toContain(validFilters.status)
+      expect(["pending", "verified", "rejected", "expired"]).toContain(validFilters.verificationStatus)
       expect(validFilters.rating.min).toBeGreaterThanOrEqual(0)
       expect(validFilters.rating.max).toBeLessThanOrEqual(5)
       expect(validFilters.commissionRate.min).toBeGreaterThanOrEqual(0)
@@ -200,21 +196,13 @@ describe("Agency Service Logic Tests", () => {
 
     it("should calculate coverage area distances", () => {
       // Simple distance calculation for testing
-      const calculateDistance = (
-        lat1: number,
-        lon1: number,
-        lat2: number,
-        lon2: number
-      ): number => {
+      const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
         const R = 6371 // Earth's radius in km
         const dLat = ((lat2 - lat1) * Math.PI) / 180
         const dLon = ((lon2 - lon1) * Math.PI) / 180
         const a =
           Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos((lat1 * Math.PI) / 180) *
-            Math.cos((lat2 * Math.PI) / 180) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2)
+          Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
         return R * c
       }

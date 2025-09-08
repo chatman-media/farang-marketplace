@@ -1,14 +1,13 @@
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 import { config } from "dotenv"
-import * as schema from "./schema.js"
+import * as schema from "./schema"
 
 // Load environment variables
 config()
 
 // Database configuration
-const connectionString =
-  process.env.DATABASE_URL || "postgresql://user:password@localhost:5432/marketplace_payments"
+const connectionString = process.env.DATABASE_URL || "postgresql://user:password@localhost:5432/marketplace_payments"
 
 // Create postgres client
 const client = postgres(connectionString, {

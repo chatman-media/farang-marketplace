@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express"
+import { FastifyRequest, FastifyReply } from "fastify"
 import jwt from "jsonwebtoken"
 
 interface JWTPayload {
@@ -9,12 +9,22 @@ interface JWTPayload {
   exp: number
 }
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+declare module "fastify" {
+  interface FastifyRequest {
+    user?: {
+      id: string
+      email: string
+      role: string
+    }
+  }
+}
+
+export const authMiddleware = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization
+    const authHeader = request.headers.authorization
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
+      return reply.status(401).send({
         success: false,
         message: "Access token required",
       })
@@ -25,42 +35,40 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload
 
-    req.user = {
+    request.user = {
       id: decoded.id,
       email: decoded.email,
       role: decoded.role,
     }
-
-    next()
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      return res.status(401).json({
+      return reply.status(401).send({
         success: false,
         message: "Invalid access token",
       })
     }
 
     if (error instanceof jwt.TokenExpiredError) {
-      return res.status(401).json({
+      return reply.status(401).send({
         success: false,
         message: "Access token expired",
       })
     }
 
     console.error("Auth middleware error:", error)
-    return res.status(500).json({
+    return reply.status(500).send({
       success: false,
       message: "Authentication failed",
     })
   }
 }
 
-export const optionalAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const optionalAuthMiddleware = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization
+    const authHeader = request.headers.authorization
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return next() // Continue without authentication
+      return // Continue without authentication
     }
 
     const token = authHeader.substring(7)
@@ -68,34 +76,29 @@ export const optionalAuthMiddleware = (req: Request, res: Response, next: NextFu
 
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload
 
-    req.user = {
+    request.user = {
       id: decoded.id,
       email: decoded.email,
       role: decoded.role,
     }
-
-    next()
   } catch (error) {
     console.log("Optional auth error:", error)
     // If token is invalid, continue without authentication
-    next()
   }
 }
 
-export const adminMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user) {
-    return res.status(401).json({
+export const adminMiddleware = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  if (!request.user) {
+    return reply.status(401).send({
       success: false,
       message: "Authentication required",
     })
   }
 
-  if (req.user.role !== "admin" && req.user.role !== "manager") {
-    return res.status(403).json({
+  if (request.user.role !== "admin" && request.user.role !== "manager") {
+    return reply.status(403).send({
       success: false,
       message: "Admin access required",
     })
   }
-
-  next()
 }

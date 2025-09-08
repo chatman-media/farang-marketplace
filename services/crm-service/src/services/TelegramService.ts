@@ -76,11 +76,7 @@ export class TelegramService {
         messageOptions.reply_markup = request.replyMarkup
       }
 
-      const sentMessage = await this.bot.telegram.sendMessage(
-        request.chatId,
-        content || "",
-        messageOptions
-      )
+      const sentMessage = await this.bot.telegram.sendMessage(request.chatId, content || "", messageOptions)
 
       // Log communication history
       const historyId = await this.logCommunication({
@@ -138,7 +134,7 @@ export class TelegramService {
 
   async sendBulkMessage(
     chatIds: string[],
-    request: Omit<SendTelegramRequest, "chatId">
+    request: Omit<SendTelegramRequest, "chatId">,
   ): Promise<SendMessageResponse[]> {
     const results: SendMessageResponse[] = []
 
@@ -257,7 +253,7 @@ export class TelegramService {
     try {
       const result = await query(
         "SELECT * FROM message_templates WHERE id = $1 AND channel = $2 AND is_active = true",
-        [templateId, CommunicationChannel.TELEGRAM]
+        [templateId, CommunicationChannel.TELEGRAM],
       )
 
       if (result.rows.length === 0) return null
@@ -313,7 +309,7 @@ export class TelegramService {
         data.campaignId || null,
         data.status,
         JSON.stringify(data.metadata || {}),
-      ]
+      ],
     )
 
     return result.rows[0].id
@@ -337,7 +333,7 @@ export class TelegramService {
 
   async getCommunicationHistory(
     customerId: string,
-    options: { limit?: number; offset?: number } = {}
+    options: { limit?: number; offset?: number } = {},
   ): Promise<CommunicationHistory[]> {
     const { limit = 50, offset = 0 } = options
 
@@ -346,7 +342,7 @@ export class TelegramService {
        WHERE customer_id = $1 AND channel = $2
        ORDER BY created_at DESC
        LIMIT $3 OFFSET $4`,
-      [customerId, CommunicationChannel.TELEGRAM, limit, offset]
+      [customerId, CommunicationChannel.TELEGRAM, limit, offset],
     )
 
     return result.rows.map((row: any) => ({

@@ -59,12 +59,7 @@ export const cancellationReasonEnum = pgEnum("cancellation_reason", [
   "system_error",
 ])
 
-export const disputeStatusEnum = pgEnum("dispute_status", [
-  "open",
-  "investigating",
-  "resolved",
-  "closed",
-])
+export const disputeStatusEnum = pgEnum("dispute_status", ["open", "investigating", "resolved", "closed"])
 
 // Type exports for TypeScript
 export type BookingStatus = (typeof bookingStatusEnum.enumValues)[number]
@@ -136,7 +131,7 @@ export const bookings = pgTable(
     statusIdx: index("bookings_status_idx").on(table.status),
     checkInIdx: index("bookings_check_in_idx").on(table.checkIn),
     paymentStatusIdx: index("bookings_payment_status_idx").on(table.paymentStatus),
-  })
+  }),
 )
 
 // Service Bookings Table (extends bookings for service-specific fields)
@@ -209,7 +204,7 @@ export const serviceBookings = pgTable(
     providerIdIdx: index("service_bookings_provider_id_idx").on(table.providerId),
     scheduledDateIdx: index("service_bookings_scheduled_date_idx").on(table.scheduledDate),
     serviceTypeIdx: index("service_bookings_service_type_idx").on(table.serviceType),
-  })
+  }),
 )
 
 // Booking Status History
@@ -234,7 +229,7 @@ export const bookingStatusHistory = pgTable(
   (table) => ({
     bookingIdIdx: index("booking_status_history_booking_id_idx").on(table.bookingId),
     changedAtIdx: index("booking_status_history_changed_at_idx").on(table.changedAt),
-  })
+  }),
 )
 
 // Availability Conflicts
@@ -256,7 +251,7 @@ export const availabilityConflicts = pgTable(
   (table) => ({
     listingIdIdx: index("availability_conflicts_listing_id_idx").on(table.listingId),
     dateRangeIdx: index("availability_conflicts_date_range_idx").on(table.startDate, table.endDate),
-  })
+  }),
 )
 
 // Disputes
@@ -299,7 +294,7 @@ export const disputes = pgTable(
     bookingIdIdx: index("disputes_booking_id_idx").on(table.bookingId),
     statusIdx: index("disputes_status_idx").on(table.status),
     initiatedByIdx: index("disputes_initiated_by_idx").on(table.initiatedBy),
-  })
+  }),
 )
 
 // Relations

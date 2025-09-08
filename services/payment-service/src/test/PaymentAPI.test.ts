@@ -245,14 +245,7 @@ describe("Payment API Tests", () => {
 
       // Validate payment method filter
       if (mockRequest.query.paymentMethod) {
-        const validMethods = [
-          "ton_wallet",
-          "ton_connect",
-          "jetton_usdt",
-          "jetton_usdc",
-          "credit_card",
-          "bank_transfer",
-        ]
+        const validMethods = ["ton_wallet", "ton_connect", "jetton_usdt", "jetton_usdc", "credit_card", "bank_transfer"]
         expect(validMethods).toContain(mockRequest.query.paymentMethod)
       }
 

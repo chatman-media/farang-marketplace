@@ -45,22 +45,15 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
         body: tonWebhookSchema,
       },
     },
-    async (
-      request: FastifyRequest<{ Body: z.infer<typeof tonWebhookSchema> }>,
-      reply: FastifyReply
-    ) => {
+    async (request: FastifyRequest<{ Body: z.infer<typeof tonWebhookSchema> }>, reply: FastifyReply) => {
       try {
-        const { transaction_hash, from_address, to_address, amount, comment, confirmed } =
-          request.body
+        const { transaction_hash, from_address, to_address, amount, comment, confirmed } = request.body
 
         fastify.log.info({ transaction_hash }, "Received TON webhook")
 
         if (confirmed) {
           // Find payment by transaction hash or comment
-          const payment = await paymentService.findPaymentByTonTransaction(
-            transaction_hash,
-            comment
-          )
+          const payment = await paymentService.findPaymentByTonTransaction(transaction_hash, comment)
 
           if (payment) {
             // Verify transaction on blockchain
@@ -70,7 +63,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
               await paymentService.updatePaymentStatus(
                 payment.id,
                 "confirmed",
-                `TON transaction confirmed: ${transaction_hash}`
+                `TON transaction confirmed: ${transaction_hash}`,
               )
 
               fastify.log.info({ paymentId: payment.id }, "Payment confirmed via TON webhook")
@@ -90,7 +83,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           error: "Failed to process webhook",
         })
       }
-    }
+    },
   )
 
   // Stripe webhook
@@ -114,9 +107,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
 
           const providedSignature = signature.split("=")[1]
 
-          if (
-            !crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(providedSignature))
-          ) {
+          if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(providedSignature))) {
             return reply.status(400).send({ error: "Invalid signature" })
           }
         } catch (error) {
@@ -127,10 +118,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
         body: stripeWebhookSchema,
       },
     },
-    async (
-      request: FastifyRequest<{ Body: z.infer<typeof stripeWebhookSchema> }>,
-      reply: FastifyReply
-    ) => {
+    async (request: FastifyRequest<{ Body: z.infer<typeof stripeWebhookSchema> }>, reply: FastifyReply) => {
       try {
         const { type, data } = request.body
 
@@ -164,7 +152,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           error: "Failed to process webhook",
         })
       }
-    }
+    },
   )
 
   // Generic payment webhook
@@ -174,14 +162,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
       schema: {
         body: z.object({
           payment_id: z.string().uuid(),
-          status: z.enum([
-            "pending",
-            "processing",
-            "confirmed",
-            "completed",
-            "failed",
-            "cancelled",
-          ]),
+          status: z.enum(["pending", "processing", "confirmed", "completed", "failed", "cancelled"]),
           transaction_id: z.string().optional(),
           reason: z.string().optional(),
           metadata: z.record(z.any()).optional(),
@@ -198,7 +179,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           metadata?: Record<string, any>
         }
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const { payment_id, status, transaction_id, reason, metadata } = request.body
@@ -219,7 +200,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           error: "Failed to process webhook",
         })
       }
-    }
+    },
   )
 
   // Refund webhook
@@ -230,10 +211,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
         body: refundWebhookSchema,
       },
     },
-    async (
-      request: FastifyRequest<{ Body: z.infer<typeof refundWebhookSchema> }>,
-      reply: FastifyReply
-    ) => {
+    async (request: FastifyRequest<{ Body: z.infer<typeof refundWebhookSchema> }>, reply: FastifyReply) => {
       try {
         const { refund_id, payment_id, amount, status, reason } = request.body
 
@@ -253,7 +231,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           error: "Failed to process webhook",
         })
       }
-    }
+    },
   )
 
   // Webhook health check

@@ -27,12 +27,7 @@ export const listingCategoryEnum = pgEnum("listing_category", [
   "products",
 ])
 
-export const listingTypeEnum = pgEnum("listing_type", [
-  "accommodation",
-  "service",
-  "vehicle",
-  "product",
-])
+export const listingTypeEnum = pgEnum("listing_type", ["accommodation", "service", "vehicle", "product"])
 
 export const listingStatusEnum = pgEnum("listing_status", [
   "draft",
@@ -71,29 +66,11 @@ export const vehicleCategoryEnum = pgEnum("vehicle_category", [
   "classic",
 ])
 
-export const fuelTypeEnum = pgEnum("fuel_type", [
-  "gasoline",
-  "diesel",
-  "electric",
-  "hybrid",
-  "lpg",
-  "cng",
-])
+export const fuelTypeEnum = pgEnum("fuel_type", ["gasoline", "diesel", "electric", "hybrid", "lpg", "cng"])
 
-export const transmissionTypeEnum = pgEnum("transmission_type", [
-  "manual",
-  "automatic",
-  "cvt",
-  "semi_automatic",
-])
+export const transmissionTypeEnum = pgEnum("transmission_type", ["manual", "automatic", "cvt", "semi_automatic"])
 
-export const vehicleConditionEnum = pgEnum("vehicle_condition", [
-  "new",
-  "excellent",
-  "good",
-  "fair",
-  "poor",
-])
+export const vehicleConditionEnum = pgEnum("vehicle_condition", ["new", "excellent", "good", "fair", "poor"])
 
 export const vehicleStatusEnum = pgEnum("vehicle_status", [
   "available",
@@ -143,19 +120,9 @@ export const productStatusEnum = pgEnum("product_status", [
   "rejected",
 ])
 
-export const productListingTypeEnum = pgEnum("product_listing_type", [
-  "sale",
-  "rent",
-  "both",
-  "service",
-])
+export const productListingTypeEnum = pgEnum("product_listing_type", ["sale", "rent", "both", "service"])
 
-export const priceTypeEnum = pgEnum("price_type", [
-  "fixed",
-  "negotiable",
-  "auction",
-  "quote_on_request",
-])
+export const priceTypeEnum = pgEnum("price_type", ["fixed", "negotiable", "auction", "quote_on_request"])
 
 // Main listings table
 export const listings = pgTable("listings", {
@@ -365,9 +332,7 @@ export const products = pgTable("products", {
   size: varchar("size", { length: 50 }),
 
   // Technical specifications (flexible JSON)
-  technicalSpecs: jsonb("technical_specs")
-    .$type<Record<string, string | number | boolean>>()
-    .default({}),
+  technicalSpecs: jsonb("technical_specs").$type<Record<string, string | number | boolean>>().default({}),
 
   // Features and capabilities
   features: jsonb("features").$type<string[]>().notNull().default([]),
@@ -552,24 +517,9 @@ export const listingBookingsRelations = relations(listingBookings, ({ one }) => 
 }))
 
 // Add new enums for service providers
-export const providerTypeEnum = pgEnum("provider_type", [
-  "individual",
-  "company",
-  "agency",
-  "freelancer",
-])
-export const verificationLevelEnum = pgEnum("verification_level", [
-  "basic",
-  "verified",
-  "premium",
-  "enterprise",
-])
-export const availabilityStatusEnum = pgEnum("availability_status", [
-  "available",
-  "busy",
-  "away",
-  "offline",
-])
+export const providerTypeEnum = pgEnum("provider_type", ["individual", "company", "agency", "freelancer"])
+export const verificationLevelEnum = pgEnum("verification_level", ["basic", "verified", "premium", "enterprise"])
+export const availabilityStatusEnum = pgEnum("availability_status", ["available", "busy", "away", "offline"])
 
 // Service Providers table
 export const serviceProviders = pgTable("service_providers", {

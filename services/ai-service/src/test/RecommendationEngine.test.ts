@@ -114,7 +114,7 @@ describe("Recommendation Engine Tests", () => {
         (item) =>
           item.metadata.category === "electronics" ||
           (item.metadata.title && item.metadata.title.toLowerCase().includes("laptop")) ||
-          (item.metadata.title && item.metadata.title.toLowerCase().includes("gaming"))
+          (item.metadata.title && item.metadata.title.toLowerCase().includes("gaming")),
       )
       expect(hasRelevantItems).toBe(true)
     })
@@ -148,8 +148,7 @@ describe("Recommendation Engine Tests", () => {
       // All items should be within price range
       const withinPriceRange = recommendations.results.every(
         (item) =>
-          (item.metadata.price && item.metadata.price >= 5000 && item.metadata.price <= 10000) ||
-          !item.metadata.price
+          (item.metadata.price && item.metadata.price >= 5000 && item.metadata.price <= 10000) || !item.metadata.price,
       )
       expect(withinPriceRange).toBe(true)
     })
@@ -258,7 +257,7 @@ describe("Recommendation Engine Tests", () => {
       const hasTrendingMetrics = recommendations.results.some(
         (item) =>
           (item.metadata.viewCount && item.metadata.viewCount > 100) ||
-          (item.metadata.bookingCount && item.metadata.bookingCount > 10)
+          (item.metadata.bookingCount && item.metadata.bookingCount > 10),
       )
       expect(hasTrendingMetrics).toBe(true)
     })
@@ -355,13 +354,11 @@ describe("Recommendation Engine Tests", () => {
 
       // Low diversity
       const lowDiversityRequest = { ...baseRequest, diversityFactor: 0.1 }
-      const lowDiversityRecs =
-        await recommendationEngine.generateRecommendations(lowDiversityRequest)
+      const lowDiversityRecs = await recommendationEngine.generateRecommendations(lowDiversityRequest)
 
       // High diversity
       const highDiversityRequest = { ...baseRequest, diversityFactor: 0.8 }
-      const highDiversityRecs =
-        await recommendationEngine.generateRecommendations(highDiversityRequest)
+      const highDiversityRecs = await recommendationEngine.generateRecommendations(highDiversityRequest)
 
       expect(lowDiversityRecs.results.length).toBeGreaterThan(0)
       expect(highDiversityRecs.results.length).toBeGreaterThan(0)
@@ -395,7 +392,7 @@ describe("Recommendation Engine Tests", () => {
 
       // All recommendations should meet quality criteria
       const highQuality = recommendations.results.every(
-        (item) => item.score >= 0.1 // Lower threshold for testing
+        (item) => item.score >= 0.1, // Lower threshold for testing
       )
       expect(highQuality).toBe(true)
     })

@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { validationResult } from "express-validator"
-import { AvailabilityService } from "../services/AvailabilityService.js"
+import { AvailabilityService } from "../services/AvailabilityService"
 
 export class AvailabilityController {
   private availabilityService: AvailabilityService
@@ -28,11 +28,7 @@ export class AvailabilityController {
       const checkInDate = new Date(checkIn as string)
       const checkOutDate = checkOut ? new Date(checkOut as string) : undefined
 
-      const isAvailable = await this.availabilityService.checkAvailability(
-        listingId,
-        checkInDate,
-        checkOutDate
-      )
+      const isAvailable = await this.availabilityService.checkAvailability(listingId, checkInDate, checkOutDate)
 
       res.json({
         success: true,
@@ -76,7 +72,7 @@ export class AvailabilityController {
       const isAvailable = await this.availabilityService.checkServiceAvailability(
         providerId,
         scheduledDateTime,
-        duration
+        duration,
       )
 
       res.json({
@@ -186,10 +182,7 @@ export class AvailabilityController {
 
       const targetDate = new Date(date as string)
 
-      const availability = await this.availabilityService.getServiceProviderAvailability(
-        providerId,
-        targetDate
-      )
+      const availability = await this.availabilityService.getServiceProviderAvailability(providerId, targetDate)
 
       res.json({
         success: true,
@@ -352,7 +345,7 @@ export class AvailabilityController {
 
       const upcomingBookings = await this.availabilityService.getUpcomingBookings(
         listingId,
-        Math.min(limit, 50) // Cap at 50
+        Math.min(limit, 50), // Cap at 50
       )
 
       res.json({

@@ -125,10 +125,7 @@ export class LineService {
     }
   }
 
-  async sendBulkMessage(
-    userIds: string[],
-    request: Omit<SendLineRequest, "userId">
-  ): Promise<SendMessageResponse[]> {
+  async sendBulkMessage(userIds: string[], request: Omit<SendLineRequest, "userId">): Promise<SendMessageResponse[]> {
     const results: SendMessageResponse[] = []
 
     for (const userId of userIds) {
@@ -195,11 +192,7 @@ export class LineService {
     }
   }
 
-  private async processIncomingMessage(
-    customerId: string,
-    text: string,
-    event: MessageEvent
-  ): Promise<void> {
+  private async processIncomingMessage(customerId: string, text: string, event: MessageEvent): Promise<void> {
     // Basic auto-reply logic
     const lowerText = text.toLowerCase()
 
@@ -235,7 +228,7 @@ export class LineService {
     try {
       const result = await query(
         "SELECT * FROM message_templates WHERE id = $1 AND channel = $2 AND is_active = true",
-        [templateId, CommunicationChannel.LINE]
+        [templateId, CommunicationChannel.LINE],
       )
 
       if (result.rows.length === 0) return null
@@ -291,7 +284,7 @@ export class LineService {
         data.campaignId || null,
         data.status,
         JSON.stringify(data.metadata || {}),
-      ]
+      ],
     )
 
     return result.rows[0].id
@@ -299,7 +292,7 @@ export class LineService {
 
   async getCommunicationHistory(
     customerId: string,
-    options: { limit?: number; offset?: number } = {}
+    options: { limit?: number; offset?: number } = {},
   ): Promise<CommunicationHistory[]> {
     const { limit = 50, offset = 0 } = options
 
@@ -308,7 +301,7 @@ export class LineService {
        WHERE customer_id = $1 AND channel = $2
        ORDER BY created_at DESC
        LIMIT $3 OFFSET $4`,
-      [customerId, CommunicationChannel.LINE, limit, offset]
+      [customerId, CommunicationChannel.LINE, limit, offset],
     )
 
     return result.rows.map((row: any) => ({
@@ -334,10 +327,7 @@ export class LineService {
   async verifySignature(body: string, signature: string): Promise<boolean> {
     try {
       const crypto = require("crypto")
-      const hash = crypto
-        .createHmac("sha256", this.config.channelSecret)
-        .update(body)
-        .digest("base64")
+      const hash = crypto.createHmac("sha256", this.config.channelSecret).update(body).digest("base64")
 
       return hash === signature
     } catch (error) {

@@ -4,7 +4,7 @@ import { Address, toNano, fromNano, Cell, beginCell } from "ton-core"
 import { TonConnect } from "@tonconnect/sdk"
 import axios from "axios"
 import { z } from "zod"
-import { env } from "../app.js"
+import { env } from "../app"
 
 // Modern Zod schemas for validation
 export const tonAddressSchema = z.string().refine(
@@ -16,7 +16,7 @@ export const tonAddressSchema = z.string().refine(
       return false
     }
   },
-  { message: "Invalid TON address format" }
+  { message: "Invalid TON address format" },
 )
 
 export const tonAmountSchema = z.string().refine(
@@ -24,7 +24,7 @@ export const tonAmountSchema = z.string().refine(
     const num = parseFloat(amount)
     return !isNaN(num) && num > 0 && num <= 1000000
   },
-  { message: "Invalid TON amount" }
+  { message: "Invalid TON amount" },
 )
 
 export const paymentRequestSchema = z.object({
@@ -138,9 +138,7 @@ export class ModernTonService {
   /**
    * Create payment with modern validation
    */
-  async createPayment(
-    request: z.infer<typeof paymentRequestSchema>
-  ): Promise<ModernTonTransaction> {
+  async createPayment(request: z.infer<typeof paymentRequestSchema>): Promise<ModernTonTransaction> {
     const validatedRequest = paymentRequestSchema.parse(request)
 
     if (!this.wallet || !this.keyPair) {
@@ -196,9 +194,7 @@ export class ModernTonService {
   /**
    * Transfer Jetton tokens (USDT/USDC)
    */
-  async transferJetton(
-    request: z.infer<typeof jettonTransferSchema>
-  ): Promise<ModernTonTransaction> {
+  async transferJetton(request: z.infer<typeof jettonTransferSchema>): Promise<ModernTonTransaction> {
     const validatedRequest = jettonTransferSchema.parse(request)
 
     if (!this.wallet || !this.keyPair) {
@@ -269,10 +265,7 @@ export class ModernTonService {
    */
   async verifyTransaction(hash: string): Promise<boolean> {
     try {
-      const transactions = await this.client.getTransactions(
-        Address.parse(env.TON_WALLET_ADDRESS),
-        { limit: 100 }
-      )
+      const transactions = await this.client.getTransactions(Address.parse(env.TON_WALLET_ADDRESS), { limit: 100 })
 
       const transaction = transactions.find((tx) => tx.hash().toString("hex") === hash)
 

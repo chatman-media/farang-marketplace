@@ -1,4 +1,4 @@
-import { AIProvider, AIProviderConfig } from "./types.js"
+import { AIProvider, AIProviderConfig } from "./types"
 
 // Default AI configuration
 export const defaultAIConfig: AIProviderConfig = {
@@ -81,9 +81,7 @@ export function validateAIConfig(config: AIProviderConfig): {
 
   // Check fallback providers
   if (!config.fallbackProviders || config.fallbackProviders.length === 0) {
-    warnings.push(
-      "No fallback providers configured - service may fail if default provider is unavailable"
-    )
+    warnings.push("No fallback providers configured - service may fail if default provider is unavailable")
   }
 
   // Validate rate limits

@@ -11,11 +11,11 @@ import {
   type ServiceMatchingResponse,
   type AIMetrics,
   type AIError,
-} from "./types.js"
+} from "./types"
 
-import { OpenAIProvider } from "./providers/OpenAIProvider.js"
-import { DeepSeekProvider } from "./providers/DeepSeekProvider.js"
-import { ClaudeProvider } from "./providers/ClaudeProvider.js"
+import { OpenAIProvider } from "./providers/OpenAIProvider"
+import { DeepSeekProvider } from "./providers/DeepSeekProvider"
+import { ClaudeProvider } from "./providers/ClaudeProvider"
 
 export class AIService {
   private providers: Map<AIProvider, AIProviderInterface> = new Map()
@@ -98,13 +98,10 @@ export class AIService {
 
   private async executeWithFallback<T>(
     operation: (provider: AIProviderInterface) => Promise<T>,
-    preferredProvider?: AIProvider
+    preferredProvider?: AIProvider,
   ): Promise<T> {
-    const providersToTry = [
-      preferredProvider || this.currentProvider,
-      ...this.config.fallbackProviders,
-    ].filter(
-      (provider, index, arr) => provider && arr.indexOf(provider) === index // Remove duplicates
+    const providersToTry = [preferredProvider || this.currentProvider, ...this.config.fallbackProviders].filter(
+      (provider, index, arr) => provider && arr.indexOf(provider) === index, // Remove duplicates
     )
 
     let lastError: AIError | null = null
@@ -131,10 +128,7 @@ export class AIService {
         return result
       } catch (error) {
         lastError = error as AIError
-        console.error(
-          `Provider ${providerType} failed:`,
-          error instanceof Error ? error.message : String(error)
-        )
+        console.error(`Provider ${providerType} failed:`, error instanceof Error ? error.message : String(error))
 
         // If error is not retryable, don't try other providers
         if (lastError && !lastError.retryable) {
@@ -151,10 +145,7 @@ export class AIService {
     const startTime = Date.now()
 
     try {
-      const enhancement = await this.executeWithFallback(
-        (provider) => provider.enhanceSearch(query),
-        preferredProvider
-      )
+      const enhancement = await this.executeWithFallback((provider) => provider.enhanceSearch(query), preferredProvider)
 
       // Mock search results for now - in real implementation, this would query the database
       const mockResults: SearchResult[] = [
@@ -175,12 +166,12 @@ export class AIService {
 
       const rankedResults = await this.executeWithFallback(
         (provider) => provider.rankResults(mockResults, query),
-        preferredProvider
+        preferredProvider,
       )
 
       const suggestions = await this.executeWithFallback(
         (provider) => provider.generateSuggestions(query.query, query.userContext),
-        preferredProvider
+        preferredProvider,
       )
 
       return {
@@ -218,27 +209,21 @@ export class AIService {
 
   async generateRecommendations(
     request: RecommendationRequest,
-    preferredProvider?: AIProvider
+    preferredProvider?: AIProvider,
   ): Promise<RecommendationResponse> {
-    return this.executeWithFallback(
-      (provider) => provider.generateRecommendations(request),
-      preferredProvider
-    )
+    return this.executeWithFallback((provider) => provider.generateRecommendations(request), preferredProvider)
   }
 
   async matchServices(
     request: ServiceMatchingRequest,
-    preferredProvider?: AIProvider
+    preferredProvider?: AIProvider,
   ): Promise<ServiceMatchingResponse> {
-    return this.executeWithFallback(
-      (provider) => provider.matchServices(request),
-      preferredProvider
-    )
+    return this.executeWithFallback((provider) => provider.matchServices(request), preferredProvider)
   }
 
   async analyzeQuery(
     query: string,
-    preferredProvider?: AIProvider
+    preferredProvider?: AIProvider,
   ): Promise<{
     intent: string
     entities: Record<string, any>
@@ -248,14 +233,10 @@ export class AIService {
     return this.executeWithFallback((provider) => provider.analyzeQuery(query), preferredProvider)
   }
 
-  async generateSuggestions(
-    partialQuery: string,
-    context?: any,
-    preferredProvider?: AIProvider
-  ): Promise<string[]> {
+  async generateSuggestions(partialQuery: string, context?: any, preferredProvider?: AIProvider): Promise<string[]> {
     return this.executeWithFallback(
       (provider) => provider.generateSuggestions(partialQuery, context),
-      preferredProvider
+      preferredProvider,
     )
   }
 

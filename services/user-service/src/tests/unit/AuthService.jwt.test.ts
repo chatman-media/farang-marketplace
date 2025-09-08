@@ -157,7 +157,7 @@ describe("AuthService JWT Integration Tests", () => {
           type: "access",
         },
         "test-secret-key",
-        { expiresIn: "0s" }
+        { expiresIn: "0s" },
       )
 
       // Wait a moment to ensure expiration
@@ -174,20 +174,16 @@ describe("AuthService JWT Integration Tests", () => {
           role: UserRole.USER,
           type: "access",
         },
-        "wrong-secret-key"
+        "wrong-secret-key",
       )
 
-      await expect(authService.validateAccessToken(wrongSecretToken)).rejects.toThrow(
-        "Invalid access token"
-      )
+      await expect(authService.validateAccessToken(wrongSecretToken)).rejects.toThrow("Invalid access token")
     })
 
     it("should reject malformed tokens", async () => {
       const malformedToken = "not.a.valid.jwt.token"
 
-      await expect(authService.validateAccessToken(malformedToken)).rejects.toThrow(
-        "Invalid access token"
-      )
+      await expect(authService.validateAccessToken(malformedToken)).rejects.toThrow("Invalid access token")
     })
   })
 
@@ -228,7 +224,7 @@ describe("AuthService JWT Integration Tests", () => {
       await expect(
         authService.refreshTokens({
           refreshToken: loginResult.accessToken, // Using access token instead of refresh token
-        })
+        }),
       ).rejects.toThrow("Invalid refresh token")
     })
   })
@@ -261,7 +257,7 @@ describe("AuthService JWT Integration Tests", () => {
         authService.login({
           email: "test@example.com",
           password: "wrongpassword",
-        })
+        }),
       ).rejects.toThrow("Invalid email or password")
     })
 
@@ -270,7 +266,7 @@ describe("AuthService JWT Integration Tests", () => {
         authService.login({
           email: "nonexistent@example.com",
           password: "password123",
-        })
+        }),
       ).rejects.toThrow("Invalid email or password")
     })
   })

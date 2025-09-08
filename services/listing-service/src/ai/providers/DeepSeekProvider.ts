@@ -1,5 +1,5 @@
-import { BaseAIProvider } from "../BaseAIProvider.js"
-import { AIProvider } from "../types.js"
+import { BaseAIProvider } from "../BaseAIProvider"
+import { AIProvider } from "../types"
 
 export class DeepSeekProvider extends BaseAIProvider {
   private baseUrl: string
@@ -64,17 +64,14 @@ export class DeepSeekProvider extends BaseAIProvider {
         throw this.createAIError(
           `DeepSeek API error: ${response.status} - ${errorData.error?.message || response.statusText}`,
           `DEEPSEEK_${response.status}`,
-          response.status >= 500 || response.status === 429
+          response.status >= 500 || response.status === 429,
         )
       }
 
       const data = await response.json()
 
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw this.createAIError(
-          "Invalid response format from DeepSeek",
-          "DEEPSEEK_INVALID_RESPONSE"
-        )
+        throw this.createAIError("Invalid response format from DeepSeek", "DEEPSEEK_INVALID_RESPONSE")
       }
 
       return data.choices[0].message.content
@@ -84,11 +81,7 @@ export class DeepSeekProvider extends BaseAIProvider {
       }
 
       if (error instanceof Error && error.message.includes("fetch")) {
-        throw this.createAIError(
-          "Network error connecting to DeepSeek",
-          "DEEPSEEK_NETWORK_ERROR",
-          true
-        )
+        throw this.createAIError("Network error connecting to DeepSeek", "DEEPSEEK_NETWORK_ERROR", true)
       }
 
       throw error
@@ -250,11 +243,7 @@ Return as JSON array with objects containing: query, analysis, reasoning`
   }
 
   // Mathematical reasoning for pricing
-  async analyzePricingStrategy(data: {
-    items: any[]
-    market: string
-    competition: any[]
-  }): Promise<{
+  async analyzePricingStrategy(data: { items: any[]; market: string; competition: any[] }): Promise<{
     strategy: string
     reasoning: string
     recommendations: string[]
@@ -297,7 +286,7 @@ Show your mathematical reasoning and provide actionable recommendations.`
   // Logical reasoning for service matching
   async logicalServiceMatch(
     requirements: any,
-    providers: any[]
+    providers: any[],
   ): Promise<{
     matches: any[]
     logic: string

@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { body, param, query } from "express-validator"
-import { BookingController } from "../controllers/BookingController.js"
-import { authMiddleware } from "../middleware/auth.js"
+import { BookingController } from "../controllers/BookingController"
+import { authMiddleware } from "../middleware/auth"
 
 const router = Router()
 const bookingController = new BookingController()
@@ -34,9 +34,7 @@ const createBookingValidation = [
       }
       return true
     }),
-  body("guests")
-    .isInt({ min: 1, max: 20 })
-    .withMessage("Number of guests must be between 1 and 20"),
+  body("guests").isInt({ min: 1, max: 20 }).withMessage("Number of guests must be between 1 and 20"),
   body("specialRequests")
     .optional()
     .isLength({ max: 1000 })
@@ -65,21 +63,14 @@ const createServiceBookingValidation = [
     .withMessage("Scheduled time must be in HH:MM format"),
   body("duration").isObject().withMessage("Duration must be an object"),
   body("duration.value").isInt({ min: 1 }).withMessage("Duration value must be a positive integer"),
-  body("duration.unit")
-    .isIn(["minutes", "hours", "days", "weeks", "months"])
-    .withMessage("Invalid duration unit"),
-  body("deliveryMethod")
-    .isIn(["online", "in_person", "hybrid"])
-    .withMessage("Invalid delivery method"),
+  body("duration.unit").isIn(["minutes", "hours", "days", "weeks", "months"]).withMessage("Invalid duration unit"),
+  body("deliveryMethod").isIn(["online", "in_person", "hybrid"]).withMessage("Invalid delivery method"),
   body("requirements").optional().isArray().withMessage("Requirements must be an array"),
   body("deliverables").optional().isArray().withMessage("Deliverables must be an array"),
   body("communicationPreference")
     .isIn(["email", "phone", "chat", "video_call"])
     .withMessage("Invalid communication preference"),
-  body("timezone")
-    .optional()
-    .isLength({ min: 1, max: 50 })
-    .withMessage("Timezone must be between 1 and 50 characters"),
+  body("timezone").optional().isLength({ min: 1, max: 50 }).withMessage("Timezone must be between 1 and 50 characters"),
 ]
 
 const updateStatusValidation = [
@@ -87,22 +78,14 @@ const updateStatusValidation = [
   body("status")
     .isIn(["pending", "confirmed", "active", "completed", "cancelled", "disputed"])
     .withMessage("Invalid booking status"),
-  body("reason")
-    .optional()
-    .isLength({ max: 500 })
-    .withMessage("Reason must not exceed 500 characters"),
+  body("reason").optional().isLength({ max: 500 }).withMessage("Reason must not exceed 500 characters"),
 ]
 
-const bookingIdValidation = [
-  param("bookingId").isUUID().withMessage("Booking ID must be a valid UUID"),
-]
+const bookingIdValidation = [param("bookingId").isUUID().withMessage("Booking ID must be a valid UUID")]
 
 const searchValidation = [
   query("page").optional().isInt({ min: 1 }).withMessage("Page must be a positive integer"),
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be between 1 and 100"),
+  query("limit").optional().isInt({ min: 1, max: 100 }).withMessage("Limit must be between 1 and 100"),
   query("status")
     .optional()
     .isIn(["pending", "confirmed", "active", "completed", "cancelled", "disputed"])
@@ -119,14 +102,8 @@ const searchValidation = [
   query("hostId").optional().isUUID().withMessage("Host ID must be a valid UUID"),
   query("startDate").optional().isISO8601().withMessage("Start date must be a valid ISO 8601 date"),
   query("endDate").optional().isISO8601().withMessage("End date must be a valid ISO 8601 date"),
-  query("minPrice")
-    .optional()
-    .isFloat({ min: 0 })
-    .withMessage("Minimum price must be a non-negative number"),
-  query("maxPrice")
-    .optional()
-    .isFloat({ min: 0 })
-    .withMessage("Maximum price must be a non-negative number"),
+  query("minPrice").optional().isFloat({ min: 0 }).withMessage("Minimum price must be a non-negative number"),
+  query("maxPrice").optional().isFloat({ min: 0 }).withMessage("Maximum price must be a non-negative number"),
 ]
 
 // Routes
@@ -143,12 +120,7 @@ router.post("/", authMiddleware, createBookingValidation, bookingController.crea
  * @desc    Create a new service booking
  * @access  Private (authenticated users)
  */
-router.post(
-  "/service",
-  authMiddleware,
-  createServiceBookingValidation,
-  bookingController.createServiceBooking
-)
+router.post("/service", authMiddleware, createServiceBookingValidation, bookingController.createServiceBooking)
 
 /**
  * @route   GET /api/bookings/search
@@ -169,35 +141,20 @@ router.get("/:bookingId", authMiddleware, bookingIdValidation, bookingController
  * @desc    Get service booking details by ID
  * @access  Private (booking participants only)
  */
-router.get(
-  "/:bookingId/service",
-  authMiddleware,
-  bookingIdValidation,
-  bookingController.getServiceBooking
-)
+router.get("/:bookingId/service", authMiddleware, bookingIdValidation, bookingController.getServiceBooking)
 
 /**
  * @route   PATCH /api/bookings/:bookingId/status
  * @desc    Update booking status
  * @access  Private (booking participants only)
  */
-router.patch(
-  "/:bookingId/status",
-  authMiddleware,
-  updateStatusValidation,
-  bookingController.updateBookingStatus
-)
+router.patch("/:bookingId/status", authMiddleware, updateStatusValidation, bookingController.updateBookingStatus)
 
 /**
  * @route   GET /api/bookings/:bookingId/history
  * @desc    Get booking status history
  * @access  Private (booking participants only)
  */
-router.get(
-  "/:bookingId/history",
-  authMiddleware,
-  bookingIdValidation,
-  bookingController.getBookingStatusHistory
-)
+router.get("/:bookingId/history", authMiddleware, bookingIdValidation, bookingController.getBookingStatusHistory)
 
 export default router

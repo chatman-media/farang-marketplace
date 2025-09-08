@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest"
-import { AIProviderService } from "../services/AIProviderService.js"
+import { AIProviderService } from "../services/AIProviderService"
 
 describe("AI Provider Service Tests", () => {
   let aiProviderService: AIProviderService
@@ -248,9 +248,7 @@ describe("AI Provider Service Tests", () => {
       expect(response.cost).toBe(0)
       expect(response.usage.promptTokens).toBeGreaterThan(0)
       expect(response.usage.completionTokens).toBeGreaterThan(0)
-      expect(response.usage.totalTokens).toBe(
-        response.usage.promptTokens + response.usage.completionTokens
-      )
+      expect(response.usage.totalTokens).toBe(response.usage.promptTokens + response.usage.completionTokens)
     })
 
     it("should handle zero token usage", async () => {
@@ -345,9 +343,7 @@ describe("AI Provider Service Tests", () => {
       expect(response.usage.promptTokens).toBeGreaterThanOrEqual(0)
       expect(response.usage.completionTokens).toBeGreaterThanOrEqual(0)
       expect(response.usage.totalTokens).toBeGreaterThanOrEqual(0)
-      expect(response.usage.totalTokens).toBe(
-        response.usage.promptTokens + response.usage.completionTokens
-      )
+      expect(response.usage.totalTokens).toBe(response.usage.promptTokens + response.usage.completionTokens)
     })
   })
 })

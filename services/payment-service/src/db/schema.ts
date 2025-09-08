@@ -44,21 +44,9 @@ export const transactionTypeEnum = pgEnum("transaction_type", [
   "confirmation",
 ])
 
-export const refundStatusEnum = pgEnum("refund_status", [
-  "pending",
-  "processing",
-  "completed",
-  "failed",
-  "cancelled",
-])
+export const refundStatusEnum = pgEnum("refund_status", ["pending", "processing", "completed", "failed", "cancelled"])
 
-export const disputeStatusEnum = pgEnum("dispute_status", [
-  "open",
-  "investigating",
-  "resolved",
-  "closed",
-  "escalated",
-])
+export const disputeStatusEnum = pgEnum("dispute_status", ["open", "investigating", "resolved", "closed", "escalated"])
 
 // Main Tables
 export const payments = pgTable(
@@ -121,7 +109,7 @@ export const payments = pgTable(
     statusIdx: index("payments_status_idx").on(table.status),
     tonTxHashIdx: index("payments_ton_tx_hash_idx").on(table.tonTransactionHash),
     createdAtIdx: index("payments_created_at_idx").on(table.createdAt),
-  })
+  }),
 )
 
 export const transactions = pgTable(
@@ -161,7 +149,7 @@ export const transactions = pgTable(
     typeIdx: index("transactions_type_idx").on(table.type),
     tonTxHashIdx: index("transactions_ton_tx_hash_idx").on(table.tonTransactionHash),
     statusIdx: index("transactions_status_idx").on(table.status),
-  })
+  }),
 )
 
 export const refunds = pgTable(
@@ -198,7 +186,7 @@ export const refunds = pgTable(
     paymentIdIdx: index("refunds_payment_id_idx").on(table.paymentId),
     requestedByIdx: index("refunds_requested_by_idx").on(table.requestedBy),
     statusIdx: index("refunds_status_idx").on(table.status),
-  })
+  }),
 )
 
 export const disputes = pgTable(
@@ -236,7 +224,7 @@ export const disputes = pgTable(
     paymentIdIdx: index("disputes_payment_id_idx").on(table.paymentId),
     raisedByIdx: index("disputes_raised_by_idx").on(table.raisedBy),
     statusIdx: index("disputes_status_idx").on(table.status),
-  })
+  }),
 )
 
 export const paymentMethods = pgTable(
@@ -276,7 +264,7 @@ export const paymentMethods = pgTable(
     userIdIdx: index("payment_methods_user_id_idx").on(table.userId),
     typeIdx: index("payment_methods_type_idx").on(table.type),
     tonWalletIdx: index("payment_methods_ton_wallet_idx").on(table.tonWalletAddress),
-  })
+  }),
 )
 
 // Relations

@@ -30,18 +30,12 @@ describe("UserService Integration Tests", () => {
   describe("User Creation", () => {
     it("should create a new user successfully", async () => {
       const userData = testUserData.validCreateData
-      const mockUserEntity = new UserEntity(
-        "new-user-id",
-        userData.email,
-        "hashed-password",
-        UserRole.USER,
-        {
-          ...userData.profile,
-          rating: 0,
-          reviewsCount: 0,
-          verificationStatus: VerificationStatus.UNVERIFIED,
-        }
-      )
+      const mockUserEntity = new UserEntity("new-user-id", userData.email, "hashed-password", UserRole.USER, {
+        ...userData.profile,
+        rating: 0,
+        reviewsCount: 0,
+        verificationStatus: VerificationStatus.UNVERIFIED,
+      })
 
       mockUserRepository.findByEmail.mockResolvedValue(null)
       mockUserRepository.create.mockResolvedValue(mockUserEntity)
@@ -57,19 +51,11 @@ describe("UserService Integration Tests", () => {
 
     it("should throw error if email already exists", async () => {
       const userData = testUserData.validCreateData
-      const existingUser = new UserEntity(
-        "existing-id",
-        userData.email,
-        "hash",
-        UserRole.USER,
-        userData.profile
-      )
+      const existingUser = new UserEntity("existing-id", userData.email, "hash", UserRole.USER, userData.profile)
 
       mockUserRepository.findByEmail.mockResolvedValue(existingUser)
 
-      await expect(userService.createUser(userData)).rejects.toThrow(
-        "User with this email already exists"
-      )
+      await expect(userService.createUser(userData)).rejects.toThrow("User with this email already exists")
       expect(mockUserRepository.create).not.toHaveBeenCalled()
     })
 
@@ -91,15 +77,13 @@ describe("UserService Integration Tests", () => {
         [],
         "email" as any,
         undefined,
-        userData.telegramId
+        userData.telegramId,
       )
 
       mockUserRepository.findByEmail.mockResolvedValue(null)
       mockUserRepository.findByTelegramId.mockResolvedValue(existingUser)
 
-      await expect(userService.createUser(userData)).rejects.toThrow(
-        "User with this Telegram ID already exists"
-      )
+      await expect(userService.createUser(userData)).rejects.toThrow("User with this Telegram ID already exists")
       expect(mockUserRepository.create).not.toHaveBeenCalled()
     })
 
@@ -113,18 +97,12 @@ describe("UserService Integration Tests", () => {
 
     it("should set default values for new users", async () => {
       const userData = testUserData.validCreateData
-      const mockUserEntity = new UserEntity(
-        "new-user-id",
-        userData.email,
-        "hashed-password",
-        UserRole.USER,
-        {
-          ...userData.profile,
-          rating: 0,
-          reviewsCount: 0,
-          verificationStatus: VerificationStatus.UNVERIFIED,
-        }
-      )
+      const mockUserEntity = new UserEntity("new-user-id", userData.email, "hashed-password", UserRole.USER, {
+        ...userData.profile,
+        rating: 0,
+        reviewsCount: 0,
+        verificationStatus: VerificationStatus.UNVERIFIED,
+      })
 
       mockUserRepository.findByEmail.mockResolvedValue(null)
       mockUserRepository.create.mockResolvedValue(mockUserEntity)
@@ -145,7 +123,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       mockUserRepository.findById.mockResolvedValue(mockUserEntity)
@@ -170,7 +148,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       mockUserRepository.findByEmail.mockResolvedValue(mockUserEntity)
@@ -195,16 +173,14 @@ describe("UserService Integration Tests", () => {
         [],
         "email" as any,
         testUserData.validUser.phone,
-        testUserData.validUser.telegramId
+        testUserData.validUser.telegramId,
       )
 
       mockUserRepository.findByTelegramId.mockResolvedValue(mockUserEntity)
 
       const result = await userService.getUserByTelegramId(testUserData.validUser.telegramId!)
 
-      expect(mockUserRepository.findByTelegramId).toHaveBeenCalledWith(
-        testUserData.validUser.telegramId
-      )
+      expect(mockUserRepository.findByTelegramId).toHaveBeenCalledWith(testUserData.validUser.telegramId)
       expect(result).toEqual(mockUserEntity.toPublicUser())
     })
   })
@@ -217,7 +193,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email, // Keep original email since updateData doesn't have email
         "hash",
         UserRole.USER,
-        { ...testUserData.validUser.profile, ...updateData.profile }
+        { ...testUserData.validUser.profile, ...updateData.profile },
       )
 
       mockUserRepository.update.mockResolvedValue(updatedUserEntity)
@@ -229,7 +205,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.id,
         expect.objectContaining({
           profile: expect.objectContaining(updateData.profile),
-        })
+        }),
       )
       expect(result).toEqual(updatedUserEntity.toPublicUser())
     })
@@ -254,12 +230,12 @@ describe("UserService Integration Tests", () => {
           primaryAuthProvider: "email" as any,
         },
         [],
-        "email" as any
+        "email" as any,
       )
       mockUserRepository.findByEmail.mockResolvedValue(existingUser)
 
       await expect(userService.updateUser(testUserData.validUser.id, updateData)).rejects.toThrow(
-        "Email already in use by another user"
+        "Email already in use by another user",
       )
 
       expect(mockUserRepository.update).not.toHaveBeenCalled()
@@ -288,12 +264,12 @@ describe("UserService Integration Tests", () => {
         [],
         "email" as any,
         undefined,
-        "existing-telegram"
+        "existing-telegram",
       )
       mockUserRepository.findByTelegramId.mockResolvedValue(existingUser)
 
       await expect(userService.updateUser(testUserData.validUser.id, updateData)).rejects.toThrow(
-        "Telegram ID already in use by another user"
+        "Telegram ID already in use by another user",
       )
 
       expect(mockUserRepository.update).not.toHaveBeenCalled()
@@ -302,9 +278,7 @@ describe("UserService Integration Tests", () => {
     it("should validate update data", async () => {
       const invalidUpdateData = { email: "invalid-email" }
 
-      await expect(
-        userService.updateUser(testUserData.validUser.id, invalidUpdateData)
-      ).rejects.toThrow()
+      await expect(userService.updateUser(testUserData.validUser.id, invalidUpdateData)).rejects.toThrow()
 
       expect(mockUserRepository.update).not.toHaveBeenCalled()
     })
@@ -317,7 +291,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "old-hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       // Mock password validation to return true
@@ -326,11 +300,7 @@ describe("UserService Integration Tests", () => {
       mockUserRepository.findById.mockResolvedValue(mockUserEntity)
       mockUserRepository.updatePassword.mockResolvedValue(true)
 
-      const result = await userService.changePassword(
-        testUserData.validUser.id,
-        "oldpassword",
-        "newpassword123"
-      )
+      const result = await userService.changePassword(testUserData.validUser.id, "oldpassword", "newpassword123")
 
       expect(mockUserRepository.findById).toHaveBeenCalledWith(testUserData.validUser.id)
       expect(mockUserEntity.validatePassword).toHaveBeenCalledWith("oldpassword")
@@ -341,9 +311,9 @@ describe("UserService Integration Tests", () => {
     it("should throw error if user not found during password change", async () => {
       mockUserRepository.findById.mockResolvedValue(null)
 
-      await expect(
-        userService.changePassword("non-existent-id", "oldpassword", "newpassword123")
-      ).rejects.toThrow("User not found")
+      await expect(userService.changePassword("non-existent-id", "oldpassword", "newpassword123")).rejects.toThrow(
+        "User not found",
+      )
 
       expect(mockUserRepository.updatePassword).not.toHaveBeenCalled()
     })
@@ -354,14 +324,14 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       vi.spyOn(mockUserEntity, "validatePassword").mockResolvedValue(false)
       mockUserRepository.findById.mockResolvedValue(mockUserEntity)
 
       await expect(
-        userService.changePassword(testUserData.validUser.id, "wrongpassword", "newpassword123")
+        userService.changePassword(testUserData.validUser.id, "wrongpassword", "newpassword123"),
       ).rejects.toThrow("Current password is incorrect")
 
       expect(mockUserRepository.updatePassword).not.toHaveBeenCalled()
@@ -369,17 +339,15 @@ describe("UserService Integration Tests", () => {
 
     it("should validate password change data", async () => {
       // Test short new password - this should fail validation before repository call
-      await expect(
-        userService.changePassword(testUserData.validUser.id, "oldpassword", "123")
-      ).rejects.toThrow()
+      await expect(userService.changePassword(testUserData.validUser.id, "oldpassword", "123")).rejects.toThrow()
 
       // Test missing fields - these should fail validation before repository call
       await expect(
-        userService.changePassword(testUserData.validUser.id, "oldpassword", undefined as any)
+        userService.changePassword(testUserData.validUser.id, "oldpassword", undefined as any),
       ).rejects.toThrow()
 
       await expect(
-        userService.changePassword(testUserData.validUser.id, undefined as any, "newpassword123")
+        userService.changePassword(testUserData.validUser.id, undefined as any, "newpassword123"),
       ).rejects.toThrow()
     })
   })
@@ -409,7 +377,7 @@ describe("UserService Integration Tests", () => {
         "email" as any,
         undefined,
         undefined,
-        true
+        true,
       )
 
       mockUserRepository.update.mockResolvedValue(activatedUserEntity)
@@ -437,7 +405,7 @@ describe("UserService Integration Tests", () => {
         "email" as any,
         undefined,
         undefined,
-        false
+        false,
       )
 
       mockUserRepository.update.mockResolvedValue(deactivatedUserEntity)
@@ -456,7 +424,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.AGENCY,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       mockUserRepository.update.mockResolvedValue(updatedUserEntity)
@@ -478,7 +446,7 @@ describe("UserService Integration Tests", () => {
         {
           ...testUserData.validUser.profile,
           verificationStatus: VerificationStatus.UNVERIFIED,
-        }
+        },
       )
 
       const verifiedUserEntity = new UserEntity(
@@ -489,7 +457,7 @@ describe("UserService Integration Tests", () => {
         {
           ...testUserData.validUser.profile,
           verificationStatus: VerificationStatus.VERIFIED,
-        }
+        },
       )
 
       mockUserRepository.findById.mockResolvedValue(mockUserEntity)
@@ -528,16 +496,13 @@ describe("UserService Integration Tests", () => {
         "email" as any,
         undefined,
         undefined,
-        true
+        true,
       )
 
       vi.spyOn(mockUserEntity, "validatePassword").mockResolvedValue(true)
       mockUserRepository.findByEmail.mockResolvedValue(mockUserEntity)
 
-      const result = await userService.validateUserCredentials(
-        testUserData.validUser.email,
-        "correctpassword"
-      )
+      const result = await userService.validateUserCredentials(testUserData.validUser.email, "correctpassword")
 
       expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(testUserData.validUser.email)
       expect(mockUserEntity.validatePassword).toHaveBeenCalledWith("correctpassword")
@@ -550,16 +515,13 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       vi.spyOn(mockUserEntity, "validatePassword").mockResolvedValue(false)
       mockUserRepository.findByEmail.mockResolvedValue(mockUserEntity)
 
-      const result = await userService.validateUserCredentials(
-        testUserData.validUser.email,
-        "wrongpassword"
-      )
+      const result = await userService.validateUserCredentials(testUserData.validUser.email, "wrongpassword")
 
       expect(result).toBeNull()
     })
@@ -567,10 +529,7 @@ describe("UserService Integration Tests", () => {
     it("should return null for non-existent user", async () => {
       mockUserRepository.findByEmail.mockResolvedValue(null)
 
-      const result = await userService.validateUserCredentials(
-        "nonexistent@example.com",
-        "password"
-      )
+      const result = await userService.validateUserCredentials("nonexistent@example.com", "password")
 
       expect(result).toBeNull()
     })
@@ -590,15 +549,12 @@ describe("UserService Integration Tests", () => {
         "email" as any,
         undefined,
         undefined,
-        false // inactive
+        false, // inactive
       )
 
       mockUserRepository.findByEmail.mockResolvedValue(inactiveUserEntity)
 
-      const result = await userService.validateUserCredentials(
-        testUserData.validUser.email,
-        "correctpassword"
-      )
+      const result = await userService.validateUserCredentials(testUserData.validUser.email, "correctpassword")
 
       expect(result).toBeNull()
     })

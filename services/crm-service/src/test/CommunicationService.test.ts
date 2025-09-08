@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
-import { CommunicationService } from "../services/CommunicationService"
-import { CommunicationChannel, CustomerStatus } from "@marketplace/shared-types"
+import { CommunicationService, UnifiedSendRequest } from "../services/CommunicationService"
+import { CommunicationChannel } from "@marketplace/shared-types"
 
 // Mock all communication services
 vi.mock("../services/EmailService", () => ({
@@ -106,25 +106,6 @@ describe("CommunicationService", () => {
   })
 
   describe("sendMessage", () => {
-    const mockCustomer = {
-      id: "customer-123",
-      email: "test@example.com",
-      phone: "+1234567890",
-      telegramId: "telegram123",
-      whatsappId: "+1234567890",
-      lineId: "line123",
-      firstName: "John",
-      lastName: "Doe",
-      preferredChannel: CommunicationChannel.EMAIL,
-      preferredLanguage: "en",
-      status: CustomerStatus.ACTIVE,
-      leadScore: 75,
-      tags: [],
-      customFields: {},
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }
-
     const mockCustomerRow = {
       id: "customer-123",
       email: "test@example.com",
@@ -159,7 +140,7 @@ describe("CommunicationService", () => {
 
       mockEmailService.sendEmail.mockResolvedValueOnce(mockResponse)
 
-      const request = {
+      const request: UnifiedSendRequest = {
         customerId: "customer-123",
         content: "Test message",
         subject: "Test Subject",
@@ -197,7 +178,7 @@ describe("CommunicationService", () => {
 
       mockTelegramService.sendMessage.mockResolvedValueOnce(mockResponse)
 
-      const request = {
+      const request: UnifiedSendRequest = {
         customerId: "customer-123",
         content: "Test message",
         channel: CommunicationChannel.TELEGRAM,
@@ -233,7 +214,7 @@ describe("CommunicationService", () => {
 
       mockWhatsAppService.sendMessage.mockResolvedValueOnce(mockResponse)
 
-      const request = {
+      const request: UnifiedSendRequest = {
         customerId: "customer-123",
         content: "Test message",
         channel: CommunicationChannel.WHATSAPP,
@@ -269,7 +250,7 @@ describe("CommunicationService", () => {
 
       mockLineService.sendMessage.mockResolvedValueOnce(mockResponse)
 
-      const request = {
+      const request: UnifiedSendRequest = {
         customerId: "customer-123",
         content: "Test message",
         channel: CommunicationChannel.LINE,
@@ -305,7 +286,7 @@ describe("CommunicationService", () => {
 
       mockEmailService.sendEmail.mockResolvedValueOnce(mockResponse)
 
-      const request = {
+      const request: UnifiedSendRequest = {
         customerId: "customer-123",
         content: "Test message",
         // No channel specified, should use customer's preferred channel (email)
@@ -321,7 +302,7 @@ describe("CommunicationService", () => {
       // Mock customer query to return empty result
       mockQuery.mockResolvedValueOnce({ rows: [] })
 
-      const request = {
+      const request: UnifiedSendRequest = {
         customerId: "non-existent",
         content: "Test message",
       }
@@ -333,14 +314,14 @@ describe("CommunicationService", () => {
       // Mock customer fetch
       mockQuery.mockResolvedValueOnce({ rows: [mockCustomerRow] })
 
-      const request = {
+      const request: UnifiedSendRequest = {
         customerId: "customer-123",
         content: "Test message",
         channel: "unsupported" as CommunicationChannel,
       }
 
       await expect(communicationService.sendMessage(request)).rejects.toThrow(
-        "No contact information available for channel"
+        "No contact information available for channel",
       )
     })
   })
@@ -376,7 +357,7 @@ describe("CommunicationService", () => {
       mockEmailService.sendEmail.mockResolvedValue(mockResponse)
 
       const customerIds = ["customer-1", "customer-2"]
-      const request = {
+      const request: Omit<UnifiedSendRequest, "customerId"> = {
         content: "Bulk message",
         subject: "Bulk Subject",
         channel: CommunicationChannel.EMAIL,
@@ -401,7 +382,7 @@ describe("CommunicationService", () => {
         .mockRejectedValueOnce(new Error("Send failed"))
 
       const customerIds = ["customer-1", "customer-2"]
-      const request = {
+      const request: Omit<UnifiedSendRequest, "customerId"> = {
         content: "Bulk message",
         channel: CommunicationChannel.EMAIL,
       }
@@ -443,9 +424,7 @@ describe("CommunicationService", () => {
         },
       ]
 
-      mockQuery
-        .mockResolvedValueOnce({ rows: mockThreadData })
-        .mockResolvedValue({ rows: mockMessages })
+      mockQuery.mockResolvedValueOnce({ rows: mockThreadData }).mockResolvedValue({ rows: mockMessages })
 
       const threads = await communicationService.getConversationThreads("customer-123")
 
@@ -468,7 +447,7 @@ describe("CommunicationService", () => {
       expect(result).toBe(true)
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining("UPDATE communication_history SET read_at = NOW()"),
-        ["history-123"]
+        ["history-123"],
       )
     })
 

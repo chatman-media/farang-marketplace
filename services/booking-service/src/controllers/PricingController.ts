@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { validationResult } from "express-validator"
-import { PricingService } from "../services/PricingService.js"
-import type { BookingPriceRequest, ServicePriceRequest } from "../services/PricingService.js"
+import { PricingService } from "../services/PricingService"
+import type { BookingPriceRequest, ServicePriceRequest } from "../services/PricingService"
 
 export class PricingController {
   private pricingService: PricingService
@@ -105,11 +105,7 @@ export class PricingController {
       const bookingType = type as "accommodation" | "service"
       const durationValue = duration ? parseInt(duration as string) : undefined
 
-      const estimate = await this.pricingService.getQuickEstimate(
-        listingId,
-        bookingType,
-        durationValue
-      )
+      const estimate = await this.pricingService.getQuickEstimate(listingId, bookingType, durationValue)
 
       res.json({
         success: true,
@@ -155,7 +151,7 @@ export class PricingController {
         basePrice,
         listingId,
         checkInDate,
-        checkOutDate
+        checkOutDate,
       )
 
       const priceChange = adjustedPrice - basePrice
@@ -328,15 +324,13 @@ export class PricingController {
               error: "Failed to calculate pricing for this option",
             }
           }
-        })
+        }),
       )
 
       // Find best value option
       const validComparisons = comparisons.filter((comp) => !comp.error)
       const bestValue = validComparisons.reduce((best, current) => {
-        return (current.pricing?.totalPrice || Infinity) < (best.pricing?.totalPrice || Infinity)
-          ? current
-          : best
+        return (current.pricing?.totalPrice || Infinity) < (best.pricing?.totalPrice || Infinity) ? current : best
       }, validComparisons[0])
 
       res.json({

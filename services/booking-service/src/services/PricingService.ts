@@ -76,17 +76,12 @@ export class PricingService {
     const basePrice = listingPrice.nightlyRate * numberOfNights
 
     // 4. Apply pricing rules (discounts, surcharges)
-    const { adjustedPrice, discounts } = await this.applyPricingRules(
-      basePrice,
-      request,
-      numberOfNights
-    )
+    const { adjustedPrice, discounts } = await this.applyPricingRules(basePrice, request, numberOfNights)
 
     // 5. Calculate fees
     const cleaningFee = listingPrice.cleaningFee || 0
     const platformFee = adjustedPrice * this.PLATFORM_FEE_PERCENTAGE
-    const paymentProcessingFee =
-      (adjustedPrice + platformFee) * this.PAYMENT_PROCESSING_FEE_PERCENTAGE
+    const paymentProcessingFee = (adjustedPrice + platformFee) * this.PAYMENT_PROCESSING_FEE_PERCENTAGE
 
     // 6. Calculate subtotal before tax
     const subtotal = adjustedPrice + cleaningFee + platformFee + paymentProcessingFee
@@ -147,8 +142,7 @@ export class PricingService {
 
     // 5. Calculate fees
     const platformFee = adjustedPrice * this.PLATFORM_FEE_PERCENTAGE
-    const paymentProcessingFee =
-      (adjustedPrice + platformFee) * this.PAYMENT_PROCESSING_FEE_PERCENTAGE
+    const paymentProcessingFee = (adjustedPrice + platformFee) * this.PAYMENT_PROCESSING_FEE_PERCENTAGE
 
     // 6. Calculate subtotal before tax
     const subtotal = adjustedPrice + platformFee + paymentProcessingFee
@@ -178,7 +172,7 @@ export class PricingService {
   async getQuickEstimate(
     listingId: string,
     type: "accommodation" | "service",
-    duration?: number
+    duration?: number,
   ): Promise<{ minPrice: number; maxPrice: number; currency: string }> {
     if (type === "accommodation") {
       const listingPrice = await this.getListingPrice(listingId)
@@ -204,12 +198,7 @@ export class PricingService {
   }
 
   // Apply dynamic pricing based on demand, seasonality, etc.
-  async applyDynamicPricing(
-    basePrice: number,
-    listingId: string,
-    checkIn: Date,
-    checkOut?: Date
-  ): Promise<number> {
+  async applyDynamicPricing(basePrice: number, listingId: string, checkIn: Date, checkOut?: Date): Promise<number> {
     let adjustedPrice = basePrice
 
     // 1. Seasonal pricing
@@ -243,7 +232,7 @@ export class PricingService {
 
   private async getServicePrice(
     listingId: string,
-    serviceType: string
+    serviceType: string,
   ): Promise<{
     priceType: "hourly" | "fixed" | "daily"
     hourlyRate: number
@@ -303,7 +292,7 @@ export class PricingService {
   private async applyPricingRules(
     basePrice: number,
     request: BookingPriceRequest,
-    numberOfNights: number
+    numberOfNights: number,
   ): Promise<{ adjustedPrice: number; discounts: number }> {
     let adjustedPrice = basePrice
     let totalDiscounts = 0

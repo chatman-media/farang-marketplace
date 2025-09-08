@@ -50,10 +50,7 @@ export class AuthService {
     this.refreshTokenExpiry = process.env.JWT_REFRESH_EXPIRES_IN || "7d"
 
     if (process.env.NODE_ENV === "production") {
-      if (
-        this.accessTokenSecret === "default-access-secret" ||
-        this.refreshTokenSecret === "default-refresh-secret"
-      ) {
+      if (this.accessTokenSecret === "default-access-secret" || this.refreshTokenSecret === "default-refresh-secret") {
         throw new Error("JWT secrets must be set in production environment")
       }
     }
@@ -91,10 +88,7 @@ export class AuthService {
     })
 
     // Get the user entity for token generation
-    const userEntity = await this.userService.validateUserCredentials(
-      registerData.email,
-      registerData.password
-    )
+    const userEntity = await this.userService.validateUserCredentials(registerData.email, registerData.password)
 
     if (!userEntity) {
       throw new Error("Failed to create user account")
@@ -142,7 +136,7 @@ export class AuthService {
         user.telegramId,
         user.isActive,
         user.createdAt,
-        user.updatedAt
+        user.updatedAt,
       )
 
       // Generate new tokens

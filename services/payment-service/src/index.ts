@@ -1,8 +1,8 @@
-import { createApp, gracefulShutdown, env } from "./app.js"
-import { checkDatabaseConnection } from "./db/connection.js"
+import { createApp, gracefulShutdown, env } from "./app"
+import { checkDatabaseConnection } from "./db/connection"
 
 // Initialize modern job system
-import "./jobs/modern-queue.js"
+import "./jobs/modern-queue"
 
 // Start the modern application
 const start = async () => {

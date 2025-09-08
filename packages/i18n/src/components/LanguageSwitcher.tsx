@@ -1,11 +1,6 @@
 import React from "react"
 import { useTranslation } from "react-i18next"
-import {
-  SUPPORTED_LANGUAGES,
-  SupportedLanguage,
-  changeLanguage,
-  getCurrentLanguage,
-} from "../index.js"
+import { SUPPORTED_LANGUAGES, SupportedLanguage, changeLanguage, getCurrentLanguage } from "../index"
 
 interface LanguageSwitcherProps {
   className?: string
@@ -57,12 +52,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
           ))}
         </select>
         <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-          <svg
-            className="w-4 h-4 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
@@ -78,9 +68,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             key={code}
             onClick={() => handleLanguageChange(code as SupportedLanguage)}
             className={`px-3 py-2 text-sm rounded-md transition-colors ${
-              currentLanguage === code
-                ? "bg-blue-500 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              currentLanguage === code ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
             aria-label={`${t("common.language")}: ${name}`}
           >
@@ -99,9 +87,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
             key={code}
             onClick={() => handleLanguageChange(code as SupportedLanguage)}
             className={`w-8 h-8 text-lg rounded-full transition-all ${
-              currentLanguage === code
-                ? "bg-blue-500 text-white scale-110"
-                : "hover:bg-gray-100 hover:scale-105"
+              currentLanguage === code ? "bg-blue-500 text-white scale-110" : "hover:bg-gray-100 hover:scale-105"
             }`}
             title={name}
             aria-label={`${t("common.language")}: ${name}`}

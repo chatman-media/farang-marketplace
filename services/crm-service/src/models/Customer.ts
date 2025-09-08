@@ -61,13 +61,9 @@ export class Customer implements ICustomer {
       case CommunicationChannel.EMAIL:
         return { channel: CommunicationChannel.EMAIL, value: this.email }
       case CommunicationChannel.TELEGRAM:
-        return this.telegramId
-          ? { channel: CommunicationChannel.TELEGRAM, value: this.telegramId }
-          : null
+        return this.telegramId ? { channel: CommunicationChannel.TELEGRAM, value: this.telegramId } : null
       case CommunicationChannel.WHATSAPP:
-        return this.whatsappId
-          ? { channel: CommunicationChannel.WHATSAPP, value: this.whatsappId }
-          : null
+        return this.whatsappId ? { channel: CommunicationChannel.WHATSAPP, value: this.whatsappId } : null
       case CommunicationChannel.SMS:
       case CommunicationChannel.PHONE:
         return this.phone ? { channel: this.preferredChannel, value: this.phone } : null

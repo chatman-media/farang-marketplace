@@ -1,13 +1,6 @@
 import * as bcrypt from "bcryptjs"
 import { z } from "zod"
-import {
-  User,
-  UserRole,
-  UserProfile,
-  VerificationStatus,
-  SocialProfile,
-  AuthProvider,
-} from "@marketplace/shared-types"
+import { User, UserRole, UserProfile, VerificationStatus, SocialProfile, AuthProvider } from "@marketplace/shared-types"
 
 // Validation schemas
 export const UserProfileSchema = z.object({
@@ -62,7 +55,7 @@ export class UserEntity {
     public telegramId?: string,
     public isActive: boolean = true,
     public createdAt: Date = new Date(),
-    public updatedAt: Date = new Date()
+    public updatedAt: Date = new Date(),
   ) {}
 
   // Static factory method to create user from database row
@@ -79,7 +72,7 @@ export class UserEntity {
       row.telegram_id,
       row.is_active,
       row.created_at,
-      row.updated_at
+      row.updated_at,
     )
   }
 

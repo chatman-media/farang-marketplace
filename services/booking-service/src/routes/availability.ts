@@ -1,19 +1,15 @@
 import { Router } from "express"
 import { body, param, query } from "express-validator"
-import { AvailabilityController } from "../controllers/AvailabilityController.js"
-import { authMiddleware, optionalAuthMiddleware, hostOrAdmin } from "../middleware/auth.js"
+import { AvailabilityController } from "../controllers/AvailabilityController"
+import { authMiddleware, optionalAuthMiddleware, hostOrAdmin } from "../middleware/auth"
 
 const router = Router()
 const availabilityController = new AvailabilityController()
 
 // Validation rules
-const listingIdValidation = [
-  param("listingId").isUUID().withMessage("Listing ID must be a valid UUID"),
-]
+const listingIdValidation = [param("listingId").isUUID().withMessage("Listing ID must be a valid UUID")]
 
-const providerIdValidation = [
-  param("providerId").isUUID().withMessage("Provider ID must be a valid UUID"),
-]
+const providerIdValidation = [param("providerId").isUUID().withMessage("Provider ID must be a valid UUID")]
 
 const checkAvailabilityValidation = [
   ...listingIdValidation,
@@ -39,9 +35,7 @@ const serviceAvailabilityValidation = [
   body("scheduledDate").isISO8601().withMessage("Scheduled date must be a valid ISO 8601 date"),
   body("duration").isObject().withMessage("Duration must be an object"),
   body("duration.value").isInt({ min: 1 }).withMessage("Duration value must be a positive integer"),
-  body("duration.unit")
-    .isIn(["minutes", "hours", "days", "weeks", "months"])
-    .withMessage("Invalid duration unit"),
+  body("duration.unit").isIn(["minutes", "hours", "days", "weeks", "months"]).withMessage("Invalid duration unit"),
 ]
 
 const calendarValidation = [
@@ -83,9 +77,7 @@ const blockDatesValidation = [
       }
       return true
     }),
-  body("reason")
-    .isLength({ min: 1, max: 500 })
-    .withMessage("Reason must be between 1 and 500 characters"),
+  body("reason").isLength({ min: 1, max: 500 }).withMessage("Reason must be between 1 and 500 characters"),
 ]
 
 const unblockDatesValidation = [
@@ -108,10 +100,7 @@ const unblockDatesValidation = [
 
 const upcomingBookingsValidation = [
   ...listingIdValidation,
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 50 })
-    .withMessage("Limit must be between 1 and 50"),
+  query("limit").optional().isInt({ min: 1, max: 50 }).withMessage("Limit must be between 1 and 50"),
 ]
 
 // Routes
@@ -125,7 +114,7 @@ router.get(
   "/listings/:listingId/check",
   optionalAuthMiddleware,
   checkAvailabilityValidation,
-  availabilityController.checkAvailability
+  availabilityController.checkAvailability,
 )
 
 /**
@@ -137,7 +126,7 @@ router.post(
   "/providers/:providerId/check",
   optionalAuthMiddleware,
   serviceAvailabilityValidation,
-  availabilityController.checkServiceAvailability
+  availabilityController.checkServiceAvailability,
 )
 
 /**
@@ -149,7 +138,7 @@ router.get(
   "/listings/:listingId/calendar",
   optionalAuthMiddleware,
   calendarValidation,
-  availabilityController.getAvailabilityCalendar
+  availabilityController.getAvailabilityCalendar,
 )
 
 /**
@@ -161,7 +150,7 @@ router.get(
   "/providers/:providerId",
   optionalAuthMiddleware,
   providerAvailabilityValidation,
-  availabilityController.getServiceProviderAvailability
+  availabilityController.getServiceProviderAvailability,
 )
 
 /**
@@ -174,7 +163,7 @@ router.post(
   authMiddleware,
   hostOrAdmin,
   blockDatesValidation,
-  availabilityController.blockDates
+  availabilityController.blockDates,
 )
 
 /**
@@ -187,7 +176,7 @@ router.post(
   authMiddleware,
   hostOrAdmin,
   unblockDatesValidation,
-  availabilityController.unblockDates
+  availabilityController.unblockDates,
 )
 
 /**
@@ -200,7 +189,7 @@ router.get(
   authMiddleware,
   hostOrAdmin,
   upcomingBookingsValidation,
-  availabilityController.getUpcomingBookings
+  availabilityController.getUpcomingBookings,
 )
 
 export default router

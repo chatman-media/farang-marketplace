@@ -67,6 +67,7 @@ describe("LineService", () => {
         customerId: "customer-123",
         userId: "line-user-123",
         content: "Test message",
+        channel: CommunicationChannel.LINE,
       }
 
       const result = await lineService.sendMessage(request)
@@ -101,6 +102,7 @@ describe("LineService", () => {
         content: "Test message",
         templateId: "template-123",
         templateVariables: { name: "John Doe" },
+        channel: CommunicationChannel.LINE,
       }
 
       const result = await lineService.sendMessage(request)
@@ -142,6 +144,7 @@ describe("LineService", () => {
         userId: "line-user-123",
         content: "Do you want to continue?",
         quickReply,
+        channel: CommunicationChannel.LINE,
       }
 
       const result = await lineService.sendMessage(request)
@@ -163,6 +166,7 @@ describe("LineService", () => {
         customerId: "customer-123",
         userId: "line-user-123",
         content: "Test message",
+        channel: CommunicationChannel.LINE,
       }
 
       const result = await lineService.sendMessage(request)
@@ -182,6 +186,7 @@ describe("LineService", () => {
       const request = {
         customerId: "customer-123",
         content: "Bulk message",
+        channel: CommunicationChannel.LINE,
       }
 
       const results = await lineService.sendBulkMessage(userIds, request)
@@ -228,9 +233,7 @@ describe("LineService", () => {
 
       await lineService.handleWebhook(events as any)
 
-      expect(mockQuery).toHaveBeenCalledWith("SELECT * FROM customers WHERE line_id = $1", [
-        "line-user-123",
-      ])
+      expect(mockQuery).toHaveBeenCalledWith("SELECT * FROM customers WHERE line_id = $1", ["line-user-123"])
       expect(mockClient.replyMessage).toHaveBeenCalledWith("reply-token-123", {
         type: "text",
         text: "Hello! How can I help you today? / สวัสดีครับ มีอะไรให้ช่วยไหมครับ",
@@ -291,7 +294,7 @@ describe("LineService", () => {
       })
       expect(mockQuery).toHaveBeenCalledWith(
         "SELECT * FROM message_templates WHERE id = $1 AND channel = $2 AND is_active = true",
-        ["template-123", CommunicationChannel.LINE]
+        ["template-123", CommunicationChannel.LINE],
       )
     })
 

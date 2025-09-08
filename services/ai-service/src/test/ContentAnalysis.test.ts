@@ -13,8 +13,7 @@ describe("Content Analysis Service Tests", () => {
 
   describe("Keyword Extraction with Compromise", () => {
     it("should extract keywords using compromise NLP", async () => {
-      const text =
-        "This amazing smartphone has excellent camera quality and fast processor performance"
+      const text = "This amazing smartphone has excellent camera quality and fast processor performance"
       const keywords = await contentAnalysisService.extractKeywords(text, "en")
 
       expect(keywords).toBeDefined()
@@ -23,9 +22,7 @@ describe("Content Analysis Service Tests", () => {
 
       // Should extract nouns like 'smartphone', 'camera', 'processor'
       const keywordWords = keywords.map((k) => k.word)
-      expect(
-        keywordWords.some((word) => ["smartphone", "camera", "processor"].includes(word))
-      ).toBe(true)
+      expect(keywordWords.some((word) => ["smartphone", "camera", "processor"].includes(word))).toBe(true)
 
       // Should have categories for different types of words
       const categorizedKeywords = keywords.filter((k) => k.category)
@@ -33,8 +30,7 @@ describe("Content Analysis Service Tests", () => {
     })
 
     it("should extract entities using compromise", async () => {
-      const text =
-        "Apple iPhone 15 Pro available in Bangkok, Thailand. Contact John Smith for details."
+      const text = "Apple iPhone 15 Pro available in Bangkok, Thailand. Contact John Smith for details."
       const keywords = await contentAnalysisService.extractKeywords(text, "en")
 
       expect(keywords).toBeDefined()
@@ -61,8 +57,7 @@ describe("Content Analysis Service Tests", () => {
         type: "listing",
         content: {
           title: "Latest Gaming Laptop",
-          description:
-            "High-performance laptop with NVIDIA graphics card, Intel processor, and RGB keyboard",
+          description: "High-performance laptop with NVIDIA graphics card, Intel processor, and RGB keyboard",
         },
         language: "en",
         options: {
@@ -218,8 +213,7 @@ describe("Content Analysis Service Tests", () => {
         type: "listing",
         content: {
           title: "English Product Title",
-          description:
-            "This is a description written in English language with proper grammar and vocabulary.",
+          description: "This is a description written in English language with proper grammar and vocabulary.",
         },
         language: "auto",
         options: {

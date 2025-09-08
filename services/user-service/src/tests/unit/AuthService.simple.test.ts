@@ -39,10 +39,7 @@ describe("AuthService Static Methods", () => {
 
   describe("Role Validation", () => {
     it("should validate user has required role", () => {
-      const hasRole = AuthService.hasRequiredRole("admin" as any, [
-        "admin" as any,
-        "manager" as any,
-      ])
+      const hasRole = AuthService.hasRequiredRole("admin" as any, ["admin" as any, "manager" as any])
       expect(hasRole).toBe(true)
     })
 
@@ -52,10 +49,7 @@ describe("AuthService Static Methods", () => {
     })
 
     it("should validate user has one of multiple required roles", () => {
-      const hasRole = AuthService.hasRequiredRole("manager" as any, [
-        "admin" as any,
-        "manager" as any,
-      ])
+      const hasRole = AuthService.hasRequiredRole("manager" as any, ["admin" as any, "manager" as any])
       expect(hasRole).toBe(true)
     })
 

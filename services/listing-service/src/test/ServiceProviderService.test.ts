@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest"
-import { ServiceProviderService } from "../services/ServiceProviderService.js"
+import { ServiceProviderService } from "../services/ServiceProviderService"
 
 describe("ServiceProviderService", () => {
   let serviceProviderService: ServiceProviderService
@@ -83,14 +83,7 @@ describe("ServiceProviderService", () => {
       })
 
       it("should validate required fields for service provider creation", () => {
-        const requiredFields = [
-          "ownerId",
-          "businessType",
-          "description",
-          "services",
-          "contactInfo",
-          "location",
-        ]
+        const requiredFields = ["ownerId", "businessType", "description", "services", "contactInfo", "location"]
 
         const serviceProviderData = {
           ownerId: "user-123",
@@ -249,10 +242,8 @@ describe("ServiceProviderService", () => {
           expect(slot.end).toMatch(/^\d{2}:\d{2}$/)
 
           // Convert to minutes for comparison
-          const startMinutes =
-            parseInt(slot.start.split(":")[0]) * 60 + parseInt(slot.start.split(":")[1])
-          const endMinutes =
-            parseInt(slot.end.split(":")[0]) * 60 + parseInt(slot.end.split(":")[1])
+          const startMinutes = parseInt(slot.start.split(":")[0]) * 60 + parseInt(slot.start.split(":")[1])
+          const endMinutes = parseInt(slot.end.split(":")[0]) * 60 + parseInt(slot.end.split(":")[1])
 
           expect(endMinutes).toBeGreaterThan(startMinutes)
         })

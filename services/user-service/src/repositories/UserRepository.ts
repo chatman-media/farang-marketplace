@@ -42,7 +42,7 @@ export class UserRepository {
         userData.telegramId,
         userData.role,
         JSON.stringify(userData.profile),
-      ]
+      ],
     )
 
     return UserEntity.fromDatabaseRow(result.rows[0])
@@ -97,7 +97,7 @@ export class UserRepository {
       role?: UserRole
       profile?: UserProfile
       isActive?: boolean
-    }
+    },
   ): Promise<UserEntity | null> {
     const fields: string[] = []
     const values: any[] = []
@@ -140,10 +140,7 @@ export class UserRepository {
     fields.push(`updated_at = NOW()`)
     values.push(id)
 
-    const result = await query(
-      `UPDATE users SET ${fields.join(", ")} WHERE id = $${paramCount} RETURNING *`,
-      values
-    )
+    const result = await query(`UPDATE users SET ${fields.join(", ")} WHERE id = $${paramCount} RETURNING *`, values)
 
     if (result.rows.length === 0) {
       return null
@@ -153,19 +150,19 @@ export class UserRepository {
   }
 
   async updatePassword(id: string, passwordHash: string): Promise<boolean> {
-    const result = await query(
-      "UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2",
-      [passwordHash, id]
-    )
+    const result = await query("UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2", [
+      passwordHash,
+      id,
+    ])
 
     return (result.rowCount ?? 0) > 0
   }
 
   async updateProfile(id: string, profile: UserProfile): Promise<UserEntity | null> {
-    const result = await query(
-      "UPDATE users SET profile = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
-      [JSON.stringify(profile), id]
-    )
+    const result = await query("UPDATE users SET profile = $1, updated_at = NOW() WHERE id = $2 RETURNING *", [
+      JSON.stringify(profile),
+      id,
+    ])
 
     if (result.rows.length === 0) {
       return null
@@ -175,10 +172,7 @@ export class UserRepository {
   }
 
   async updateRole(id: string, role: UserRole): Promise<UserEntity | null> {
-    const result = await query(
-      "UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
-      [role, id]
-    )
+    const result = await query("UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2 RETURNING *", [role, id])
 
     if (result.rows.length === 0) {
       return null
@@ -188,19 +182,13 @@ export class UserRepository {
   }
 
   async activate(id: string): Promise<boolean> {
-    const result = await query(
-      "UPDATE users SET is_active = true, updated_at = NOW() WHERE id = $1",
-      [id]
-    )
+    const result = await query("UPDATE users SET is_active = true, updated_at = NOW() WHERE id = $1", [id])
 
     return (result.rowCount ?? 0) > 0
   }
 
   async deactivate(id: string): Promise<boolean> {
-    const result = await query(
-      "UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1",
-      [id]
-    )
+    const result = await query("UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1", [id])
 
     return (result.rowCount ?? 0) > 0
   }
@@ -212,7 +200,7 @@ export class UserRepository {
 
   async findMany(
     filters: UserFilters = {},
-    pagination: PaginationOptions = { page: 1, limit: 10 }
+    pagination: PaginationOptions = { page: 1, limit: 10 },
   ): Promise<PaginatedResult<UserEntity>> {
     const conditions: string[] = []
     const values: any[] = []
@@ -259,7 +247,7 @@ export class UserRepository {
       `SELECT * FROM users ${whereClause} 
        ORDER BY created_at DESC 
        LIMIT $${paramCount++} OFFSET $${paramCount}`,
-      [...values, pagination.limit, offset]
+      [...values, pagination.limit, offset],
     )
 
     const users = dataResult.rows.map((row) => UserEntity.fromDatabaseRow(row))
@@ -274,10 +262,9 @@ export class UserRepository {
   }
 
   async findByRole(role: UserRole): Promise<UserEntity[]> {
-    const result = await query(
-      "SELECT * FROM users WHERE role = $1 AND is_active = true ORDER BY created_at DESC",
-      [role]
-    )
+    const result = await query("SELECT * FROM users WHERE role = $1 AND is_active = true ORDER BY created_at DESC", [
+      role,
+    ])
 
     return result.rows.map((row) => UserEntity.fromDatabaseRow(row))
   }
@@ -298,7 +285,7 @@ export class UserRepository {
       `SELECT * FROM users 
        WHERE created_at >= NOW() - INTERVAL '${days} days'
        ORDER BY created_at DESC`,
-      []
+      [],
     )
 
     return result.rows.map((row) => UserEntity.fromDatabaseRow(row))
@@ -390,7 +377,7 @@ export class UserRepository {
        ) AND is_active = true
        ORDER BY created_at DESC
        LIMIT $2`,
-      [`%${searchTerm}%`, limit]
+      [`%${searchTerm}%`, limit],
     )
 
     return result.rows.map((row) => UserEntity.fromDatabaseRow(row))
@@ -403,7 +390,7 @@ export class UserRepository {
     const result = await query(
       `UPDATE users SET role = $${userIds.length + 1}, updated_at = NOW() 
        WHERE id IN (${placeholders})`,
-      [...userIds, role]
+      [...userIds, role],
     )
 
     return result.rowCount ?? 0
@@ -416,7 +403,7 @@ export class UserRepository {
     const result = await query(
       `UPDATE users SET is_active = false, updated_at = NOW() 
        WHERE id IN (${placeholders})`,
-      userIds
+      userIds,
     )
 
     return result.rowCount ?? 0
@@ -428,7 +415,7 @@ export class UserRepository {
        WHERE is_active = true AND (profile->>'rating')::numeric > 0
        ORDER BY (profile->>'rating')::numeric DESC, (profile->>'reviewsCount')::numeric DESC
        LIMIT $1`,
-      [limit]
+      [limit],
     )
 
     return result.rows.map((row) => UserEntity.fromDatabaseRow(row))

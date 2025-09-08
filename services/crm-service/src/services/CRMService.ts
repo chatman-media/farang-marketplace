@@ -45,7 +45,7 @@ export class CRMService {
         data.preferredChannel || "email",
         data.tags || [],
         JSON.stringify(data.customFields || {}),
-      ]
+      ],
     )
 
     return new Customer(result.rows[0])
@@ -133,7 +133,7 @@ export class CRMService {
     const result = await query(
       `UPDATE customers SET ${updates.join(", ")}, updated_at = NOW() 
        WHERE id = $${paramIndex} RETURNING *`,
-      values
+      values,
     )
 
     return result.rows.length > 0 ? new Customer(result.rows[0]) : null
@@ -150,7 +150,7 @@ export class CRMService {
       tags?: string[]
       search?: string
     } = {},
-    pagination: { page?: number; limit?: number } = {}
+    pagination: { page?: number; limit?: number } = {},
   ): Promise<{ customers: Customer[]; total: number; page: number; limit: number }> {
     const { page = 1, limit = 20 } = pagination
     const offset = (page - 1) * limit
@@ -182,10 +182,7 @@ export class CRMService {
     }
 
     // Get total count
-    const countResult = await query(
-      `SELECT COUNT(*) as total FROM customers ${whereClause}`,
-      queryParams
-    )
+    const countResult = await query(`SELECT COUNT(*) as total FROM customers ${whereClause}`, queryParams)
     const total = parseInt(countResult.rows[0].total)
 
     // Get customers
@@ -194,7 +191,7 @@ export class CRMService {
       `SELECT * FROM customers ${whereClause} 
        ORDER BY created_at DESC 
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      queryParams
+      queryParams,
     )
 
     const customers = result.rows.map((row: any) => new Customer(row))
@@ -233,7 +230,7 @@ export class CRMService {
         data.value || null,
         data.notes || "",
         data.followUpDate || null,
-      ]
+      ],
     )
 
     const lead = new Lead(result.rows[0])
@@ -297,7 +294,7 @@ export class CRMService {
     const result = await query(
       `UPDATE leads SET ${updates.join(", ")}, updated_at = NOW() 
        WHERE id = $${paramIndex} RETURNING *`,
-      values
+      values,
     )
 
     if (result.rows.length > 0) {
@@ -321,10 +318,7 @@ export class CRMService {
   }
 
   async getLeadsByCustomer(customerId: string): Promise<Lead[]> {
-    const result = await query(
-      "SELECT * FROM leads WHERE customer_id = $1 ORDER BY created_at DESC",
-      [customerId]
-    )
+    const result = await query("SELECT * FROM leads WHERE customer_id = $1 ORDER BY created_at DESC", [customerId])
     return result.rows.map((row: any) => new Lead(row))
   }
 
@@ -335,7 +329,7 @@ export class CRMService {
       assignedTo?: string
       customerId?: string
     } = {},
-    pagination: { page?: number; limit?: number } = {}
+    pagination: { page?: number; limit?: number } = {},
   ): Promise<{ leads: Lead[]; total: number; page: number; limit: number }> {
     const { page = 1, limit = 20 } = pagination
     const offset = (page - 1) * limit
@@ -362,10 +356,7 @@ export class CRMService {
     })
 
     // Get total count
-    const countResult = await query(
-      `SELECT COUNT(*) as total FROM leads ${whereClause}`,
-      queryParams
-    )
+    const countResult = await query(`SELECT COUNT(*) as total FROM leads ${whereClause}`, queryParams)
     const total = parseInt(countResult.rows[0].total)
 
     // Get leads
@@ -374,7 +365,7 @@ export class CRMService {
       `SELECT * FROM leads ${whereClause} 
        ORDER BY created_at DESC 
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      queryParams
+      queryParams,
     )
 
     const leads = result.rows.map((row: any) => new Lead(row))
@@ -467,9 +458,7 @@ export class CRMService {
 
     const messageStats = messageStatsResult.rows[0]
     const responseRate =
-      messageStats.sent > 0
-        ? (parseInt(messageStats.responded) / parseInt(messageStats.sent)) * 100
-        : 0
+      messageStats.sent > 0 ? (parseInt(messageStats.responded) / parseInt(messageStats.sent)) * 100 : 0
 
     // Build response object
     const customersByStatus: Record<CustomerStatus, number> = {

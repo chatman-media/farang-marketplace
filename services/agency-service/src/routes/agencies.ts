@@ -1,73 +1,159 @@
-import { Router } from "express"
-import {
-  AgencyController,
-  createAgencyValidation,
-  updateAgencyValidation,
-  agencyIdValidation,
-  verifyAgencyValidation,
-  rejectAgencyValidation,
-} from "../controllers/AgencyController.js"
+import { FastifyPluginAsync } from "fastify"
+
+import { agencyController } from "../controllers/AgencyController"
 import {
   authenticateToken,
   requireAdmin,
   requireAgencyStaff,
   requireAgencyOwnership,
   optionalAuth,
-} from "../middleware/auth.js"
+} from "../middleware/auth"
 
-const router = Router()
-const agencyController = new AgencyController()
+const agenciesRoutes: FastifyPluginAsync = async (fastify) => {
+  // Public routes
+  fastify.get("/search", {
+    preHandler: [optionalAuth],
+    handler: async (_request, reply) => {
+      return reply.status(200).send({
+        success: true,
+        data: [],
+        message: "Agency search (placeholder)",
+      })
+    },
+  })
 
-// Public routes
-router.get("/search", optionalAuth, agencyController.searchAgencies.bind(agencyController))
-router.get(
-  "/:id",
-  agencyIdValidation,
-  optionalAuth,
-  agencyController.getAgencyById.bind(agencyController)
-)
+  fastify.get("/:id", {
+    preHandler: [optionalAuth],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+    },
+    handler: agencyController.getAgencyById.bind(agencyController),
+  })
 
-// Protected routes - require authentication
-router.use(authenticateToken)
+  // Protected routes - require authentication
+  fastify.get("/", {
+    preHandler: [authenticateToken],
+    schema: {
+      querystring: {
+        type: "object",
+        properties: {
+          page: { type: "number", default: 1 },
+          limit: { type: "number", default: 10 },
+          search: { type: "string" },
+          status: { type: "string" },
+        },
+      },
+    },
+    handler: agencyController.getAllAgencies.bind(agencyController),
+  })
 
-// User routes - create and manage own agency
-router.post("/", createAgencyValidation, agencyController.createAgency.bind(agencyController))
-router.get("/me/agency", agencyController.getMyAgency.bind(agencyController))
+  fastify.post("/", {
+    preHandler: [authenticateToken],
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          description: { type: "string" },
+          email: { type: "string", format: "email" },
+          phone: { type: "string" },
+          address: { type: "string" },
+          website: { type: "string" },
+          businessLicense: { type: "string" },
+          taxId: { type: "string" },
+        },
+        required: ["name", "email", "phone"],
+      },
+    },
+    handler: agencyController.createAgency.bind(agencyController),
+  })
 
-// Agency management routes - require agency ownership or admin
-router.put(
-  "/:id",
-  updateAgencyValidation,
-  requireAgencyOwnership,
-  agencyController.updateAgency.bind(agencyController)
-)
-router.delete(
-  "/:id",
-  agencyIdValidation,
-  requireAgencyOwnership,
-  agencyController.deleteAgency.bind(agencyController)
-)
+  fastify.put("/:id", {
+    preHandler: [authenticateToken, requireAgencyOwnership],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+      body: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          description: { type: "string" },
+          email: { type: "string", format: "email" },
+          phone: { type: "string" },
+          address: { type: "string" },
+          website: { type: "string" },
+        },
+      },
+    },
+    handler: agencyController.updateAgency.bind(agencyController),
+  })
 
-// Statistics routes - require agency ownership or admin
-router.get(
-  "/:id/stats",
-  agencyIdValidation,
-  requireAgencyOwnership,
-  agencyController.getAgencyStats.bind(agencyController)
-)
+  fastify.delete("/:id", {
+    preHandler: [authenticateToken, requireAgencyOwnership],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+    },
+    handler: agencyController.deleteAgency.bind(agencyController),
+  })
 
-// Admin only routes
-router.post(
-  "/:id/verify",
-  verifyAgencyValidation,
-  requireAdmin,
-  agencyController.verifyAgency.bind(agencyController)
-)
-router.post(
-  "/:id/reject",
-  rejectAgencyValidation,
-  requireAdmin,
-  agencyController.rejectAgencyVerification.bind(agencyController)
-)
+  // Admin routes
+  fastify.patch("/:id/status", {
+    preHandler: [authenticateToken, requireAdmin],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+      body: {
+        type: "object",
+        properties: {
+          status: { type: "string", enum: ["pending", "approved", "rejected", "suspended"] },
+        },
+        required: ["status"],
+      },
+    },
+    handler: agencyController.updateAgencyStatus.bind(agencyController),
+  })
 
-export default router
+  // Agency staff routes
+  fastify.get("/my/agencies", {
+    preHandler: [authenticateToken],
+    handler: agencyController.getAgenciesByUser.bind(agencyController),
+  })
+
+  fastify.get("/:id/stats", {
+    preHandler: [authenticateToken, requireAgencyStaff],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+    },
+    handler: agencyController.getAgencyStats.bind(agencyController),
+  })
+}
+
+export default agenciesRoutes

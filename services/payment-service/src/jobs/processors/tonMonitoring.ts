@@ -1,9 +1,9 @@
 import { Worker, Job } from "bullmq"
-import { redis } from "../index.js"
-import { ModernTonService } from "../../services/ModernTonService.js"
-import { PaymentService } from "../../services/PaymentService.js"
-import { db } from "../../db/connection.js"
-import { payments, transactions } from "../../db/schema.js"
+import { redis } from "../index"
+import { ModernTonService } from "../../services/ModernTonService"
+import { PaymentService } from "../../services/PaymentService"
+import { db } from "../../db/connection"
+import { payments, transactions } from "../../db/schema"
 import { eq, and, inArray } from "drizzle-orm"
 import axios from "axios"
 
@@ -23,14 +23,9 @@ async function checkPendingTransactions(job: Job) {
       .from(payments)
       .where(
         and(
-          inArray(payments.paymentMethod, [
-            "ton_wallet",
-            "ton_connect",
-            "jetton_usdt",
-            "jetton_usdc",
-          ]),
-          inArray(payments.status, ["pending", "processing"])
-        )
+          inArray(payments.paymentMethod, ["ton_wallet", "ton_connect", "jetton_usdt", "jetton_usdc"]),
+          inArray(payments.status, ["pending", "processing"]),
+        ),
       )
       .limit(batchSize)
 
@@ -44,11 +39,7 @@ async function checkPendingTransactions(job: Job) {
           const isConfirmed = await tonService.verifyTransaction(payment.tonTransactionHash)
 
           if (isConfirmed && payment.status !== "confirmed") {
-            await paymentService.updatePaymentStatus(
-              payment.id,
-              "confirmed",
-              "Transaction confirmed on TON blockchain"
-            )
+            await paymentService.updatePaymentStatus(payment.id, "confirmed", "Transaction confirmed on TON blockchain")
             confirmed++
           }
 
@@ -170,7 +161,7 @@ const tonMonitoringWorker = new Worker(
         throw new Error(`Unknown job type: ${type}`)
     }
   },
-  { connection: redis }
+  { connection: redis },
 )
 
 console.log("🔄 TON monitoring job processors loaded")

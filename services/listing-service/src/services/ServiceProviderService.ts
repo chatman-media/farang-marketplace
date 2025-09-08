@@ -1,6 +1,6 @@
 import { eq, and, sql, desc } from "drizzle-orm"
-import { db } from "../db/connection.js"
-import { serviceProviders } from "../db/schema.js"
+import { db } from "../db/connection"
+import { serviceProviders } from "../db/schema"
 import type { ServiceProviderFilters, ServiceProviderProfile } from "@marketplace/shared-types"
 
 // Custom interfaces for our API
@@ -127,10 +127,7 @@ export class ServiceProviderService {
   // Get service provider by ID
   async getServiceProviderById(id: string): Promise<ServiceProviderProfile | null> {
     try {
-      const [serviceProvider] = await db
-        .select()
-        .from(serviceProviders)
-        .where(eq(serviceProviders.id, id))
+      const [serviceProvider] = await db.select().from(serviceProviders).where(eq(serviceProviders.id, id))
 
       if (!serviceProvider) {
         return null
@@ -161,14 +158,12 @@ export class ServiceProviderService {
           sql`EXISTS (
             SELECT 1 FROM jsonb_array_elements(${serviceProviders.serviceCapabilities}) AS capability
             WHERE capability->>'serviceType' = ANY(${filters.serviceTypes})
-          )`
+          )`,
         )
       }
 
       if (filters.location?.city) {
-        conditions.push(
-          sql`${serviceProviders.primaryLocation}->>'city' ILIKE ${`%${filters.location.city}%`}`
-        )
+        conditions.push(sql`${serviceProviders.primaryLocation}->>'city' ILIKE ${`%${filters.location.city}%`}`)
       }
 
       if (filters.verificationLevel) {
@@ -185,7 +180,7 @@ export class ServiceProviderService {
           sql`EXISTS (
             SELECT 1 FROM jsonb_array_elements(${serviceProviders.serviceCapabilities}) AS capability
             WHERE (capability->'pricing'->>'basePrice')::numeric BETWEEN ${filters.priceRange.min} AND ${filters.priceRange.max}
-          )`
+          )`,
         )
       }
 
@@ -225,7 +220,7 @@ export class ServiceProviderService {
   async updateServiceProvider(
     id: string,
     data: UpdateServiceProviderRequest,
-    userId: string
+    userId: string,
   ): Promise<ServiceProviderProfile | null> {
     try {
       // Check ownership
@@ -273,11 +268,7 @@ export class ServiceProviderService {
         }))
       }
 
-      const [updated] = await db
-        .update(serviceProviders)
-        .set(updateData)
-        .where(eq(serviceProviders.id, id))
-        .returning()
+      const [updated] = await db.update(serviceProviders).set(updateData).where(eq(serviceProviders.id, id)).returning()
 
       return this.mapToServiceProviderProfile(updated)
     } catch (error) {

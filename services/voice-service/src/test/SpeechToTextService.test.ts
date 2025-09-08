@@ -1,11 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import { SpeechToTextService } from "../services/SpeechToTextService.js"
-import {
-  createMockAudioBase64,
-  createMockAudioBuffer,
-  expectToBeWithinRange,
-  mockVoiceRequest,
-} from "./setup.js"
+import { SpeechToTextService } from "../services/SpeechToTextService"
+import { createMockAudioBase64, createMockAudioBuffer, expectToBeWithinRange, mockVoiceRequest } from "./setup"
 
 describe("Speech-to-Text Service Tests", () => {
   let speechToTextService: SpeechToTextService
@@ -293,7 +288,7 @@ describe("Speech-to-Text Service Tests", () => {
           speechToTextService.transcribe({
             ...mockVoiceRequest,
             audioData: createMockAudioBuffer(),
-          })
+          }),
         )
 
       const results = await Promise.all(requests)

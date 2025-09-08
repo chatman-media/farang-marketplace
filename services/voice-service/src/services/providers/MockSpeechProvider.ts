@@ -4,7 +4,7 @@ import type {
   SpeechToTextProvider,
   VoiceRequest,
   VoiceResponse,
-} from "../../models/index.js"
+} from "../../models/index"
 
 export class MockSpeechProvider implements SpeechToTextProvider {
   name = "mock"
@@ -94,13 +94,7 @@ export class MockSpeechProvider implements SpeechToTextProvider {
           "List my house for sale",
         ]
       case "navigation":
-        return [
-          "Go to home page",
-          "Show my bookings",
-          "Open my profile",
-          "Navigate to search",
-          "Go back",
-        ]
+        return ["Go to home page", "Show my bookings", "Open my profile", "Navigate to search", "Go back"]
       case "booking":
         return [
           "Book this property",

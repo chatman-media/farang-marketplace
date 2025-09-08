@@ -11,14 +11,7 @@ const createPaymentSchema = z.object({
   bookingId: z.string().uuid(),
   amount: z.string().regex(/^\d+(\.\d{1,6})?$/),
   currency: z.string().optional().default("TON"),
-  method: z.enum([
-    "ton_wallet",
-    "ton_connect",
-    "jetton_usdt",
-    "jetton_usdc",
-    "stripe_card",
-    "promptpay",
-  ]),
+  method: z.enum(["ton_wallet", "ton_connect", "jetton_usdt", "jetton_usdc", "stripe_card", "promptpay"]),
   walletAddress: z.string().optional(),
   comment: z.string().optional(),
   fiatAmount: z.number().optional(),
@@ -26,16 +19,7 @@ const createPaymentSchema = z.object({
 })
 
 const updatePaymentStatusSchema = z.object({
-  status: z.enum([
-    "pending",
-    "processing",
-    "confirmed",
-    "completed",
-    "failed",
-    "cancelled",
-    "refunded",
-    "disputed",
-  ]),
+  status: z.enum(["pending", "processing", "confirmed", "completed", "failed", "cancelled", "refunded", "disputed"]),
   reason: z.string().optional(),
 })
 
@@ -75,21 +59,9 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         },
       },
     },
-    async (
-      request: FastifyRequest<{ Body: z.infer<typeof createPaymentSchema> }>,
-      reply: FastifyReply
-    ) => {
+    async (request: FastifyRequest<{ Body: z.infer<typeof createPaymentSchema> }>, reply: FastifyReply) => {
       try {
-        const {
-          bookingId,
-          amount,
-          currency,
-          method,
-          walletAddress,
-          comment,
-          fiatAmount,
-          fiatCurrency,
-        } = request.body
+        const { bookingId, amount, currency, method, walletAddress, comment, fiatAmount, fiatCurrency } = request.body
 
         // Create payment
         const payment = await paymentService.createPayment({
@@ -131,9 +103,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
             method: payment.paymentMethod,
             tonPaymentUrl,
             qrCode,
-            expiresAt:
-              payment.expiresAt?.toISOString() ||
-              new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+            expiresAt: payment.expiresAt?.toISOString() || new Date(Date.now() + 30 * 60 * 1000).toISOString(),
           },
         })
       } catch (error) {
@@ -144,7 +114,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           message: error instanceof Error ? error.message : "Unknown error",
         })
       }
-    }
+    },
   )
 
   // Get payment by ID
@@ -179,7 +149,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           error: "Failed to get payment",
         })
       }
-    }
+    },
   )
 
   // Update payment status
@@ -198,16 +168,12 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         Params: { id: string }
         Body: z.infer<typeof updatePaymentStatusSchema>
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const { status, reason } = request.body
 
-        const updatedPayment = await paymentService.updatePaymentStatus(
-          request.params.id,
-          status,
-          reason
-        )
+        const updatedPayment = await paymentService.updatePaymentStatus(request.params.id, status, reason)
 
         return reply.send({
           success: true,
@@ -220,7 +186,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           error: "Failed to update payment status",
         })
       }
-    }
+    },
   )
 
   // Search payments
@@ -231,10 +197,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         querystring: searchPaymentsSchema,
       },
     },
-    async (
-      request: FastifyRequest<{ Querystring: z.infer<typeof searchPaymentsSchema> }>,
-      reply: FastifyReply
-    ) => {
+    async (request: FastifyRequest<{ Querystring: z.infer<typeof searchPaymentsSchema> }>, reply: FastifyReply) => {
       try {
         const filters = request.query
 
@@ -246,11 +209,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           endDate: filters.endDate ? new Date(filters.endDate) : undefined,
         }
 
-        const result = await paymentService.searchPayments(
-          searchFilters,
-          filters.page,
-          filters.limit
-        )
+        const result = await paymentService.searchPayments(searchFilters, filters.page, filters.limit)
 
         return reply.send({
           success: true,
@@ -263,6 +222,6 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           error: "Failed to search payments",
         })
       }
-    }
+    },
   )
 }

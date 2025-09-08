@@ -1,79 +1,115 @@
-import { Router } from "express"
-import {
-  AgencyServiceController,
-  createServiceValidation,
-  updateServiceValidation,
-  serviceIdValidation,
-  agencyIdValidation,
-  bulkUpdatePricesValidation,
-} from "../controllers/AgencyServiceController.js"
-import {
-  authenticateToken,
-  requireAgencyStaff,
-  requireAgencyOwnership,
-  optionalAuth,
-} from "../middleware/auth.js"
+import { FastifyPluginAsync } from "fastify"
 
-const router = Router()
-const agencyServiceController = new AgencyServiceController()
+import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
-// Public routes
-router.get(
-  "/search",
-  optionalAuth,
-  agencyServiceController.searchServices.bind(agencyServiceController)
-)
+const servicesRoutes: FastifyPluginAsync = async (fastify) => {
+  // Get all services
+  fastify.get("/", {
+    handler: async (_request, reply) => {
+      return reply.status(200).send({
+        success: true,
+        data: [],
+        message: "Services retrieved successfully (placeholder)",
+      })
+    },
+  })
 
-// Protected routes - require authentication
-router.use(authenticateToken)
+  // Get service by ID
+  fastify.get("/:id", {
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+    },
+    handler: async (request, reply) => {
+      const { id } = request.params as { id: string }
+      return reply.status(200).send({
+        success: true,
+        data: { id, name: "Sample Service" },
+        message: "Service retrieved successfully (placeholder)",
+      })
+    },
+  })
 
-// Service management routes
-router.post(
-  "/",
-  createServiceValidation,
-  requireAgencyStaff,
-  agencyServiceController.createService.bind(agencyServiceController)
-)
-router.get(
-  "/:id",
-  serviceIdValidation,
-  agencyServiceController.getServiceById.bind(agencyServiceController)
-)
-router.put(
-  "/:id",
-  updateServiceValidation,
-  requireAgencyStaff,
-  agencyServiceController.updateService.bind(agencyServiceController)
-)
-router.delete(
-  "/:id",
-  serviceIdValidation,
-  requireAgencyStaff,
-  agencyServiceController.deleteService.bind(agencyServiceController)
-)
+  // Create service (protected)
+  fastify.post("/", {
+    preHandler: [authenticateToken, requireAgencyStaff],
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          description: { type: "string" },
+          category: { type: "string" },
+          price: { type: "number" },
+          agencyId: { type: "string" },
+        },
+        required: ["name", "category", "price", "agencyId"],
+      },
+    },
+    handler: async (request, reply) => {
+      return reply.status(201).send({
+        success: true,
+        data: { id: "new-service-id", ...(request.body as any) },
+        message: "Service created successfully (placeholder)",
+      })
+    },
+  })
 
-// Agency-specific service routes
-router.get(
-  "/agency/:agencyId",
-  agencyIdValidation,
-  requireAgencyOwnership,
-  agencyServiceController.getServicesByAgency.bind(agencyServiceController)
-)
+  // Update service (protected)
+  fastify.put("/:id", {
+    preHandler: [authenticateToken, requireAgencyStaff],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+      body: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          description: { type: "string" },
+          category: { type: "string" },
+          price: { type: "number" },
+        },
+      },
+    },
+    handler: async (request, reply) => {
+      const { id } = request.params as { id: string }
+      return reply.status(200).send({
+        success: true,
+        data: { id, ...(request.body as any) },
+        message: "Service updated successfully (placeholder)",
+      })
+    },
+  })
 
-// Service status management
-router.patch(
-  "/:id/toggle-status",
-  serviceIdValidation,
-  requireAgencyStaff,
-  agencyServiceController.toggleServiceStatus.bind(agencyServiceController)
-)
+  // Delete service (protected)
+  fastify.delete("/:id", {
+    preHandler: [authenticateToken, requireAgencyStaff],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+    },
+    handler: async (request, reply) => {
+      return reply.status(200).send({
+        success: true,
+        message: "Service deleted successfully (placeholder)",
+      })
+    },
+  })
+}
 
-// Bulk operations
-router.patch(
-  "/agency/:agencyId/bulk-update-prices",
-  bulkUpdatePricesValidation,
-  requireAgencyOwnership,
-  agencyServiceController.bulkUpdatePrices.bind(agencyServiceController)
-)
-
-export default router
+export default servicesRoutes

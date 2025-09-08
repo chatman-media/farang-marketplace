@@ -2,8 +2,8 @@ import natural from "natural"
 import sentiment from "sentiment"
 import { removeStopwords, eng, tha } from "stopword"
 import compromise from "compromise"
-import type { ContentAnalysisRequest, ContentAnalysisResult } from "../models/index.js"
-import { AIProviderService } from "./AIProviderService.js"
+import type { ContentAnalysisRequest, ContentAnalysisResult } from "../models/index"
+import { AIProviderService } from "./AIProviderService"
 
 export class ContentAnalysisService {
   private aiProvider: AIProviderService
@@ -68,9 +68,7 @@ export class ContentAnalysisService {
       return result
     } catch (error) {
       console.error("Content analysis failed:", error)
-      throw new Error(
-        `Content analysis failed: ${error instanceof Error ? error.message : "Unknown error"}`
-      )
+      throw new Error(`Content analysis failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
@@ -92,7 +90,7 @@ export class ContentAnalysisService {
    */
   private async analyzeSentiment(
     text: string,
-    language?: string
+    language?: string,
   ): Promise<{
     score: number
     label: "negative" | "neutral" | "positive"
@@ -150,7 +148,7 @@ export class ContentAnalysisService {
    */
   private async getAISentiment(
     text: string,
-    language?: string
+    language?: string,
   ): Promise<{
     score: number
     confidence: number
@@ -195,7 +193,7 @@ Respond with only a JSON object: {"score": 0.X, "confidence": 0.X}
    */
   private async extractKeywords(
     text: string,
-    language?: string
+    language?: string,
   ): Promise<
     Array<{
       word: string
@@ -363,7 +361,7 @@ Respond with only a JSON object: {"score": 0.X, "confidence": 0.X}
    */
   private async getAIKeywords(
     text: string,
-    language?: string
+    language?: string,
   ): Promise<Array<{
     word: string
     score: number
@@ -406,7 +404,7 @@ Respond with a JSON array of keywords with scores:
    * Remove duplicate keywords
    */
   private deduplicateKeywords(
-    keywords: Array<{ word: string; score: number; category?: string }>
+    keywords: Array<{ word: string; score: number; category?: string }>,
   ): Array<{ word: string; score: number; category?: string }> {
     const seen = new Set<string>()
     const unique: Array<{ word: string; score: number; category?: string }> = []
@@ -427,7 +425,7 @@ Respond with a JSON array of keywords with scores:
    */
   private async categorizeContent(
     text: string,
-    type: string
+    type: string,
   ): Promise<
     Array<{
       category: string
@@ -470,35 +468,9 @@ Respond with a JSON array of keywords with scores:
         "food",
         "services",
       ],
-      review: [
-        "positive",
-        "negative",
-        "neutral",
-        "complaint",
-        "praise",
-        "recommendation",
-        "warning",
-        "question",
-      ],
-      message: [
-        "inquiry",
-        "booking",
-        "complaint",
-        "compliment",
-        "question",
-        "request",
-        "offer",
-        "negotiation",
-      ],
-      profile: [
-        "personal",
-        "business",
-        "professional",
-        "casual",
-        "verified",
-        "new_user",
-        "experienced",
-      ],
+      review: ["positive", "negative", "neutral", "complaint", "praise", "recommendation", "warning", "question"],
+      message: ["inquiry", "booking", "complaint", "compliment", "question", "request", "offer", "negotiation"],
+      profile: ["personal", "business", "professional", "casual", "verified", "new_user", "experienced"],
     }
 
     return categoryMap[type as keyof typeof categoryMap] || categoryMap.listing
@@ -510,7 +482,7 @@ Respond with a JSON array of keywords with scores:
   private async getAICategories(
     text: string,
     categories: string[],
-    type: string
+    type: string,
   ): Promise<Array<{
     category: string
     confidence: number
@@ -555,7 +527,7 @@ Only include categories with confidence > 0.3.
    */
   private getKeywordBasedCategories(
     text: string,
-    categories: string[]
+    categories: string[],
   ): Array<{
     category: string
     confidence: number
@@ -781,7 +753,7 @@ Respond with JSON: {"flagged": boolean, "categories": ["category"], "scores": {"
    */
   private async assessQuality(
     content: ContentAnalysisRequest["content"],
-    type: string
+    type: string,
   ): Promise<{
     score: number
     issues: string[]
@@ -902,7 +874,7 @@ Respond with JSON: {"flagged": boolean, "categories": ["category"], "scores": {"
    */
   private async getAIQualityAssessment(
     content: ContentAnalysisRequest["content"],
-    type: string
+    type: string,
   ): Promise<{
     score: number
     issues: string[]

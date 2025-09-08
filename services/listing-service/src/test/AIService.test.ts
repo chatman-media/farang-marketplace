@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
-import { AIService } from "../ai/AIService.js"
-import { AIProvider, AIProviderConfig } from "../ai/types.js"
+import { AIService } from "../ai/AIService"
+import { AIProvider, AIProviderConfig } from "../ai/types"
 
 // Mock AI providers for testing
 const mockConfig: AIProviderConfig = {

@@ -22,11 +22,7 @@ export interface JWTPayload {
 /**
  * Middleware to authenticate JWT tokens
  */
-export const authenticateToken = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
   try {
     const authHeader = req.headers.authorization
     const token = authHeader && authHeader.split(" ")[1] // Bearer TOKEN
@@ -82,11 +78,7 @@ export const authenticateToken = (
 /**
  * Optional authentication middleware - doesn't fail if no token provided
  */
-export const optionalAuth = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const optionalAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
   try {
     const authHeader = req.headers.authorization
     const token = authHeader && authHeader.split(" ")[1]
@@ -122,11 +114,7 @@ export const optionalAuth = (
 /**
  * Middleware to require admin role
  */
-export const requireAdmin = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const requireAdmin = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
   if (!req.user) {
     res.status(401).json({
       success: false,
@@ -149,11 +137,7 @@ export const requireAdmin = (
 /**
  * Middleware to require agency staff role (owner or manager)
  */
-export const requireAgencyStaff = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const requireAgencyStaff = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
   if (!req.user) {
     res.status(401).json({
       success: false,
@@ -177,11 +161,7 @@ export const requireAgencyStaff = (
 /**
  * Middleware to require agency ownership
  */
-export const requireAgencyOwnership = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const requireAgencyOwnership = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
   if (!req.user) {
     res.status(401).json({
       success: false,
@@ -274,11 +254,7 @@ export const requireResourceAccess = (resourceType: "user" | "agency") => {
 /**
  * Middleware for rate limiting based on user role
  */
-export const roleBasedRateLimit = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const roleBasedRateLimit = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
   // In a real implementation, this would check rate limits based on user role
   // For now, just add rate limit info to response headers
 
@@ -323,7 +299,7 @@ export const generateToken = (user: {
       agencyId: user.agencyId,
     },
     jwtSecret,
-    { expiresIn } as jwt.SignOptions
+    { expiresIn } as jwt.SignOptions,
   )
 }
 

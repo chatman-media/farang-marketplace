@@ -1,6 +1,6 @@
 import OpenAI from "openai"
 import axios from "axios"
-import type { AIProviderConfig, AIRequest, AIResponse, AIError } from "../models/index.js"
+import type { AIProviderConfig, AIRequest, AIResponse, AIError } from "../models/index"
 
 export class AIProviderService {
   private providers: Map<string, AIProviderConfig> = new Map()
@@ -41,7 +41,7 @@ export class AIProviderService {
         "openai",
         new OpenAI({
           apiKey: openaiConfig.apiKey,
-        })
+        }),
       )
     }
 
@@ -73,7 +73,7 @@ export class AIProviderService {
         new OpenAI({
           apiKey: deepseekConfig.apiKey,
           baseURL: deepseekConfig.baseUrl,
-        })
+        }),
       )
     }
 
@@ -276,16 +276,14 @@ export class AIProviderService {
               "x-api-key": provider.apiKey,
               "anthropic-version": "2023-06-01",
             },
-          }
+          },
         )
 
         response = claudeResponse.data.content[0]?.text || ""
         usage = {
           promptTokens: claudeResponse.data.usage?.input_tokens || 0,
           completionTokens: claudeResponse.data.usage?.output_tokens || 0,
-          totalTokens:
-            (claudeResponse.data.usage?.input_tokens || 0) +
-            (claudeResponse.data.usage?.output_tokens || 0),
+          totalTokens: (claudeResponse.data.usage?.input_tokens || 0) + (claudeResponse.data.usage?.output_tokens || 0),
         }
       } else {
         throw new Error(`Unsupported provider type: ${provider.type}`)
@@ -306,19 +304,14 @@ export class AIProviderService {
         timestamp: new Date(),
       }
     } catch (error) {
-      throw new Error(
-        `Provider ${provider.name} failed: ${error instanceof Error ? error.message : "Unknown error"}`
-      )
+      throw new Error(`Provider ${provider.name} failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
 
   /**
    * Calculate cost for AI request
    */
-  private calculateCost(
-    provider: AIProviderConfig,
-    usage: { promptTokens: number; completionTokens: number }
-  ): number {
+  private calculateCost(provider: AIProviderConfig, usage: { promptTokens: number; completionTokens: number }): number {
     const inputCost = (usage.promptTokens / 1000) * provider.cost.inputTokens
     const outputCost = (usage.completionTokens / 1000) * provider.cost.outputTokens
     return inputCost + outputCost

@@ -1,7 +1,7 @@
 import { Router } from "express"
 import { body, query, param } from "express-validator"
-import { MarketplaceIntegrationController } from "../controllers/MarketplaceIntegrationController.js"
-import { authenticateToken } from "../middleware/auth.js"
+import { MarketplaceIntegrationController } from "../controllers/MarketplaceIntegrationController"
+import { authenticateToken } from "../middleware/auth"
 
 const router = Router()
 const marketplaceController = new MarketplaceIntegrationController()
@@ -12,18 +12,9 @@ const bookingIntelligenceValidation = [
   body("listingId").isUUID().withMessage("Listing ID must be a valid UUID"),
   body("bookingData").isObject().withMessage("Booking data must be an object"),
   body("bookingData.bookingId").optional().isUUID().withMessage("Booking ID must be a valid UUID"),
-  body("bookingData.currentPrice")
-    .optional()
-    .isNumeric()
-    .withMessage("Current price must be a number"),
-  body("bookingData.checkIn")
-    .optional()
-    .isISO8601()
-    .withMessage("Check-in date must be a valid ISO 8601 date"),
-  body("bookingData.checkOut")
-    .optional()
-    .isISO8601()
-    .withMessage("Check-out date must be a valid ISO 8601 date"),
+  body("bookingData.currentPrice").optional().isNumeric().withMessage("Current price must be a number"),
+  body("bookingData.checkIn").optional().isISO8601().withMessage("Check-in date must be a valid ISO 8601 date"),
+  body("bookingData.checkOut").optional().isISO8601().withMessage("Check-out date must be a valid ISO 8601 date"),
 ]
 
 const priceSuggestionsValidation = [
@@ -46,10 +37,7 @@ const fraudDetectionValidation = [
   body("userId").isUUID().withMessage("User ID must be a valid UUID"),
   body("listingId").optional().isUUID().withMessage("Listing ID must be a valid UUID"),
   body("transactionData").optional().isObject().withMessage("Transaction data must be an object"),
-  body("transactionData.amount")
-    .optional()
-    .isNumeric()
-    .withMessage("Transaction amount must be a number"),
+  body("transactionData.amount").optional().isNumeric().withMessage("Transaction amount must be a number"),
   body("transactionData.currency")
     .optional()
     .isLength({ min: 3, max: 3 })
@@ -72,25 +60,13 @@ router.get("/health", marketplaceController.healthCheck)
 router.use(authenticateToken)
 
 // Booking Intelligence
-router.post(
-  "/booking-intelligence",
-  bookingIntelligenceValidation,
-  marketplaceController.generateBookingIntelligence
-)
+router.post("/booking-intelligence", bookingIntelligenceValidation, marketplaceController.generateBookingIntelligence)
 
 // Price Suggestions
-router.post(
-  "/price-suggestions",
-  priceSuggestionsValidation,
-  marketplaceController.generatePriceSuggestions
-)
+router.post("/price-suggestions", priceSuggestionsValidation, marketplaceController.generatePriceSuggestions)
 
 // Smart Notifications
-router.post(
-  "/smart-notifications",
-  smartNotificationValidation,
-  marketplaceController.createSmartNotification
-)
+router.post("/smart-notifications", smartNotificationValidation, marketplaceController.createSmartNotification)
 
 // Fraud Detection
 router.post("/fraud-detection", fraudDetectionValidation, marketplaceController.detectFraud)

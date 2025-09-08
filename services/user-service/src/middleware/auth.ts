@@ -1,13 +1,11 @@
-import { Request, Response, NextFunction } from "express"
+import { FastifyRequest, FastifyReply } from "fastify"
 import { AuthService, TokenPayload } from "../services/AuthService"
 import { UserRole } from "@marketplace/shared-types"
 
-// Extend Express Request interface to include user data
-declare global {
-  namespace Express {
-    interface Request {
-      user?: TokenPayload
-    }
+// Extend Fastify Request interface to include user data
+declare module "fastify" {
+  interface FastifyRequest {
+    user?: TokenPayload
   }
 }
 
@@ -16,67 +14,86 @@ export interface AuthMiddlewareOptions {
   optional?: boolean
 }
 
-export class AuthMiddleware {
+export class FastifyAuthMiddleware {
   constructor(private authService: AuthService) {}
 
   // Main authentication middleware
   authenticate(options: AuthMiddlewareOptions = {}) {
-    return async (req: Request, res: Response, next: NextFunction) => {
+    return async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const authHeader = req.headers.authorization
+        const authHeader = request.headers.authorization
         const token = AuthService.extractTokenFromHeader(authHeader)
 
         if (!token) {
           if (options.optional) {
-            return next()
+            return
           }
-          return res.status(401).json({
+          return reply.status(401).send({
             error: {
               code: "MISSING_TOKEN",
               message: "Access token is required",
               timestamp: new Date().toISOString(),
-              requestId: req.headers["x-request-id"] || "unknown",
+              requestId: request.headers["x-request-id"] || "unknown",
             },
           })
         }
 
         // Validate token
         const payload = await this.authService.validateAccessToken(token)
-        req.user = payload
+        request.user = payload
 
         // Check role requirements
         if (options.requiredRoles && options.requiredRoles.length > 0) {
           if (!AuthService.hasRequiredRole(payload.role, options.requiredRoles)) {
-            return res.status(403).json({
+            return reply.status(403).send({
               error: {
                 code: "INSUFFICIENT_PERMISSIONS",
-                message: "Insufficient permissions for this resource",
+                message: `Required roles: ${options.requiredRoles.join(", ")}`,
                 timestamp: new Date().toISOString(),
-                requestId: req.headers["x-request-id"] || "unknown",
+                requestId: request.headers["x-request-id"] || "unknown",
               },
             })
           }
         }
-
-        next()
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Authentication failed"
+        if (options.optional) {
+          return
+        }
 
-        return res.status(401).json({
+        if (error instanceof Error) {
+          return reply.status(401).send({
+            error: {
+              code: "INVALID_TOKEN",
+              message: error.message,
+              timestamp: new Date().toISOString(),
+              requestId: request.headers["x-request-id"] || "unknown",
+            },
+          })
+        }
+
+        return reply.status(500).send({
           error: {
-            code: "INVALID_TOKEN",
-            message: errorMessage,
+            code: "AUTH_ERROR",
+            message: "Authentication failed",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: request.headers["x-request-id"] || "unknown",
           },
         })
       }
     }
   }
 
-  // Convenience methods for common role checks
-  requireAuth() {
-    return this.authenticate()
+  // Convenience methods
+  requireAuth(requiredRoles?: UserRole[]) {
+    return this.authenticate({ requiredRoles })
+  }
+
+  optionalAuth() {
+    return this.authenticate({ optional: true })
+  }
+
+  requireRole(roles: UserRole[]) {
+    return this.authenticate({ requiredRoles: roles })
   }
 
   requireAdmin() {
@@ -84,103 +101,34 @@ export class AuthMiddleware {
   }
 
   requireManager() {
-    return this.authenticate({
-      requiredRoles: [UserRole.ADMIN, UserRole.MANAGER],
-    })
-  }
-
-  requireAgency() {
-    return this.authenticate({ requiredRoles: [UserRole.AGENCY] })
-  }
-
-  requireUser() {
-    return this.authenticate({
-      requiredRoles: [UserRole.USER, UserRole.AGENCY],
-    })
-  }
-
-  optionalAuth() {
-    return this.authenticate({ optional: true })
-  }
-
-  // Middleware to check if user can access specific resource
-  requireOwnershipOrAdmin(getUserId: (req: Request) => string) {
-    return async (req: Request, res: Response, next: NextFunction) => {
-      if (!req.user) {
-        return res.status(401).json({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      const resourceUserId = getUserId(req)
-      const isOwner = req.user.userId === resourceUserId
-      const isAdmin = AuthService.isAdmin(req.user.role)
-      const isManager = AuthService.isManager(req.user.role)
-
-      if (!isOwner && !isAdmin && !isManager) {
-        return res.status(403).json({
-          error: {
-            code: "ACCESS_DENIED",
-            message: "Access denied to this resource",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-
-      next()
-    }
-  }
-
-  // Middleware to validate request body against schema
-  validateRequest(schema: any) {
-    return (req: Request, res: Response, next: NextFunction) => {
-      try {
-        req.body = schema.parse(req.body)
-        next()
-      } catch (error) {
-        return res.status(400).json({
-          error: {
-            code: "VALIDATION_ERROR",
-            message: "Request validation failed",
-            details: error,
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
-          },
-        })
-      }
-    }
+    return this.authenticate({ requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] })
   }
 }
 
-// Error handling middleware for authentication errors
-export const authErrorHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
-  if (error.name === "JsonWebTokenError") {
-    return res.status(401).json({
+// Error handler for authentication errors
+export const authErrorHandler = async (error: Error, request: FastifyRequest, reply: FastifyReply) => {
+  if (error.name === "UnauthorizedError" || error.message.includes("token")) {
+    return reply.status(401).send({
       error: {
-        code: "INVALID_TOKEN",
-        message: "Invalid authentication token",
+        code: "UNAUTHORIZED",
+        message: "Invalid or expired token",
         timestamp: new Date().toISOString(),
-        requestId: req.headers["x-request-id"] || "unknown",
+        requestId: request.headers["x-request-id"] || "unknown",
       },
     })
   }
 
-  if (error.name === "TokenExpiredError") {
-    return res.status(401).json({
+  if (error.name === "ForbiddenError") {
+    return reply.status(403).send({
       error: {
-        code: "TOKEN_EXPIRED",
-        message: "Authentication token has expired",
+        code: "FORBIDDEN",
+        message: "Insufficient permissions",
         timestamp: new Date().toISOString(),
-        requestId: req.headers["x-request-id"] || "unknown",
+        requestId: request.headers["x-request-id"] || "unknown",
       },
     })
   }
 
-  next(error)
+  // Re-throw other errors to be handled by global error handler
+  throw error
 }

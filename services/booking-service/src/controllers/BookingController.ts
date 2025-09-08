@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { validationResult } from "express-validator"
-import { BookingService } from "../services/BookingService.js"
+import { BookingService } from "../services/BookingService"
 import type {
   CreateBookingRequest,
   CreateServiceBookingRequest,
@@ -109,11 +109,7 @@ export class BookingController {
         return
       }
 
-      const serviceBooking = await this.bookingService.createServiceBooking(
-        serviceBookingRequest,
-        guestId,
-        providerId
-      )
+      const serviceBooking = await this.bookingService.createServiceBooking(serviceBookingRequest, guestId, providerId)
 
       res.status(201).json({
         success: true,
@@ -282,11 +278,7 @@ export class BookingController {
         return
       }
 
-      const updatedBooking = await this.bookingService.updateBookingStatus(
-        bookingId,
-        updateRequest,
-        userId
-      )
+      const updatedBooking = await this.bookingService.updateBookingStatus(bookingId, updateRequest, userId)
 
       res.json({
         success: true,

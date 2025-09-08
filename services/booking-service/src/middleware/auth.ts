@@ -24,11 +24,7 @@ export interface JWTPayload {
   exp?: number
 }
 
-export const authMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Get token from header
     const authHeader = req.header("Authorization")
@@ -116,11 +112,7 @@ export const authMiddleware = async (
 }
 
 // Optional auth middleware - doesn't fail if no token provided
-export const optionalAuthMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+export const optionalAuthMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const authHeader = req.header("Authorization")
 

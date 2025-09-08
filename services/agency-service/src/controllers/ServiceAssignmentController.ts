@@ -1,7 +1,5 @@
-import { Request, Response } from "express"
-import { body, param, query, validationResult } from "express-validator"
-import { ServiceAssignmentService } from "../services/ServiceAssignmentService.js"
-import type { AuthenticatedRequest } from "../middleware/auth.js"
+import { FastifyRequest, FastifyReply } from "fastify"
+import { ServiceAssignmentService } from "../services/ServiceAssignmentService"
 
 export class ServiceAssignmentController {
   private serviceAssignmentService: ServiceAssignmentService
@@ -13,28 +11,19 @@ export class ServiceAssignmentController {
   /**
    * Create a new service assignment
    */
-  async createAssignment(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async createAssignment(req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
-
-      const assignmentData = req.body
+      const assignmentData = req.body as any
       const assignment = await this.serviceAssignmentService.createAssignment(assignmentData)
 
-      res.status(201).json({
+      return reply.status(201).send({
         success: true,
         message: "Service assignment created successfully",
         data: assignment,
       })
     } catch (error) {
       console.error("Error creating assignment:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to create assignment",
       })
@@ -44,20 +33,11 @@ export class ServiceAssignmentController {
   /**
    * Get assignment by ID
    */
-  async getAssignmentById(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getAssignmentById(req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
-
-      const { id } = req.params
+      const { id } = req.params as { id: string }
       if (!id) {
-        return res.status(400).json({
+        return reply.status(400).send({
           success: false,
           message: "Assignment ID is required",
         })
@@ -66,19 +46,19 @@ export class ServiceAssignmentController {
       const assignment = await this.serviceAssignmentService.getAssignmentById(id)
 
       if (!assignment) {
-        return res.status(404).json({
+        return reply.status(404).send({
           success: false,
           message: "Assignment not found",
         })
       }
 
-      res.json({
+      return reply.send({
         success: true,
         data: assignment,
       })
     } catch (error) {
       console.error("Error getting assignment:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignment",
       })
@@ -88,20 +68,11 @@ export class ServiceAssignmentController {
   /**
    * Get assignments by agency ID
    */
-  async getAssignmentsByAgency(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getAssignmentsByAgency(req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
-
-      const { agencyId } = req.params
+      const { agencyId } = req.params as { agencyId: string }
       if (!agencyId) {
-        return res.status(400).json({
+        return reply.status(400).send({
           success: false,
           message: "Agency ID is required",
         })
@@ -109,13 +80,13 @@ export class ServiceAssignmentController {
 
       const assignments = await this.serviceAssignmentService.getAssignmentsByAgencyId(agencyId)
 
-      res.json({
+      return reply.send({
         success: true,
         data: assignments,
       })
     } catch (error) {
       console.error("Error getting assignments by agency:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignments",
       })
@@ -125,20 +96,11 @@ export class ServiceAssignmentController {
   /**
    * Get assignments by listing ID
    */
-  async getAssignmentsByListing(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getAssignmentsByListing(req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
-
-      const { listingId } = req.params
+      const { listingId } = req.params as { listingId: string }
       if (!listingId) {
-        return res.status(400).json({
+        return reply.status(400).send({
           success: false,
           message: "Listing ID is required",
         })
@@ -146,13 +108,13 @@ export class ServiceAssignmentController {
 
       const assignments = await this.serviceAssignmentService.getAssignmentsByListingId(listingId)
 
-      res.json({
+      return reply.send({
         success: true,
         data: assignments,
       })
     } catch (error) {
       console.error("Error getting assignments by listing:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignments",
       })
@@ -162,48 +124,35 @@ export class ServiceAssignmentController {
   /**
    * Update assignment status
    */
-  async updateAssignmentStatus(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async updateAssignmentStatus(req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
-
-      const { id } = req.params
-      const { status, notes } = req.body
+      const { id } = req.params as { id: string }
+      const { status, notes } = req.body as { status: "active" | "paused" | "completed" | "cancelled"; notes?: string }
 
       if (!id) {
-        return res.status(400).json({
+        return reply.status(400).send({
           success: false,
           message: "Assignment ID is required",
         })
       }
 
-      const assignment = await this.serviceAssignmentService.updateAssignmentStatus(
-        id,
-        status,
-        notes
-      )
+      const assignment = await this.serviceAssignmentService.updateAssignmentStatus(id, status, notes)
 
       if (!assignment) {
-        return res.status(404).json({
+        return reply.status(404).send({
           success: false,
           message: "Assignment not found",
         })
       }
 
-      res.json({
+      return reply.send({
         success: true,
         message: "Assignment status updated successfully",
         data: assignment,
       })
     } catch (error) {
       console.error("Error updating assignment status:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update assignment status",
       })
@@ -213,48 +162,35 @@ export class ServiceAssignmentController {
   /**
    * Add customer feedback
    */
-  async addCustomerFeedback(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async addCustomerFeedback(req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
-
-      const { id } = req.params
-      const { rating, feedback } = req.body
+      const { id } = req.params as { id: string }
+      const { rating, feedback } = req.body as { rating: number; feedback?: string }
 
       if (!id) {
-        return res.status(400).json({
+        return reply.status(400).send({
           success: false,
           message: "Assignment ID is required",
         })
       }
 
-      const assignment = await this.serviceAssignmentService.addCustomerFeedback(
-        id,
-        rating,
-        feedback
-      )
+      const assignment = await this.serviceAssignmentService.addCustomerFeedback(id, rating, feedback)
 
       if (!assignment) {
-        return res.status(404).json({
+        return reply.status(404).send({
           success: false,
           message: "Assignment not found",
         })
       }
 
-      res.json({
+      return reply.send({
         success: true,
         message: "Customer feedback added successfully",
         data: assignment,
       })
     } catch (error) {
       console.error("Error adding customer feedback:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to add customer feedback",
       })
@@ -264,47 +200,27 @@ export class ServiceAssignmentController {
   /**
    * Search assignments
    */
-  async searchAssignments(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async searchAssignments(req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
+      const { status, agencyId, listingId, page = 1, limit = 10 } = req.query as any
+
+      const searchParams = {
+        status,
+        agencyId,
+        listingId,
+        page: Number.parseInt(page),
+        limit: Number.parseInt(limit),
       }
 
-      const filters = {
-        agencyId: req.query.agencyId as string,
-        listingId: req.query.listingId as string,
-        bookingId: req.query.bookingId as string,
-        status: req.query.status as any,
-        dateRange:
-          req.query.startDate && req.query.endDate
-            ? {
-                start: new Date(req.query.startDate as string),
-                end: new Date(req.query.endDate as string),
-              }
-            : undefined,
-      }
+      const assignments = await this.serviceAssignmentService.searchAssignments(searchParams)
 
-      const options = {
-        page: req.query.page ? parseInt(req.query.page as string) : 1,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
-        sortBy: (req.query.sortBy as any) || "assignedAt",
-        sortOrder: (req.query.sortOrder as any) || "desc",
-      }
-
-      const result = await this.serviceAssignmentService.searchAssignments(filters, options)
-
-      res.json({
+      return reply.send({
         success: true,
-        data: result,
+        data: assignments,
       })
     } catch (error) {
       console.error("Error searching assignments:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to search assignments",
       })
@@ -314,69 +230,28 @@ export class ServiceAssignmentController {
   /**
    * Get assignment statistics
    */
-  async getAssignmentStats(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getAssignmentStats(req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
-      const agencyId = req.query.agencyId as string
+      const { agencyId } = req.params as { agencyId: string }
+      if (!agencyId) {
+        return reply.status(400).send({
+          success: false,
+          message: "Agency ID is required",
+        })
+      }
+
       const stats = await this.serviceAssignmentService.getAssignmentStats(agencyId)
 
-      res.json({
+      return reply.send({
         success: true,
         data: stats,
       })
     } catch (error) {
       console.error("Error getting assignment stats:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to get assignment statistics",
+        message: error instanceof Error ? error.message : "Failed to get assignment stats",
       })
     }
   }
 }
-
-// Validation rules
-export const createAssignmentValidation = [
-  body("agencyId").isUUID().withMessage("Valid agency ID is required"),
-  body("agencyServiceId").isUUID().withMessage("Valid agency service ID is required"),
-  body("listingId").isUUID().withMessage("Valid listing ID is required"),
-  body("servicePrice").isFloat({ min: 0 }).withMessage("Service price must be a positive number"),
-  body("commissionRate")
-    .isFloat({ min: 0, max: 1 })
-    .withMessage("Commission rate must be between 0 and 1"),
-  body("bookingId").optional().isUUID().withMessage("Booking ID must be a valid UUID"),
-  body("currency")
-    .optional()
-    .isLength({ min: 3, max: 3 })
-    .withMessage("Currency must be a 3-letter code"),
-]
-
-export const updateAssignmentStatusValidation = [
-  param("id").isUUID().withMessage("Valid assignment ID is required"),
-  body("status")
-    .isIn(["active", "paused", "completed", "cancelled"])
-    .withMessage("Valid status is required"),
-  body("notes")
-    .optional()
-    .isLength({ max: 1000 })
-    .withMessage("Notes must be less than 1000 characters"),
-]
-
-export const addFeedbackValidation = [
-  param("id").isUUID().withMessage("Valid assignment ID is required"),
-  body("rating").isInt({ min: 1, max: 5 }).withMessage("Rating must be between 1 and 5"),
-  body("feedback")
-    .optional()
-    .isLength({ max: 2000 })
-    .withMessage("Feedback must be less than 2000 characters"),
-]
-
-export const assignmentIdValidation = [
-  param("id").isUUID().withMessage("Valid assignment ID is required"),
-]
-
-export const agencyIdValidation = [
-  param("agencyId").isUUID().withMessage("Valid agency ID is required"),
-]
-
-export const listingIdValidation = [
-  param("listingId").isUUID().withMessage("Valid listing ID is required"),
-]

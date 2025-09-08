@@ -32,7 +32,7 @@ describe("UserEntity", () => {
       "telegram123",
       true,
       new Date("2023-01-01"),
-      new Date("2023-01-01")
+      new Date("2023-01-01"),
     )
   })
 
@@ -200,13 +200,7 @@ describe("UserEntity", () => {
     it("should identify manager users", () => {
       expect(user.isManager()).toBe(false)
 
-      const managerUser = new UserEntity(
-        "id",
-        "manager@test.com",
-        "hash",
-        UserRole.MANAGER,
-        user.profile
-      )
+      const managerUser = new UserEntity("id", "manager@test.com", "hash", UserRole.MANAGER, user.profile)
       expect(managerUser.isManager()).toBe(true)
 
       const adminUser = new UserEntity("id", "admin@test.com", "hash", UserRole.ADMIN, user.profile)
@@ -216,38 +210,14 @@ describe("UserEntity", () => {
     it("should identify agency users", () => {
       expect(user.isAgency()).toBe(false)
 
-      const agencyUser = new UserEntity(
-        "id",
-        "agency@test.com",
-        "hash",
-        UserRole.AGENCY,
-        user.profile
-      )
+      const agencyUser = new UserEntity("id", "agency@test.com", "hash", UserRole.AGENCY, user.profile)
       expect(agencyUser.isAgency()).toBe(true)
     })
 
     it("should determine user management permissions", () => {
-      const regularUser = new UserEntity(
-        "id2",
-        "user2@test.com",
-        "hash",
-        UserRole.USER,
-        user.profile
-      )
-      const managerUser = new UserEntity(
-        "id3",
-        "manager@test.com",
-        "hash",
-        UserRole.MANAGER,
-        user.profile
-      )
-      const adminUser = new UserEntity(
-        "id4",
-        "admin@test.com",
-        "hash",
-        UserRole.ADMIN,
-        user.profile
-      )
+      const regularUser = new UserEntity("id2", "user2@test.com", "hash", UserRole.USER, user.profile)
+      const managerUser = new UserEntity("id3", "manager@test.com", "hash", UserRole.MANAGER, user.profile)
+      const adminUser = new UserEntity("id4", "admin@test.com", "hash", UserRole.ADMIN, user.profile)
 
       // User can manage themselves
       expect(user.canManageUser(user)).toBe(true)
@@ -351,7 +321,7 @@ describe("UserEntity", () => {
         UserEntity.validateCreateData({
           ...testUserData.validCreateData,
           profile: { ...testUserData.validCreateData.profile, firstName: "" },
-        })
+        }),
       ).toThrow()
 
       expect(() =>
@@ -361,7 +331,7 @@ describe("UserEntity", () => {
             ...testUserData.validCreateData.profile,
             firstName: "a".repeat(51),
           },
-        })
+        }),
       ).toThrow()
 
       // Test lastName validation
@@ -369,7 +339,7 @@ describe("UserEntity", () => {
         UserEntity.validateCreateData({
           ...testUserData.validCreateData,
           profile: { ...testUserData.validCreateData.profile, lastName: "" },
-        })
+        }),
       ).toThrow()
 
       expect(() =>
@@ -379,7 +349,7 @@ describe("UserEntity", () => {
             ...testUserData.validCreateData.profile,
             lastName: "a".repeat(51),
           },
-        })
+        }),
       ).toThrow()
     })
 
@@ -423,7 +393,7 @@ describe("UserEntity", () => {
         UserEntity.validatePasswordChange({
           currentPassword: "oldpassword",
           newPassword: "123", // Too short
-        })
+        }),
       ).toThrow()
 
       // Test missing fields
@@ -502,22 +472,10 @@ describe("UserEntity", () => {
     it("should determine if user can create listings", () => {
       expect(user.canCreateListing()).toBe(true)
 
-      const agencyUser = new UserEntity(
-        "id",
-        "agency@test.com",
-        "hash",
-        UserRole.AGENCY,
-        user.profile
-      )
+      const agencyUser = new UserEntity("id", "agency@test.com", "hash", UserRole.AGENCY, user.profile)
       expect(agencyUser.canCreateListing()).toBe(true)
 
-      const managerUser = new UserEntity(
-        "id",
-        "manager@test.com",
-        "hash",
-        UserRole.MANAGER,
-        user.profile
-      )
+      const managerUser = new UserEntity("id", "manager@test.com", "hash", UserRole.MANAGER, user.profile)
       expect(managerUser.canCreateListing()).toBe(false)
 
       user.deactivate()
@@ -527,13 +485,7 @@ describe("UserEntity", () => {
     it("should determine if user can moderate content", () => {
       expect(user.canModerateContent()).toBe(false)
 
-      const managerUser = new UserEntity(
-        "id",
-        "manager@test.com",
-        "hash",
-        UserRole.MANAGER,
-        user.profile
-      )
+      const managerUser = new UserEntity("id", "manager@test.com", "hash", UserRole.MANAGER, user.profile)
       expect(managerUser.canModerateContent()).toBe(true)
 
       const adminUser = new UserEntity("id", "admin@test.com", "hash", UserRole.ADMIN, user.profile)
@@ -543,13 +495,7 @@ describe("UserEntity", () => {
     it("should determine if user can access admin panel", () => {
       expect(user.canAccessAdminPanel()).toBe(false)
 
-      const managerUser = new UserEntity(
-        "id",
-        "manager@test.com",
-        "hash",
-        UserRole.MANAGER,
-        user.profile
-      )
+      const managerUser = new UserEntity("id", "manager@test.com", "hash", UserRole.MANAGER, user.profile)
       expect(managerUser.canAccessAdminPanel()).toBe(true)
 
       const adminUser = new UserEntity("id", "admin@test.com", "hash", UserRole.ADMIN, user.profile)
@@ -559,13 +505,7 @@ describe("UserEntity", () => {
     it("should determine if user can manage agencies", () => {
       expect(user.canManageAgencies()).toBe(false)
 
-      const managerUser = new UserEntity(
-        "id",
-        "manager@test.com",
-        "hash",
-        UserRole.MANAGER,
-        user.profile
-      )
+      const managerUser = new UserEntity("id", "manager@test.com", "hash", UserRole.MANAGER, user.profile)
       expect(managerUser.canManageAgencies()).toBe(false)
 
       const adminUser = new UserEntity("id", "admin@test.com", "hash", UserRole.ADMIN, user.profile)

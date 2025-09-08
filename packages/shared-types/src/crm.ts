@@ -1,5 +1,35 @@
 // CRM and Customer Management Types
 
+export interface CustomerAddress {
+  street?: string
+  city?: string
+  state?: string
+  country?: string
+  postalCode?: string
+}
+
+export interface CustomerSocialProfiles {
+  facebook?: string
+  instagram?: string
+  linkedin?: string
+  twitter?: string
+  youtube?: string
+  tiktok?: string
+}
+
+export interface CommunicationPreferences {
+  email?: boolean
+  sms?: boolean
+  telegram?: boolean
+  whatsapp?: boolean
+  line?: boolean
+  phone?: boolean
+  marketing?: boolean
+  transactional?: boolean
+  frequency?: "daily" | "weekly" | "monthly" | "never"
+  timezone?: string
+}
+
 export interface Customer {
   id: string
   userId?: string // Link to platform user if exists
@@ -10,12 +40,23 @@ export interface Customer {
   lineId?: string
   firstName: string
   lastName: string
+  company?: string
+  jobTitle?: string
+  website?: string
+  address?: CustomerAddress
+  socialProfiles?: CustomerSocialProfiles
+  source?: LeadSource
+  timezone?: string
   preferredLanguage: string
   preferredChannel: CommunicationChannel
+  communicationPreferences?: CommunicationPreferences
   status: CustomerStatus
   leadScore: number
   tags: string[]
   customFields: Record<string, any>
+  totalInteractions?: number
+  lastInteractionAt?: Date
+  lifetimeValue?: number
   createdAt: Date
   updatedAt: Date
 }
@@ -29,6 +70,14 @@ export interface Lead {
   priority: LeadPriority
   assignedTo?: string
   value?: number
+  propertyInterest?: string
+  estimatedValue?: number
+  probability?: number // 0-100
+  currency?: string
+  stage?: string
+  campaign?: string
+  medium?: string
+  expectedCloseDate?: Date
   notes: string
   followUpDate?: Date
   createdAt: Date
@@ -257,8 +306,16 @@ export interface CreateCustomerRequest {
   userId?: string
   firstName: string
   lastName: string
+  company?: string
+  jobTitle?: string
+  website?: string
+  address?: CustomerAddress
+  socialProfiles?: CustomerSocialProfiles
+  source?: LeadSource
+  timezone?: string
   preferredLanguage?: string
   preferredChannel?: CommunicationChannel
+  communicationPreferences?: CommunicationPreferences
   tags?: string[]
   customFields?: Record<string, any>
 }
@@ -266,6 +323,9 @@ export interface CreateCustomerRequest {
 export interface UpdateCustomerRequest extends Partial<CreateCustomerRequest> {
   status?: CustomerStatus
   leadScore?: number
+  totalInteractions?: number
+  lastInteractionAt?: Date
+  lifetimeValue?: number
 }
 
 export interface CreateLeadRequest {
@@ -274,6 +334,14 @@ export interface CreateLeadRequest {
   source: LeadSource
   priority?: LeadPriority
   value?: number
+  propertyInterest?: string
+  estimatedValue?: number
+  probability?: number
+  currency?: string
+  stage?: string
+  campaign?: string
+  medium?: string
+  expectedCloseDate?: Date
   notes?: string
   followUpDate?: Date
 }

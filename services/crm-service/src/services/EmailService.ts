@@ -142,7 +142,7 @@ export class EmailService {
     try {
       const result = await query(
         "SELECT * FROM message_templates WHERE id = $1 AND channel = $2 AND is_active = true",
-        [templateId, CommunicationChannel.EMAIL]
+        [templateId, CommunicationChannel.EMAIL],
       )
 
       if (result.rows.length === 0) return null
@@ -178,7 +178,7 @@ export class EmailService {
         template.subject,
         template.content,
         template.variables || [],
-      ]
+      ],
     )
 
     return result.rows[0].id
@@ -192,7 +192,7 @@ export class EmailService {
       content?: string
       variables?: string[]
       isActive?: boolean
-    }
+    },
   ): Promise<boolean> {
     const updateFields: string[] = []
     const values: any[] = []
@@ -219,7 +219,7 @@ export class EmailService {
     const result = await query(
       `UPDATE message_templates SET ${updateFields.join(", ")}, updated_at = NOW()
        WHERE id = $${paramIndex} AND channel = $${paramIndex + 1}`,
-      [...values, CommunicationChannel.EMAIL]
+      [...values, CommunicationChannel.EMAIL],
     )
 
     return result.rowCount > 0
@@ -287,7 +287,7 @@ export class EmailService {
         data.campaignId || null,
         data.status,
         JSON.stringify(data.metadata || {}),
-      ]
+      ],
     )
 
     return result.rows[0].id
@@ -305,7 +305,7 @@ export class EmailService {
 
   async getCommunicationHistory(
     customerId: string,
-    options: { limit?: number; offset?: number } = {}
+    options: { limit?: number; offset?: number } = {},
   ): Promise<CommunicationHistory[]> {
     const { limit = 50, offset = 0 } = options
 
@@ -314,7 +314,7 @@ export class EmailService {
        WHERE customer_id = $1 AND channel = $2
        ORDER BY created_at DESC
        LIMIT $3 OFFSET $4`,
-      [customerId, CommunicationChannel.EMAIL, limit, offset]
+      [customerId, CommunicationChannel.EMAIL, limit, offset],
     )
 
     return result.rows.map((row: any) => ({

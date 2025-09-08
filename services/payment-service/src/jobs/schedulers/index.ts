@@ -4,7 +4,7 @@ import {
   webhookQueue,
   reconciliationQueue,
   maintenanceQueue,
-} from "../index.js"
+} from "../index"
 
 // Schedule recurring jobs
 export const scheduleJobs = () => {
@@ -18,7 +18,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "*/30 * * * * *" }, // Every 30 seconds
       removeOnComplete: 10,
       removeOnFail: 5,
-    }
+    },
   )
 
   tonMonitoringQueue.add(
@@ -28,7 +28,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 */5 * * * *" }, // Every 5 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   tonMonitoringQueue.add(
@@ -38,7 +38,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 */10 * * * *" }, // Every 10 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   tonMonitoringQueue.add(
@@ -48,7 +48,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 */5 * * * *" }, // Every 5 minutes
       removeOnComplete: 3,
       removeOnFail: 2,
-    }
+    },
   )
 
   // Payment Lifecycle Jobs
@@ -59,7 +59,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 0 * * * *" }, // Every hour
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   paymentLifecycleQueue.add(
@@ -69,7 +69,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 */15 * * * *" }, // Every 15 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   paymentLifecycleQueue.add(
@@ -79,7 +79,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 */5 * * * *" }, // Every 5 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   paymentLifecycleQueue.add(
@@ -89,7 +89,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 */2 * * * *" }, // Every 2 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   // Webhook Processing Jobs
@@ -100,7 +100,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 */10 * * * *" }, // Every 10 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   webhookQueue.add(
@@ -110,7 +110,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 0 2 * * *" }, // Daily at 2 AM
       removeOnComplete: 3,
       removeOnFail: 2,
-    }
+    },
   )
 
   // Reconciliation Jobs
@@ -121,7 +121,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 0 */6 * * *" }, // Every 6 hours
       removeOnComplete: 3,
       removeOnFail: 2,
-    }
+    },
   )
 
   reconciliationQueue.add(
@@ -131,7 +131,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 0 * * * *" }, // Every hour
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   reconciliationQueue.add(
@@ -141,7 +141,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 0 0 * * *" }, // Daily at midnight
       removeOnComplete: 7,
       removeOnFail: 3,
-    }
+    },
   )
 
   reconciliationQueue.add(
@@ -151,7 +151,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 0 0 * * 1" }, // Weekly on Monday
       removeOnComplete: 4,
       removeOnFail: 2,
-    }
+    },
   )
 
   // Maintenance Jobs
@@ -162,7 +162,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 0 3 * * *" }, // Daily at 3 AM
       removeOnComplete: 3,
       removeOnFail: 2,
-    }
+    },
   )
 
   maintenanceQueue.add(
@@ -172,7 +172,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 0 4 * * 0" }, // Weekly on Sunday at 4 AM
       removeOnComplete: 2,
       removeOnFail: 1,
-    }
+    },
   )
 
   maintenanceQueue.add(
@@ -182,7 +182,7 @@ export const scheduleJobs = () => {
       repeat: { cron: "0 */5 * * * *" }, // Every 5 minutes
       removeOnComplete: 3,
       removeOnFail: 2,
-    }
+    },
   )
 
   console.log("✅ All recurring jobs scheduled")

@@ -1,14 +1,14 @@
 import { Router } from "express"
 import multer from "multer"
-import { VoiceController } from "../controllers/VoiceController.js"
+import { VoiceController } from "../controllers/VoiceController"
 import {
   authenticateToken,
   optionalAuth,
   validateAudioFile,
   validateVoiceRequest,
   voiceRateLimit,
-} from "../middleware/auth.js"
-import type { VoiceCommandResponse } from "../models/index.js"
+} from "../middleware/auth"
+import type { VoiceCommandResponse } from "../models/index"
 
 const router = Router()
 const voiceController = new VoiceController()
@@ -49,24 +49,14 @@ router.use(voiceRateLimit(100, 60000)) // 100 requests per minute
  * @desc Transcribe audio to text
  * @access Public (with optional auth)
  */
-router.post(
-  "/transcribe",
-  optionalAuth,
-  validateVoiceRequest,
-  voiceController.transcribe.bind(voiceController)
-)
+router.post("/transcribe", optionalAuth, validateVoiceRequest, voiceController.transcribe.bind(voiceController))
 
 /**
  * @route POST /api/voice/command
  * @desc Process voice command (audio or text)
  * @access Public (with optional auth)
  */
-router.post(
-  "/command",
-  optionalAuth,
-  validateVoiceRequest,
-  voiceController.processCommand.bind(voiceController)
-)
+router.post("/command", optionalAuth, validateVoiceRequest, voiceController.processCommand.bind(voiceController))
 
 /**
  * @route POST /api/voice/upload
@@ -78,7 +68,7 @@ router.post(
   optionalAuth,
   upload.single("audio"),
   validateAudioFile,
-  voiceController.uploadAudio.bind(voiceController)
+  voiceController.uploadAudio.bind(voiceController),
 )
 
 /**
@@ -107,22 +97,14 @@ router.get("/stats", authenticateToken, voiceController.getStats.bind(voiceContr
  * @desc Get provider statistics
  * @access Private (admin only)
  */
-router.get(
-  "/providers/stats",
-  authenticateToken,
-  voiceController.getProviderStats.bind(voiceController)
-)
+router.get("/providers/stats", authenticateToken, voiceController.getProviderStats.bind(voiceController))
 
 /**
  * @route POST /api/voice/sessions/cleanup
  * @desc Clean up expired sessions
  * @access Private (admin only)
  */
-router.post(
-  "/sessions/cleanup",
-  authenticateToken,
-  voiceController.cleanupSessions.bind(voiceController)
-)
+router.post("/sessions/cleanup", authenticateToken, voiceController.cleanupSessions.bind(voiceController))
 
 /**
  * @route GET /api/voice/health
@@ -155,16 +137,10 @@ router.post("/search", optionalAuth, validateVoiceRequest, async (req, res) => {
         userId,
         sessionId,
         context,
-        language
+        language,
       )
     } else if (text) {
-      result = await voiceController.voiceCommandService.processTextCommand(
-        text,
-        userId,
-        sessionId,
-        context,
-        language
-      )
+      result = await voiceController.voiceCommandService.processTextCommand(text, userId, sessionId, context, language)
     } else {
       res.status(400).json({
         success: false,
@@ -207,16 +183,10 @@ router.post("/listing/create", authenticateToken, validateVoiceRequest, async (r
         userId,
         sessionId,
         context,
-        language
+        language,
       )
     } else if (text) {
-      result = await voiceController.voiceCommandService.processTextCommand(
-        text,
-        userId,
-        sessionId,
-        context,
-        language
-      )
+      result = await voiceController.voiceCommandService.processTextCommand(text, userId, sessionId, context, language)
     } else {
       res.status(400).json({
         success: false,
@@ -259,16 +229,10 @@ router.post("/navigate", optionalAuth, validateVoiceRequest, async (req, res) =>
         userId,
         sessionId,
         context,
-        language
+        language,
       )
     } else if (text) {
-      result = await voiceController.voiceCommandService.processTextCommand(
-        text,
-        userId,
-        sessionId,
-        context,
-        language
-      )
+      result = await voiceController.voiceCommandService.processTextCommand(text, userId, sessionId, context, language)
     } else {
       res.status(400).json({
         success: false,

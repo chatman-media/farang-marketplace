@@ -85,16 +85,7 @@ export default [
     },
   },
   {
-    ignores: [
-      "node_modules/",
-      "dist/",
-      ".next/",
-      "build/",
-      "coverage/",
-      "*.config.js",
-      "*.config.mjs",
-      "*.config.cjs",
-    ],
+    ignores: ["node_modules/", "dist/", ".next/", "build/", "coverage/", "*.config.js", "*.config.mjs", "*.config.cjs"],
   },
   prettier,
 ]

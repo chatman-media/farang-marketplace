@@ -154,7 +154,7 @@ export class CommunicationService {
 
   async sendBulkMessage(
     customerIds: string[],
-    request: Omit<UnifiedSendRequest, "customerId">
+    request: Omit<UnifiedSendRequest, "customerId">,
   ): Promise<SendMessageResponse[]> {
     const results: SendMessageResponse[] = []
 
@@ -180,7 +180,7 @@ export class CommunicationService {
 
   async getConversationThreads(
     customerId: string,
-    options: { limit?: number; offset?: number } = {}
+    options: { limit?: number; offset?: number } = {},
   ): Promise<ConversationThread[]> {
     const { limit = 10, offset = 0 } = options
 
@@ -196,7 +196,7 @@ export class CommunicationService {
        GROUP BY channel
        ORDER BY last_message_at DESC
        LIMIT $2 OFFSET $3`,
-      [customerId, limit, offset]
+      [customerId, limit, offset],
     )
 
     const threads: ConversationThread[] = []
@@ -229,7 +229,7 @@ export class CommunicationService {
       offset?: number
       startDate?: Date
       endDate?: Date
-    } = {}
+    } = {},
   ): Promise<CommunicationHistory[]> {
     const { channel, limit = 50, offset = 0, startDate, endDate } = options
 
@@ -260,7 +260,7 @@ export class CommunicationService {
        ${whereClause}
        ORDER BY created_at DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      [...params, limit, offset]
+      [...params, limit, offset],
     )
 
     return result.rows.map((row: any) => ({
@@ -285,10 +285,9 @@ export class CommunicationService {
 
   async markAsRead(historyId: string): Promise<boolean> {
     try {
-      const result = await query(
-        "UPDATE communication_history SET read_at = NOW() WHERE id = $1 AND read_at IS NULL",
-        [historyId]
-      )
+      const result = await query("UPDATE communication_history SET read_at = NOW() WHERE id = $1 AND read_at IS NULL", [
+        historyId,
+      ])
       return result.rowCount > 0
     } catch (error) {
       console.error("Error marking message as read:", error)
@@ -300,7 +299,7 @@ export class CommunicationService {
     try {
       const result = await query(
         "UPDATE communication_history SET responded_at = NOW() WHERE id = $1 AND responded_at IS NULL",
-        [historyId]
+        [historyId],
       )
       return result.rowCount > 0
     } catch (error) {
@@ -338,7 +337,7 @@ export class CommunicationService {
        ${whereClause}
        GROUP BY channel, direction, status
        ORDER BY channel, direction, status`,
-      params
+      params,
     )
 
     const stats: Record<string, any> = {}
@@ -384,7 +383,7 @@ export class CommunicationService {
 
   private getContactInfoForChannel(
     customer: Customer,
-    channel: CommunicationChannel
+    channel: CommunicationChannel,
   ): { channel: CommunicationChannel; value: string } | null {
     switch (channel) {
       case CommunicationChannel.EMAIL:

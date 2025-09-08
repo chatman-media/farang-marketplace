@@ -92,15 +92,11 @@ export class InsightsController {
 
       // Filter insights by type if requested
       const typeFilter = req.query["type"] as string
-      const filteredInsights = typeFilter
-        ? insights.filter((insight) => insight.type === typeFilter)
-        : insights
+      const filteredInsights = typeFilter ? insights.filter((insight) => insight.type === typeFilter) : insights
 
       // Filter by actionable if requested
       const actionableOnly = req.query["actionable"] === "true"
-      const finalInsights = actionableOnly
-        ? filteredInsights.filter((insight) => insight.actionable)
-        : filteredInsights
+      const finalInsights = actionableOnly ? filteredInsights.filter((insight) => insight.actionable) : filteredInsights
 
       res.json({
         success: true,
@@ -431,9 +427,7 @@ export const trackBehaviorValidation = [
   body("action")
     .isIn(["view", "search", "click", "bookmark", "share", "contact", "book", "purchase"])
     .withMessage("Invalid action"),
-  body("entityType")
-    .isIn(["listing", "service", "agency", "user"])
-    .withMessage("Invalid entity type"),
+  body("entityType").isIn(["listing", "service", "agency", "user"]).withMessage("Invalid entity type"),
   body("entityId").isLength({ min: 1 }).withMessage("Entity ID is required"),
   body("sessionId").optional().isLength({ min: 1 }).withMessage("Session ID must not be empty"),
   body("metadata").optional().isObject().withMessage("Metadata must be an object"),
@@ -455,10 +449,7 @@ export const marketInsightsValidation = [
     .withMessage("Invalid insight type"),
   query("category").optional().isLength({ min: 1 }).withMessage("Category must not be empty"),
   query("location").optional().isLength({ min: 1 }).withMessage("Location must not be empty"),
-  query("minConfidence")
-    .optional()
-    .isFloat({ min: 0, max: 1 })
-    .withMessage("Min confidence must be between 0 and 1"),
+  query("minConfidence").optional().isFloat({ min: 0, max: 1 }).withMessage("Min confidence must be between 0 and 1"),
 ]
 
 export const behaviorTrendsValidation = [

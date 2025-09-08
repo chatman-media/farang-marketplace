@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from "vitest"
 import request from "supertest"
-import app from "../../server"
+import { createApp } from "../../app"
 import { setupTestDatabase, cleanupTestDatabase } from "../fixtures/database"
 import { UserRepository } from "../../repositories/UserRepository"
 import { UserEntity } from "../../models/User"
@@ -14,11 +14,15 @@ describe("ProfileController Integration Tests", () => {
   let adminUser: any
   let userToken: string
   let adminToken: string
+  let testEmail: string
+  let adminEmail: string
+  let app: any
 
   beforeAll(async () => {
     process.env.BASE_URL = "http://localhost:3001"
     await setupTestDatabase()
     userRepository = new UserRepository()
+    app = await createApp()
   })
 
   afterAll(async () => {
@@ -26,9 +30,13 @@ describe("ProfileController Integration Tests", () => {
   })
 
   beforeEach(async () => {
-    // Create test users
+    // Create test users with unique emails
+    const timestamp = Date.now()
+    testEmail = `testuser${timestamp}@example.com`
+    adminEmail = `admin${timestamp}@example.com`
+
     const testUserData = {
-      email: "testuser@example.com",
+      email: testEmail,
       passwordHash: await UserEntity.hashPassword("password123"),
       role: UserRole.USER,
       profile: {
@@ -43,7 +51,7 @@ describe("ProfileController Integration Tests", () => {
     }
 
     const adminUserData = {
-      email: "admin@example.com",
+      email: adminEmail,
       passwordHash: await UserEntity.hashPassword("password123"),
       role: UserRole.ADMIN,
       profile: {
@@ -62,12 +70,12 @@ describe("ProfileController Integration Tests", () => {
 
     // Get auth tokens
     const userLoginResponse = await request(app).post("/api/auth/login").send({
-      email: "testuser@example.com",
+      email: testEmail,
       password: "password123",
     })
 
     const adminLoginResponse = await request(app).post("/api/auth/login").send({
-      email: "admin@example.com",
+      email: adminEmail,
       password: "password123",
     })
 
@@ -100,15 +108,13 @@ describe("ProfileController Integration Tests", () => {
 
   describe("GET /api/profile", () => {
     it("should get current user profile successfully", async () => {
-      const response = await request(app)
-        .get("/api/profile")
-        .set("Authorization", `Bearer ${userToken}`)
+      const response = await request(app).get("/api/profile").set("Authorization", `Bearer ${userToken}`)
 
       expect(response.status).toBe(200)
       expect(response.body.success).toBe(true)
       expect(response.body.data).toMatchObject({
         id: testUser.id,
-        email: "testuser@example.com",
+        email: testEmail,
         role: UserRole.USER,
         profile: {
           firstName: "Test",
@@ -192,18 +198,16 @@ describe("ProfileController Integration Tests", () => {
     it("should upload avatar successfully", async () => {
       // Create a minimal valid JPEG buffer (1x1 pixel)
       const testImageBuffer = Buffer.from([
-        0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00,
-        0x48, 0x00, 0x48, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06,
-        0x05, 0x08, 0x07, 0x07, 0x07, 0x09, 0x09, 0x08, 0x0a, 0x0c, 0x14, 0x0d, 0x0c, 0x0b, 0x0b,
-        0x0c, 0x19, 0x12, 0x13, 0x0f, 0x14, 0x1d, 0x1a, 0x1f, 0x1e, 0x1d, 0x1a, 0x1c, 0x1c, 0x20,
-        0x24, 0x2e, 0x27, 0x20, 0x22, 0x2c, 0x23, 0x1c, 0x1c, 0x28, 0x37, 0x29, 0x2c, 0x30, 0x31,
-        0x34, 0x34, 0x34, 0x1f, 0x27, 0x39, 0x3d, 0x38, 0x32, 0x3c, 0x2e, 0x33, 0x34, 0x32, 0xff,
-        0xc0, 0x00, 0x11, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0x02, 0x11, 0x01,
-        0x03, 0x11, 0x01, 0xff, 0xc4, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0xff, 0xc4, 0x00, 0x14, 0x10,
-        0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0xff, 0xda, 0x00, 0x0c, 0x03, 0x01, 0x00, 0x02, 0x11, 0x03, 0x11, 0x00, 0x3f,
-        0x00, 0xb2, 0xc0, 0x07, 0xff, 0xd9,
+        0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x48, 0x00, 0x48,
+        0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06, 0x05, 0x08, 0x07, 0x07, 0x07, 0x09,
+        0x09, 0x08, 0x0a, 0x0c, 0x14, 0x0d, 0x0c, 0x0b, 0x0b, 0x0c, 0x19, 0x12, 0x13, 0x0f, 0x14, 0x1d, 0x1a, 0x1f,
+        0x1e, 0x1d, 0x1a, 0x1c, 0x1c, 0x20, 0x24, 0x2e, 0x27, 0x20, 0x22, 0x2c, 0x23, 0x1c, 0x1c, 0x28, 0x37, 0x29,
+        0x2c, 0x30, 0x31, 0x34, 0x34, 0x34, 0x1f, 0x27, 0x39, 0x3d, 0x38, 0x32, 0x3c, 0x2e, 0x33, 0x34, 0x32, 0xff,
+        0xc0, 0x00, 0x11, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01,
+        0xff, 0xc4, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x08, 0xff, 0xc4, 0x00, 0x14, 0x10, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xda, 0x00, 0x0c, 0x03, 0x01, 0x00, 0x02, 0x11, 0x03,
+        0x11, 0x00, 0x3f, 0x00, 0xb2, 0xc0, 0x07, 0xff, 0xd9,
       ])
 
       const response = await request(app)
@@ -216,17 +220,13 @@ describe("ProfileController Integration Tests", () => {
       }
       expect(response.status).toBe(200)
       expect(response.body.success).toBe(true)
-      expect(response.body.data.avatarUrl).toMatch(
-        /http:\/\/localhost:3001\/uploads\/profiles\/.*\.jpg$/
-      )
+      expect(response.body.data.avatarUrl).toMatch(/http:\/\/localhost:3001\/uploads\/profiles\/.*\.jpg$/)
       expect(response.body.data.user.profile.avatar).toBeDefined()
       expect(response.body.message).toBe("Avatar uploaded successfully")
     })
 
     it("should return 400 when no file is provided", async () => {
-      const response = await request(app)
-        .post("/api/profile/avatar")
-        .set("Authorization", `Bearer ${userToken}`)
+      const response = await request(app).post("/api/profile/avatar").set("Authorization", `Bearer ${userToken}`)
 
       expect(response.status).toBe(400)
       expect(response.body.error.code).toBe("FILE_REQUIRED")
@@ -406,9 +406,7 @@ describe("ProfileController Integration Tests", () => {
 
   describe("GET /api/profile/:userId", () => {
     it("should get own profile by ID", async () => {
-      const response = await request(app)
-        .get(`/api/profile/${testUser.id}`)
-        .set("Authorization", `Bearer ${userToken}`)
+      const response = await request(app).get(`/api/profile/${testUser.id}`).set("Authorization", `Bearer ${userToken}`)
 
       expect(response.status).toBe(200)
       expect(response.body.success).toBe(true)
@@ -486,9 +484,7 @@ describe("ProfileController Integration Tests", () => {
     })
 
     it("should include request ID in error responses", async () => {
-      const response = await request(app)
-        .get("/api/profile")
-        .set("x-request-id", "test-request-123")
+      const response = await request(app).get("/api/profile").set("x-request-id", "test-request-123")
 
       expect(response.status).toBe(401)
       expect(response.body.error.requestId).toBe("test-request-123")

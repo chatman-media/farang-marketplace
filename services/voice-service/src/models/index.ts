@@ -157,15 +157,7 @@ export interface AudioFormat {
 }
 
 export interface AudioEncoding {
-  type:
-    | "LINEAR16"
-    | "FLAC"
-    | "MULAW"
-    | "AMR"
-    | "AMR_WB"
-    | "OGG_OPUS"
-    | "SPEEX_WITH_HEADER_BYTE"
-    | "WEBM_OPUS"
+  type: "LINEAR16" | "FLAC" | "MULAW" | "AMR" | "AMR_WB" | "OGG_OPUS" | "SPEEX_WITH_HEADER_BYTE" | "WEBM_OPUS"
   sampleRateHertz: number
   audioChannelCount: number
   languageCode: string

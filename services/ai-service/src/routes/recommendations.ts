@@ -1,65 +1,109 @@
-import { Router } from "express"
-import {
-  RecommendationController,
-  getRecommendationsValidation,
-  updateBehaviorValidation,
-  similarItemsValidation,
-  trendingItemsValidation,
-} from "../controllers/RecommendationController.js"
-import {
-  authenticateToken,
-  optionalAuth,
-  requireAdmin,
-  roleBasedRateLimit,
-} from "../middleware/auth.js"
+import { FastifyPluginAsync } from "fastify"
+import { FastifyRecommendationController } from "../controllers/FastifyRecommendationController"
 
-const router = Router()
+const recommendationRoutes: FastifyPluginAsync<{
+  recommendationController: FastifyRecommendationController
+}> = async (fastify, opts) => {
+  const { recommendationController } = opts
 
-export const createRecommendationRoutes = (recommendationController: RecommendationController) => {
   // Public routes with optional authentication
-  router.get(
+  fastify.get(
     "/trending",
-    optionalAuth,
-    trendingItemsValidation,
-    recommendationController.getTrendingItems.bind(recommendationController)
+    {
+      // preHandler: [fastify.optionalAuth],
+      schema: {
+        querystring: {
+          type: "object",
+          properties: {
+            category: { type: "string" },
+            limit: { type: "number", minimum: 1, maximum: 50, default: 10 },
+            timeframe: { type: "string", enum: ["1h", "24h", "7d", "30d"], default: "24h" },
+          },
+        },
+      },
+    },
+    recommendationController.getTrendingItems.bind(recommendationController),
   )
-  router.get(
+
+  fastify.get(
     "/similar/:itemId",
-    optionalAuth,
-    similarItemsValidation,
-    recommendationController.getSimilarItems.bind(recommendationController)
+    {
+      // preHandler: [fastify.optionalAuth],
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            itemId: { type: "string", format: "uuid" },
+          },
+          required: ["itemId"],
+        },
+        querystring: {
+          type: "object",
+          properties: {
+            limit: { type: "number", minimum: 1, maximum: 20, default: 5 },
+          },
+        },
+      },
+    },
+    recommendationController.getSimilarItems.bind(recommendationController),
   )
 
   // Protected routes - require authentication
-  router.use(authenticateToken)
-  router.use(roleBasedRateLimit)
-
-  // User recommendations
-  router.get(
+  fastify.get(
     "/",
-    getRecommendationsValidation,
-    recommendationController.getRecommendations.bind(recommendationController)
+    {
+      // preHandler: [fastify.authenticateToken, fastify.roleBasedRateLimit],
+      schema: {
+        querystring: {
+          type: "object",
+          properties: {
+            category: { type: "string" },
+            limit: { type: "number", minimum: 1, maximum: 50, default: 10 },
+            includeViewed: { type: "boolean", default: false },
+          },
+        },
+      },
+    },
+    recommendationController.getRecommendations.bind(recommendationController),
   )
-  router.get(
+
+  fastify.get(
     "/categories",
-    recommendationController.getPersonalizedCategories.bind(recommendationController)
+    {
+      // preHandler: [fastify.authenticateToken, fastify.roleBasedRateLimit],
+    },
+    recommendationController.getPersonalizedCategories.bind(recommendationController),
   )
 
   // Behavior tracking
-  router.post(
+  fastify.post(
     "/behavior",
-    updateBehaviorValidation,
-    recommendationController.updateUserBehavior.bind(recommendationController)
+    {
+      // preHandler: [fastify.authenticateToken, fastify.roleBasedRateLimit],
+      schema: {
+        body: {
+          type: "object",
+          properties: {
+            action: { type: "string", enum: ["view", "like", "share", "purchase", "search"] },
+            itemId: { type: "string", format: "uuid" },
+            category: { type: "string" },
+            metadata: { type: "object" },
+          },
+          required: ["action", "itemId"],
+        },
+      },
+    },
+    recommendationController.updateUserBehavior.bind(recommendationController),
   )
 
   // Admin only routes
-  router.get(
+  fastify.get(
     "/stats",
-    requireAdmin,
-    recommendationController.getRecommendationStats.bind(recommendationController)
+    {
+      // preHandler: [fastify.authenticateToken, fastify.requireAdmin],
+    },
+    recommendationController.getRecommendationStats.bind(recommendationController),
   )
-
-  return router
 }
 
-export default router
+export default recommendationRoutes

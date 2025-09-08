@@ -1,5 +1,5 @@
 import { eq, and, desc, asc, sql, like, ilike, inArray } from "drizzle-orm"
-import { db } from "../db/connection.js"
+import { db } from "../db/connection"
 import {
   agencies,
   agencyServices,
@@ -12,13 +12,8 @@ import {
   type AgencyStatusType,
   type VerificationStatusType,
   type ServiceCategoryType,
-} from "../db/schema.js"
-import type {
-  Agency as AgencyType,
-  AgencyServiceType,
-  ServiceCategory,
-  Location,
-} from "../types/index.js"
+} from "../db/schema"
+import type { Agency as AgencyType, AgencyServiceType, ServiceCategory, Location } from "../types/index"
 
 export interface AgencyFilters {
   status?: AgencyStatusType
@@ -52,9 +47,7 @@ export class AgencyService {
   /**
    * Create a new agency
    */
-  async createAgency(
-    agencyData: Omit<NewAgency, "id" | "createdAt" | "updatedAt">
-  ): Promise<Agency> {
+  async createAgency(agencyData: Omit<NewAgency, "id" | "createdAt" | "updatedAt">): Promise<Agency> {
     try {
       const [agency] = await db
         .insert(agencies)
@@ -107,10 +100,7 @@ export class AgencyService {
   /**
    * Update agency
    */
-  async updateAgency(
-    id: string,
-    updates: Partial<Omit<Agency, "id" | "createdAt">>
-  ): Promise<Agency | null> {
+  async updateAgency(id: string, updates: Partial<Omit<Agency, "id" | "createdAt">>): Promise<Agency | null> {
     try {
       const [agency] = await db
         .update(agencies)
@@ -147,7 +137,7 @@ export class AgencyService {
    */
   async searchAgencies(
     filters: AgencyFilters = {},
-    options: AgencySearchOptions = {}
+    options: AgencySearchOptions = {},
   ): Promise<{
     agencies: Agency[]
     total: number
@@ -173,7 +163,7 @@ export class AgencyService {
 
       if (filters.search) {
         conditions.push(
-          sql`(${ilike(agencies.name, `%${filters.search}%`)} OR ${ilike(agencies.description, `%${filters.search}%`)})`
+          sql`(${ilike(agencies.name, `%${filters.search}%`)} OR ${ilike(agencies.description, `%${filters.search}%`)})`,
         )
       }
 
@@ -207,18 +197,14 @@ export class AgencyService {
           orderClause = sortOrder === "asc" ? asc(agencies.rating) : desc(agencies.rating)
           break
         case "commissionRate":
-          orderClause =
-            sortOrder === "asc" ? asc(agencies.commissionRate) : desc(agencies.commissionRate)
+          orderClause = sortOrder === "asc" ? asc(agencies.commissionRate) : desc(agencies.commissionRate)
           break
         default:
           orderClause = sortOrder === "asc" ? asc(agencies.createdAt) : desc(agencies.createdAt)
       }
 
       // Get total count
-      const countResult = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(agencies)
-        .where(whereClause)
+      const countResult = await db.select({ count: sql<number>`count(*)` }).from(agencies).where(whereClause)
 
       // Get agencies
       const agencyList = await db

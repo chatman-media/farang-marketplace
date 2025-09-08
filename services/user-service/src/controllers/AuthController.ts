@@ -1,4 +1,4 @@
-import { Request, Response } from "express"
+import { FastifyRequest, FastifyReply } from "fastify"
 import { AuthService, LoginRequest, RegisterRequest, RefreshRequest } from "../services/AuthService"
 import { z } from "zod"
 
@@ -38,7 +38,7 @@ const RefreshTokenSchema = z.object({
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  login = async (req: Request, res: Response) => {
+  login = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       // Validate request body
       const loginData = LoginSchema.parse(req.body) as LoginRequest
@@ -46,7 +46,7 @@ export class AuthController {
       // Authenticate user
       const authResponse = await this.authService.login(loginData)
 
-      res.status(200).json({
+      return reply.status(200).send({
         success: true,
         data: authResponse,
         message: "Login successful",
@@ -55,11 +55,8 @@ export class AuthController {
       const errorMessage = error instanceof Error ? error.message : "Login failed"
 
       // Check for specific error types
-      if (
-        errorMessage.includes("Invalid email or password") ||
-        errorMessage.includes("Account is deactivated")
-      ) {
-        return res.status(401).json({
+      if (errorMessage.includes("Invalid email or password") || errorMessage.includes("Account is deactivated")) {
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_FAILED",
             message: errorMessage,
@@ -71,7 +68,7 @@ export class AuthController {
 
       // Validation errors
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
+        return reply.status(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -83,7 +80,7 @@ export class AuthController {
       }
 
       // Generic server error
-      res.status(500).json({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -94,7 +91,7 @@ export class AuthController {
     }
   }
 
-  register = async (req: Request, res: Response) => {
+  register = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       // Validate request body
       const registerData = RegisterSchema.parse(req.body) as RegisterRequest
@@ -102,7 +99,7 @@ export class AuthController {
       // Register user
       const authResponse = await this.authService.register(registerData)
 
-      res.status(201).json({
+      return reply.status(201).send({
         success: true,
         data: authResponse,
         message: "Registration successful",
@@ -112,7 +109,7 @@ export class AuthController {
 
       // Check for specific error types
       if (errorMessage.includes("already exists")) {
-        return res.status(409).json({
+        return reply.status(409).send({
           error: {
             code: "CONFLICT",
             message: errorMessage,
@@ -124,7 +121,7 @@ export class AuthController {
 
       // Validation errors
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
+        return reply.status(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -136,7 +133,7 @@ export class AuthController {
       }
 
       // Generic server error
-      res.status(500).json({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -147,7 +144,7 @@ export class AuthController {
     }
   }
 
-  refreshToken = async (req: Request, res: Response) => {
+  refreshToken = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       // Validate request body
       const refreshData = RefreshTokenSchema.parse(req.body) as RefreshRequest
@@ -155,7 +152,7 @@ export class AuthController {
       // Refresh tokens
       const authResponse = await this.authService.refreshTokens(refreshData)
 
-      res.status(200).json({
+      return reply.status(200).send({
         success: true,
         data: authResponse,
         message: "Token refresh successful",
@@ -165,7 +162,7 @@ export class AuthController {
 
       // Check for specific error types
       if (errorMessage.includes("Invalid") || errorMessage.includes("expired")) {
-        return res.status(401).json({
+        return reply.status(401).send({
           error: {
             code: "INVALID_REFRESH_TOKEN",
             message: errorMessage,
@@ -177,7 +174,7 @@ export class AuthController {
 
       // Validation errors
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
+        return reply.status(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -189,7 +186,7 @@ export class AuthController {
       }
 
       // Generic server error
-      res.status(500).json({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -201,10 +198,10 @@ export class AuthController {
   }
 
   // Get current user profile (requires authentication)
-  getProfile = async (req: Request, res: Response) => {
+  getProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return res.status(401).json({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -216,7 +213,7 @@ export class AuthController {
 
       // Get user data (this would typically come from UserService)
       // For now, we'll return the token payload data
-      res.status(200).json({
+      return reply.status(200).send({
         success: true,
         data: {
           userId: req.user.userId,
@@ -226,7 +223,7 @@ export class AuthController {
         message: "Profile retrieved successfully",
       })
     } catch (error) {
-      res.status(500).json({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -238,25 +235,25 @@ export class AuthController {
   }
 
   // Logout endpoint (for client-side token cleanup)
-  logout = async (req: Request, res: Response) => {
+  logout = async (req: FastifyRequest, reply: FastifyReply) => {
     // In a stateless JWT implementation, logout is typically handled client-side
     // by removing the tokens from storage. However, we can provide this endpoint
     // for consistency and future token blacklisting if needed.
 
-    res.status(200).json({
+    return reply.status(200).send({
       success: true,
       message: "Logout successful",
     })
   }
 
   // Validate token endpoint (for other services to validate tokens)
-  validateToken = async (req: Request, res: Response) => {
+  validateToken = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       const authHeader = req.headers.authorization
       const token = AuthService.extractTokenFromHeader(authHeader)
 
       if (!token) {
-        return res.status(400).json({
+        return reply.status(400).send({
           error: {
             code: "MISSING_TOKEN",
             message: "Access token is required",
@@ -268,7 +265,7 @@ export class AuthController {
 
       const payload = await this.authService.validateAccessToken(token)
 
-      res.status(200).json({
+      return reply.status(200).send({
         success: true,
         data: {
           valid: true,
@@ -277,7 +274,7 @@ export class AuthController {
         message: "Token is valid",
       })
     } catch (error) {
-      res.status(401).json({
+      return reply.status(401).send({
         error: {
           code: "INVALID_TOKEN",
           message: "Token validation failed",

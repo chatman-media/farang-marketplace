@@ -1,6 +1,6 @@
 import { eq, and, gte, lte, or, between } from "drizzle-orm"
-import { db } from "../db/connection.js"
-import { availabilityConflicts, bookings, serviceBookings } from "../db/schema.js"
+import { db } from "../db/connection"
+import { availabilityConflicts, bookings, serviceBookings } from "../db/schema"
 
 export interface TimeSlot {
   start: string // HH:MM format
@@ -43,22 +43,13 @@ export class AvailabilityService {
           eq(availabilityConflicts.listingId, listingId),
           or(
             // Conflict starts within our range
-            and(
-              gte(availabilityConflicts.startDate, checkIn),
-              lte(availabilityConflicts.startDate, endDate)
-            ),
+            and(gte(availabilityConflicts.startDate, checkIn), lte(availabilityConflicts.startDate, endDate)),
             // Conflict ends within our range
-            and(
-              gte(availabilityConflicts.endDate, checkIn),
-              lte(availabilityConflicts.endDate, endDate)
-            ),
+            and(gte(availabilityConflicts.endDate, checkIn), lte(availabilityConflicts.endDate, endDate)),
             // Our range is within the conflict
-            and(
-              lte(availabilityConflicts.startDate, checkIn),
-              gte(availabilityConflicts.endDate, endDate)
-            )
-          )
-        )
+            and(lte(availabilityConflicts.startDate, checkIn), gte(availabilityConflicts.endDate, endDate)),
+          ),
+        ),
       )
 
     return conflicts.length === 0
@@ -68,7 +59,7 @@ export class AvailabilityService {
   async checkServiceAvailability(
     providerId: string,
     scheduledDate: Date,
-    duration: { value: number; unit: string }
+    duration: { value: number; unit: string },
   ): Promise<boolean> {
     const endTime = this.calculateEndTime(scheduledDate, duration)
 
@@ -84,28 +75,21 @@ export class AvailabilityService {
           // Check if the scheduled date conflicts
           or(
             // Existing booking starts within our time
-            and(
-              gte(serviceBookings.scheduledDate, scheduledDate),
-              lte(serviceBookings.scheduledDate, endTime)
-            ),
+            and(gte(serviceBookings.scheduledDate, scheduledDate), lte(serviceBookings.scheduledDate, endTime)),
             // Our booking starts within existing booking time
             and(
               lte(serviceBookings.scheduledDate, scheduledDate),
-              gte(serviceBookings.scheduledDate, scheduledDate) // Simplified for now
-            )
-          )
-        )
+              gte(serviceBookings.scheduledDate, scheduledDate), // Simplified for now
+            ),
+          ),
+        ),
       )
 
     return conflictingBookings.length === 0
   }
 
   // Get availability calendar for a listing
-  async getAvailabilityCalendar(
-    listingId: string,
-    startDate: Date,
-    endDate: Date
-  ): Promise<AvailabilityWindow[]> {
+  async getAvailabilityCalendar(listingId: string, startDate: Date, endDate: Date): Promise<AvailabilityWindow[]> {
     const conflicts = await db
       .select()
       .from(availabilityConflicts)
@@ -115,12 +99,9 @@ export class AvailabilityService {
           or(
             between(availabilityConflicts.startDate, startDate, endDate),
             between(availabilityConflicts.endDate, startDate, endDate),
-            and(
-              lte(availabilityConflicts.startDate, startDate),
-              gte(availabilityConflicts.endDate, endDate)
-            )
-          )
-        )
+            and(lte(availabilityConflicts.startDate, startDate), gte(availabilityConflicts.endDate, endDate)),
+          ),
+        ),
       )
 
     const calendar: AvailabilityWindow[] = []
@@ -150,10 +131,7 @@ export class AvailabilityService {
   }
 
   // Get service provider availability for a specific date
-  async getServiceProviderAvailability(
-    providerId: string,
-    date: Date
-  ): Promise<ServiceAvailability> {
+  async getServiceProviderAvailability(providerId: string, date: Date): Promise<ServiceAvailability> {
     const startOfDay = new Date(date)
     startOfDay.setHours(0, 0, 0, 0)
 
@@ -170,8 +148,8 @@ export class AvailabilityService {
           eq(serviceBookings.providerId, providerId),
           gte(serviceBookings.scheduledDate, startOfDay),
           lte(serviceBookings.scheduledDate, endOfDay),
-          or(eq(bookings.status, "confirmed"), eq(bookings.status, "active"))
-        )
+          or(eq(bookings.status, "confirmed"), eq(bookings.status, "active")),
+        ),
       )
 
     // Generate time slots (assuming 1-hour slots from 9 AM to 6 PM)
@@ -215,7 +193,7 @@ export class AvailabilityService {
     conflictType: "booking" | "maintenance" | "blocked",
     bookingId?: string,
     createdBy?: string,
-    reason?: string
+    reason?: string,
   ): Promise<void> {
     await db.insert(availabilityConflicts).values({
       listingId,
@@ -239,7 +217,7 @@ export class AvailabilityService {
     startDate: Date,
     endDate: Date,
     reason: string,
-    createdBy: string
+    createdBy: string,
   ): Promise<void> {
     // Check if dates are already blocked or booked
     const isAvailable = await this.checkAvailability(listingId, startDate, endDate)
@@ -248,15 +226,7 @@ export class AvailabilityService {
       throw new Error("Cannot block dates that are already unavailable")
     }
 
-    await this.createConflict(
-      listingId,
-      startDate,
-      endDate,
-      "blocked",
-      undefined,
-      createdBy,
-      reason
-    )
+    await this.createConflict(listingId, startDate, endDate, "blocked", undefined, createdBy, reason)
   }
 
   // Unblock dates
@@ -268,15 +238,15 @@ export class AvailabilityService {
           eq(availabilityConflicts.listingId, listingId),
           eq(availabilityConflicts.conflictType, "blocked"),
           gte(availabilityConflicts.startDate, startDate),
-          lte(availabilityConflicts.endDate, endDate)
-        )
+          lte(availabilityConflicts.endDate, endDate),
+        ),
       )
   }
 
   // Get upcoming bookings for a listing
   async getUpcomingBookings(
     listingId: string,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<
     Array<{
       bookingId: string
@@ -301,8 +271,8 @@ export class AvailabilityService {
         and(
           eq(bookings.listingId, listingId),
           gte(bookings.checkIn, now),
-          or(eq(bookings.status, "confirmed"), eq(bookings.status, "active"))
-        )
+          or(eq(bookings.status, "confirmed"), eq(bookings.status, "active")),
+        ),
       )
       .orderBy(bookings.checkIn)
       .limit(limit)

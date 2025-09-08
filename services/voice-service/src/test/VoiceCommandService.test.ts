@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import { SpeechToTextService } from "../services/SpeechToTextService.js"
-import { VoiceCommandService } from "../services/VoiceCommandService.js"
-import { createMockAudioBuffer, delay } from "./setup.js"
+import { SpeechToTextService } from "../services/SpeechToTextService"
+import { VoiceCommandService } from "../services/VoiceCommandService"
+import { createMockAudioBuffer, delay } from "./setup"
 
 describe("Voice Command Service Tests", () => {
   let voiceCommandService: VoiceCommandService
@@ -50,7 +50,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "search", currentPage: "/search" },
-        "en-US"
+        "en-US",
       )
 
       expect(result).toBeDefined()
@@ -66,7 +66,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "search" },
-        "en-US"
+        "en-US",
       )
 
       expect(result.success).toBe(false)
@@ -81,7 +81,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "search" },
-        "en-US"
+        "en-US",
       )
 
       expect(result.success).toBe(true)
@@ -97,7 +97,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "navigation" },
-        "en-US"
+        "en-US",
       )
 
       expect(result.success).toBe(true)
@@ -111,7 +111,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "listing" },
-        "en-US"
+        "en-US",
       )
 
       expect(result.success).toBe(true)
@@ -125,7 +125,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "booking" },
-        "en-US"
+        "en-US",
       )
 
       expect(result.success).toBe(true)
@@ -139,7 +139,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "general" },
-        "en-US"
+        "en-US",
       )
 
       expect(result.success).toBe(true)
@@ -153,7 +153,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "general" },
-        "en-US"
+        "en-US",
       )
 
       expect(result.success).toBe(true)
@@ -166,7 +166,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "general" },
-        "en-US"
+        "en-US",
       )
 
       expect(result.success).toBe(true)
@@ -179,7 +179,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "general" },
-        "en-US"
+        "en-US",
       )
 
       expect(result.success).toBe(false)
@@ -195,7 +195,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "search" },
-        "th-TH"
+        "th-TH",
       )
 
       expect(result.success).toBe(true)
@@ -209,7 +209,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "navigation" },
-        "th-TH"
+        "th-TH",
       )
 
       expect(result.success).toBe(true)
@@ -223,7 +223,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "listing" },
-        "th-TH"
+        "th-TH",
       )
 
       expect(result.success).toBe(true)
@@ -237,7 +237,7 @@ describe("Voice Command Service Tests", () => {
         "test-user",
         "test-session",
         { type: "general" },
-        "th-TH"
+        "th-TH",
       )
 
       expect(result.success).toBe(true)
@@ -248,22 +248,14 @@ describe("Voice Command Service Tests", () => {
 
   describe("Intent Recognition", () => {
     it("should recognize search intent with high confidence", async () => {
-      const result = await voiceCommandService.processTextCommand(
-        "Find houses for sale",
-        "test-user",
-        "test-session"
-      )
+      const result = await voiceCommandService.processTextCommand("Find houses for sale", "test-user", "test-session")
 
       expect(result.success).toBe(true)
       expect(result.action).toBe("search")
     })
 
     it("should recognize navigation intent", async () => {
-      const result = await voiceCommandService.processTextCommand(
-        "Navigate to my profile",
-        "test-user",
-        "test-session"
-      )
+      const result = await voiceCommandService.processTextCommand("Navigate to my profile", "test-user", "test-session")
 
       expect(result.success).toBe(true)
       expect(result.action).toBe("navigate")
@@ -274,7 +266,7 @@ describe("Voice Command Service Tests", () => {
         "Find apartments under 20000 baht in Sukhumvit",
         "test-user",
         "test-session",
-        { type: "search" }
+        { type: "search" },
       )
 
       expect(result.success).toBe(true)
@@ -288,13 +280,7 @@ describe("Voice Command Service Tests", () => {
     it("should create and manage sessions", async () => {
       const sessionId = "test-session-123"
 
-      await voiceCommandService.processTextCommand(
-        "Hello",
-        "test-user",
-        sessionId,
-        { type: "general" },
-        "en-US"
-      )
+      await voiceCommandService.processTextCommand("Hello", "test-user", sessionId, { type: "general" }, "en-US")
 
       const session = voiceCommandService.getSession(sessionId)
 
@@ -368,12 +354,9 @@ describe("Voice Command Service Tests", () => {
       const sessionId = "test-listing-flow"
 
       // Start listing creation
-      const startResult = await voiceCommandService.processTextCommand(
-        "Create a new listing",
-        "test-user",
-        sessionId,
-        { type: "listing" }
-      )
+      const startResult = await voiceCommandService.processTextCommand("Create a new listing", "test-user", sessionId, {
+        type: "listing",
+      })
 
       expect(startResult.success).toBe(true)
       expect(startResult.action).toBe("start_listing_creation")
@@ -383,12 +366,9 @@ describe("Voice Command Service Tests", () => {
       expect(session?.state?.step).toBe("start")
 
       // Confirm to proceed
-      const confirmResult = await voiceCommandService.processTextCommand(
-        "Yes",
-        "test-user",
-        sessionId,
-        { type: "listing" }
-      )
+      const confirmResult = await voiceCommandService.processTextCommand("Yes", "test-user", sessionId, {
+        type: "listing",
+      })
 
       expect(confirmResult.success).toBe(true)
       expect(confirmResult.action).toBe("listing_creation_next")
@@ -403,12 +383,9 @@ describe("Voice Command Service Tests", () => {
       })
 
       // Cancel
-      const cancelResult = await voiceCommandService.processTextCommand(
-        "Cancel",
-        "test-user",
-        sessionId,
-        { type: "listing" }
-      )
+      const cancelResult = await voiceCommandService.processTextCommand("Cancel", "test-user", sessionId, {
+        type: "listing",
+      })
 
       expect(cancelResult.success).toBe(true)
       expect(cancelResult.action).toBe("cancel")
@@ -429,11 +406,7 @@ describe("Voice Command Service Tests", () => {
     it("should handle very long commands", async () => {
       const longCommand = "a".repeat(10000)
 
-      const result = await voiceCommandService.processTextCommand(
-        longCommand,
-        "test-user",
-        "test-session"
-      )
+      const result = await voiceCommandService.processTextCommand(longCommand, "test-user", "test-session")
 
       expect(result).toBeDefined()
       expect(typeof result.success).toBe("boolean")
@@ -443,7 +416,7 @@ describe("Voice Command Service Tests", () => {
       const result = await voiceCommandService.processTextCommand(
         "Find @#$%^&*() properties",
         "test-user",
-        "test-session"
+        "test-session",
       )
 
       expect(result).toBeDefined()
@@ -455,11 +428,7 @@ describe("Voice Command Service Tests", () => {
     it("should process commands quickly", async () => {
       const startTime = Date.now()
 
-      const result = await voiceCommandService.processTextCommand(
-        "Find apartments",
-        "test-user",
-        "test-session"
-      )
+      const result = await voiceCommandService.processTextCommand("Find apartments", "test-user", "test-session")
 
       const endTime = Date.now()
       const processingTime = endTime - startTime
@@ -469,16 +438,10 @@ describe("Voice Command Service Tests", () => {
     })
 
     it("should handle concurrent command processing", async () => {
-      const commands = [
-        "Find apartments",
-        "Go to home",
-        "Create listing",
-        "Help me",
-        "Search for houses",
-      ]
+      const commands = ["Find apartments", "Go to home", "Create listing", "Help me", "Search for houses"]
 
       const promises = commands.map((command, index) =>
-        voiceCommandService.processTextCommand(command, "test-user", `test-session-${index}`)
+        voiceCommandService.processTextCommand(command, "test-user", `test-session-${index}`),
       )
 
       const results = await Promise.all(promises)

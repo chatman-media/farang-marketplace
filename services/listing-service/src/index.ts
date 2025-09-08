@@ -1,97 +1,38 @@
-import express from "express"
-import cors from "cors"
-import helmet from "helmet"
-import compression from "compression"
-import rateLimit from "express-rate-limit"
-import path from "path"
-import { config } from "dotenv"
-import listingRoutes from "./routes/listings.js"
-import serviceProviderRoutes from "./routes/serviceProviders.js"
-import aiSearchRoutes from "./routes/aiSearch.js"
-import { serveImages } from "./middleware/upload.js"
+import { createApp, env } from "./app"
 
-// Load environment variables
-config()
+const start = async () => {
+  try {
+    const app = await createApp()
 
-const app = express()
-const PORT = process.env.PORT || 3003
+    await app.listen({
+      port: env.PORT,
+      host: "0.0.0.0",
+    })
 
-// Security middleware
-app.use(helmet())
-app.use(
-  cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(",") || [
-      "http://localhost:3000",
-      "http://localhost:3001",
-    ],
-    credentials: true,
-  })
-)
+    console.log(`🚀 Listing service running on port ${env.PORT}`)
+    console.log(`📊 Health check: http://localhost:${env.PORT}/health`)
+    console.log(`📝 Listings API: http://localhost:${env.PORT}/api/listings`)
+    console.log(`🏢 Service Providers API: http://localhost:${env.PORT}/api/service-providers`)
+    console.log(`🤖 AI Search API: http://localhost:${env.PORT}/api/ai`)
+  } catch (error) {
+    console.error("❌ Error starting server:", error)
+    process.exit(1)
+  }
+}
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    success: false,
-    message: "Too many requests from this IP, please try again later.",
-  },
-})
-app.use(limiter)
-
-// Body parsing middleware
-app.use(compression())
-app.use(express.json({ limit: "10mb" }))
-app.use(express.urlencoded({ extended: true, limit: "10mb" }))
-
-// Health check endpoint
-app.get("/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "Listing service is healthy",
-    timestamp: new Date().toISOString(),
-    service: "listing-service",
-    version: "1.0.0",
-  })
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  console.log("🛑 SIGTERM received, shutting down gracefully")
+  process.exit(0)
 })
 
-// Static file serving for images
-app.use("/uploads", serveImages)
-
-// API routes
-app.use("/api/listings", listingRoutes)
-app.use("/api/service-providers", serviceProviderRoutes)
-app.use("/api/ai", aiSearchRoutes)
-
-// 404 handler
-app.use("*", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Endpoint not found",
-    path: req.originalUrl,
-  })
+process.on("SIGINT", async () => {
+  console.log("🛑 SIGINT received, shutting down gracefully")
+  process.exit(0)
 })
 
-// Global error handler
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Global error handler:", error)
+// Start the application
+start()
 
-  res.status(error.status || 500).json({
-    success: false,
-    message: error.message || "Internal server error",
-    ...(process.env.NODE_ENV === "development" && { stack: error.stack }),
-  })
-})
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Listing service running on port ${PORT}`)
-  console.log(`📋 Environment: ${process.env.NODE_ENV || "development"}`)
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`)
-  console.log(`📚 API endpoints:`)
-  console.log(`   📋 Listings: http://localhost:${PORT}/api/listings`)
-  console.log(`   🏢 Service Providers: http://localhost:${PORT}/api/service-providers`)
-  console.log(`   🤖 AI Search: http://localhost:${PORT}/api/ai`)
-})
-
-export default app
+// Export for testing and external use
+export { createApp, env }

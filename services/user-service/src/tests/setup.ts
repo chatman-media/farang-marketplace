@@ -1,8 +1,9 @@
 import { vi, beforeEach } from "vitest"
 import dotenv from "dotenv"
+import path from "path"
 
 // Load test environment variables
-dotenv.config({ path: ".env.test" })
+dotenv.config({ path: path.join(__dirname, "../../../.env.test") })
 
 // Mock environment variables with correct values
 process.env.DB_HOST = "localhost"

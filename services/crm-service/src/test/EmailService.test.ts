@@ -58,6 +58,7 @@ describe("EmailService", () => {
         to: "recipient@test.com",
         subject: "Test Subject",
         content: "Test content",
+        channel: CommunicationChannel.EMAIL,
       }
 
       const result = await emailService.sendEmail(request)
@@ -103,6 +104,7 @@ describe("EmailService", () => {
         content: "Test content",
         templateId: "template-123",
         templateVariables: { name: "John Doe" },
+        channel: CommunicationChannel.EMAIL,
       }
 
       const result = await emailService.sendEmail(request)
@@ -127,6 +129,7 @@ describe("EmailService", () => {
         to: "recipient@test.com",
         subject: "Test Subject",
         content: "Test content",
+        channel: CommunicationChannel.EMAIL,
       }
 
       const result = await emailService.sendEmail(request)
@@ -152,17 +155,14 @@ describe("EmailService", () => {
       const templateId = await emailService.createTemplate(template)
 
       expect(templateId).toBe("template-123")
-      expect(mockQuery).toHaveBeenCalledWith(
-        expect.stringContaining("INSERT INTO message_templates"),
-        [
-          "Welcome Email",
-          CommunicationChannel.EMAIL,
-          "en",
-          "Welcome {{name}}!",
-          "Hello {{name}}, welcome!",
-          ["name"],
-        ]
-      )
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("INSERT INTO message_templates"), [
+        "Welcome Email",
+        CommunicationChannel.EMAIL,
+        "en",
+        "Welcome {{name}}!",
+        "Hello {{name}}, welcome!",
+        ["name"],
+      ])
     })
 
     it("should get email template", async () => {
@@ -209,7 +209,7 @@ describe("EmailService", () => {
       expect(result).toBe(true)
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining("UPDATE message_templates"),
-        expect.arrayContaining(["Updated Template", "Updated Subject", false, "template-123"])
+        expect.arrayContaining(["Updated Template", "Updated Subject", false, "template-123"]),
       )
     })
 

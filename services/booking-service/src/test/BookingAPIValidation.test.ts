@@ -55,9 +55,7 @@ describe("Booking API Validation Tests", () => {
 
       // Validate duration structure
       expect(validServiceRequest.duration.value).toBeGreaterThan(0)
-      expect(["minutes", "hours", "days", "weeks", "months"]).toContain(
-        validServiceRequest.duration.unit
-      )
+      expect(["minutes", "hours", "days", "weeks", "months"]).toContain(validServiceRequest.duration.unit)
     })
 
     it("should validate booking status update request", () => {

@@ -6,8 +6,8 @@ import type {
   VoiceIntent,
   VoiceIntentType,
   VoiceSession,
-} from "../models/index.js"
-import type { SpeechToTextService } from "./SpeechToTextService.js"
+} from "../models/index"
+import type { SpeechToTextService } from "./SpeechToTextService"
 
 export class VoiceCommandService {
   private speechToTextService: SpeechToTextService
@@ -27,7 +27,7 @@ export class VoiceCommandService {
     userId?: string,
     sessionId?: string,
     context?: VoiceContext,
-    language?: string
+    language?: string,
   ): Promise<VoiceCommandResponse> {
     try {
       // Transcribe audio to text
@@ -48,13 +48,7 @@ export class VoiceCommandService {
       }
 
       // Process the transcribed text as a command
-      return this.processTextCommand(
-        transcriptionResult.transcription,
-        userId,
-        sessionId,
-        context,
-        language
-      )
+      return this.processTextCommand(transcriptionResult.transcription, userId, sessionId, context, language)
     } catch (error) {
       return {
         action: "error",
@@ -72,7 +66,7 @@ export class VoiceCommandService {
     userId?: string,
     sessionId?: string,
     context?: VoiceContext,
-    language?: string
+    language?: string,
   ): Promise<VoiceCommandResponse> {
     const session = this.getOrCreateSession(sessionId || this.generateSessionId(), userId, language)
 
@@ -248,10 +242,7 @@ export class VoiceCommandService {
   /**
    * Execute command based on intent
    */
-  private async executeCommand(
-    command: VoiceCommand,
-    session: VoiceSession
-  ): Promise<VoiceCommandResponse> {
+  private async executeCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
     switch (command.intent.name) {
       case "search":
         return this.executeSearchCommand(command, session)
@@ -275,10 +266,7 @@ export class VoiceCommandService {
   /**
    * Execute search command
    */
-  private async executeSearchCommand(
-    command: VoiceCommand,
-    _session: VoiceSession
-  ): Promise<VoiceCommandResponse> {
+  private async executeSearchCommand(command: VoiceCommand, _session: VoiceSession): Promise<VoiceCommandResponse> {
     const query = command.intent.parameters?.query || command.command
     const location = command.entities.find((e) => e.type === "location")?.value
     const priceEntity = command.entities.find((e) => e.type === "price")?.value
@@ -312,10 +300,7 @@ export class VoiceCommandService {
   /**
    * Execute navigation command
    */
-  private async executeNavigationCommand(
-    command: VoiceCommand,
-    _session: VoiceSession
-  ): Promise<VoiceCommandResponse> {
+  private async executeNavigationCommand(command: VoiceCommand, _session: VoiceSession): Promise<VoiceCommandResponse> {
     const target = command.intent.parameters?.query?.toLowerCase() || ""
 
     const navigationMap: Record<string, string> = {
@@ -350,7 +335,7 @@ export class VoiceCommandService {
    */
   private async executeListingCreationCommand(
     command: VoiceCommand,
-    session: VoiceSession
+    session: VoiceSession,
   ): Promise<VoiceCommandResponse> {
     // Update session state for listing creation flow
     session.state = {
@@ -373,10 +358,7 @@ export class VoiceCommandService {
   /**
    * Execute booking command
    */
-  private async executeBookingCommand(
-    command: VoiceCommand,
-    _session: VoiceSession
-  ): Promise<VoiceCommandResponse> {
+  private async executeBookingCommand(command: VoiceCommand, _session: VoiceSession): Promise<VoiceCommandResponse> {
     const query = command.intent.parameters?.query || ""
 
     return {
@@ -391,10 +373,7 @@ export class VoiceCommandService {
   /**
    * Execute help command
    */
-  private async executeHelpCommand(
-    command: VoiceCommand,
-    _session: VoiceSession
-  ): Promise<VoiceCommandResponse> {
+  private async executeHelpCommand(command: VoiceCommand, _session: VoiceSession): Promise<VoiceCommandResponse> {
     return {
       action: "help",
       data: {
@@ -414,10 +393,7 @@ export class VoiceCommandService {
   /**
    * Execute confirm command
    */
-  private async executeConfirmCommand(
-    command: VoiceCommand,
-    session: VoiceSession
-  ): Promise<VoiceCommandResponse> {
+  private async executeConfirmCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
     if (session.state?.awaitingInput) {
       // Handle confirmation based on current flow
       switch (session.state.currentFlow) {
@@ -444,10 +420,7 @@ export class VoiceCommandService {
   /**
    * Execute cancel command
    */
-  private async executeCancelCommand(
-    command: VoiceCommand,
-    session: VoiceSession
-  ): Promise<VoiceCommandResponse> {
+  private async executeCancelCommand(command: VoiceCommand, session: VoiceSession): Promise<VoiceCommandResponse> {
     // Reset session state
     session.state = {
       awaitingInput: false,
@@ -463,10 +436,7 @@ export class VoiceCommandService {
   /**
    * Execute unknown command
    */
-  private async executeUnknownCommand(
-    command: VoiceCommand,
-    _session: VoiceSession
-  ): Promise<VoiceCommandResponse> {
+  private async executeUnknownCommand(command: VoiceCommand, _session: VoiceSession): Promise<VoiceCommandResponse> {
     return {
       action: "unknown",
       data: { originalCommand: command.command },
@@ -487,9 +457,7 @@ export class VoiceCommandService {
         en: params?.query
           ? `Searching for ${params.query}${params.location ? ` in ${params.location}` : ""}`
           : "Starting search",
-        th: params?.query
-          ? `กำลังค้นหา ${params.query}${params.location ? ` ใน ${params.location}` : ""}`
-          : "เริ่มการค้นหา",
+        th: params?.query ? `กำลังค้นหา ${params.query}${params.location ? ` ใน ${params.location}` : ""}` : "เริ่มการค้นหา",
       },
       navigate: {
         en: params?.target ? `Navigating to ${params.target}` : "Navigating",

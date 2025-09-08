@@ -59,7 +59,7 @@ export class OAuthService {
 
   constructor(
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.config = this.loadConfig()
     this.initializeProviders()
@@ -71,8 +71,7 @@ export class OAuthService {
         ? {
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-            redirectUri:
-              process.env.GOOGLE_CALLBACK_URL || `${process.env.BACKEND_URL}/auth/google/callback`,
+            redirectUri: process.env.GOOGLE_CALLBACK_URL || `${process.env.BACKEND_URL}/auth/google/callback`,
           }
         : undefined,
       apple: process.env.APPLE_CLIENT_ID
@@ -81,16 +80,14 @@ export class OAuthService {
             teamId: process.env.APPLE_TEAM_ID!,
             keyId: process.env.APPLE_KEY_ID!,
             privateKeyPath: process.env.APPLE_PRIVATE_KEY_PATH!,
-            redirectUri:
-              process.env.APPLE_CALLBACK_URL || `${process.env.BACKEND_URL}/auth/apple/callback`,
+            redirectUri: process.env.APPLE_CALLBACK_URL || `${process.env.BACKEND_URL}/auth/apple/callback`,
           }
         : undefined,
       tiktok: process.env.TIKTOK_CLIENT_KEY
         ? {
             clientKey: process.env.TIKTOK_CLIENT_KEY!,
             clientSecret: process.env.TIKTOK_CLIENT_SECRET!,
-            redirectUri:
-              process.env.TIKTOK_REDIRECT_URI || `${process.env.BACKEND_URL}/auth/tiktok/callback`,
+            redirectUri: process.env.TIKTOK_REDIRECT_URI || `${process.env.BACKEND_URL}/auth/tiktok/callback`,
           }
         : undefined,
       telegram: process.env.TELEGRAM_BOT_TOKEN
@@ -103,8 +100,7 @@ export class OAuthService {
         ? {
             channelId: process.env.LINE_CHANNEL_ID!,
             channelSecret: process.env.LINE_CHANNEL_SECRET!,
-            redirectUri:
-              process.env.LINE_CALLBACK_URL || `${process.env.BACKEND_URL}/auth/line/callback`,
+            redirectUri: process.env.LINE_CALLBACK_URL || `${process.env.BACKEND_URL}/auth/line/callback`,
           }
         : undefined,
       whatsapp: process.env.WHATSAPP_APP_ID
@@ -112,9 +108,7 @@ export class OAuthService {
             appId: process.env.WHATSAPP_APP_ID!,
             appSecret: process.env.WHATSAPP_APP_SECRET!,
             phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID!,
-            redirectUri:
-              process.env.WHATSAPP_CALLBACK_URL ||
-              `${process.env.BACKEND_URL}/auth/whatsapp/callback`,
+            redirectUri: process.env.WHATSAPP_CALLBACK_URL || `${process.env.BACKEND_URL}/auth/whatsapp/callback`,
           }
         : undefined,
     }
@@ -222,9 +216,7 @@ export class OAuthService {
       throw new Error("User not found")
     }
 
-    const existingProfile = user.socialProfiles?.find(
-      (p: SocialProfile) => p.provider === request.provider
-    )
+    const existingProfile = user.socialProfiles?.find((p: SocialProfile) => p.provider === request.provider)
     if (existingProfile) {
       throw new Error(`${request.provider} account is already linked to this user`)
     }
@@ -242,11 +234,7 @@ export class OAuthService {
     const socialProfiles = user.socialProfiles || []
     const hasPassword = user.email // Предполагаем, что если есть email, то есть и пароль
 
-    if (
-      socialProfiles.length === 1 &&
-      socialProfiles[0].provider === request.provider &&
-      !hasPassword
-    ) {
+    if (socialProfiles.length === 1 && socialProfiles[0].provider === request.provider && !hasPassword) {
       throw new Error("Cannot unlink the only authentication method. Please set a password first.")
     }
 
@@ -278,8 +266,7 @@ export class OAuthService {
 
   private async createUserFromSocialProfile(_socialProfile: SocialProfile): Promise<User> {
     const userData = {
-      email:
-        _socialProfile.email || `${_socialProfile.providerId}@${_socialProfile.provider}.local`,
+      email: _socialProfile.email || `${_socialProfile.providerId}@${_socialProfile.provider}.local`,
       password: randomBytes(32).toString("hex"), // Случайный пароль
       role: UserRole.USER,
       profile: {
@@ -329,9 +316,7 @@ export class OAuthService {
 // Базовый класс для OAuth провайдеров
 export abstract class BaseOAuthProvider implements OAuthProvider {
   abstract getAuthorizationUrl(state: string): string
-  abstract getUserProfile(
-    request: OAuthLoginRequest | LinkSocialAccountRequest
-  ): Promise<SocialProfile>
+  abstract getUserProfile(request: OAuthLoginRequest | LinkSocialAccountRequest): Promise<SocialProfile>
 
   protected generateState(): string {
     return randomBytes(32).toString("hex")
@@ -596,9 +581,7 @@ export class AppleOAuthProvider extends BaseOAuthProvider {
     return {
       sub: decoded.sub,
       email: decoded.email,
-      name: decoded.name
-        ? `${decoded.name.firstName || ""} ${decoded.name.lastName || ""}`.trim()
-        : undefined,
+      name: decoded.name ? `${decoded.name.firstName || ""} ${decoded.name.lastName || ""}`.trim() : undefined,
     }
   }
 }
@@ -749,9 +732,7 @@ export class LineOAuthProvider extends BaseOAuthProvider {
     }
   }
 
-  private async exchangeCodeForToken(
-    code: string
-  ): Promise<{ access_token: string; id_token?: string }> {
+  private async exchangeCodeForToken(code: string): Promise<{ access_token: string; id_token?: string }> {
     const params = new URLSearchParams({
       grant_type: "authorization_code",
       code,
@@ -873,14 +854,11 @@ export class WhatsAppOAuthProvider extends BaseOAuthProvider {
     id: string
     name?: string
   }> {
-    const response = await fetch(
-      `https://graph.facebook.com/v18.0/me?fields=id,name&access_token=${accessToken}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    )
+    const response = await fetch(`https://graph.facebook.com/v18.0/me?fields=id,name&access_token=${accessToken}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
 
     if (!response.ok) {
       const error = await response.text()

@@ -1,10 +1,10 @@
 import { Request, Response } from "express"
 import { validationResult } from "express-validator"
-import { MarketplaceIntegrationService } from "../services/MarketplaceIntegrationService.js"
-import { AIProviderService } from "../services/AIProviderService.js"
-import { RecommendationEngine } from "../services/RecommendationEngine.js"
-import { UserBehaviorService } from "../services/UserBehaviorService.js"
-import { ContentAnalysisService } from "../services/ContentAnalysisService.js"
+import { MarketplaceIntegrationService } from "../services/MarketplaceIntegrationService"
+import { AIProviderService } from "../services/AIProviderService"
+import { RecommendationEngine } from "../services/RecommendationEngine"
+import { UserBehaviorService } from "../services/UserBehaviorService"
+import { ContentAnalysisService } from "../services/ContentAnalysisService"
 
 // Extend Request interface to include user property
 interface AuthenticatedRequest extends Request {
@@ -29,7 +29,7 @@ export class MarketplaceIntegrationController {
       aiProvider,
       recommendationEngine,
       userBehaviorService,
-      contentAnalysisService
+      contentAnalysisService,
     )
   }
 
@@ -62,11 +62,7 @@ export class MarketplaceIntegrationController {
         return
       }
 
-      const intelligence = await this.marketplaceService.generateBookingIntelligence(
-        userId,
-        listingId,
-        bookingData
-      )
+      const intelligence = await this.marketplaceService.generateBookingIntelligence(userId, listingId, bookingData)
 
       res.status(200).json({
         success: true,
@@ -102,11 +98,7 @@ export class MarketplaceIntegrationController {
 
       const { listingId, currentPrice, marketContext } = req.body
 
-      const suggestions = await this.marketplaceService.generatePriceSuggestions(
-        listingId,
-        currentPrice,
-        marketContext
-      )
+      const suggestions = await this.marketplaceService.generatePriceSuggestions(listingId, currentPrice, marketContext)
 
       res.status(200).json({
         success: true,
@@ -153,11 +145,7 @@ export class MarketplaceIntegrationController {
         return
       }
 
-      const notification = await this.marketplaceService.createSmartNotification(
-        userId,
-        type,
-        context
-      )
+      const notification = await this.marketplaceService.createSmartNotification(userId, type, context)
 
       res.status(201).json({
         success: true,
@@ -195,10 +183,7 @@ export class MarketplaceIntegrationController {
       const authenticatedUserId = req.user?.id
 
       // Only allow fraud detection for own data or by admin/moderator
-      if (
-        authenticatedUserId !== userId &&
-        !["admin", "moderator"].includes(req.user?.role || "")
-      ) {
+      if (authenticatedUserId !== userId && !["admin", "moderator"].includes(req.user?.role || "")) {
         res.status(403).json({
           error: "Forbidden",
           message: "Access denied to fraud detection for other users",
@@ -207,11 +192,7 @@ export class MarketplaceIntegrationController {
         return
       }
 
-      const fraudResult = await this.marketplaceService.detectFraud(
-        userId,
-        listingId,
-        transactionData
-      )
+      const fraudResult = await this.marketplaceService.detectFraud(userId, listingId, transactionData)
 
       res.status(200).json({
         success: true,

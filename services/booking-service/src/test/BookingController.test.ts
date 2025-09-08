@@ -58,9 +58,7 @@ describe("BookingController Logic Tests", () => {
 
       // Validate duration
       expect(mockRequest.body.duration.value).toBeGreaterThan(0)
-      expect(["minutes", "hours", "days", "weeks", "months"]).toContain(
-        mockRequest.body.duration.unit
-      )
+      expect(["minutes", "hours", "days", "weeks", "months"]).toContain(mockRequest.body.duration.unit)
     })
 
     it("should validate status update request", () => {
@@ -219,28 +217,13 @@ describe("BookingController Logic Tests", () => {
 
       // Validate status filter
       if (mockRequest.query.status) {
-        const validStatuses = [
-          "pending",
-          "confirmed",
-          "active",
-          "completed",
-          "cancelled",
-          "disputed",
-        ]
+        const validStatuses = ["pending", "confirmed", "active", "completed", "cancelled", "disputed"]
         expect(validStatuses).toContain(mockRequest.query.status)
       }
 
       // Validate type filter
       if (mockRequest.query.type) {
-        const validTypes = [
-          "accommodation",
-          "transportation",
-          "tour",
-          "activity",
-          "dining",
-          "event",
-          "service",
-        ]
+        const validTypes = ["accommodation", "transportation", "tour", "activity", "dining", "event", "service"]
         expect(validTypes).toContain(mockRequest.query.type)
       }
 

@@ -1,5 +1,5 @@
-import { BaseAIProvider } from "../BaseAIProvider.js"
-import { AIProvider } from "../types.js"
+import { BaseAIProvider } from "../BaseAIProvider"
+import { AIProvider } from "../types"
 
 export class OpenAIProvider extends BaseAIProvider {
   private baseUrl: string
@@ -63,7 +63,7 @@ export class OpenAIProvider extends BaseAIProvider {
         throw this.createAIError(
           `OpenAI API error: ${response.status} - ${errorData.error?.message || response.statusText}`,
           `OPENAI_${response.status}`,
-          response.status >= 500 || response.status === 429
+          response.status >= 500 || response.status === 429,
         )
       }
 
@@ -220,8 +220,7 @@ Provide suggestions one by one, each on a new line.`
       return {
         flagged: result.flagged,
         categories: Object.keys(result.categories).filter((key) => result.categories[key]),
-        confidence:
-          Math.max(...Object.values(result.category_scores as Record<string, number>)) * 100,
+        confidence: Math.max(...Object.values(result.category_scores as Record<string, number>)) * 100,
       }
     } catch (error) {
       console.error("Content moderation failed:", error)

@@ -1,12 +1,5 @@
 import { eq, and, or, desc, asc, sql, like, ilike, inArray } from "drizzle-orm"
-import {
-  db,
-  listings,
-  vehicles,
-  products,
-  listingAvailability,
-  listingBookings,
-} from "../db/connection.js"
+import { db, listings, vehicles, products, listingAvailability, listingBookings } from "../db/connection"
 import type {
   Vehicle,
   Product,
@@ -24,10 +17,7 @@ import { v4 as uuidv4 } from "uuid"
 
 export class ListingService {
   // Create vehicle listing
-  async createVehicleListing(
-    ownerId: string,
-    vehicleData: CreateVehicleRequest
-  ): Promise<VehicleListing> {
+  async createVehicleListing(ownerId: string, vehicleData: CreateVehicleRequest): Promise<VehicleListing> {
     const listingId = uuidv4()
     const vehicleId = uuidv4()
 
@@ -42,8 +32,7 @@ export class ListingService {
             ownerId,
             title: `${vehicleData.specifications.make} ${vehicleData.specifications.model} ${vehicleData.specifications.year}`,
             description:
-              vehicleData.notes ||
-              `${vehicleData.specifications.make} ${vehicleData.specifications.model} for rent`,
+              vehicleData.notes || `${vehicleData.specifications.make} ${vehicleData.specifications.model} for rent`,
             category: "vehicles",
             type: "vehicle",
             status: "draft",
@@ -57,11 +46,7 @@ export class ListingService {
             locationLongitude: vehicleData.location.coordinates?.longitude?.toString(),
             images: vehicleData.images,
             mainImage: vehicleData.images[0],
-            tags: [
-              vehicleData.type,
-              vehicleData.category,
-              vehicleData.specifications.make.toLowerCase(),
-            ],
+            tags: [vehicleData.type, vehicleData.category, vehicleData.specifications.make.toLowerCase()],
           })
           .returning()
 
@@ -158,10 +143,7 @@ export class ListingService {
   }
 
   // Create product listing
-  async createProductListing(
-    ownerId: string,
-    productData: CreateProductRequest
-  ): Promise<ProductListing> {
+  async createProductListing(ownerId: string, productData: CreateProductRequest): Promise<ProductListing> {
     const listingId = uuidv4()
     const productId = uuidv4()
 
@@ -382,9 +364,7 @@ export class ListingService {
           engineSize: vehicle.engineSize,
           power: vehicle.power,
           maxSpeed: vehicle.maxSpeed,
-          fuelConsumption: vehicle.fuelConsumption
-            ? parseFloat(vehicle.fuelConsumption)
-            : undefined,
+          fuelConsumption: vehicle.fuelConsumption ? parseFloat(vehicle.fuelConsumption) : undefined,
           fuelType: vehicle.fuelType,
           transmission: vehicle.transmission,
           seatingCapacity: vehicle.seatingCapacity,
@@ -432,17 +412,13 @@ export class ListingService {
           monthlyRate: vehicle.monthlyRate ? parseFloat(vehicle.monthlyRate) : undefined,
           yearlyRate: vehicle.yearlyRate ? parseFloat(vehicle.yearlyRate) : undefined,
           securityDeposit: parseFloat(vehicle.securityDeposit),
-          insurancePerDay: vehicle.insurancePerDay
-            ? parseFloat(vehicle.insurancePerDay)
-            : undefined,
+          insurancePerDay: vehicle.insurancePerDay ? parseFloat(vehicle.insurancePerDay) : undefined,
           deliveryFee: vehicle.deliveryFee ? parseFloat(vehicle.deliveryFee) : undefined,
           pickupFee: vehicle.pickupFee ? parseFloat(vehicle.pickupFee) : undefined,
           lateFee: vehicle.lateFee ? parseFloat(vehicle.lateFee) : undefined,
           damageFee: vehicle.damageFee ? parseFloat(vehicle.damageFee) : undefined,
           fuelPolicy: vehicle.fuelPolicy,
-          fuelCostPerLiter: vehicle.fuelCostPerLiter
-            ? parseFloat(vehicle.fuelCostPerLiter)
-            : undefined,
+          fuelCostPerLiter: vehicle.fuelCostPerLiter ? parseFloat(vehicle.fuelCostPerLiter) : undefined,
           durationDiscounts: vehicle.durationDiscounts || {},
         },
         location: {
@@ -771,9 +747,7 @@ export class ListingService {
           rentalPricing: product.rentalPricing,
           shippingCost: product.shippingCost ? parseFloat(product.shippingCost) : undefined,
           handlingFee: product.handlingFee ? parseFloat(product.handlingFee) : undefined,
-          installationFee: product.installationFee
-            ? parseFloat(product.installationFee)
-            : undefined,
+          installationFee: product.installationFee ? parseFloat(product.installationFee) : undefined,
           acceptedPayments: product.acceptedPayments || [],
           installmentAvailable: product.installmentAvailable,
           installmentOptions: product.installmentOptions || [],

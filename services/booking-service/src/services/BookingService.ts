@@ -1,5 +1,5 @@
 import { eq, and, gte, lte, or, desc, asc, count, sql } from "drizzle-orm"
-import { db } from "../db/connection.js"
+import { db } from "../db/connection"
 import {
   bookings,
   serviceBookings,
@@ -9,7 +9,7 @@ import {
   type BookingStatus,
   type BookingType,
   type PaymentStatus,
-} from "../db/schema.js"
+} from "../db/schema"
 import type {
   Booking,
   ServiceBooking,
@@ -32,17 +32,13 @@ export class BookingService {
   }
 
   // Create a new booking
-  async createBooking(
-    request: CreateBookingRequest,
-    guestId: string,
-    hostId: string
-  ): Promise<Booking> {
+  async createBooking(request: CreateBookingRequest, guestId: string, hostId: string): Promise<Booking> {
     return db.transaction(async (tx) => {
       // 1. Check availability
       const isAvailable = await this.availabilityService.checkAvailability(
         request.listingId,
         new Date(request.checkIn),
-        request.checkOut ? new Date(request.checkOut) : undefined
+        request.checkOut ? new Date(request.checkOut) : undefined,
       )
 
       if (!isAvailable) {
@@ -84,7 +80,7 @@ export class BookingService {
         request.checkOut ? new Date(request.checkOut) : new Date(request.checkIn),
         "booking",
         newBooking.id,
-        guestId
+        guestId,
       )
 
       // 5. Record status history
@@ -101,14 +97,14 @@ export class BookingService {
   async createServiceBooking(
     request: CreateServiceBookingRequest,
     guestId: string,
-    providerId: string
+    providerId: string,
   ): Promise<ServiceBooking> {
     return db.transaction(async (tx) => {
       // 1. Check service provider availability
       const isAvailable = await this.availabilityService.checkServiceAvailability(
         providerId,
         new Date(request.scheduledDate),
-        request.duration
+        request.duration,
       )
 
       if (!isAvailable) {
@@ -163,35 +159,20 @@ export class BookingService {
         .returning()
 
       // 5. Record status history
-      await this.recordStatusChange(
-        newBooking.id,
-        null,
-        "pending",
-        "Service booking created",
-        guestId,
-        {
-          automaticChange: true,
-          systemReason: "service_booking_creation",
-        }
-      )
+      await this.recordStatusChange(newBooking.id, null, "pending", "Service booking created", guestId, {
+        automaticChange: true,
+        systemReason: "service_booking_creation",
+      })
 
       return this.mapServiceBookingFromDb(newBooking, newServiceBooking)
     })
   }
 
   // Update booking status
-  async updateBookingStatus(
-    bookingId: string,
-    request: UpdateStatusRequest,
-    userId: string
-  ): Promise<Booking> {
+  async updateBookingStatus(bookingId: string, request: UpdateStatusRequest, userId: string): Promise<Booking> {
     return db.transaction(async (tx) => {
       // 1. Get current booking
-      const [currentBooking] = await tx
-        .select()
-        .from(bookings)
-        .where(eq(bookings.id, bookingId))
-        .limit(1)
+      const [currentBooking] = await tx.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1)
 
       if (!currentBooking) {
         throw new Error("Booking not found")
@@ -222,7 +203,7 @@ export class BookingService {
         currentBooking.status,
         request.status,
         request.reason || "Status updated",
-        userId
+        userId,
       )
 
       // 5. Handle status-specific logic
@@ -259,7 +240,7 @@ export class BookingService {
   async searchBookings(
     filters: BookingFilters,
     page: number = 1,
-    limit: number = 20
+    limit: number = 20,
   ): Promise<{
     bookings: Booking[]
     total: number
@@ -271,10 +252,7 @@ export class BookingService {
     const conditions = this.buildBookingFilters(filters)
 
     // Get total count
-    const [{ count: totalCount }] = await db
-      .select({ count: count() })
-      .from(bookings)
-      .where(conditions)
+    const [{ count: totalCount }] = await db.select({ count: count() }).from(bookings).where(conditions)
 
     // Get bookings
     const bookingResults = await db
@@ -306,14 +284,7 @@ export class BookingService {
   // Private helper methods
   private validateStatusTransition(currentStatus: string, newStatus: string): void {
     // Validate that statuses are valid enum values
-    const validStatuses: BookingStatus[] = [
-      "pending",
-      "confirmed",
-      "active",
-      "completed",
-      "cancelled",
-      "disputed",
-    ]
+    const validStatuses: BookingStatus[] = ["pending", "confirmed", "active", "completed", "cancelled", "disputed"]
     if (
       !validStatuses.includes(currentStatus as BookingStatus) ||
       !validStatuses.includes(newStatus as BookingStatus)
@@ -342,7 +313,7 @@ export class BookingService {
     toStatus: string,
     reason: string,
     changedBy: string,
-    metadata?: any
+    metadata?: any,
   ): Promise<void> {
     await db.insert(bookingStatusHistory).values({
       bookingId,
@@ -354,11 +325,7 @@ export class BookingService {
     })
   }
 
-  private async handleStatusChange(
-    booking: any,
-    fromStatus: string,
-    toStatus: string
-  ): Promise<void> {
+  private async handleStatusChange(booking: any, fromStatus: string, toStatus: string): Promise<void> {
     // Handle status-specific business logic
     switch (toStatus) {
       case "cancelled":
@@ -395,11 +362,7 @@ export class BookingService {
     await db.delete(availabilityConflicts).where(eq(availabilityConflicts.bookingId, bookingId))
   }
 
-  private async createDispute(
-    bookingId: string,
-    fromStatus: string,
-    toStatus: string
-  ): Promise<void> {
+  private async createDispute(bookingId: string, fromStatus: string, toStatus: string): Promise<void> {
     // Get booking details to find who initiated the dispute
     const [booking] = await db.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1)
 
@@ -441,8 +404,8 @@ export class BookingService {
       conditions.push(
         and(
           gte(bookings.checkIn, new Date(filters.dateRange.startDate)),
-          lte(bookings.checkIn, new Date(filters.dateRange.endDate))
-        )
+          lte(bookings.checkIn, new Date(filters.dateRange.endDate)),
+        ),
       )
     }
 
@@ -450,8 +413,8 @@ export class BookingService {
       conditions.push(
         and(
           gte(bookings.totalPrice, filters.priceRange.min.toString()),
-          lte(bookings.totalPrice, filters.priceRange.max.toString())
-        )
+          lte(bookings.totalPrice, filters.priceRange.max.toString()),
+        ),
       )
     }
 

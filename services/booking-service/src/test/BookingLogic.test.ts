@@ -77,9 +77,7 @@ describe("Booking Service Logic", () => {
       const checkOut = undefined
 
       const nights = checkOut
-        ? Math.ceil(
-            (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
-          )
+        ? Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24))
         : 1
 
       expect(nights).toBe(1)
@@ -100,8 +98,7 @@ describe("Booking Service Logic", () => {
 
       // Check if dates overlap
       const hasConflict =
-        newBooking.startDate < existingBooking.endDate &&
-        newBooking.endDate > existingBooking.startDate
+        newBooking.startDate < existingBooking.endDate && newBooking.endDate > existingBooking.startDate
 
       expect(hasConflict).toBe(true)
     })
@@ -119,8 +116,7 @@ describe("Booking Service Logic", () => {
 
       // Check if dates overlap
       const hasConflict =
-        newBooking.startDate < existingBooking.endDate &&
-        newBooking.endDate > existingBooking.startDate
+        newBooking.startDate < existingBooking.endDate && newBooking.endDate > existingBooking.startDate
 
       expect(hasConflict).toBe(false)
     })

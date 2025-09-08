@@ -1,5 +1,5 @@
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm"
-import { db } from "../db/connection.js"
+import { db } from "../db/connection"
 import {
   serviceAssignments,
   agencyServices,
@@ -8,7 +8,7 @@ import {
   type ServiceAssignment,
   type NewServiceAssignment,
   type ServiceAssignmentStatusType,
-} from "../db/schema.js"
+} from "../db/schema"
 
 export interface AssignmentFilters {
   agencyId?: string
@@ -45,10 +45,7 @@ export class ServiceAssignmentService {
   async createAssignment(assignmentData: CreateAssignmentRequest): Promise<ServiceAssignment> {
     try {
       // Verify agency and service exist
-      const [agency] = await db
-        .select()
-        .from(agencies)
-        .where(eq(agencies.id, assignmentData.agencyId))
+      const [agency] = await db.select().from(agencies).where(eq(agencies.id, assignmentData.agencyId))
 
       if (!agency) {
         throw new Error("Agency not found")
@@ -100,10 +97,7 @@ export class ServiceAssignmentService {
    */
   async getAssignmentById(id: string): Promise<ServiceAssignment | null> {
     try {
-      const [assignment] = await db
-        .select()
-        .from(serviceAssignments)
-        .where(eq(serviceAssignments.id, id))
+      const [assignment] = await db.select().from(serviceAssignments).where(eq(serviceAssignments.id, id))
 
       return assignment || null
     } catch (error) {
@@ -154,7 +148,7 @@ export class ServiceAssignmentService {
   async updateAssignmentStatus(
     id: string,
     status: ServiceAssignmentStatusType,
-    notes?: string
+    notes?: string,
   ): Promise<ServiceAssignment | null> {
     try {
       const updateData: any = {
@@ -186,11 +180,7 @@ export class ServiceAssignmentService {
   /**
    * Add customer feedback
    */
-  async addCustomerFeedback(
-    id: string,
-    rating: number,
-    feedback?: string
-  ): Promise<ServiceAssignment | null> {
+  async addCustomerFeedback(id: string, rating: number, feedback?: string): Promise<ServiceAssignment | null> {
     try {
       if (rating < 1 || rating > 5) {
         throw new Error("Rating must be between 1 and 5")
@@ -218,7 +208,7 @@ export class ServiceAssignmentService {
    */
   async searchAssignments(
     filters: AssignmentFilters = {},
-    options: AssignmentSearchOptions = {}
+    options: AssignmentSearchOptions = {},
   ): Promise<{
     assignments: (ServiceAssignment & {
       agencyName: string | null
@@ -264,34 +254,21 @@ export class ServiceAssignmentService {
       let orderClause
       switch (sortBy) {
         case "assignedAt":
-          orderClause =
-            sortOrder === "asc"
-              ? asc(serviceAssignments.assignedAt)
-              : desc(serviceAssignments.assignedAt)
+          orderClause = sortOrder === "asc" ? asc(serviceAssignments.assignedAt) : desc(serviceAssignments.assignedAt)
           break
         case "completedAt":
-          orderClause =
-            sortOrder === "asc"
-              ? asc(serviceAssignments.completedAt)
-              : desc(serviceAssignments.completedAt)
+          orderClause = sortOrder === "asc" ? asc(serviceAssignments.completedAt) : desc(serviceAssignments.completedAt)
           break
         case "servicePrice":
           orderClause =
-            sortOrder === "asc"
-              ? asc(serviceAssignments.servicePrice)
-              : desc(serviceAssignments.servicePrice)
+            sortOrder === "asc" ? asc(serviceAssignments.servicePrice) : desc(serviceAssignments.servicePrice)
           break
         case "customerRating":
           orderClause =
-            sortOrder === "asc"
-              ? asc(serviceAssignments.customerRating)
-              : desc(serviceAssignments.customerRating)
+            sortOrder === "asc" ? asc(serviceAssignments.customerRating) : desc(serviceAssignments.customerRating)
           break
         default:
-          orderClause =
-            sortOrder === "asc"
-              ? asc(serviceAssignments.assignedAt)
-              : desc(serviceAssignments.assignedAt)
+          orderClause = sortOrder === "asc" ? asc(serviceAssignments.assignedAt) : desc(serviceAssignments.assignedAt)
       }
 
       // Get total count

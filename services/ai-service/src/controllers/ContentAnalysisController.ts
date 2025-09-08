@@ -92,8 +92,7 @@ export class ContentAnalysisController {
         data: {
           results,
           totalItems: requests.length,
-          successfulAnalyses: results.filter((r) => r.sentiment || r.keywords || r.categories)
-            .length,
+          successfulAnalyses: results.filter((r) => r.sentiment || r.keywords || r.categories).length,
         },
       })
     } catch (error) {
@@ -435,98 +434,54 @@ export class ContentAnalysisController {
 
 // Validation rules
 export const analyzeContentValidation = [
-  body("type")
-    .isIn(["listing", "review", "message", "profile"])
-    .withMessage("Invalid content type"),
+  body("type").isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
   body("content").isObject().withMessage("Content object is required"),
-  body("content.title")
-    .optional()
-    .isLength({ min: 1, max: 500 })
-    .withMessage("Title must be 1-500 characters"),
+  body("content.title").optional().isLength({ min: 1, max: 500 }).withMessage("Title must be 1-500 characters"),
   body("content.description")
     .optional()
     .isLength({ min: 1, max: 5000 })
     .withMessage("Description must be 1-5000 characters"),
-  body("content.text")
-    .optional()
-    .isLength({ min: 1, max: 10000 })
-    .withMessage("Text must be 1-10000 characters"),
-  body("language")
-    .optional()
-    .isLength({ min: 2, max: 5 })
-    .withMessage("Language code must be 2-5 characters"),
+  body("content.text").optional().isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
+  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
 ]
 
 export const batchAnalyzeValidation = [
   body("items").isArray({ min: 1, max: 50 }).withMessage("Items array must contain 1-50 items"),
-  body("items.*.type")
-    .isIn(["listing", "review", "message", "profile"])
-    .withMessage("Invalid content type"),
+  body("items.*.type").isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
   body("items.*.content").isObject().withMessage("Content object is required"),
 ]
 
 export const sentimentAnalysisValidation = [
   body("text").isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
-  body("type")
-    .optional()
-    .isIn(["listing", "review", "message", "profile"])
-    .withMessage("Invalid content type"),
-  body("language")
-    .optional()
-    .isLength({ min: 2, max: 5 })
-    .withMessage("Language code must be 2-5 characters"),
+  body("type").optional().isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
+  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
 ]
 
 export const keywordExtractionValidation = [
   body("text").isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
-  body("type")
-    .optional()
-    .isIn(["listing", "review", "message", "profile"])
-    .withMessage("Invalid content type"),
-  body("language")
-    .optional()
-    .isLength({ min: 2, max: 5 })
-    .withMessage("Language code must be 2-5 characters"),
+  body("type").optional().isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
+  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
 ]
 
 export const categorizationValidation = [
-  body("type")
-    .isIn(["listing", "review", "message", "profile"])
-    .withMessage("Invalid content type"),
+  body("type").isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
   body("content").isObject().withMessage("Content object is required"),
-  body("language")
-    .optional()
-    .isLength({ min: 2, max: 5 })
-    .withMessage("Language code must be 2-5 characters"),
+  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
 ]
 
 export const moderationValidation = [
   body("text").isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
-  body("type")
-    .optional()
-    .isIn(["listing", "review", "message", "profile"])
-    .withMessage("Invalid content type"),
-  body("language")
-    .optional()
-    .isLength({ min: 2, max: 5 })
-    .withMessage("Language code must be 2-5 characters"),
+  body("type").optional().isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
+  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
 ]
 
 export const qualityAssessmentValidation = [
-  body("type")
-    .isIn(["listing", "review", "message", "profile"])
-    .withMessage("Invalid content type"),
+  body("type").isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
   body("content").isObject().withMessage("Content object is required"),
-  body("language")
-    .optional()
-    .isLength({ min: 2, max: 5 })
-    .withMessage("Language code must be 2-5 characters"),
+  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
 ]
 
 export const languageDetectionValidation = [
   body("text").isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
-  body("type")
-    .optional()
-    .isIn(["listing", "review", "message", "profile"])
-    .withMessage("Invalid content type"),
+  body("type").optional().isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
 ]

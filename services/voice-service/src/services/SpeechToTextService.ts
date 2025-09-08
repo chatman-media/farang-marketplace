@@ -1,14 +1,8 @@
-import type {
-  LanguageSupport,
-  ProviderUsage,
-  SpeechToTextProvider,
-  VoiceRequest,
-  VoiceResponse,
-} from "../models/index.js"
-import { AzureSpeechProvider } from "./providers/AzureSpeechProvider.js"
-import { GoogleSpeechProvider } from "./providers/GoogleSpeechProvider.js"
-import { MockSpeechProvider } from "./providers/MockSpeechProvider.js"
-import { OpenAISpeechProvider } from "./providers/OpenAISpeechProvider.js"
+import type { LanguageSupport, ProviderUsage, SpeechToTextProvider, VoiceRequest, VoiceResponse } from "../models/index"
+import { AzureSpeechProvider } from "./providers/AzureSpeechProvider"
+import { GoogleSpeechProvider } from "./providers/GoogleSpeechProvider"
+import { MockSpeechProvider } from "./providers/MockSpeechProvider"
+import { OpenAISpeechProvider } from "./providers/OpenAISpeechProvider"
 
 export class SpeechToTextService {
   private providers: Map<string, SpeechToTextProvider> = new Map()
@@ -35,7 +29,7 @@ export class SpeechToTextService {
           new GoogleSpeechProvider({
             apiKey: process.env.GOOGLE_SPEECH_API_KEY,
             projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-          })
+          }),
         )
       }
 
@@ -45,7 +39,7 @@ export class SpeechToTextService {
           new AzureSpeechProvider({
             apiKey: process.env.AZURE_SPEECH_KEY,
             region: process.env.AZURE_SPEECH_REGION,
-          })
+          }),
         )
       }
 
@@ -55,7 +49,7 @@ export class SpeechToTextService {
           new OpenAISpeechProvider({
             apiKey: process.env.OPENAI_API_KEY,
             organization: process.env.OPENAI_ORGANIZATION,
-          })
+          }),
         )
       }
 
@@ -233,9 +227,7 @@ export class SpeechToTextService {
 
     // Check language support
     if (request.language) {
-      const isSupported = this.supportedLanguages.some(
-        (l) => l.code === request.language && l.enabled
-      )
+      const isSupported = this.supportedLanguages.some((l) => l.code === request.language && l.enabled)
       if (!isSupported) {
         throw new Error(`Language ${request.language} is not supported`)
       }

@@ -1,73 +1,113 @@
-import { Router } from "express"
-import {
-  ServiceAssignmentController,
-  createAssignmentValidation,
-  updateAssignmentStatusValidation,
-  addFeedbackValidation,
-  assignmentIdValidation,
-  agencyIdValidation,
-  listingIdValidation,
-} from "../controllers/ServiceAssignmentController.js"
-import {
-  authenticateToken,
-  requireAgencyStaff,
-  requireAgencyOwnership,
-  requireAdmin,
-} from "../middleware/auth.js"
+import { FastifyPluginAsync } from "fastify"
+import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
-const router = Router()
-const serviceAssignmentController = new ServiceAssignmentController()
+const assignmentsRoutes: FastifyPluginAsync = async (fastify) => {
+  // Get all assignments
+  fastify.get("/", {
+    preHandler: [authenticateToken],
+    handler: async (request, reply) => {
+      return reply.status(200).send({
+        success: true,
+        data: [],
+        message: "Assignments retrieved successfully (placeholder)",
+      })
+    },
+  })
 
-// All routes require authentication
-router.use(authenticateToken)
+  // Get assignment by ID
+  fastify.get("/:id", {
+    preHandler: [authenticateToken],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+    },
+    handler: async (request, reply) => {
+      const { id } = request.params as { id: string }
+      return reply.status(200).send({
+        success: true,
+        data: { id, status: "active" },
+        message: "Assignment retrieved successfully (placeholder)",
+      })
+    },
+  })
 
-// Assignment management routes
-router.post(
-  "/",
-  createAssignmentValidation,
-  requireAgencyStaff,
-  serviceAssignmentController.createAssignment.bind(serviceAssignmentController)
-)
-router.get(
-  "/search",
-  serviceAssignmentController.searchAssignments.bind(serviceAssignmentController)
-)
-router.get(
-  "/stats",
-  serviceAssignmentController.getAssignmentStats.bind(serviceAssignmentController)
-)
+  // Create assignment (protected)
+  fastify.post("/", {
+    preHandler: [authenticateToken, requireAgencyStaff],
+    schema: {
+      body: {
+        type: "object",
+        properties: {
+          serviceId: { type: "string" },
+          agencyId: { type: "string" },
+          userId: { type: "string" },
+          commissionRate: { type: "number" },
+        },
+        required: ["serviceId", "agencyId", "userId"],
+      },
+    },
+    handler: async (request, reply) => {
+      return reply.status(201).send({
+        success: true,
+        data: { id: "new-assignment-id", ...(request.body as any) },
+        message: "Assignment created successfully (placeholder)",
+      })
+    },
+  })
 
-// Individual assignment routes
-router.get(
-  "/:id",
-  assignmentIdValidation,
-  serviceAssignmentController.getAssignmentById.bind(serviceAssignmentController)
-)
-router.patch(
-  "/:id/status",
-  updateAssignmentStatusValidation,
-  requireAgencyStaff,
-  serviceAssignmentController.updateAssignmentStatus.bind(serviceAssignmentController)
-)
-router.post(
-  "/:id/feedback",
-  addFeedbackValidation,
-  serviceAssignmentController.addCustomerFeedback.bind(serviceAssignmentController)
-)
+  // Update assignment (protected)
+  fastify.put("/:id", {
+    preHandler: [authenticateToken, requireAgencyStaff],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+      body: {
+        type: "object",
+        properties: {
+          status: { type: "string" },
+          commissionRate: { type: "number" },
+        },
+      },
+    },
+    handler: async (request, reply) => {
+      const { id } = request.params as { id: string }
+      return reply.status(200).send({
+        success: true,
+        data: { id, ...(request.body as any) },
+        message: "Assignment updated successfully (placeholder)",
+      })
+    },
+  })
 
-// Agency-specific assignment routes
-router.get(
-  "/agency/:agencyId",
-  agencyIdValidation,
-  requireAgencyOwnership,
-  serviceAssignmentController.getAssignmentsByAgency.bind(serviceAssignmentController)
-)
+  // Delete assignment (protected)
+  fastify.delete("/:id", {
+    preHandler: [authenticateToken, requireAgencyStaff],
+    schema: {
+      params: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+        },
+        required: ["id"],
+      },
+    },
+    handler: async (request, reply) => {
+      return reply.status(200).send({
+        success: true,
+        message: "Assignment deleted successfully (placeholder)",
+      })
+    },
+  })
+}
 
-// Listing-specific assignment routes
-router.get(
-  "/listing/:listingId",
-  listingIdValidation,
-  serviceAssignmentController.getAssignmentsByListing.bind(serviceAssignmentController)
-)
-
-export default router
+export default assignmentsRoutes

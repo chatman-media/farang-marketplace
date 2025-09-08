@@ -1,15 +1,4 @@
-import {
-  pgTable,
-  uuid,
-  varchar,
-  text,
-  decimal,
-  boolean,
-  timestamp,
-  jsonb,
-  index,
-  pgEnum,
-} from "drizzle-orm/pg-core"
+import { pgTable, uuid, varchar, text, decimal, boolean, timestamp, jsonb, index, pgEnum } from "drizzle-orm/pg-core"
 
 // Enums
 export const serviceCategory = pgEnum("service_category", [
@@ -27,20 +16,9 @@ export const serviceCategory = pgEnum("service_category", [
   "other",
 ])
 
-export const agencyStatus = pgEnum("agency_status", [
-  "pending",
-  "active",
-  "suspended",
-  "inactive",
-  "rejected",
-])
+export const agencyStatus = pgEnum("agency_status", ["pending", "active", "suspended", "inactive", "rejected"])
 
-export const verificationStatus = pgEnum("verification_status", [
-  "pending",
-  "verified",
-  "rejected",
-  "expired",
-])
+export const verificationStatus = pgEnum("verification_status", ["pending", "verified", "rejected", "expired"])
 
 export const serviceAssignmentStatus = pgEnum("service_assignment_status", [
   "active",
@@ -74,9 +52,7 @@ export const agencies = pgTable(
     coverageAreas: jsonb("coverage_areas").notNull().default("[]"), // Location[]
 
     // Business Details
-    commissionRate: decimal("commission_rate", { precision: 5, scale: 4 })
-      .notNull()
-      .default("0.15"),
+    commissionRate: decimal("commission_rate", { precision: 5, scale: 4 }).notNull().default("0.15"),
     minimumOrderValue: decimal("minimum_order_value", {
       precision: 12,
       scale: 2,
@@ -117,7 +93,7 @@ export const agencies = pgTable(
     verificationStatusIdx: index("agencies_verification_status_idx").on(table.verificationStatus),
     ratingIdx: index("agencies_rating_idx").on(table.rating),
     emailIdx: index("agencies_email_idx").on(table.email),
-  })
+  }),
 )
 
 export const agencyServices = pgTable(
@@ -158,7 +134,7 @@ export const agencyServices = pgTable(
     agencyIdIdx: index("agency_services_agency_id_idx").on(table.agencyId),
     categoryIdx: index("agency_services_category_idx").on(table.category),
     isActiveIdx: index("agency_services_is_active_idx").on(table.isActive),
-  })
+  }),
 )
 
 export const serviceAssignments = pgTable(
@@ -215,7 +191,7 @@ export const serviceAssignments = pgTable(
     bookingIdIdx: index("service_assignments_booking_id_idx").on(table.bookingId),
     statusIdx: index("service_assignments_status_idx").on(table.status),
     assignedAtIdx: index("service_assignments_assigned_at_idx").on(table.assignedAt),
-  })
+  }),
 )
 
 export const commissionPayments = pgTable(
@@ -251,12 +227,10 @@ export const commissionPayments = pgTable(
   },
   (table) => ({
     agencyIdIdx: index("commission_payments_agency_id_idx").on(table.agencyId),
-    serviceAssignmentIdIdx: index("commission_payments_service_assignment_id_idx").on(
-      table.serviceAssignmentId
-    ),
+    serviceAssignmentIdIdx: index("commission_payments_service_assignment_id_idx").on(table.serviceAssignmentId),
     statusIdx: index("commission_payments_status_idx").on(table.status),
     paidAtIdx: index("commission_payments_paid_at_idx").on(table.paidAt),
-  })
+  }),
 )
 
 // Type exports

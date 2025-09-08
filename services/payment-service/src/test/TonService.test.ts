@@ -29,8 +29,7 @@ describe("TON Service Logic Tests", () => {
       })
 
       invalidAddresses.forEach((address) => {
-        const isValid =
-          address.length === 48 && address.startsWith("EQ") && /^EQ[A-Za-z0-9_-]+$/.test(address)
+        const isValid = address.length === 48 && address.startsWith("EQ") && /^EQ[A-Za-z0-9_-]+$/.test(address)
         expect(isValid).toBe(false)
       })
     })
@@ -296,17 +295,11 @@ describe("TON Service Logic Tests", () => {
       const signature3 = "b".repeat(64)
 
       // Same signatures should be equal
-      const equal = crypto.timingSafeEqual(
-        Buffer.from(signature1, "hex"),
-        Buffer.from(signature2, "hex")
-      )
+      const equal = crypto.timingSafeEqual(Buffer.from(signature1, "hex"), Buffer.from(signature2, "hex"))
       expect(equal).toBe(true)
 
       // Different signatures should not be equal
-      const notEqual = crypto.timingSafeEqual(
-        Buffer.from(signature1, "hex"),
-        Buffer.from(signature3, "hex")
-      )
+      const notEqual = crypto.timingSafeEqual(Buffer.from(signature1, "hex"), Buffer.from(signature3, "hex"))
       expect(notEqual).toBe(false)
     })
   })

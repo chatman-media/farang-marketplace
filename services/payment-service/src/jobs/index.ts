@@ -35,14 +35,14 @@ export const reconciliationEvents = new QueueEvents("reconciliation", { connecti
 export const maintenanceEvents = new QueueEvents("maintenance", { connection: redis })
 
 // Job processors
-import "./processors/tonMonitoring.js"
-import "./processors/paymentLifecycle.js"
-import "./processors/webhookProcessing.js"
-import "./processors/reconciliation.js"
-import "./processors/maintenance.js"
+import "./processors/tonMonitoring"
+import "./processors/paymentLifecycle"
+import "./processors/webhookProcessing"
+import "./processors/reconciliation"
+import "./processors/maintenance"
 
 // Job schedulers
-import "./schedulers/index.js"
+import "./schedulers/index"
 
 // Graceful shutdown
 const gracefulShutdown = async () => {

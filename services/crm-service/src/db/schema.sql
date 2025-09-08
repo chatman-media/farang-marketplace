@@ -14,12 +14,23 @@ CREATE TABLE IF NOT EXISTS customers (
   line_id VARCHAR(100),
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
+  company VARCHAR(255),
+  job_title VARCHAR(255),
+  website VARCHAR(255),
+  address JSONB, -- {street, city, state, country, postalCode}
+  social_profiles JSONB, -- {facebook, instagram, linkedin, twitter, youtube, tiktok}
+  source VARCHAR(50),
+  timezone VARCHAR(50),
   preferred_language VARCHAR(10) DEFAULT 'en',
   preferred_channel VARCHAR(20) DEFAULT 'email',
+  communication_preferences JSONB, -- {email, sms, telegram, whatsapp, line, phone, marketing, transactional, frequency, timezone}
   status VARCHAR(20) DEFAULT 'lead',
   lead_score INTEGER DEFAULT 0,
   tags TEXT[], -- Array of tags
   custom_fields JSONB DEFAULT '{}',
+  total_interactions INTEGER DEFAULT 0,
+  last_interaction_at TIMESTAMP WITH TIME ZONE,
+  lifetime_value DECIMAL(10,2),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -34,6 +45,14 @@ CREATE TABLE IF NOT EXISTS leads (
   priority VARCHAR(20) DEFAULT 'medium',
   assigned_to UUID, -- Reference to user who handles this lead
   value DECIMAL(10,2),
+  property_interest TEXT,
+  estimated_value DECIMAL(12,2),
+  probability INTEGER CHECK (probability >= 0 AND probability <= 100),
+  currency VARCHAR(3) DEFAULT 'THB',
+  stage VARCHAR(50),
+  campaign VARCHAR(100),
+  medium VARCHAR(50),
+  expected_close_date DATE,
   notes TEXT,
   follow_up_date TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

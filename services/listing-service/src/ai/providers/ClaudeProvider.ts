@@ -1,5 +1,5 @@
-import { BaseAIProvider } from "../BaseAIProvider.js"
-import { AIProvider } from "../types.js"
+import { BaseAIProvider } from "../BaseAIProvider"
+import { AIProvider } from "../types"
 
 export class ClaudeProvider extends BaseAIProvider {
   private baseUrl: string
@@ -61,7 +61,7 @@ export class ClaudeProvider extends BaseAIProvider {
         throw this.createAIError(
           `Claude API error: ${response.status} - ${errorData.error?.message || response.statusText}`,
           `CLAUDE_${response.status}`,
-          response.status >= 500 || response.status === 429
+          response.status >= 500 || response.status === 429,
         )
       }
 
@@ -212,7 +212,7 @@ Provide your response in JSON format with the analysis results.`
   // Multi-turn conversation for complex queries
   async conversationalAnalysis(
     query: string,
-    context: string[] = []
+    context: string[] = [],
   ): Promise<{
     response: string
     followUpQuestions: string[]
@@ -296,7 +296,7 @@ Provide JSON response with: safe (boolean), concerns (array), recommendations (a
   // Creative content generation
   async generateCreativeContent(
     type: string,
-    context: any
+    context: any,
   ): Promise<{
     content: string
     alternatives: string[]
@@ -385,9 +385,7 @@ Provide ethical analysis and recommendations.`
     const clarificationKeywords = ["clarify", "specify", "explain", "details"]
     const sentences = text.split(/[.!?]+/)
     return sentences
-      .filter((sentence) =>
-        clarificationKeywords.some((keyword) => sentence.toLowerCase().includes(keyword))
-      )
+      .filter((sentence) => clarificationKeywords.some((keyword) => sentence.toLowerCase().includes(keyword)))
       .map((c) => c.trim())
       .filter((c) => c.length > 0)
   }
@@ -401,12 +399,9 @@ Provide ethical analysis and recommendations.`
   }> {
     try {
       const startTime = Date.now()
-      const response = await this.makeRequest(
-        "Perform a comprehensive health check and list your capabilities",
-        {
-          max_tokens: 200,
-        }
-      )
+      const response = await this.makeRequest("Perform a comprehensive health check and list your capabilities", {
+        max_tokens: 200,
+      })
       const responseTime = Date.now() - startTime
 
       return {

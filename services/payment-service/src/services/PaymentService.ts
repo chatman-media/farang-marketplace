@@ -1,8 +1,8 @@
-import { db } from "../db/connection.js"
-import { payments, transactions, refunds, disputes } from "../db/schema.js"
+import { db } from "../db/connection"
+import { payments, transactions, refunds, disputes } from "../db/schema"
 import { eq, and, desc, gte, lte, sql } from "drizzle-orm"
-import { ModernTonService } from "./ModernTonService.js"
-import { StripeService } from "./StripeService.js"
+import { ModernTonService } from "./ModernTonService"
+import { StripeService } from "./StripeService"
 import type {
   Payment,
   NewPayment,
@@ -14,7 +14,7 @@ import type {
   NewDispute,
   PaymentStatus,
   PaymentMethodType,
-} from "../db/schema.js"
+} from "../db/schema"
 
 export interface CreatePaymentRequest {
   bookingId: string
@@ -93,10 +93,7 @@ export class PaymentService {
       // For TON payments, convert fiat to TON if needed
       let tonAmount = request.amount
       if (request.paymentMethod.includes("ton") && request.fiatAmount) {
-        tonAmount = await this.tonService.calculateTonAmount(
-          request.fiatAmount,
-          request.fiatCurrency ?? "USD"
-        )
+        tonAmount = await this.tonService.calculateTonAmount(request.fiatAmount, request.fiatCurrency ?? "USD")
       }
 
       const newPayment: NewPayment = {
@@ -196,7 +193,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         "failed",
-        `Payment failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Payment failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
       throw error
     }
@@ -205,11 +202,7 @@ export class PaymentService {
   /**
    * Process Stripe payment
    */
-  async processStripePayment(
-    paymentId: string,
-    paymentMethodId: string,
-    customerId?: string
-  ): Promise<Payment> {
+  async processStripePayment(paymentId: string, paymentMethodId: string, customerId?: string): Promise<Payment> {
     try {
       const payment = await this.getPaymentById(paymentId)
       if (!payment) {
@@ -221,10 +214,7 @@ export class PaymentService {
       }
 
       // Convert amount to Stripe format (cents)
-      const stripeAmount = this.stripeService.convertToStripeAmount(
-        parseFloat(payment.amount),
-        payment.currency
-      )
+      const stripeAmount = this.stripeService.convertToStripeAmount(parseFloat(payment.amount), payment.currency)
 
       // Update payment status to processing
       await this.updatePaymentStatus(paymentId, "processing", "Stripe payment initiated")
@@ -277,7 +267,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         "failed",
-        `Stripe payment failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Stripe payment failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
       throw error
     }
@@ -298,9 +288,7 @@ export class PaymentService {
       }
 
       // Confirm payment intent
-      const stripeResponse = await this.stripeService.confirmPaymentIntent(
-        payment.stripePaymentIntentId
-      )
+      const stripeResponse = await this.stripeService.confirmPaymentIntent(payment.stripePaymentIntentId)
 
       // Update payment status
       const [updatedPayment] = await db
@@ -330,7 +318,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         "failed",
-        `Stripe confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Stripe confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
       throw error
     }
@@ -362,7 +350,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         "failed",
-        `Confirmation monitoring failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Confirmation monitoring failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
     }
   }
@@ -370,11 +358,7 @@ export class PaymentService {
   /**
    * Update payment status
    */
-  async updatePaymentStatus(
-    paymentId: string,
-    status: PaymentStatus,
-    reason?: string
-  ): Promise<Payment> {
+  async updatePaymentStatus(paymentId: string, status: PaymentStatus, reason?: string): Promise<Payment> {
     try {
       const updateData: any = {
         status,
@@ -388,11 +372,7 @@ export class PaymentService {
         updateData.completedAt = new Date()
       }
 
-      const [updatedPayment] = await db
-        .update(payments)
-        .set(updateData)
-        .where(eq(payments.id, paymentId))
-        .returning()
+      const [updatedPayment] = await db.update(payments).set(updateData).where(eq(payments.id, paymentId)).returning()
 
       // Create transaction record for status change
       await this.createTransaction({
@@ -432,7 +412,7 @@ export class PaymentService {
   async searchPayments(
     filters: PaymentSearchFilters,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<PaymentSearchResult> {
     try {
       const offset = (page - 1) * limit
@@ -473,10 +453,7 @@ export class PaymentService {
         .offset(offset)
 
       // Get total count
-      const [{ count }] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(payments)
-        .where(whereClause)
+      const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(payments).where(whereClause)
 
       return {
         payments: paymentResults,
@@ -589,17 +566,10 @@ export class PaymentService {
   /**
    * Find payment by TON transaction hash or comment
    */
-  async findPaymentByTonTransaction(
-    transactionHash: string,
-    comment?: string
-  ): Promise<Payment | null> {
+  async findPaymentByTonTransaction(transactionHash: string, comment?: string): Promise<Payment | null> {
     try {
       // First try to find by transaction hash
-      let payment = await db
-        .select()
-        .from(payments)
-        .where(eq(payments.tonTransactionHash, transactionHash))
-        .limit(1)
+      let payment = await db.select().from(payments).where(eq(payments.tonTransactionHash, transactionHash)).limit(1)
 
       if (payment.length > 0) {
         return payment[0]
@@ -610,11 +580,7 @@ export class PaymentService {
         const bookingIdMatch = comment.match(/booking\s+([a-f0-9-]+)/i)
         if (bookingIdMatch) {
           const bookingId = bookingIdMatch[1]
-          payment = await db
-            .select()
-            .from(payments)
-            .where(eq(payments.bookingId, bookingId))
-            .limit(1)
+          payment = await db.select().from(payments).where(eq(payments.bookingId, bookingId)).limit(1)
 
           if (payment.length > 0) {
             return payment[0]
@@ -674,11 +640,7 @@ export class PaymentService {
    */
   async handleStripeDispute(chargeId: string): Promise<void> {
     try {
-      const payment = await db
-        .select()
-        .from(payments)
-        .where(eq(payments.stripeChargeId, chargeId))
-        .limit(1)
+      const payment = await db.select().from(payments).where(eq(payments.stripeChargeId, chargeId)).limit(1)
 
       if (payment.length > 0) {
         await this.updatePaymentStatus(payment[0].id, "disputed", "Stripe dispute created")

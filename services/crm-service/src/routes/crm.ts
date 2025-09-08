@@ -1,50 +1,122 @@
-import { Router } from "express"
+import { FastifyInstance, FastifyPluginAsync } from "fastify"
 import { CRMController } from "../controllers/CRMController"
 import { authenticateToken, requireRole } from "../middleware/auth"
 import {
-  validateCreateCustomer,
-  validateUpdateCustomer,
-  validateCreateLead,
-  validateUpdateLead,
-  validateCustomerQuery,
-  validateLeadQuery,
-  validateUUIDParam,
+  createCustomerSchema,
+  updateCustomerSchema,
+  createLeadSchema,
+  updateLeadSchema,
+  customerQuerySchema,
+  leadQuerySchema,
+  uuidParamSchema,
 } from "../middleware/validation"
 
-const router = Router()
 const crmController = new CRMController()
 
-// Health check (no auth required)
-router.get("/health", crmController.healthCheck)
+const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
+  // Health check (no auth required)
+  fastify.get("/health", crmController.healthCheck)
 
-// All other routes require authentication
-router.use(authenticateToken)
+  // Customer routes with authentication
+  fastify.post(
+    "/customers",
+    {
+      preHandler: [authenticateToken],
+      schema: createCustomerSchema,
+    },
+    crmController.createCustomer,
+  )
 
-// Customer routes
-router.post("/customers", validateCreateCustomer, crmController.createCustomer)
-router.get("/customers", validateCustomerQuery, crmController.getCustomers)
-router.get("/customers/:id", validateUUIDParam, crmController.getCustomer)
-router.put("/customers/:id", validateUpdateCustomer, crmController.updateCustomer)
-router.delete(
-  "/customers/:id",
-  validateUUIDParam,
-  requireRole(["admin"]),
-  crmController.deleteCustomer
-)
+  fastify.get(
+    "/customers",
+    {
+      preHandler: [authenticateToken],
+      schema: customerQuerySchema,
+    },
+    crmController.getCustomers,
+  )
 
-// Lead routes
-router.post("/leads", validateCreateLead, crmController.createLead)
-router.get("/leads", validateLeadQuery, crmController.getLeads)
-router.get("/leads/:id", validateUUIDParam, crmController.getLead)
-router.put("/leads/:id", validateUpdateLead, crmController.updateLead)
-router.delete(
-  "/leads/:id",
-  validateUUIDParam,
-  requireRole(["admin", "manager"]),
-  crmController.deleteLead
-)
+  fastify.get(
+    "/customers/:id",
+    {
+      preHandler: [authenticateToken],
+      schema: uuidParamSchema,
+    },
+    crmController.getCustomer,
+  )
 
-// Analytics routes (admin and manager only)
-router.get("/analytics", requireRole(["admin", "manager"]), crmController.getAnalytics)
+  fastify.put(
+    "/customers/:id",
+    {
+      preHandler: [authenticateToken],
+      schema: updateCustomerSchema,
+    },
+    crmController.updateCustomer,
+  )
 
-export default router
+  fastify.delete(
+    "/customers/:id",
+    {
+      preHandler: [authenticateToken, requireRole(["admin"])],
+      schema: uuidParamSchema,
+    },
+    crmController.deleteCustomer,
+  )
+
+  // Lead routes with authentication
+  fastify.post(
+    "/leads",
+    {
+      preHandler: [authenticateToken],
+      schema: createLeadSchema,
+    },
+    crmController.createLead,
+  )
+
+  fastify.get(
+    "/leads",
+    {
+      preHandler: [authenticateToken],
+      schema: leadQuerySchema,
+    },
+    crmController.getLeads,
+  )
+
+  fastify.get(
+    "/leads/:id",
+    {
+      preHandler: [authenticateToken],
+      schema: uuidParamSchema,
+    },
+    crmController.getLead,
+  )
+
+  fastify.put(
+    "/leads/:id",
+    {
+      preHandler: [authenticateToken],
+      schema: updateLeadSchema,
+    },
+    crmController.updateLead,
+  )
+
+  fastify.delete(
+    "/leads/:id",
+    {
+      preHandler: [authenticateToken, requireRole(["admin", "manager"])],
+      schema: uuidParamSchema,
+    },
+    crmController.deleteLead,
+  )
+
+  // Analytics routes (admin and manager only)
+  fastify.get(
+    "/analytics",
+    {
+      preHandler: [authenticateToken, requireRole(["admin", "manager"])],
+    },
+    crmController.getAnalytics,
+  )
+}
+
+export default crmRoutes
