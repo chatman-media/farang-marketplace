@@ -28,12 +28,13 @@ export class FastifyAuthMiddleware {
           if (options.optional) {
             return
           }
-          return reply.code(401).send({
+          return reply.status(401).send({
             error: {
               code: "MISSING_TOKEN",
               message: "Access token is required",
               timestamp: new Date().toISOString(),
-              requestId: request.headers["x-request-id"] || "unknown",
+              requestId:
+                request.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             },
           })
         }
@@ -45,12 +46,13 @@ export class FastifyAuthMiddleware {
         // Check role requirements
         if (options.requiredRoles && options.requiredRoles.length > 0) {
           if (!AuthService.hasRequiredRole(payload.role, options.requiredRoles)) {
-            return reply.code(403).send({
+            return reply.status(403).send({
               error: {
                 code: "INSUFFICIENT_PERMISSIONS",
                 message: `Required roles: ${options.requiredRoles.join(", ")}`,
                 timestamp: new Date().toISOString(),
-                requestId: request.headers["x-request-id"] || "unknown",
+                requestId:
+                  request.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               },
             })
           }
@@ -61,22 +63,24 @@ export class FastifyAuthMiddleware {
         }
 
         if (error instanceof Error) {
-          return reply.code(401).send({
+          return reply.status(401).send({
             error: {
               code: "INVALID_TOKEN",
               message: error.message,
               timestamp: new Date().toISOString(),
-              requestId: request.headers["x-request-id"] || "unknown",
+              requestId:
+                request.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             },
           })
         }
 
-        return reply.code(500).send({
+        return reply.status(500).send({
           error: {
             code: "AUTH_ERROR",
             message: "Authentication failed",
             timestamp: new Date().toISOString(),
-            requestId: request.headers["x-request-id"] || "unknown",
+            requestId:
+              request.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
@@ -108,7 +112,7 @@ export class FastifyAuthMiddleware {
 // Error handler for authentication errors
 export const authErrorHandler = async (error: Error, request: FastifyRequest, reply: FastifyReply) => {
   if (error.name === "UnauthorizedError" || error.message.includes("token")) {
-    return reply.code(401).send({
+    return reply.status(401).send({
       error: {
         code: "UNAUTHORIZED",
         message: "Invalid or expired token",
@@ -119,7 +123,7 @@ export const authErrorHandler = async (error: Error, request: FastifyRequest, re
   }
 
   if (error.name === "ForbiddenError") {
-    return reply.code(403).send({
+    return reply.status(403).send({
       error: {
         code: "FORBIDDEN",
         message: "Insufficient permissions",

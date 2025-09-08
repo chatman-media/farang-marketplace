@@ -66,40 +66,40 @@ export class ProfileController {
   getProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.code(401).send({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
       const user = await this.userService.getUserById(req.user.userId)
       if (!user) {
-        return reply.code(404).send({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
-      return reply.code(200).send({
+      return reply.status(200).send({
         success: true,
         data: user,
         message: "Profile retrieved successfully",
       })
     } catch {
-      return reply.code(500).send({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
           timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
+          requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         },
       })
     }
@@ -109,12 +109,12 @@ export class ProfileController {
   updateProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.code(401).send({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
@@ -128,41 +128,41 @@ export class ProfileController {
       })
 
       if (!updatedUser) {
-        return reply.code(404).send({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
-      return reply.code(200).send({
+      return reply.status(200).send({
         success: true,
         data: updatedUser,
         message: "Profile updated successfully",
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.code(400).send({
+        return reply.status(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
             details: error.issues,
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
       const errorMessage = error instanceof Error ? error.message : "Profile update failed"
-      return reply.code(500).send({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: errorMessage,
           timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
+          requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         },
       })
     }
@@ -172,31 +172,84 @@ export class ProfileController {
   uploadAvatar = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.code(401).send({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
-      const file = (req as any).file
-      if (!file) {
-        return reply.code(400).send({
+      // Handle Fastify multipart
+      let data
+      try {
+        data = await req.file()
+      } catch (error) {
+        // No file uploaded
+        return reply.status(400).send({
           error: {
             code: "FILE_REQUIRED",
             message: "Avatar image file is required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
+      if (!data) {
+        return reply.status(400).send({
+          error: {
+            code: "FILE_REQUIRED",
+            message: "Avatar image file is required",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          },
+        })
+      }
+
+      // Check file size first (5MB limit)
+      const buffer = await data.toBuffer()
+      if (buffer.length > 5 * 1024 * 1024) {
+        return reply.status(400).send({
+          error: {
+            code: "FILE_TOO_LARGE",
+            message: "File size must be less than 5MB",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          },
+        })
+      }
+
+      // Validate file type
+      if (!data.mimetype.startsWith("image/")) {
+        return reply.status(400).send({
+          error: {
+            code: "INVALID_FILE_TYPE",
+            message: "Only image files are allowed",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          },
+        })
+      }
+
+      // Generate filename and save file
+      const timestamp = Date.now()
+      const ext = path.extname(data.filename || ".jpg")
+      const filename = `${req.user.userId}-${timestamp}${ext}`
+      const uploadDir = "uploads/profiles/"
+
+      // Ensure upload directory exists
+      await fs.mkdir(uploadDir, { recursive: true })
+
+      // Save file
+      const filePath = path.join(uploadDir, filename)
+      await fs.writeFile(filePath, buffer)
+
       // Generate avatar URL (in production, this would be a CDN URL)
       const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3001}`
-      const avatarUrl = `${baseUrl}/uploads/profiles/${file.filename}`
+      const avatarUrl = `${baseUrl}/uploads/profiles/${filename}`
 
       // Update user profile with new avatar
       const updatedUser = await this.userService.updateUser(req.user.userId, {
@@ -205,18 +258,18 @@ export class ProfileController {
 
       if (!updatedUser) {
         // Clean up uploaded file if user update fails
-        await fs.unlink(file.path).catch(() => {})
-        return reply.code(404).send({
+        await fs.unlink(filePath).catch(() => {})
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
-      return reply.code(200).send({
+      return reply.status(200).send({
         success: true,
         data: {
           user: updatedUser,
@@ -225,19 +278,13 @@ export class ProfileController {
         message: "Avatar uploaded successfully",
       })
     } catch (error) {
-      // Clean up uploaded file on error
-      const file = (req as any).file
-      if (file) {
-        await fs.unlink(file.path).catch(() => {})
-      }
-
       const errorMessage = error instanceof Error ? error.message : "Avatar upload failed"
-      return reply.code(500).send({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: errorMessage,
           timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
+          requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         },
       })
     }
@@ -247,12 +294,12 @@ export class ProfileController {
   requestVerification = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.code(401).send({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
@@ -263,36 +310,36 @@ export class ProfileController {
       // Check if user exists
       const user = await this.userService.getUserById(req.user.userId)
       if (!user) {
-        return reply.code(404).send({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
       // Check if user is already verified
       if (user.profile.verificationStatus === VerificationStatus.VERIFIED) {
-        return reply.code(400).send({
+        return reply.status(400).send({
           error: {
             code: "ALREADY_VERIFIED",
             message: "User is already verified",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
       // Check if there's already a pending verification request
       if (user.profile.verificationStatus === VerificationStatus.PENDING) {
-        return reply.code(400).send({
+        return reply.status(400).send({
           error: {
             code: "VERIFICATION_PENDING",
             message: "Verification request is already pending",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
@@ -305,30 +352,39 @@ export class ProfileController {
         },
       })
 
-      return reply.code(200).send({
+      return reply.status(200).send({
         success: true,
-        data: updatedUser,
+        data: {
+          user: updatedUser,
+          verificationRequest: {
+            status: VerificationStatus.PENDING,
+            documents: verificationData.documents,
+            notes: verificationData.notes,
+            submittedAt: new Date(),
+            submittedBy: req.user.userId,
+          },
+        },
         message: "Verification request submitted successfully",
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.code(400).send({
+        return reply.status(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
             details: error.issues,
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
-      return reply.code(500).send({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
           timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
+          requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         },
       })
     }
@@ -338,24 +394,24 @@ export class ProfileController {
   approveVerification = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.code(401).send({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
       // Check if user has admin or manager role
       if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
-        return reply.code(403).send({
+        return reply.status(403).send({
           error: {
             code: "INSUFFICIENT_PERMISSIONS",
             message: "Admin or Manager role required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
@@ -364,27 +420,47 @@ export class ProfileController {
       const user = await this.userService.getUserById(userId)
 
       if (!user) {
-        return reply.code(404).send({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
-      return reply.code(200).send({
+      // Update user verification status to verified
+      const updatedUser = await this.userService.updateUser(userId, {
+        profile: {
+          ...user.profile,
+          verificationStatus: VerificationStatus.VERIFIED,
+        },
+      })
+
+      if (!updatedUser) {
+        return reply.status(404).send({
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "User not found",
+            timestamp: new Date().toISOString(),
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          },
+        })
+      }
+
+      return reply.status(200).send({
         success: true,
+        data: updatedUser,
         message: "User verification approved successfully",
       })
     } catch {
-      return reply.code(500).send({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
           timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
+          requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         },
       })
     }
@@ -394,24 +470,24 @@ export class ProfileController {
   rejectVerification = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.code(401).send({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
       // Check if user has admin or manager role
       if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
-        return reply.code(403).send({
+        return reply.status(403).send({
           error: {
             code: "INSUFFICIENT_PERMISSIONS",
             message: "Admin or Manager role required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
@@ -421,12 +497,12 @@ export class ProfileController {
       const user = await this.userService.getUserById(userId)
 
       if (!user) {
-        return reply.code(404).send({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
@@ -440,33 +516,35 @@ export class ProfileController {
       })
 
       if (!updatedUser) {
-        return reply.code(404).send({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
-      return reply.code(200).send({
+      return reply.status(200).send({
         success: true,
-        data: updatedUser,
-        message: "User verification rejected successfully",
-        verificationData: {
-          rejectedAt: new Date(),
-          rejectedBy: req.user.userId,
-          rejectionReason: reason,
+        data: {
+          user: updatedUser,
+          rejection: {
+            reason: reason,
+            rejectedAt: new Date(),
+            rejectedBy: req.user.userId,
+          },
         },
+        message: "User verification rejected successfully",
       })
     } catch {
-      return reply.code(500).send({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
           timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
+          requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         },
       })
     }
@@ -476,12 +554,12 @@ export class ProfileController {
   getUserProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.code(401).send({
+        return reply.status(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
@@ -493,40 +571,40 @@ export class ProfileController {
         req.user.userId === userId || req.user.role === UserRole.ADMIN || req.user.role === UserRole.MANAGER
 
       if (!canAccess) {
-        return reply.code(403).send({
+        return reply.status(403).send({
           error: {
             code: "INSUFFICIENT_PERMISSIONS",
             message: "Access denied",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
       const user = await this.userService.getUserById(userId)
       if (!user) {
-        return reply.code(404).send({
+        return reply.status(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
             timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || "unknown",
+            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           },
         })
       }
 
-      return reply.code(200).send({
+      return reply.status(200).send({
         success: true,
         data: user,
         message: "Profile retrieved successfully",
       })
     } catch {
-      return reply.code(500).send({
+      return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
           timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
+          requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         },
       })
     }

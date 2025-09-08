@@ -67,7 +67,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
     app.log.error(error)
 
     if (error.validation) {
-      return reply.code(400).send({
+      return reply.status(400).send({
         error: "Validation Error",
         message: error.message,
         details: error.validation,
@@ -76,14 +76,14 @@ export const createApp = async (): Promise<FastifyInstance> => {
     }
 
     if (error.statusCode) {
-      return reply.code(error.statusCode).send({
+      return reply.status(error.statusCode).send({
         error: error.name,
         message: error.message,
         timestamp: new Date().toISOString(),
       })
     }
 
-    return reply.code(500).send({
+    return reply.status(500).send({
       error: "Internal Server Error",
       message: env.NODE_ENV === "production" ? "Something went wrong" : error.message,
       timestamp: new Date().toISOString(),
