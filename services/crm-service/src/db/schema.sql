@@ -71,6 +71,8 @@ CREATE TABLE IF NOT EXISTS communication_history (
   template_id UUID,
   campaign_id UUID,
   status VARCHAR(20) DEFAULT 'sent',
+  outcome VARCHAR(20), -- 'SUCCESSFUL', 'FAILED', 'NO_ANSWER', 'SCHEDULED_FOLLOWUP'
+  next_action JSONB, -- {type, dueDate, assignedTo, description}
   sent_at TIMESTAMP WITH TIME ZONE,
   delivered_at TIMESTAMP WITH TIME ZONE,
   read_at TIMESTAMP WITH TIME ZONE,
@@ -103,6 +105,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
   target_segment JSONB NOT NULL, -- Customer segment criteria
   triggers JSONB NOT NULL, -- Campaign triggers
   schedule JSONB, -- Campaign schedule if applicable
+  contact_count INTEGER DEFAULT 0, -- Number of contacts in campaign
   analytics JSONB DEFAULT '{"sent":0,"delivered":0,"opened":0,"clicked":0,"responded":0,"unsubscribed":0,"bounced":0,"conversionRate":0}',
   created_by UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

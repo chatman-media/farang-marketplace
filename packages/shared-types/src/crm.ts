@@ -84,6 +84,20 @@ export interface Lead {
   updatedAt: Date
 }
 
+export enum InteractionOutcome {
+  SUCCESSFUL = "SUCCESSFUL",
+  FAILED = "FAILED",
+  NO_ANSWER = "NO_ANSWER",
+  SCHEDULED_FOLLOWUP = "SCHEDULED_FOLLOWUP",
+}
+
+export interface NextAction {
+  type: string
+  dueDate: Date
+  assignedTo: string
+  description: string
+}
+
 export interface CommunicationHistory {
   id: string
   customerId: string
@@ -95,6 +109,8 @@ export interface CommunicationHistory {
   templateId?: string
   campaignId?: string
   status: MessageStatus
+  outcome?: InteractionOutcome
+  nextAction?: NextAction
   sentAt?: Date
   deliveredAt?: Date
   readAt?: Date
@@ -113,6 +129,7 @@ export interface Campaign {
   messages: CampaignMessage[]
   triggers: CampaignTrigger[]
   schedule?: CampaignSchedule
+  contactCount: number
   analytics: CampaignAnalytics
   createdBy: string
   createdAt: Date

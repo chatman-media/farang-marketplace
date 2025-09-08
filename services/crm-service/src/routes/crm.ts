@@ -117,6 +117,40 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     },
     crmController.getAnalytics,
   )
+
+  // Automation routes (admin only)
+  fastify.get(
+    "/automations",
+    {
+      preHandler: [authenticateToken, requireRole(["admin"])],
+    },
+    crmController.getAutomations,
+  )
+
+  fastify.post(
+    "/automations",
+    {
+      preHandler: [authenticateToken, requireRole(["admin"])],
+    },
+    crmController.createAutomation,
+  )
+
+  fastify.get(
+    "/automations/:id",
+    {
+      preHandler: [authenticateToken, requireRole(["admin"])],
+      schema: uuidParamSchema,
+    },
+    crmController.getAutomationById,
+  )
+
+  fastify.post(
+    "/workflows/:eventName/trigger",
+    {
+      preHandler: [authenticateToken, requireRole(["admin", "manager"])],
+    },
+    crmController.triggerWorkflow,
+  )
 }
 
 export default crmRoutes

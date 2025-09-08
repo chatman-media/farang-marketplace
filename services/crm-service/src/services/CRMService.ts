@@ -1,6 +1,7 @@
 import { query } from "../db/connection"
 import { Customer } from "../models/Customer"
 import { Lead } from "../models/Lead"
+import { AutomationService } from "./AutomationService"
 import {
   CreateCustomerRequest,
   UpdateCustomerRequest,
@@ -13,6 +14,12 @@ import {
 } from "@marketplace/shared-types"
 
 export class CRMService {
+  private automationService: AutomationService
+
+  constructor() {
+    this.automationService = new AutomationService()
+  }
+
   // Customer management
   async createCustomer(data: CreateCustomerRequest): Promise<Customer> {
     const errors = Customer.validateCreateRequest(data)
@@ -131,12 +138,12 @@ export class CRMService {
 
     values.push(id)
     const result = await query(
-      `UPDATE customers SET ${updates.join(", ")}, updated_at = NOW() 
+      `UPDATE customers SET ${updates.join(", ")}, updated_at = NOW()
        WHERE id = $${paramIndex} RETURNING *`,
       values,
     )
 
-    return result.rows.length > 0 ? new Customer(result.rows[0]) : null
+    return result && result.rows && result.rows.length > 0 ? new Customer(result.rows[0]) : null
   }
 
   async deleteCustomer(id: string): Promise<boolean> {
@@ -239,6 +246,18 @@ export class CRMService {
     const newScore = await this.calculateCustomerLeadScore(data.customerId)
     await this.updateCustomer(data.customerId, { leadScore: newScore })
 
+    // Trigger automation for new lead
+    try {
+      await this.automationService.triggerWorkflow("new_lead", {
+        leadId: lead.id,
+        customerId: lead.customerId,
+        source: lead.source,
+        priority: lead.priority,
+      })
+    } catch (error) {
+      console.error("Failed to trigger new_lead automation:", error)
+    }
+
     return lead
   }
 
@@ -299,11 +318,40 @@ export class CRMService {
 
     if (result.rows.length > 0) {
       const lead = new Lead(result.rows[0])
+      const oldLead = await this.getLeadById(id)
 
       // Update customer lead score if lead status changed
       if (data.status) {
         const newScore = await this.calculateCustomerLeadScore(lead.customerId)
         await this.updateCustomer(lead.customerId, { leadScore: newScore })
+
+        // Trigger automation for status change
+        try {
+          await this.automationService.triggerWorkflow("lead_status_change", {
+            leadId: lead.id,
+            customerId: lead.customerId,
+            oldStatus: oldLead?.status,
+            newStatus: data.status,
+            userId: data.assignedTo,
+          })
+        } catch (error) {
+          console.error("Failed to trigger lead_status_change automation:", error)
+        }
+      }
+
+      // Trigger automation for stage change
+      if (data.stage && oldLead?.stage !== data.stage) {
+        try {
+          await this.automationService.triggerWorkflow("stage_change", {
+            leadId: lead.id,
+            customerId: lead.customerId,
+            oldStage: oldLead?.stage,
+            newStage: data.stage,
+            userId: data.assignedTo,
+          })
+        } catch (error) {
+          console.error("Failed to trigger stage_change automation:", error)
+        }
       }
 
       return lead

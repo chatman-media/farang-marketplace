@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify"
 import { CRMService } from "../services/CRMService"
+import { AutomationService } from "../services/AutomationService"
 import {
   CreateCustomerRequest,
   UpdateCustomerRequest,
@@ -8,6 +9,7 @@ import {
   CustomerStatus,
   LeadStatus,
   LeadPriority,
+  Automation,
 } from "@marketplace/shared-types"
 
 // Extend Fastify Request interface to include user property
@@ -21,9 +23,11 @@ interface AuthenticatedRequest extends FastifyRequest {
 
 export class CRMController {
   private crmService: CRMService
+  private automationService: AutomationService
 
   constructor() {
     this.crmService = new CRMService()
+    this.automationService = new AutomationService()
   }
 
   // Health check endpoint
@@ -320,6 +324,99 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error getting analytics:", error)
+      return reply.code(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
+    }
+  }
+
+  // Automation endpoints
+  getAutomations = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    try {
+      const query = request.query as any
+      const { isActive } = query
+
+      const automations = await this.automationService.getAutomations({ isActive })
+
+      return reply.send({
+        success: true,
+        data: automations,
+        message: "Automations retrieved successfully",
+      })
+    } catch (error: any) {
+      request.log.error("Error getting automations:", error)
+      return reply.code(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
+    }
+  }
+
+  createAutomation = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    try {
+      const automationData = request.body as Omit<Automation, "id" | "createdAt" | "updatedAt">
+
+      // Set createdBy from authenticated user
+      if (request.user?.id) {
+        automationData.createdBy = request.user.id
+      }
+
+      const automation = await this.automationService.createAutomation(automationData)
+
+      return reply.code(201).send({
+        success: true,
+        data: automation,
+        message: "Automation created successfully",
+      })
+    } catch (error: any) {
+      request.log.error("Error creating automation:", error)
+      return reply.code(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
+    }
+  }
+
+  getAutomationById = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    try {
+      const { id } = request.params as { id: string }
+      const automation = await this.automationService.getAutomationById(id)
+
+      if (!automation) {
+        return reply.code(404).send({
+          error: "Not Found",
+          message: "Automation not found",
+        })
+      }
+
+      return reply.send({
+        success: true,
+        data: automation,
+        message: "Automation retrieved successfully",
+      })
+    } catch (error: any) {
+      request.log.error("Error getting automation:", error)
+      return reply.code(500).send({
+        error: "Internal Server Error",
+        message: error.message,
+      })
+    }
+  }
+
+  triggerWorkflow = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    try {
+      const { eventName } = request.params as { eventName: string }
+      const triggerData = request.body as any
+
+      await this.automationService.triggerWorkflow(eventName, triggerData)
+
+      return reply.send({
+        success: true,
+        message: `Workflow ${eventName} triggered successfully`,
+      })
+    } catch (error: any) {
+      request.log.error("Error triggering workflow:", error)
       return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,

@@ -291,13 +291,20 @@ export class TelegramService {
     templateId?: string
     campaignId?: string
     status: string
+    outcome?: string
+    nextAction?: {
+      type: string
+      dueDate: Date
+      assignedTo: string
+      description: string
+    }
     metadata?: Record<string, any>
   }): Promise<string> {
     const result = await query(
       `INSERT INTO communication_history (
         customer_id, lead_id, channel, direction, content,
-        template_id, campaign_id, status, sent_at, metadata
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), $9)
+        template_id, campaign_id, status, outcome, next_action, sent_at, metadata
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), $11)
       RETURNING id`,
       [
         data.customerId,
@@ -308,6 +315,8 @@ export class TelegramService {
         data.templateId || null,
         data.campaignId || null,
         data.status,
+        data.outcome || null,
+        data.nextAction ? JSON.stringify(data.nextAction) : null,
         JSON.stringify(data.metadata || {}),
       ],
     )
