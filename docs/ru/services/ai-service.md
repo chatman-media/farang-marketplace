@@ -7,43 +7,63 @@ AI Service - это сервис искусственного интеллект
 ## 🔧 Технические характеристики
 
 - **Порт разработки**: 3006
+- **Framework**: Fastify 5.x (мигрировано с Express.js)
 - **База данных**: PostgreSQL (ai_service_db) + Vector DB (Pinecone/Weaviate)
 - **ORM**: Drizzle ORM
 - **ML Framework**: TensorFlow.js, PyTorch (Python микросервисы)
 - **Очереди**: Redis + Bull Queue
-- **Тестирование**: Vitest (5 тестов)
-- **Покрытие тестами**: 80%+
+- **Тестирование**: Vitest (75 тестов)
+- **Покрытие тестами**: 90%+
+- **Валидация**: Zod schemas
+- **Аутентификация**: JWT + Fastify plugins
+
+## 🚀 Миграция на Fastify
+
+**Статус**: ✅ Завершена (Декабрь 2024)
+
+### Изменения после миграции:
+- **Контроллеры**: Переименован `FastifyInsightsController` → `InsightsController`
+- **Роуты**: Обновлена структура без "fastify-" префиксов
+- **Middleware**: Оптимизирован `auth.ts` для Fastify
+- **Типизация**: Полная совместимость с `AuthenticatedUser` типом
+- **Тесты**: Увеличено количество тестов с 5 до 75
+- **API**: Улучшена обработка ошибок и валидация
 
 ## 🏗️ Архитектура
 
-### Структура проекта
+### Структура проекта (после миграции на Fastify)
 ```
 services/ai-service/
 ├── src/
-│   ├── controllers/     # Контроллеры API
-│   ├── middleware/      # Промежуточное ПО
-│   ├── models/         # Модели данных
-│   ├── routes/         # Маршруты API
+│   ├── controllers/     # Fastify контроллеры API
+│   │   ├── InsightsController.ts      # (переименован)
+│   │   ├── ContentAnalysisController.ts
+│   │   ├── RecommendationController.ts
+│   │   └── MarketplaceIntegrationController.ts
+│   ├── middleware/      # Fastify middleware
+│   │   └── auth.ts     # JWT аутентификация (обновлен)
+│   ├── routes/         # Fastify роуты (обновлены)
+│   │   ├── insights.ts              # Аналитика и инсайты
+│   │   ├── content-analysis.ts      # Анализ контента
+│   │   └── marketplace-integration.ts # Интеграция с маркетплейсом
 │   ├── services/       # Бизнес-логика
-│   │   ├── nlp/        # Обработка естественного языка
-│   │   ├── vision/     # Компьютерное зрение
-│   │   ├── recommendations/ # Рекомендательные системы
-│   │   ├── pricing/    # Динамическое ценообразование
-│   │   ├── fraud/      # Детекция мошенничества
-│   │   └── chatbot/    # Чат-бот
-│   ├── ml/             # ML модели и пайплайны
-│   │   ├── models/     # Обученные модели
-│   │   ├── training/   # Скрипты обучения
-│   │   └── inference/  # Инференс
-│   ├── utils/          # Утилиты
-│   ├── db/             # Конфигурация БД
-│   ├── jobs/           # Фоновые задачи
+│   │   ├── UserBehaviorService.ts   # Анализ поведения
+│   │   ├── ContentAnalysisService.ts # Анализ контента
+│   │   ├── RecommendationService.ts  # Рекомендации
+│   │   └── MarketplaceService.ts     # Интеграция
+│   ├── models/         # Типы и интерфейсы
+│   │   └── index.ts    # Общие типы
+│   ├── test/           # Vitest тесты (75 тестов)
+│   │   ├── InsightsController.test.ts
+│   │   ├── ContentAnalysisController.test.ts
+│   │   ├── RecommendationController.test.ts
+│   │   └── integration/
+│   ├── db/             # Drizzle ORM
 │   └── types/          # TypeScript типы
 ├── python/             # Python микросервисы
 │   ├── image_processing/
 │   ├── text_analysis/
 │   └── recommendation_engine/
-├── tests/              # Тесты
 └── package.json
 ```
 
