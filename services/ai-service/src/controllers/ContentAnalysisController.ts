@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify"
 import { ContentAnalysisService } from "../services/ContentAnalysisService"
 import { z } from "zod"
+import type { ContentAnalysisRequest } from "../models/index"
 
 // Zod schemas for validation
 export const analyzeContentSchema = {
@@ -104,7 +105,6 @@ interface AuthenticatedRequest extends FastifyRequest {
     id: string
     email: string
     role: "user" | "admin" | "agency_owner" | "agency_manager"
-    verified: boolean
   }
 }
 
@@ -122,11 +122,15 @@ export class ContentAnalysisController {
     try {
       const { type, content, language, options } = request.body as z.infer<typeof analyzeContentSchema.body>
 
-      const analysisRequest = {
-        id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      const analysisRequest: ContentAnalysisRequest = {
+        id: `analysis_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         type,
-        content,
-        language,
+        content: {
+          ...(content.title !== undefined && { title: content.title }),
+          ...(content.description !== undefined && { description: content.description }),
+          ...(content.text !== undefined && { text: content.text }),
+        },
+        ...(language !== undefined && { language }),
         options: {
           sentiment: options?.sentiment !== false,
           keywords: options?.keywords !== false,
@@ -161,11 +165,15 @@ export class ContentAnalysisController {
     try {
       const { items } = request.body as z.infer<typeof batchAnalyzeSchema.body>
 
-      const analysisRequests = items.map((item, index) => ({
+      const analysisRequests: ContentAnalysisRequest[] = items.map((item, index) => ({
         id: `batch_analysis_${Date.now()}_${index}`,
         type: item.type,
-        content: item.content,
-        language: item.language,
+        content: {
+          ...(item.content.title !== undefined && { title: item.content.title }),
+          ...(item.content.description !== undefined && { description: item.content.description }),
+          ...(item.content.text !== undefined && { text: item.content.text }),
+        },
+        ...(item.language !== undefined && { language: item.language }),
         options: {
           sentiment: true,
           keywords: true,

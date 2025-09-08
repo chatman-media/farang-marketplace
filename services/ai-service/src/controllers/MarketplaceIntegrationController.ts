@@ -5,7 +5,7 @@ import { AIProviderService } from "../services/AIProviderService"
 import { RecommendationEngine } from "../services/RecommendationEngine"
 import { UserBehaviorService } from "../services/UserBehaviorService"
 import { ContentAnalysisService } from "../services/ContentAnalysisService"
-import type { AuthenticatedUser } from "../middleware/fastify-auth"
+import type { AuthenticatedUser } from "../middleware/auth"
 
 // Zod schemas for validation
 export const bookingIntelligenceSchema = z.object({

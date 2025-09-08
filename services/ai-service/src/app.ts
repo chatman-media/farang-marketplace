@@ -27,13 +27,13 @@ import { UserBehaviorService } from "./services/UserBehaviorService"
 // Import controllers
 import { RecommendationController } from "./controllers/RecommendationController"
 import { ContentAnalysisController } from "./controllers/ContentAnalysisController"
-import { FastifyInsightsController } from "./controllers/FastifyInsightsController"
+import { InsightsController } from "./controllers/InsightsController"
 import { MarketplaceIntegrationController } from "./controllers/MarketplaceIntegrationController"
 
 // Import routes
-import contentAnalysisRoutes from "./routes/fastify-content-analysis"
-import insightsRoutes from "./routes/fastify-insights"
-import marketplaceIntegrationRoutes from "./routes/fastify-marketplace-integration"
+import contentAnalysisRoutes from "./routes/content-analysis"
+import insightsRoutes from "./routes/insights"
+import marketplaceIntegrationRoutes from "./routes/marketplace-integration"
 // import aiProviderRoutes from './routes/ai-providers'
 // import modelManagementRoutes from './routes/model-management'
 // import usageAnalyticsRoutes from './routes/usage-analytics'
@@ -66,7 +66,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
   })
 
   // Register auth middleware
-  await app.register(import("./middleware/fastify-auth"))
+  await app.register(import("./middleware/auth"))
 
   // Initialize services
   const aiProviderService = new AIProviderService()
@@ -77,7 +77,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
   // Initialize controllers
   const recommendationController = new RecommendationController(recommendationEngine)
   const contentAnalysisController = new ContentAnalysisController(contentAnalysisService)
-  const insightsController = new FastifyInsightsController(userBehaviorService)
+  const insightsController = new InsightsController(userBehaviorService)
   const marketplaceController = new MarketplaceIntegrationController()
 
   // Root endpoint

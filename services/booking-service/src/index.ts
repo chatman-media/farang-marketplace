@@ -15,7 +15,7 @@ const start = async () => {
         console.log("⚠️ Database not connected (continuing anyway)")
       }
     } catch (error) {
-      console.log("⚠️ Database connection failed (continuing anyway):", error.message)
+      console.log("⚠️ Database connection failed (continuing anyway):", (error as Error).message)
     }
 
     // Create and start Fastify app
@@ -44,12 +44,12 @@ const start = async () => {
 
     // Handle uncaught exceptions
     process.on("uncaughtException", (error) => {
-      app.log.error("Uncaught Exception:", error)
+      app.log.error("Uncaught Exception:", error as Error)
       gracefulShutdown(app, "uncaughtException")
     })
 
     process.on("unhandledRejection", (reason, promise) => {
-      app.log.error("Unhandled Rejection at:", promise, "reason:", reason)
+      app.log.error("Unhandled Rejection at:", promise as Promise<unknown>, "reason:", reason)
       gracefulShutdown(app, "unhandledRejection")
     })
   } catch (error) {

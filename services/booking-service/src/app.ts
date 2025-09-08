@@ -2,7 +2,7 @@ import Fastify, { FastifyInstance } from "fastify"
 import { config } from "dotenv"
 import { z } from "zod"
 import { checkDatabaseConnection } from "./db/connection"
-import { authMiddleware } from "./middleware/fastify-auth"
+import { authMiddleware } from "./middleware/auth"
 import { BookingController } from "./controllers/BookingController"
 import { AvailabilityController } from "./controllers/AvailabilityController"
 import { PricingController } from "./controllers/PricingController"
@@ -83,7 +83,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
         environment: env.NODE_ENV,
       }
     } catch (error) {
-      app.log.error("Health check failed:", error)
+      app.log.error("Health check failed:", error as Error)
       return {
         status: "error",
         timestamp: new Date().toISOString(),
@@ -108,9 +108,9 @@ export const createApp = async (): Promise<FastifyInstance> => {
   const pricingController = new PricingController(pricingService)
 
   // Register routes
-  await app.register(import("./routes/fastify-bookings"), { prefix: "/api/bookings", bookingController })
-  await app.register(import("./routes/fastify-availability"), { prefix: "/api/availability", availabilityController })
-  await app.register(import("./routes/fastify-pricing"), { prefix: "/api/pricing", pricingController })
+  await app.register(import("./routes/bookings"), { prefix: "/api/bookings", bookingController })
+  await app.register(import("./routes/availability"), { prefix: "/api/availability", availabilityController })
+  await app.register(import("./routes/pricing"), { prefix: "/api/pricing", pricingController })
 
   return app
 }

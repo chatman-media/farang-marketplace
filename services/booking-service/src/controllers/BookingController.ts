@@ -16,16 +16,7 @@ export const createBookingSchema = {
       .string()
       .datetime("Check-in date must be a valid ISO 8601 date")
       .refine((date) => new Date(date) > new Date(), "Check-in date must be in the future"),
-    checkOut: z
-      .string()
-      .datetime("Check-out date must be a valid ISO 8601 date")
-      .optional()
-      .refine((date, ctx) => {
-        if (date && ctx.parent.checkIn) {
-          return new Date(date) > new Date(ctx.parent.checkIn)
-        }
-        return true
-      }, "Check-out date must be after check-in date"),
+    checkOut: z.string().datetime("Check-out date must be a valid ISO 8601 date").optional(),
     guests: z.number().int().min(1).max(20, "Number of guests must be between 1 and 20"),
     specialRequests: z.string().max(1000, "Special requests must not exceed 1000 characters").optional(),
   }),
@@ -34,9 +25,7 @@ export const createBookingSchema = {
 export const createServiceBookingSchema = {
   body: z.object({
     listingId: z.string().uuid("Listing ID must be a valid UUID"),
-    serviceType: z.enum(["consultation", "project", "hourly", "package", "subscription"], {
-      errorMap: () => ({ message: "Invalid service type" }),
-    }),
+    serviceType: z.enum(["consultation", "project", "hourly", "package", "subscription"]),
     scheduledDate: z
       .string()
       .datetime("Scheduled date must be a valid ISO 8601 date")
@@ -47,18 +36,12 @@ export const createServiceBookingSchema = {
       .optional(),
     duration: z.object({
       value: z.number().int().positive("Duration value must be a positive integer"),
-      unit: z.enum(["minutes", "hours", "days", "weeks", "months"], {
-        errorMap: () => ({ message: "Invalid duration unit" }),
-      }),
+      unit: z.enum(["minutes", "hours", "days", "weeks", "months"]),
     }),
-    deliveryMethod: z.enum(["online", "in_person", "hybrid"], {
-      errorMap: () => ({ message: "Invalid delivery method" }),
-    }),
+    deliveryMethod: z.enum(["online", "in_person", "hybrid"]),
     requirements: z.array(z.string()).optional(),
     deliverables: z.array(z.string()).optional(),
-    communicationPreference: z.enum(["email", "phone", "chat", "video_call"], {
-      errorMap: () => ({ message: "Invalid communication preference" }),
-    }),
+    communicationPreference: z.enum(["email", "phone", "chat", "video_call"]),
     timezone: z.string().min(1).max(50, "Timezone must be between 1 and 50 characters").optional(),
   }),
 }
@@ -68,9 +51,7 @@ export const updateStatusSchema = {
     bookingId: z.string().uuid("Booking ID must be a valid UUID"),
   }),
   body: z.object({
-    status: z.enum(["pending", "confirmed", "active", "completed", "cancelled", "disputed"], {
-      errorMap: () => ({ message: "Invalid booking status" }),
-    }),
+    status: z.enum(["pending", "confirmed", "active", "completed", "cancelled", "disputed"]),
     reason: z.string().max(500, "Reason must not exceed 500 characters").optional(),
   }),
 }
@@ -99,14 +80,8 @@ export const searchSchema = {
   }),
 }
 
-// Authenticated request interface
-interface AuthenticatedRequest extends FastifyRequest {
-  user?: {
-    id: string
-    role: string
-    email: string
-  }
-}
+// Use FastifyRequest with user from auth middleware
+type AuthenticatedRequest = FastifyRequest
 
 export class BookingController {
   private bookingService: BookingService
@@ -142,11 +117,7 @@ export class BookingController {
         return
       }
 
-      const booking = await this.bookingService.createBooking({
-        ...bookingRequest,
-        guestId,
-        hostId,
-      })
+      const booking = await this.bookingService.createBooking(bookingRequest, guestId, hostId)
 
       reply.code(201).send({
         success: true,
@@ -190,11 +161,7 @@ export class BookingController {
         return
       }
 
-      const serviceBooking = await this.bookingService.createServiceBooking({
-        ...serviceBookingRequest,
-        guestId,
-        providerId,
-      })
+      const serviceBooking = await this.bookingService.createServiceBooking(serviceBookingRequest, guestId, providerId)
 
       reply.code(201).send({
         success: true,
@@ -227,7 +194,7 @@ export class BookingController {
         return
       }
 
-      const booking = await this.bookingService.getBooking(bookingId, userId)
+      const booking = await this.bookingService.getBookingById(bookingId)
 
       if (!booking) {
         reply.code(404).send({
@@ -268,7 +235,7 @@ export class BookingController {
         return
       }
 
-      const serviceBooking = await this.bookingService.getServiceBooking(bookingId, userId)
+      const serviceBooking = await this.bookingService.getServiceBookingById(bookingId)
 
       if (!serviceBooking) {
         reply.code(404).send({
@@ -312,9 +279,8 @@ export class BookingController {
 
       const updatedBooking = await this.bookingService.updateBookingStatus(
         bookingId,
-        updateRequest.status,
+        { status: updateRequest.status, reason: updateRequest.reason },
         userId,
-        updateRequest.reason,
       )
 
       if (!updatedBooking) {
@@ -345,7 +311,10 @@ export class BookingController {
   // Search bookings
   searchBookings = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const filters: BookingFilters = request.query as BookingFilters
+      const query = request.query as any
+      const filters: BookingFilters = query
+      const page = parseInt(query.page || "1")
+      const limit = parseInt(query.limit || "20")
       const userId = request.user?.id
 
       if (!userId) {
@@ -357,16 +326,17 @@ export class BookingController {
         return
       }
 
-      const result = await this.bookingService.searchBookings(filters, userId)
+      const result = await this.bookingService.searchBookings(filters, page, limit)
 
       reply.send({
         success: true,
         data: result.bookings,
         pagination: {
-          page: result.pagination.page,
-          limit: result.pagination.limit,
-          total: result.pagination.total,
-          totalPages: result.pagination.totalPages,
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+          totalPages: Math.ceil(result.total / result.limit),
+          hasMore: result.hasMore,
         },
         timestamp: new Date().toISOString(),
       })
@@ -395,7 +365,7 @@ export class BookingController {
         return
       }
 
-      const history = await this.bookingService.getBookingStatusHistory(bookingId, userId)
+      const history = await this.bookingService.getBookingStatusHistory(bookingId)
 
       if (!history) {
         reply.code(404).send({

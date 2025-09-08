@@ -1,16 +1,16 @@
 import { FastifyInstance } from "fastify"
 import {
-  FastifyInsightsController,
+  InsightsController,
   trackBehaviorSchema,
   getUserInsightsParamsSchema,
   getUserInsightsQuerySchema,
   getListingInsightsParamsSchema,
   getListingInsightsQuerySchema,
   getMarketInsightsQuerySchema,
-} from "../controllers/FastifyInsightsController"
+} from "../controllers/InsightsController"
 
 interface RouteOptions {
-  insightsController: FastifyInsightsController
+  insightsController: InsightsController
 }
 
 export default async function insightsRoutes(fastify: FastifyInstance, options: RouteOptions) {
