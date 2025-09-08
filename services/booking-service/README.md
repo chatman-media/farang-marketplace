@@ -85,9 +85,9 @@ POST   /api/pricing/compare             # Compare multiple pricing options
 ## 🛠️ Technology Stack
 
 - **Runtime**: Bun (JavaScript runtime)
-- **Framework**: Express.js with TypeScript
+- **Framework**: Fastify 5.x with TypeScript
 - **Database**: PostgreSQL with Drizzle ORM
-- **Validation**: express-validator for request validation
+- **Validation**: Zod for request validation
 - **Authentication**: JWT-based authentication
 - **Testing**: Vitest with comprehensive test coverage
 - **Security**: Helmet, CORS, rate limiting

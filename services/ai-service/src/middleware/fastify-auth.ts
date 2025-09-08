@@ -46,20 +46,18 @@ export default async function authPlugin(fastify: any) {
       const token = authHeader && authHeader.split(" ")[1] // Bearer TOKEN
 
       if (!token) {
-        reply.code(401)
-        return {
+        return reply.code(401).send({
           success: false,
           message: "Access token required",
-        }
+        })
       }
 
       if (!env.JWT_SECRET) {
         fastify.log.error("JWT_SECRET not configured")
-        reply.code(500)
-        return {
+        return reply.code(500).send({
           success: false,
           message: "Server configuration error",
-        }
+        })
       }
 
       const decoded = jwt.verify(token, env.JWT_SECRET) as JWTPayload
@@ -71,24 +69,21 @@ export default async function authPlugin(fastify: any) {
       }
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        reply.code(401)
-        return {
+        return reply.code(401).send({
           success: false,
           message: "Token expired",
-        }
+        })
       } else if (error instanceof jwt.JsonWebTokenError) {
-        reply.code(401)
-        return {
+        return reply.code(401).send({
           success: false,
           message: "Invalid token",
-        }
+        })
       } else {
         fastify.log.error("Authentication error:", error)
-        reply.code(500)
-        return {
+        return reply.code(500).send({
           success: false,
           message: "Authentication failed",
-        }
+        })
       }
     }
   })
@@ -129,19 +124,17 @@ export default async function authPlugin(fastify: any) {
    */
   fastify.decorate("requireAdmin", async (request: FastifyRequest, reply: FastifyReply) => {
     if (!request.user) {
-      reply.code(401)
-      return {
+      return reply.code(401).send({
         success: false,
         message: "Authentication required",
-      }
+      })
     }
 
     if (request.user.role !== "admin") {
-      reply.code(403)
-      return {
+      return reply.code(403).send({
         success: false,
         message: "Admin access required",
-      }
+      })
     }
   })
 
@@ -150,20 +143,18 @@ export default async function authPlugin(fastify: any) {
    */
   fastify.decorate("requireAgencyStaff", async (request: FastifyRequest, reply: FastifyReply) => {
     if (!request.user) {
-      reply.code(401)
-      return {
+      return reply.code(401).send({
         success: false,
         message: "Authentication required",
-      }
+      })
     }
 
     const allowedRoles = ["admin", "agency_owner", "agency_manager"]
     if (!allowedRoles.includes(request.user.role)) {
-      reply.code(403)
-      return {
+      return reply.code(403).send({
         success: false,
         message: "Agency staff access required",
-      }
+      })
     }
   })
 
@@ -172,11 +163,10 @@ export default async function authPlugin(fastify: any) {
    */
   fastify.decorate("requireAgencyOwnership", async (request: FastifyRequest, reply: FastifyReply) => {
     if (!request.user) {
-      reply.code(401)
-      return {
+      return reply.code(401).send({
         success: false,
         message: "Authentication required",
-      }
+      })
     }
 
     // Admins can access any agency
@@ -186,21 +176,19 @@ export default async function authPlugin(fastify: any) {
 
     // Check if user has agency role
     if (!["agency_owner", "agency_manager"].includes(request.user.role)) {
-      reply.code(403)
-      return {
+      return reply.code(403).send({
         success: false,
         message: "Agency access required",
-      }
+      })
     }
 
     // For agency-specific resources, check agency ownership
     const agencyId = (request.params as any)?.agencyId
     if (agencyId && request.user.agencyId !== agencyId) {
-      reply.code(403)
-      return {
+      return reply.code(403).send({
         success: false,
         message: "Access denied: You can only access your own agency resources",
-      }
+      })
     }
   })
 
@@ -210,11 +198,10 @@ export default async function authPlugin(fastify: any) {
   fastify.decorate("requireResourceAccess", (resourceType: string) => {
     return async (request: FastifyRequest, reply: FastifyReply) => {
       if (!request.user) {
-        reply.code(401)
-        return {
+        return reply.code(401).send({
           success: false,
           message: "Authentication required",
-        }
+        })
       }
 
       // Admins can access any resource
@@ -226,11 +213,10 @@ export default async function authPlugin(fastify: any) {
       if (resourceType === "user") {
         const userId = (request.params as any)?.userId
         if (userId && request.user.id !== userId) {
-          reply.code(403)
-          return {
+          return reply.code(403).send({
             success: false,
             message: "Access denied: You can only access your own resources",
-          }
+          })
         }
       }
     }

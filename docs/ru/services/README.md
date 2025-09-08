@@ -113,7 +113,7 @@ API Gateway
 ## 🛠️ Общие технологии
 
 - **Runtime**: Node.js + TypeScript
-- **Framework**: Express.js
+- **Framework**: Fastify 5.x (мигрировано с Express.js)
 - **Database**: PostgreSQL + Drizzle ORM
 - **Cache**: Redis
 - **Testing**: Vitest

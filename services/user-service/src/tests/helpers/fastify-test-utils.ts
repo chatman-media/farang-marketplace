@@ -88,7 +88,7 @@ export class TestRequestBuilder {
           formData.append(key, value as string)
         })
       }
-      this.files.forEach(file => {
+      this.files.forEach((file) => {
         formData.append(file.field, new Blob([file.data]), file.filename)
       })
       this.payload = formData

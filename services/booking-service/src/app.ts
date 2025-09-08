@@ -108,9 +108,9 @@ export const createApp = async (): Promise<FastifyInstance> => {
   const pricingController = new PricingController(pricingService)
 
   // Register routes
-  await app.register(import("./routes/bookings"), { prefix: "/api/bookings", bookingController })
-  await app.register(import("./routes/availability"), { prefix: "/api/availability", availabilityController })
-  await app.register(import("./routes/pricing"), { prefix: "/api/pricing", pricingController })
+  await app.register(import("./routes/fastify-bookings"), { prefix: "/api/bookings", bookingController })
+  await app.register(import("./routes/fastify-availability"), { prefix: "/api/availability", availabilityController })
+  await app.register(import("./routes/fastify-pricing"), { prefix: "/api/pricing", pricingController })
 
   return app
 }

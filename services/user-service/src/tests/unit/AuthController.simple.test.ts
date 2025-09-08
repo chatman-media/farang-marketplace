@@ -21,6 +21,10 @@ const createMockResponse = () => {
       this.statusCode = code
       return this
     },
+    send: function (data: any) {
+      this.jsonData = data
+      return this
+    },
     json: function (data: any) {
       this.jsonData = data
       return this

@@ -96,9 +96,6 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     "/booking",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        body: bookingPriceBodySchema,
-      },
     },
     pricingController.calculateBookingPrice.bind(pricingController),
   )
@@ -108,9 +105,6 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     "/service",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        body: servicePriceBodySchema,
-      },
     },
     pricingController.calculateServicePrice.bind(pricingController),
   )
@@ -120,10 +114,6 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     "/estimate/:listingId",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        params: listingIdParamsSchema,
-        querystring: quickEstimateQuerySchema,
-      },
     },
     pricingController.getQuickEstimate.bind(pricingController),
   )
@@ -133,10 +123,6 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     "/dynamic/:listingId",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        params: listingIdParamsSchema,
-        body: dynamicPricingBodySchema,
-      },
     },
     pricingController.applyDynamicPricing.bind(pricingController),
   )
@@ -146,10 +132,6 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     "/breakdown",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        querystring: pricingBreakdownQuerySchema,
-        body: pricingBreakdownBodySchema,
-      },
     },
     pricingController.getPricingBreakdown.bind(pricingController),
   )
@@ -159,9 +141,6 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     "/compare",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        body: comparePricingBodySchema,
-      },
     },
     pricingController.comparePricing.bind(pricingController),
   )

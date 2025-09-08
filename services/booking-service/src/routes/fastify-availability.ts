@@ -111,10 +111,6 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     "/listings/:listingId/check",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        params: listingIdParamsSchema,
-        querystring: checkAvailabilityQuerySchema,
-      },
     },
     availabilityController.checkAvailability.bind(availabilityController),
   )
@@ -124,10 +120,6 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     "/providers/:providerId/check",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        params: providerIdParamsSchema,
-        body: serviceAvailabilityBodySchema,
-      },
     },
     availabilityController.checkServiceAvailability.bind(availabilityController),
   )
@@ -137,10 +129,6 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     "/listings/:listingId/calendar",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        params: listingIdParamsSchema,
-        querystring: calendarQuerySchema,
-      },
     },
     availabilityController.getAvailabilityCalendar.bind(availabilityController),
   )
@@ -150,10 +138,6 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     "/providers/:providerId",
     {
       preHandler: [fastify.authenticate],
-      schema: {
-        params: providerIdParamsSchema,
-        querystring: providerAvailabilityQuerySchema,
-      },
     },
     availabilityController.getServiceProviderAvailability.bind(availabilityController),
   )
@@ -162,11 +146,7 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
   fastify.post(
     "/listings/:listingId/block",
     {
-      preHandler: [fastify.authenticate, fastify.requireHostOrAdmin],
-      schema: {
-        params: listingIdParamsSchema,
-        body: blockDatesBodySchema,
-      },
+      preHandler: [fastify.authenticate],
     },
     availabilityController.blockDates.bind(availabilityController),
   )
@@ -175,11 +155,7 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
   fastify.post(
     "/listings/:listingId/unblock",
     {
-      preHandler: [fastify.authenticate, fastify.requireHostOrAdmin],
-      schema: {
-        params: listingIdParamsSchema,
-        body: unblockDatesBodySchema,
-      },
+      preHandler: [fastify.authenticate],
     },
     availabilityController.unblockDates.bind(availabilityController),
   )
@@ -188,11 +164,7 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
   fastify.get(
     "/listings/:listingId/upcoming",
     {
-      preHandler: [fastify.authenticate, fastify.requireHostOrAdmin],
-      schema: {
-        params: listingIdParamsSchema,
-        querystring: upcomingBookingsQuerySchema,
-      },
+      preHandler: [fastify.authenticate],
     },
     availabilityController.getUpcomingBookings.bind(availabilityController),
   )

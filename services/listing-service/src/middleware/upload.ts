@@ -2,13 +2,13 @@ import multer from "multer"
 import sharp from "sharp"
 import path from "path"
 import fs from "fs/promises"
-import { Request, Response, NextFunction } from "express"
+import { FastifyRequest, FastifyReply } from "fastify"
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage()
 
 // File filter for images
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
 
   if (allowedTypes.includes(file.mimetype)) {
@@ -28,11 +28,12 @@ export const upload = multer({
   },
 })
 
-// Image processing middleware
-export const processImages = async (req: Request, res: Response, next: NextFunction) => {
+// Image processing middleware for Fastify
+export const processImages = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
-    if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
-      return next()
+    const files = (request as any).files
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      return
     }
 
     const uploadDir = path.join(process.cwd(), "uploads", "listings")
@@ -40,7 +41,7 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
 
     const processedImages: string[] = []
 
-    for (const file of req.files) {
+    for (const file of files) {
       const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}`
 
       // Process main image (800x600)
@@ -67,62 +68,61 @@ export const processImages = async (req: Request, res: Response, next: NextFunct
       processedImages.push(`/uploads/listings/${filename}.webp`)
     }
 
-    // Add processed image URLs to request
-    req.body.processedImages = processedImages
-    next()
+    // Add processed image URLs to request body
+    if (!request.body) request.body = {}
+    ;(request.body as any).processedImages = processedImages
   } catch (error) {
     console.error("Image processing error:", error)
-    res.status(500).json({
+    reply.status(500).send({
       error: {
         code: "IMAGE_PROCESSING_ERROR",
         message: "Failed to process uploaded images",
         details: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
-        requestId: req.headers["x-request-id"] || "unknown",
+        requestId: request.headers["x-request-id"] || "unknown",
       },
     })
   }
 }
 
 // Validation middleware for image uploads
-export const validateImageUpload = (req: Request, res: Response, next: NextFunction) => {
+export const validateImageUpload = (request: FastifyRequest, reply: FastifyReply) => {
   const maxImages = 20
   const minImages = 1
+  const files = (request as any).files
 
-  if (!req.files || !Array.isArray(req.files)) {
-    return res.status(400).json({
+  if (!files || !Array.isArray(files)) {
+    return reply.status(400).send({
       error: {
         code: "NO_IMAGES_UPLOADED",
         message: `At least ${minImages} image is required`,
         timestamp: new Date().toISOString(),
-        requestId: req.headers["x-request-id"] || "unknown",
+        requestId: request.headers["x-request-id"] || "unknown",
       },
     })
   }
 
-  if (req.files.length < minImages) {
-    return res.status(400).json({
+  if (files.length < minImages) {
+    return reply.status(400).send({
       error: {
         code: "INSUFFICIENT_IMAGES",
         message: `At least ${minImages} image is required`,
         timestamp: new Date().toISOString(),
-        requestId: req.headers["x-request-id"] || "unknown",
+        requestId: request.headers["x-request-id"] || "unknown",
       },
     })
   }
 
-  if (req.files.length > maxImages) {
-    return res.status(400).json({
+  if (files.length > maxImages) {
+    return reply.status(400).send({
       error: {
         code: "TOO_MANY_IMAGES",
         message: `Maximum ${maxImages} images allowed`,
         timestamp: new Date().toISOString(),
-        requestId: req.headers["x-request-id"] || "unknown",
+        requestId: request.headers["x-request-id"] || "unknown",
       },
     })
   }
-
-  next()
 }
 
 // Cleanup old images
@@ -144,26 +144,30 @@ export const cleanupImages = async (imagePaths: string[]) => {
   }
 }
 
-// Serve static images
-export const serveImages = (req: Request, res: Response, next: NextFunction) => {
-  const imagePath = path.join(process.cwd(), "uploads", req.path)
+// Serve static images for Fastify
+export const serveImages = async (request: FastifyRequest, reply: FastifyReply) => {
+  const params = request.params as { "*": string }
+  const imagePath = path.join(process.cwd(), "uploads", params["*"])
 
-  // Check if file exists
-  fs.access(imagePath)
-    .then(() => {
-      // Set appropriate headers
-      res.setHeader("Cache-Control", "public, max-age=31536000") // 1 year
-      res.setHeader("Content-Type", "image/webp")
-      res.sendFile(imagePath)
+  try {
+    // Check if file exists
+    await fs.access(imagePath)
+
+    // Set appropriate headers
+    reply.header("Cache-Control", "public, max-age=31536000") // 1 year
+    reply.type("image/webp")
+
+    // Send file
+    const fileStream = await fs.readFile(imagePath)
+    reply.send(fileStream)
+  } catch (error) {
+    reply.status(404).send({
+      error: {
+        code: "IMAGE_NOT_FOUND",
+        message: "Image not found",
+        timestamp: new Date().toISOString(),
+        requestId: request.headers["x-request-id"] || "unknown",
+      },
     })
-    .catch(() => {
-      res.status(404).json({
-        error: {
-          code: "IMAGE_NOT_FOUND",
-          message: "Image not found",
-          timestamp: new Date().toISOString(),
-          requestId: req.headers["x-request-id"] || "unknown",
-        },
-      })
-    })
+  }
 }

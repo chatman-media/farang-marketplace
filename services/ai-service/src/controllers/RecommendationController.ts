@@ -1,7 +1,13 @@
-import { Request, Response } from "express"
-import { body, param, query, validationResult } from "express-validator"
+import { FastifyRequest, FastifyReply } from "fastify"
 import { RecommendationEngine } from "../services/RecommendationEngine"
-import type { AuthenticatedRequest } from "../middleware/auth"
+
+interface AuthenticatedRequest extends FastifyRequest {
+  user?: {
+    id: string
+    email: string
+    role: "user" | "admin" | "agency_owner" | "agency_manager"
+  }
+}
 
 export class RecommendationController {
   private recommendationEngine: RecommendationEngine
@@ -13,62 +19,55 @@ export class RecommendationController {
   /**
    * Get personalized recommendations for user
    */
-  async getRecommendations(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getRecommendations(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
-
-      const userId = req.user?.id || req.body.userId
+      const body = req.body as any
+      const userId = req.user?.id || body?.userId
       if (!userId) {
-        return res.status(400).json({
+        return reply.status(400).send({
           success: false,
           message: "User ID is required",
         })
       }
 
+      const query = req.query as any
       const request = {
         userId,
-        type: (req.query["type"] as any) || "listings",
+        type: query?.type || "listings",
         context: {
-          currentListingId: (req.query["currentListingId"] as string) || "",
-          searchQuery: req.query["searchQuery"] as string,
-          category: req.query["category"] as string,
-          location: req.query["location"] as string,
-          budget: req.query["budget"] ? parseFloat(req.query["budget"] as string) : 0,
+          currentListingId: query?.currentListingId || "",
+          searchQuery: query?.searchQuery || "",
+          category: query?.category || "",
+          location: query?.location || "",
+          budget: query?.budget ? parseFloat(query.budget) : 0,
         },
         filters: {
-          categories: req.query["categories"] ? (req.query["categories"] as string).split(",") : [],
+          categories: query?.categories ? query.categories.split(",") : [],
           priceRange:
-            req.query["minPrice"] && req.query["maxPrice"]
+            query?.minPrice && query?.maxPrice
               ? {
-                  min: parseFloat(req.query["minPrice"] as string),
-                  max: parseFloat(req.query["maxPrice"] as string),
+                  min: parseFloat(query.minPrice),
+                  max: parseFloat(query.maxPrice),
                 }
               : { min: 0, max: 999999 },
-          location: req.query["filterLocation"] as string,
-          rating: req.query["minRating"] ? parseFloat(req.query["minRating"] as string) : 0,
-          availability: req.query["availability"] === "true",
+          location: query?.filterLocation || "",
+          rating: query?.minRating ? parseFloat(query.minRating) : 0,
+          availability: query?.availability === "true",
         },
-        limit: req.query["limit"] ? parseInt(req.query["limit"] as string) : 20,
-        diversityFactor: req.query["diversityFactor"] ? parseFloat(req.query["diversityFactor"] as string) : 0.3,
+        limit: query?.limit ? parseInt(query.limit) : 20,
+        diversityFactor: query?.diversityFactor ? parseFloat(query.diversityFactor) : 0.3,
       }
 
       const recommendations = await this.recommendationEngine.generateRecommendations(request)
 
-      res.json({
+      return reply.send({
         success: true,
         message: `Generated ${recommendations.results.length} recommendations`,
         data: recommendations,
       })
     } catch (error) {
       console.error("Error getting recommendations:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get recommendations",
       })
@@ -78,47 +77,39 @@ export class RecommendationController {
   /**
    * Update user behavior for recommendation improvement
    */
-  async updateUserBehavior(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async updateUserBehavior(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
-
-      const userId = req.user?.id || req.body.userId
+      const body = req.body as any
+      const userId = req.user?.id || body?.userId
       if (!userId) {
-        return res.status(400).json({
+        return reply.status(400).send({
           success: false,
           message: "User ID is required",
         })
       }
 
       const behavior = {
-        id: `behavior_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `behavior_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         userId,
-        action: req.body.action,
-        entityType: req.body.entityType,
-        entityId: req.body.entityId,
-        metadata: req.body.metadata || {},
-        sessionId: req.body.sessionId || `session_${Date.now()}`,
-        location: req.body.location,
-        device: req.body.device,
+        action: body?.action,
+        entityType: body?.entityType,
+        entityId: body?.entityId,
+        metadata: body?.metadata || {},
+        sessionId: body?.sessionId || `session_${Date.now()}`,
+        location: body?.location,
+        device: body?.device,
         timestamp: new Date(),
       }
 
       await this.recommendationEngine.updateUserBehavior(behavior)
 
-      res.json({
+      return reply.send({
         success: true,
         message: "User behavior updated successfully",
       })
     } catch (error) {
       console.error("Error updating user behavior:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update user behavior",
       })
@@ -128,17 +119,17 @@ export class RecommendationController {
   /**
    * Get recommendation statistics
    */
-  async getRecommendationStats(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getRecommendationStats(_req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
       const stats = this.recommendationEngine.getStats()
 
-      res.json({
+      return reply.send({
         success: true,
         data: stats,
       })
     } catch (error) {
       console.error("Error getting recommendation stats:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get recommendation statistics",
       })
@@ -148,25 +139,18 @@ export class RecommendationController {
   /**
    * Get similar items based on item ID
    */
-  async getSimilarItems(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getSimilarItems(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
-
-      const { itemId } = req.params
+      const params = req.params as any
+      const query = req.query as any
+      const { itemId } = params
       const userId = req.user?.id
-      const limit = req.query["limit"] ? parseInt(req.query["limit"] as string) : 10
+      const limit = query?.limit ? parseInt(query.limit) : 10
 
       // Create a recommendation request based on the item
       const request = {
         userId: userId || "anonymous",
-        type: (req.query["type"] as any) || "listings",
+        type: query?.type || "listings",
         context: {
           currentListingId: itemId || "",
           searchQuery: "",
@@ -180,7 +164,7 @@ export class RecommendationController {
 
       const recommendations = await this.recommendationEngine.generateRecommendations(request)
 
-      res.json({
+      return reply.send({
         success: true,
         message: `Found ${recommendations.results.length} similar items`,
         data: {
@@ -192,7 +176,7 @@ export class RecommendationController {
       })
     } catch (error) {
       console.error("Error getting similar items:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get similar items",
       })
@@ -202,11 +186,12 @@ export class RecommendationController {
   /**
    * Get trending items
    */
-  async getTrendingItems(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getTrendingItems(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const category = req.query["category"] as string
-      const location = req.query["location"] as string
-      const limit = req.query["limit"] ? parseInt(req.query["limit"] as string) : 20
+      const query = req.query as any
+      const category = query?.category
+      const location = query?.location
+      const limit = query?.limit ? parseInt(query.limit) : 20
 
       // Mock trending items - in real implementation would use actual trending data
       const trendingItems = Array.from({ length: limit }, (_, i) => ({
@@ -224,7 +209,7 @@ export class RecommendationController {
         rank: i + 1,
       }))
 
-      res.json({
+      return reply.send({
         success: true,
         message: `Found ${trendingItems.length} trending items`,
         data: {
@@ -237,7 +222,7 @@ export class RecommendationController {
       })
     } catch (error) {
       console.error("Error getting trending items:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get trending items",
       })
@@ -247,11 +232,11 @@ export class RecommendationController {
   /**
    * Get personalized categories for user
    */
-  async getPersonalizedCategories(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getPersonalizedCategories(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
       const userId = req.user?.id
       if (!userId) {
-        return res.status(400).json({
+        return reply.status(400).send({
           success: false,
           message: "User ID is required",
         })
@@ -265,7 +250,7 @@ export class RecommendationController {
         { category: "automotive", score: 0.4, reason: "Occasional browsing" },
       ]
 
-      res.json({
+      return reply.send({
         success: true,
         message: `Found ${categories.length} personalized categories`,
         data: {
@@ -277,7 +262,7 @@ export class RecommendationController {
       })
     } catch (error) {
       console.error("Error getting personalized categories:", error)
-      res.status(500).json({
+      return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get personalized categories",
       })
@@ -285,37 +270,26 @@ export class RecommendationController {
   }
 }
 
-// Validation rules
-export const getRecommendationsValidation = [
-  query("type")
-    .optional()
-    .isIn(["listings", "services", "agencies", "users"])
-    .withMessage("Invalid recommendation type"),
-  query("limit").optional().isInt({ min: 1, max: 100 }).withMessage("Limit must be between 1 and 100"),
-  query("diversityFactor")
-    .optional()
-    .isFloat({ min: 0, max: 1 })
-    .withMessage("Diversity factor must be between 0 and 1"),
-  query("minRating").optional().isFloat({ min: 0, max: 5 }).withMessage("Min rating must be between 0 and 5"),
-]
-
-export const updateBehaviorValidation = [
-  body("action")
-    .isIn(["view", "search", "click", "bookmark", "share", "contact", "book", "purchase"])
-    .withMessage("Invalid action"),
-  body("entityType").isIn(["listing", "service", "agency", "user"]).withMessage("Invalid entity type"),
-  body("entityId").isLength({ min: 1 }).withMessage("Entity ID is required"),
-  body("sessionId").optional().isLength({ min: 1 }).withMessage("Session ID must not be empty"),
-]
-
-export const similarItemsValidation = [
-  param("itemId").isLength({ min: 1 }).withMessage("Item ID is required"),
-  query("type").optional().isIn(["listings", "services", "agencies"]).withMessage("Invalid type"),
-  query("limit").optional().isInt({ min: 1, max: 50 }).withMessage("Limit must be between 1 and 50"),
-]
-
-export const trendingItemsValidation = [
-  query("category").optional().isLength({ min: 1 }).withMessage("Category must not be empty"),
-  query("location").optional().isLength({ min: 1 }).withMessage("Location must not be empty"),
-  query("limit").optional().isInt({ min: 1, max: 100 }).withMessage("Limit must be between 1 and 100"),
-]
+// Validation schemas for Fastify (to be implemented with JSON Schema or Zod)
+//
+// getRecommendations query parameters:
+// - type: optional, one of ["listings", "services", "agencies", "users"]
+// - limit: optional, integer between 1 and 100
+// - diversityFactor: optional, float between 0 and 1
+// - minRating: optional, float between 0 and 5
+//
+// updateBehavior body parameters:
+// - action: required, one of ["view", "search", "click", "bookmark", "share", "contact", "book", "purchase"]
+// - entityType: required, one of ["listing", "service", "agency", "user"]
+// - entityId: required, non-empty string
+// - sessionId: optional, non-empty string
+//
+// getSimilarItems parameters:
+// - itemId: required path parameter, non-empty string
+// - type: optional query, one of ["listings", "services", "agencies"]
+// - limit: optional query, integer between 1 and 50
+//
+// getTrendingItems query parameters:
+// - category: optional, non-empty string
+// - location: optional, non-empty string
+// - limit: optional, integer between 1 and 100
