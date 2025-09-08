@@ -172,6 +172,7 @@ describe("CommunicationService", () => {
       expect(mockEmailService.sendEmail).toHaveBeenCalledWith({
         customerId: request.customerId,
         leadId: request.leadId,
+        channel: CommunicationChannel.EMAIL,
         to: "test@example.com",
         subject: request.subject,
         content: request.content,
@@ -208,6 +209,7 @@ describe("CommunicationService", () => {
       expect(mockTelegramService.sendMessage).toHaveBeenCalledWith({
         customerId: request.customerId,
         leadId: request.leadId,
+        channel: CommunicationChannel.TELEGRAM,
         chatId: "telegram123",
         content: request.content,
         templateId: request.templateId,
@@ -243,6 +245,7 @@ describe("CommunicationService", () => {
       expect(mockWhatsAppService.sendMessage).toHaveBeenCalledWith({
         customerId: request.customerId,
         leadId: request.leadId,
+        channel: CommunicationChannel.WHATSAPP,
         phoneNumber: "+1234567890",
         content: request.content,
         templateId: request.templateId,
@@ -278,6 +281,7 @@ describe("CommunicationService", () => {
       expect(mockLineService.sendMessage).toHaveBeenCalledWith({
         customerId: request.customerId,
         leadId: request.leadId,
+        channel: CommunicationChannel.LINE,
         userId: "line123",
         content: request.content,
         templateId: request.templateId,
