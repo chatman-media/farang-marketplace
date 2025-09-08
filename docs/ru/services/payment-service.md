@@ -7,13 +7,17 @@ Payment Service - это современный сервис обработки 
 ## 🔧 Технические характеристики
 
 - **Порт разработки**: 3004
+- **Фреймворк**: Fastify (2025)
 - **База данных**: PostgreSQL (payment_service_db)
-- **ORM**: Drizzle ORM
-- **Blockchain**: TON (The Open Network)
-- **Тестирование**: Vitest (54 теста в 4 файлах)
+- **ORM**: Drizzle ORM 0.38.2
+- **Очереди**: BullMQ 5.42.0
+- **Валидация**: Zod для runtime проверки типов
+- **Blockchain**: TON (The Open Network) + TON Connect 3.5
+- **Тестирование**: Vitest 4.0.0 (54 теста в 4 файлах)
 - **Покрытие тестами**: 95%+
 - **PCI DSS**: Соответствие стандартам безопасности
 - **Криптовалюты**: TON, USDT, USDC (Jettons)
+- **Node.js**: 22+ (современные возможности)
 
 ## 🏗️ Архитектура
 
@@ -21,28 +25,28 @@ Payment Service - это современный сервис обработки 
 ```
 services/payment-service/
 ├── src/
-│   ├── controllers/     # Контроллеры API
-│   │   ├── PaymentController.ts
-│   │   └── WebhookController.ts
-│   ├── middleware/      # Промежуточное ПО
-│   │   └── auth.ts
-│   ├── routes/         # Маршруты API
-│   │   ├── payments.ts
-│   │   └── webhooks.ts
+│   ├── app.ts          # Современное Fastify приложение
+│   ├── index.ts        # Точка входа
+│   ├── routes/         # API маршруты v1
+│   │   ├── payments.ts # Fastify + Zod валидация
+│   │   └── webhooks.ts # Современные webhook handlers
 │   ├── services/       # Бизнес-логика
-│   │   ├── PaymentService.ts  # Основная логика
-│   │   ├── StripeService.ts   # Stripe интеграция
-│   │   └── TonService.ts      # TON Blockchain
-│   ├── db/             # База данных
+│   │   ├── PaymentService.ts    # Основная логика
+│   │   ├── StripeService.ts     # Stripe интеграция
+│   │   └── ModernTonService.ts  # TON Blockchain (2025)
+│   ├── jobs/           # BullMQ фоновые задачи
+│   │   ├── index.ts
+│   │   ├── processors/
+│   │   └── schedulers/
+│   ├── db/             # База данных (Drizzle ORM)
 │   │   ├── connection.ts
 │   │   └── schema.ts
-│   ├── test/           # Тесты (54 теста)
-│   │   ├── PaymentAPI.test.ts
-│   │   ├── PaymentService.test.ts
-│   │   ├── StripeService.test.ts
-│   │   ├── TonService.test.ts
-│   │   └── setup.ts
-│   └── index.ts
+│   └── test/           # Тесты (54 теста)
+│       ├── PaymentAPI.test.ts
+│       ├── PaymentService.test.ts
+│       ├── StripeService.test.ts
+│       ├── TonService.test.ts
+│       └── setup.ts
 ├── drizzle.config.ts   # Конфигурация ORM
 ├── vitest.config.ts    # Конфигурация тестов
 └── package.json
@@ -72,7 +76,7 @@ interface Payment {
   method: PaymentMethod;         // CARD, BANK_TRANSFER, WALLET, CRYPTO
   
   // Провайдер
-  provider: PaymentProvider;     // STRIPE, PAYPAL, BANK
+  provider: PaymentProvider;     // STRIPE, PROMPTPAY
   providerTransactionId: string; // ID транзакции у провайдера
   providerFee: number;          // Комиссия провайдера
   
@@ -238,20 +242,9 @@ class TonService {
 
 #### Традиционные платежи
 - **Stripe Card**: Банковские карты
-- **Stripe SEPA**: Европейские банковские переводы
-- **Stripe iDEAL**: Нидерландские банки
-- **Stripe SOFORT**: Немецкие банки
 
 #### Тайские платежные системы
 - **PromptPay**: Национальная система QR-платежей Таиланда
-- **TrueMoney**: Популярный e-wallet в Таиланде
-- **Rabbit LINE Pay**: Интеграция с LINE Pay
-
-#### Международные платежи
-- **Wise Transfer**: Международные переводы
-- **Revolut Pay**: Европейские платежи
-- **PayPal**: Глобальные платежи
-- **Bank Transfer**: Прямые банковские переводы
 
 ## 🔗 TON Connect интеграция
 
@@ -742,19 +735,8 @@ STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PUBLISHABLE_KEY=pk_live_...
 
-# PayPal
-PAYPAL_CLIENT_ID=your-paypal-client-id
-PAYPAL_CLIENT_SECRET=your-paypal-client-secret
-PAYPAL_ENVIRONMENT=live
-
 # Тайские платежные системы
 PROMPTPAY_MERCHANT_ID=your-promptpay-id
-TRUEMONEY_API_KEY=your-truemoney-key
-RABBIT_LINEPAY_CHANNEL_ID=your-linepay-channel
-
-# Международные платежи
-WISE_API_KEY=your-wise-api-key
-REVOLUT_API_KEY=your-revolut-key
 
 # Безопасность
 ENCRYPTION_KEY=your-encryption-key
@@ -802,15 +784,9 @@ DATADOG_API_KEY=your-datadog-key
 
 #### Традиционные платежи
 - **Stripe**: Международные карточные платежи
-- **PayPal**: Глобальные платежи
-- **Wise API**: Международные переводы
-- **Revolut API**: Европейские платежи
 
 #### Тайские платежные системы
 - **PromptPay API**: Национальная система QR-платежей
-- **TrueMoney API**: Популярный e-wallet
-- **Rabbit LINE Pay**: Интеграция с LINE
-- **Bank of Thailand APIs**: Банковские интеграции
 
 #### Курсы валют и аналитика
 - **CoinGecko API**: Курсы криптовалют
@@ -860,13 +836,10 @@ const generateDailyReport = async (date: Date) => {
 
 #### Тайские платежи
 - **PromptPay**: 0.5% (минимум 1 THB)
-- **TrueMoney**: 1.5% + 5 THB
-- **Rabbit LINE Pay**: 2.0% + 3 THB
 
-#### Международные платежи
-- **Wise Transfer**: 0.5-2.0% в зависимости от валют
-- **Revolut Pay**: 1.0% + фиксированная комиссия
-- **Комиссия за вывод средств**: 50 THB (фиат), 0.1 TON (крипто)
+#### Комиссии за вывод средств
+- **Фиат**: 50 THB
+- **Криптовалюта**: 0.1 TON
 
 ## 📈 Производительность
 

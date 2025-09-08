@@ -1,0 +1,158 @@
+# 🧪 Codecov Configuration for Thailand Marketplace
+# Modern coverage reporting with service-specific targets
+
+codecov:
+  require_ci_to_pass: yes
+  notify:
+    wait_for_ci: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+  
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 2%
+        base: auto
+        if_ci_failed: error
+    
+    patch:
+      default:
+        target: 75%
+        threshold: 5%
+        base: auto
+        if_ci_failed: error
+
+# Service-specific coverage targets
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - name_prefix: "codecov/"
+        type: "project"
+        target: 80%
+
+flags:
+  # Backend Services
+  payment-service:
+    paths:
+      - services/payment-service/
+    carryforward: true
+    
+  user-service:
+    paths:
+      - services/user-service/
+    carryforward: true
+    
+  listing-service:
+    paths:
+      - services/listing-service/
+    carryforward: true
+    
+  booking-service:
+    paths:
+      - services/booking-service/
+    carryforward: true
+    
+  notification-service:
+    paths:
+      - services/notification-service/
+    carryforward: true
+    
+  ai-service:
+    paths:
+      - services/ai-service/
+    carryforward: true
+    
+  voice-service:
+    paths:
+      - services/voice-service/
+    carryforward: true
+    
+  crm-service:
+    paths:
+      - services/crm-service/
+    carryforward: true
+    
+  agency-service:
+    paths:
+      - services/agency-service/
+    carryforward: true
+
+  # Frontend Apps
+  web-app:
+    paths:
+      - apps/web/
+    carryforward: true
+    
+  mobile-app:
+    paths:
+      - apps/mobile/
+    carryforward: true
+    
+  admin-dashboard:
+    paths:
+      - apps/admin/
+    carryforward: true
+
+  # Shared Packages
+  shared-types:
+    paths:
+      - packages/types/
+    carryforward: true
+    
+  shared-utils:
+    paths:
+      - packages/utils/
+    carryforward: true
+
+# Comment configuration
+comment:
+  layout: "reach,diff,flags,tree,reach"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+  branches:
+    - main
+    - develop
+
+# Ignore patterns
+ignore:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/coverage/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/node_modules/**"
+  - "**/*.config.js"
+  - "**/*.config.ts"
+  - "**/vitest.config.ts"
+  - "**/jest.config.js"
+  - "**/.next/**"
+  - "**/public/**"
+  - "**/docs/**"
+  - "**/*.md"
+  - "**/scripts/**"
+  - "**/migrations/**"
+  - "**/drizzle/**"
+
+# GitHub integration
+github_checks:
+  annotations: true
+
+# Slack notifications (optional)
+# slack:
+#   url: "secret:slack_webhook_url"
+#   threshold: 1%
+#   message: "Coverage changed for {{owner}}/{{repo}}"
+#   attachments:
+#     - color: "{{#green}}good{{/green}}{{#yellow}}warning{{/yellow}}{{#red}}danger{{/red}}"
+#       text: "Coverage {{changed}} to {{coverage}}%"

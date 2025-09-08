@@ -589,7 +589,10 @@ export class PaymentService {
   /**
    * Find payment by TON transaction hash or comment
    */
-  async findPaymentByTonTransaction(transactionHash: string, comment?: string): Promise<Payment | null> {
+  async findPaymentByTonTransaction(
+    transactionHash: string,
+    comment?: string
+  ): Promise<Payment | null> {
     try {
       // First try to find by transaction hash
       let payment = await db
@@ -695,7 +698,7 @@ export class PaymentService {
         .update(payments)
         .set({
           tonTransactionHash: transactionId,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(payments.id, paymentId))
     } catch (error) {
@@ -714,7 +717,7 @@ export class PaymentService {
         .set({
           status: status as any,
           reason,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(refunds.id, refundId))
     } catch (error) {
