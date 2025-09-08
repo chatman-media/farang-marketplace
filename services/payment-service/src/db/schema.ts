@@ -31,16 +31,7 @@ export const paymentMethodEnum = pgEnum("payment_method", [
   "jetton_usdt",
   "jetton_usdc",
   "stripe_card",
-  "stripe_sepa",
-  "stripe_ideal",
-  "stripe_sofort",
-  "wise_transfer",
-  "revolut_pay",
-  "paypal",
-  "bank_transfer",
   "promptpay",
-  "truemoney",
-  "rabbit_linepay",
 ])
 
 export const transactionTypeEnum = pgEnum("transaction_type", [
