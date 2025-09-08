@@ -71,8 +71,19 @@ export const createApp = async (): Promise<FastifyInstance> => {
 
   // Register routes
   await app.register(import("./routes/listings"), { prefix: "/api/listings" })
-  await app.register((await import("./routes/fastify-serviceProviders")).default, { prefix: "/api/service-providers" })
-  await app.register((await import("./routes/fastify-aiSearch")).default, { prefix: "/api/ai" })
+
+  // Import controllers for Fastify routes
+  const { FastifyServiceProviderController } = await import("./controllers/FastifyServiceProviderController")
+
+  const serviceProviderController = new FastifyServiceProviderController()
+
+  await app.register((await import("./routes/fastify-serviceProviders")).default, {
+    prefix: "/api/service-providers",
+    serviceProviderController
+  })
+  await app.register((await import("./routes/fastify-aiSearch")).default, {
+    prefix: "/api/ai"
+  })
 
   // Static file serving for uploads
   await app.register(import("@fastify/static"), {

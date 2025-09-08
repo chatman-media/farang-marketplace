@@ -124,7 +124,9 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
         },
       },
     },
-    serviceProviderController.getServiceProvider.bind(serviceProviderController),
+    async (request, reply) => {
+      return serviceProviderController.getServiceProvider(request as any, reply)
+    },
   )
 
   // Search service providers
@@ -174,7 +176,9 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
         },
       },
     },
-    serviceProviderController.searchServiceProviders.bind(serviceProviderController),
+    async (request, reply) => {
+      return serviceProviderController.searchServiceProviders(request as any, reply)
+    },
   )
 
   // Update service provider (with optional image upload)
@@ -257,7 +261,9 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
         },
       },
     },
-    serviceProviderController.updateServiceProvider.bind(serviceProviderController),
+    async (request, reply) => {
+      return serviceProviderController.updateServiceProvider(request as any, reply)
+    },
   )
 
   // Delete service provider
@@ -275,7 +281,9 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
         },
       },
     },
-    serviceProviderController.deleteServiceProvider.bind(serviceProviderController),
+    async (request, reply) => {
+      return serviceProviderController.deleteServiceProvider(request as any, reply)
+    },
   )
 }
 

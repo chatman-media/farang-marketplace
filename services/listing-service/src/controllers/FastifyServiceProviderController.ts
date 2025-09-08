@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify"
 import { ServiceProviderService } from "../services/ServiceProviderService"
 import type { ServiceProviderFilters } from "@marketplace/shared-types"
+import { ProviderVerificationLevel } from "@marketplace/shared-types"
 import { z } from "zod"
 
 // Zod validation schemas
@@ -227,8 +228,7 @@ export class FastifyServiceProviderController {
       const validatedQuery = SearchQuerySchema.parse(request.query)
 
       const filters: ServiceProviderFilters = {
-        query: validatedQuery.query,
-        serviceCapabilities: validatedQuery.category ? [validatedQuery.category] : undefined,
+        serviceTypes: validatedQuery.category ? [validatedQuery.category as any] : undefined,
         location: validatedQuery.location,
         priceRange: validatedQuery.priceRange
           ? {
@@ -237,8 +237,7 @@ export class FastifyServiceProviderController {
               currency: "THB",
             }
           : undefined,
-        verificationLevel: "basic",
-        availability: validatedQuery.availability,
+        verificationLevel: ProviderVerificationLevel.BASIC,
       }
 
       const result = await this.serviceProviderService.searchServiceProviders(

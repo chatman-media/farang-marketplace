@@ -30,6 +30,7 @@ export interface SearchQuery {
     preferences?: Record<string, any>
     location?: { latitude: number; longitude: number }
   }
+  preferredProvider?: AIProvider
 }
 
 export interface SearchResult {
@@ -94,6 +95,7 @@ export interface ServiceMatchingRequest {
     ratings?: number[]
     preferences?: Record<string, any>
   }
+  preferredProvider?: AIProvider
 }
 
 export interface ServiceMatchingResponse {

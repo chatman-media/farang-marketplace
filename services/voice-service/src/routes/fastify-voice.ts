@@ -91,7 +91,7 @@ export default async function voiceRoutes(fastify: FastifyInstance) {
    * GET /health
    * Health check endpoint
    */
-  fastify.get("/health", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get("/health", async (_request: FastifyRequest, _reply: FastifyReply) => {
     return {
       success: true,
       status: "healthy",
@@ -109,7 +109,7 @@ export default async function voiceRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.optionalAuth],
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (_request: FastifyRequest, _reply: FastifyReply) => {
       return {
         success: true,
         providers: [
