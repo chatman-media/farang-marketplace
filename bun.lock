@@ -365,6 +365,7 @@
       "dependencies": {
         "@fastify/cors": "^11.1.0",
         "@fastify/helmet": "^13.0.1",
+        "@fastify/multipart": "^9.2.1",
         "@google-cloud/speech": "7.2.0",
         "audio-buffer-utils": "^5.1.2",
         "compromise": "^14.14.4",

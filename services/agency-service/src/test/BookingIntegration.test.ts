@@ -1,11 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest"
-import { BookingIntegrationService } from "../services/BookingIntegrationService"
 
 describe("Booking Integration Service Tests", () => {
-  let bookingIntegrationService: BookingIntegrationService
-
   beforeEach(() => {
-    bookingIntegrationService = new BookingIntegrationService()
+    // Setup for tests if needed
   })
 
   describe("Service Matching Logic", () => {
@@ -324,7 +321,7 @@ describe("Booking Integration Service Tests", () => {
         cancelled: 0,
       }
 
-      Object.entries(statusProgress).forEach(([status, expectedProgress]) => {
+      Object.entries(statusProgress).forEach(([_status, expectedProgress]) => {
         expect(expectedProgress).toBeGreaterThanOrEqual(0)
         expect(expectedProgress).toBeLessThanOrEqual(100)
         expect(typeof expectedProgress).toBe("number")

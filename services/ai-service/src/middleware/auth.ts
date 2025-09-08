@@ -78,7 +78,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
 /**
  * Optional authentication middleware - doesn't fail if no token provided
  */
-export const optionalAuth = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+export const optionalAuth = (req: AuthenticatedRequest, _res: Response, next: NextFunction): void => {
   try {
     const authHeader = req.headers.authorization
     const token = authHeader && authHeader.split(" ")[1]

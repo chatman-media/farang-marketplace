@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { describe, it, expect } from "vitest"
 
 describe("Agency Service API Integration Tests", () => {
   describe("Agency Management Endpoints", () => {
@@ -431,7 +431,7 @@ describe("Agency Service API Integration Tests", () => {
         admin: ["manage_all_agencies", "verify_agencies", "view_all_data"],
       }
 
-      Object.entries(rolePermissions).forEach(([role, permissions]) => {
+      Object.entries(rolePermissions).forEach(([_role, permissions]) => {
         expect(Array.isArray(permissions)).toBe(true)
         expect(permissions.length).toBeGreaterThan(0)
         permissions.forEach((permission) => {

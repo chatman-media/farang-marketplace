@@ -1,5 +1,5 @@
-import Fastify, { FastifyInstance } from "fastify"
 import { config } from "dotenv"
+import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"
 
 // Load environment variables
@@ -84,7 +84,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
   })
 
   // Register routes
-  await app.register(import("../routes/voice"), { prefix: "/api/voice" })
+  await app.register(import("./routes/fastify-voice"), { prefix: "/api/voice" })
 
   return app
 }

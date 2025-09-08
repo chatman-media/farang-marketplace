@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, sql, like, ilike, inArray } from "drizzle-orm"
+import { eq, and, desc, asc, sql, ilike } from "drizzle-orm"
 import { db } from "../db/connection"
 import {
   agencies,
@@ -7,13 +7,10 @@ import {
   commissionPayments,
   type Agency,
   type NewAgency,
-  type AgencyService as DbAgencyService,
-  type NewAgencyService,
   type AgencyStatusType,
   type VerificationStatusType,
   type ServiceCategoryType,
 } from "../db/schema"
-import type { Agency as AgencyType, AgencyServiceType, ServiceCategory, Location } from "../types/index"
 
 export interface AgencyFilters {
   status?: AgencyStatusType

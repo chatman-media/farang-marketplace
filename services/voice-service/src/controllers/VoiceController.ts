@@ -3,6 +3,23 @@ import type { VoiceCommandResponse, VoiceContext, VoiceRequest } from "../models
 import { SpeechToTextService } from "../services/SpeechToTextService"
 import { VoiceCommandService } from "../services/VoiceCommandService"
 
+// Extend Express Request type to include user and file properties
+declare module "express" {
+  interface Request {
+    user?: {
+      id: string
+      email: string
+      role: string
+    }
+    file?: {
+      buffer: Buffer
+      originalname: string
+      mimetype: string
+      size: number
+    }
+  }
+}
+
 export class VoiceController {
   private speechToTextService: SpeechToTextService
   public voiceCommandService: VoiceCommandService

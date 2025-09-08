@@ -104,7 +104,7 @@ export async function requireAgencyOwnership(request: FastifyRequest, reply: Fas
 /**
  * Optional authentication middleware (doesn't fail if no token)
  */
-export async function optionalAuth(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+export async function optionalAuth(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
   const authHeader = request.headers["authorization"]
   const token = authHeader && authHeader.split(" ")[1]
 

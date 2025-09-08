@@ -69,12 +69,13 @@ export class FastifyAgencyController {
     try {
       const { page = 1, limit = 10, search, status } = request.query as any
 
-      const result = await this.agencyService.getAllAgencies({
-        page: parseInt(page),
-        limit: parseInt(limit),
-        search,
-        status,
-      })
+      const result = await this.agencyService.searchAgencies(
+        { search, status },
+        {
+          page: Number.parseInt(page),
+          limit: Number.parseInt(limit),
+        },
+      )
 
       return reply.status(200).send({
         success: true,
@@ -83,7 +84,8 @@ export class FastifyAgencyController {
           page: result.page,
           limit: result.limit,
           total: result.total,
-          totalPages: result.totalPages,
+          totalPages: Math.ceil(result.total / result.limit),
+          hasMore: result.hasMore,
         },
       })
     } catch (error) {
@@ -182,11 +184,11 @@ export class FastifyAgencyController {
   async getAgenciesByUser(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const userId = request.user!.id
-      const agencies = await this.agencyService.getAgenciesByUser(userId)
+      const agency = await this.agencyService.getAgencyByUserId(userId)
 
       return reply.status(200).send({
         success: true,
-        data: agencies,
+        data: agency ? [agency] : [],
       })
     } catch (error) {
       console.error("Error getting user agencies:", error)
@@ -205,7 +207,17 @@ export class FastifyAgencyController {
       const { id } = request.params as { id: string }
       const { status } = request.body as { status: string }
 
-      const agency = await this.agencyService.updateAgencyStatus(id, status)
+      // Validate status
+      const validStatuses = ["pending", "active", "suspended", "inactive", "rejected"] as const
+      if (!validStatuses.includes(status as any)) {
+        return reply.status(400).send({
+          success: false,
+          error: "Invalid status",
+          validStatuses,
+        })
+      }
+
+      const agency = await this.agencyService.updateAgencyStatus(id, status as any)
 
       if (!agency) {
         return reply.status(404).send({

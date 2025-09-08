@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, sql, ilike, inArray } from "drizzle-orm"
+import { eq, and, desc, asc, sql, ilike } from "drizzle-orm"
 import { db } from "../db/connection"
 import {
   agencyServices,
@@ -295,26 +295,21 @@ export class AgencyServiceService {
   /**
    * Get service statistics
    */
-  async getServiceStats(serviceId: string): Promise<{
+  async getServiceStats(_serviceId: string): Promise<{
     totalAssignments: number
     activeAssignments: number
     completedAssignments: number
     averageRating: number
     totalRevenue: number
   }> {
-    try {
-      // This would require joining with service assignments table
-      // For now, return default values
-      return {
-        totalAssignments: 0,
-        activeAssignments: 0,
-        completedAssignments: 0,
-        averageRating: 0,
-        totalRevenue: 0,
-      }
-    } catch (error) {
-      console.error("Error getting service stats:", error)
-      throw new Error("Failed to get service statistics")
+    // This would require joining with service assignments table
+    // For now, return default values
+    return {
+      totalAssignments: 0,
+      activeAssignments: 0,
+      completedAssignments: 0,
+      averageRating: 0,
+      totalRevenue: 0,
     }
   }
 

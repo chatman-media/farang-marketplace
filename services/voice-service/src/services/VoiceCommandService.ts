@@ -276,7 +276,7 @@ export class VoiceCommandService {
     const filters: any = {}
     if (location) filters.location = location
     if (priceEntity) {
-      const price = parseInt(priceEntity.replace(/[^\d]/g, ""), 10)
+      const price = Number.parseInt(priceEntity.replace(/[^\d]/g, ""), 10)
       filters.priceRange = { min: 0, max: price }
     }
     if (propertyType) filters.category = propertyType

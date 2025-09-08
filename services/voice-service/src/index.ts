@@ -1,4 +1,4 @@
-import { createApp, gracefulShutdown, env } from "./app"
+import { createApp, env, gracefulShutdown } from "./app"
 
 // Start the modern application
 const start = async () => {
@@ -16,12 +16,12 @@ const start = async () => {
     console.log(`🎤 Voice Service v2.0 running on port ${env.PORT}`)
     console.log(`📊 Environment: ${env.NODE_ENV}`)
     console.log(`🔗 Health check: http://localhost:${env.PORT}/health`)
-    console.log(`🎵 Modern Voice Service initialized with:`)
-    console.log(`   - Fastify 5.x for high performance`)
-    console.log(`   - Large file upload support (50MB)`)
-    console.log(`   - Multi-language speech processing`)
-    console.log(`   - Real-time audio analysis`)
-    console.log(`   - TypeScript 5.x`)
+    console.log("🎵 Modern Voice Service initialized with:")
+    console.log("   - Fastify 5.x for high performance")
+    console.log("   - Large file upload support (50MB)")
+    console.log("   - Multi-language speech processing")
+    console.log("   - Real-time audio analysis")
+    console.log("   - TypeScript 5.x")
 
     // Setup graceful shutdown
     const signals = ["SIGTERM", "SIGINT", "SIGUSR2"]
@@ -31,12 +31,12 @@ const start = async () => {
 
     // Handle uncaught exceptions
     process.on("uncaughtException", (error) => {
-      app.log.error("Uncaught Exception:", error)
+      app.log.error(error, "Uncaught Exception")
       gracefulShutdown(app, "uncaughtException")
     })
 
     process.on("unhandledRejection", (reason, promise) => {
-      app.log.error("Unhandled Rejection at:", promise, "reason:", reason)
+      app.log.error({ reason, promise: promise.toString() }, "Unhandled Rejection")
       gracefulShutdown(app, "unhandledRejection")
     })
   } catch (error) {

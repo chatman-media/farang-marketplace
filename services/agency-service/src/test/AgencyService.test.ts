@@ -1,11 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest"
-import { AgencyService } from "../services/AgencyService"
 
 describe("Agency Service Logic Tests", () => {
-  let agencyService: AgencyService
-
   beforeEach(() => {
-    agencyService = new AgencyService()
+    // Setup for tests if needed
   })
 
   describe("Agency Validation", () => {
@@ -257,7 +254,7 @@ describe("Agency Service Logic Tests", () => {
         other: ["description"],
       }
 
-      Object.entries(categoryRequirements).forEach(([category, requirements]) => {
+      Object.entries(categoryRequirements).forEach(([_category, requirements]) => {
         expect(Array.isArray(requirements)).toBe(true)
         expect(requirements.length).toBeGreaterThan(0)
         requirements.forEach((req) => {

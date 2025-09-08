@@ -1,4 +1,4 @@
-import type { FastifyRequest, FastifyReply } from "fastify"
+import type { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
 
 interface JWTPayload {
@@ -65,6 +65,8 @@ export default async function authPlugin(fastify: any) {
         email: decoded.email,
         role: decoded.role,
       }
+      // Authentication successful
+      return
     } catch (error) {
       fastify.log.error("Token verification error:", error)
       reply.status(403)
@@ -78,7 +80,7 @@ export default async function authPlugin(fastify: any) {
   /**
    * Optional authentication middleware - doesn't fail if no token provided
    */
-  fastify.decorate("optionalAuth", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.decorate("optionalAuth", async (request: FastifyRequest, _reply: FastifyReply) => {
     try {
       const authHeader = request.headers.authorization
       const token = authHeader && authHeader.split(" ")[1]
@@ -126,6 +128,8 @@ export default async function authPlugin(fastify: any) {
           message: "Insufficient permissions",
         }
       }
+      // Authorization successful
+      return
     }
   })
 
@@ -167,13 +171,15 @@ export default async function authPlugin(fastify: any) {
     }
 
     userRequests.count++
+    // Rate limit check passed
+    return
   })
 
   /**
    * Audio file validation middleware
    */
   fastify.decorate("validateAudioFile", async (request: FastifyRequest, reply: FastifyReply) => {
-    const data = await request.file()
+    const data = await (request as any).file()
 
     if (!data) {
       reply.status(400)
@@ -184,7 +190,7 @@ export default async function authPlugin(fastify: any) {
     }
 
     // Check file size
-    const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10) // 10MB default
+    const maxSize = Number.parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10) // 10MB default
     const buffer = await data.toBuffer()
 
     if (buffer.length > maxSize) {
@@ -217,13 +223,16 @@ export default async function authPlugin(fastify: any) {
         supportedFormats: allowedMimeTypes,
       }
     }
-
     // Store the buffer for later use
-    ;(request as any).fileBuffer = buffer(request as any).fileInfo = {
+    ;(request as any).fileBuffer = buffer
+    ;(request as any).fileInfo = {
       filename: data.filename,
       mimetype: data.mimetype,
       encoding: data.encoding,
     }
+
+    // Validation successful
+    return
   })
 
   /**
@@ -263,7 +272,7 @@ export default async function authPlugin(fastify: any) {
       // Check audio data size
       const audioSize = typeof audioData === "string" ? Buffer.from(audioData, "base64").length : audioData.length
 
-      const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10)
+      const maxSize = Number.parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10)
       if (audioSize > maxSize) {
         reply.status(400)
         return {

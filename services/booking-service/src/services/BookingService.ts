@@ -397,7 +397,7 @@ export class BookingService {
     }
 
     if (filters.paymentStatus) {
-      conditions.push(eq(bookings.paymentStatus, filters.paymentStatus as any))
+      conditions.push(eq(bookings.paymentStatus, filters.paymentStatus as PaymentStatus))
     }
 
     if (filters.dateRange) {
