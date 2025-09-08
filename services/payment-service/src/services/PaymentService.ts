@@ -1,7 +1,7 @@
 import { db } from "../db/connection.js"
-import { payments, transactions, refunds, disputes, paymentMethods } from "../db/schema.js"
+import { payments, transactions, refunds, disputes } from "../db/schema.js"
 import { eq, and, desc, gte, lte, sql } from "drizzle-orm"
-import { TonService } from "./TonService.js"
+import { ModernTonService } from "./ModernTonService.js"
 import { StripeService } from "./StripeService.js"
 import type {
   Payment,
@@ -51,11 +51,11 @@ export interface PaymentSearchResult {
 }
 
 export class PaymentService {
-  private tonService: TonService
+  private tonService: ModernTonService
   private stripeService: StripeService
 
   constructor() {
-    this.tonService = new TonService()
+    this.tonService = new ModernTonService()
     this.stripeService = new StripeService()
   }
 
@@ -64,7 +64,7 @@ export class PaymentService {
    */
   async initialize(): Promise<void> {
     try {
-      await this.tonService.initializeWallet()
+      // ModernTonService initializes automatically in constructor
       console.log("Payment service initialized successfully")
     } catch (error) {
       console.error("Failed to initialize payment service:", error)
@@ -95,7 +95,7 @@ export class PaymentService {
       if (request.paymentMethod.includes("ton") && request.fiatAmount) {
         tonAmount = await this.tonService.calculateTonAmount(
           request.fiatAmount,
-          request.fiatCurrency
+          request.fiatCurrency ?? "USD"
         )
       }
 
@@ -158,11 +158,13 @@ export class PaymentService {
       await this.updatePaymentStatus(paymentId, "processing", "TON payment initiated")
 
       // Send TON payment
-      const txHash = await this.tonService.sendPayment({
+      const txResult = await this.tonService.createPayment({
         toAddress: payment.tonWalletAddress || process.env.TON_WALLET_ADDRESS!,
         amount: payment.tonAmount || payment.amount,
         comment: `Payment for booking ${payment.bookingId}`,
+        timeout: 600,
       })
+      const txHash = txResult.hash
 
       // Update payment with transaction hash
       const [updatedPayment] = await db
@@ -342,12 +344,8 @@ export class PaymentService {
       const payment = await this.getPaymentById(paymentId)
       if (!payment) return
 
-      const requiredConfirmations = payment.requiredConfirmations || 3
-      const confirmed = await this.tonService.waitForConfirmation(
-        txHash,
-        requiredConfirmations,
-        30 * 60 * 1000 // 30 minutes timeout
-      )
+      // Use verifyTransaction instead of waitForConfirmation
+      const confirmed = await this.tonService.verifyTransaction(txHash)
 
       if (confirmed) {
         await this.updatePaymentStatus(paymentId, "confirmed", "Payment confirmed on blockchain")
@@ -567,12 +565,161 @@ export class PaymentService {
     switch (method) {
       case "ton_wallet":
       case "ton_connect":
-        return data.tonWalletAddress && this.tonService.validateAddress(data.tonWalletAddress)
+        return data.tonWalletAddress && this.isValidTonAddress(data.tonWalletAddress)
       case "jetton_usdt":
       case "jetton_usdc":
-        return data.tonWalletAddress && this.tonService.validateAddress(data.tonWalletAddress)
+        return data.tonWalletAddress && this.isValidTonAddress(data.tonWalletAddress)
       default:
         return false
+    }
+  }
+
+  /**
+   * Simple TON address validation
+   */
+  private isValidTonAddress(address: string): boolean {
+    try {
+      // Basic validation - TON addresses are typically 48 characters
+      return address.length === 48 && /^[A-Za-z0-9_-]+$/.test(address)
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Find payment by TON transaction hash or comment
+   */
+  async findPaymentByTonTransaction(transactionHash: string, comment?: string): Promise<Payment | null> {
+    try {
+      // First try to find by transaction hash
+      let payment = await db
+        .select()
+        .from(payments)
+        .where(eq(payments.tonTransactionHash, transactionHash))
+        .limit(1)
+
+      if (payment.length > 0) {
+        return payment[0]
+      }
+
+      // If not found and comment exists, try to find by booking ID in comment
+      if (comment) {
+        const bookingIdMatch = comment.match(/booking\s+([a-f0-9-]+)/i)
+        if (bookingIdMatch) {
+          const bookingId = bookingIdMatch[1]
+          payment = await db
+            .select()
+            .from(payments)
+            .where(eq(payments.bookingId, bookingId))
+            .limit(1)
+
+          if (payment.length > 0) {
+            return payment[0]
+          }
+        }
+      }
+
+      return null
+    } catch (error) {
+      console.error("Failed to find payment by TON transaction:", error)
+      throw error
+    }
+  }
+
+  /**
+   * Handle Stripe payment success
+   */
+  async handleStripePaymentSuccess(paymentIntentId: string): Promise<void> {
+    try {
+      const payment = await db
+        .select()
+        .from(payments)
+        .where(eq(payments.stripePaymentIntentId, paymentIntentId))
+        .limit(1)
+
+      if (payment.length > 0) {
+        await this.updatePaymentStatus(payment[0].id, "confirmed", "Stripe payment succeeded")
+      }
+    } catch (error) {
+      console.error("Failed to handle Stripe payment success:", error)
+      throw error
+    }
+  }
+
+  /**
+   * Handle Stripe payment failure
+   */
+  async handleStripePaymentFailure(paymentIntentId: string): Promise<void> {
+    try {
+      const payment = await db
+        .select()
+        .from(payments)
+        .where(eq(payments.stripePaymentIntentId, paymentIntentId))
+        .limit(1)
+
+      if (payment.length > 0) {
+        await this.updatePaymentStatus(payment[0].id, "failed", "Stripe payment failed")
+      }
+    } catch (error) {
+      console.error("Failed to handle Stripe payment failure:", error)
+      throw error
+    }
+  }
+
+  /**
+   * Handle Stripe dispute
+   */
+  async handleStripeDispute(chargeId: string): Promise<void> {
+    try {
+      const payment = await db
+        .select()
+        .from(payments)
+        .where(eq(payments.stripeChargeId, chargeId))
+        .limit(1)
+
+      if (payment.length > 0) {
+        await this.updatePaymentStatus(payment[0].id, "disputed", "Stripe dispute created")
+      }
+    } catch (error) {
+      console.error("Failed to handle Stripe dispute:", error)
+      throw error
+    }
+  }
+
+  /**
+   * Update payment transaction ID
+   */
+  async updatePaymentTransactionId(paymentId: string, transactionId: string): Promise<void> {
+    try {
+      await db
+        .update(payments)
+        .set({
+          tonTransactionHash: transactionId,
+          updatedAt: new Date()
+        })
+        .where(eq(payments.id, paymentId))
+    } catch (error) {
+      console.error("Failed to update payment transaction ID:", error)
+      throw error
+    }
+  }
+
+  /**
+   * Update refund status
+   */
+  async updateRefundStatus(refundId: string, status: string, reason?: string): Promise<void> {
+    try {
+      await db
+        .update(refunds)
+        .set({
+          status: status as any,
+          reason,
+          updatedAt: new Date()
+        })
+        .where(eq(refunds.id, refundId))
+    } catch (error) {
+      console.error("Failed to update refund status:", error)
+      throw error
     }
   }
 }

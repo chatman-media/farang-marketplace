@@ -5,10 +5,9 @@ import { LineService } from "./LineService"
 import { query } from "../db/connection"
 import {
   CommunicationChannel,
-  SendMessageRequest,
-  SendMessageResponse,
-  CommunicationHistory,
-  Customer,
+  type SendMessageResponse,
+  type CommunicationHistory,
+  type Customer,
 } from "@marketplace/shared-types"
 
 export interface UnifiedSendRequest {
@@ -321,7 +320,7 @@ export class CommunicationService {
         break
     }
 
-    let whereClause = "WHERE created_at >= NOW() - INTERVAL '" + interval + "'"
+    let whereClause = `WHERE created_at >= NOW() - INTERVAL '${interval}'`
     const params: any[] = []
 
     if (customerId) {

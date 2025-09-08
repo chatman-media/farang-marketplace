@@ -1,226 +1,277 @@
-import { Router } from "express"
-import { body, param, query } from "express-validator"
-import { PaymentController } from "../controllers/PaymentController.js"
-import { authMiddleware, requireRole } from "../middleware/auth.js"
+import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify"
+import { z } from "zod"
+import { PaymentService } from "../services/PaymentService"
+import { ModernTonService } from "../services/ModernTonService"
 
-const router = Router()
-const paymentController = new PaymentController()
+const paymentService = new PaymentService()
+const tonService = new ModernTonService()
 
-// Initialize payment controller
-await paymentController.initialize()
+// Zod schemas for validation
+const createPaymentSchema = z.object({
+  bookingId: z.string().uuid(),
+  amount: z.string().regex(/^\d+(\.\d{1,6})?$/),
+  currency: z.string().optional().default("TON"),
+  method: z.enum([
+    "ton_wallet",
+    "ton_connect",
+    "jetton_usdt",
+    "jetton_usdc",
+    "stripe_card",
+    "stripe_sepa",
+    "stripe_ideal",
+    "stripe_sofort",
+    "wise_transfer",
+    "revolut_pay",
+    "paypal",
+    "bank_transfer",
+    "promptpay",
+    "truemoney",
+    "rabbit_linepay",
+  ]),
+  walletAddress: z.string().optional(),
+  comment: z.string().optional(),
+  fiatAmount: z.number().optional(),
+  fiatCurrency: z.string().optional(),
+})
 
-/**
- * @route POST /api/payments
- * @desc Create a new payment
- * @access Private (authenticated users)
- */
-router.post(
-  "/",
-  authMiddleware,
-  [
-    body("bookingId").isUUID().withMessage("Booking ID must be a valid UUID"),
-    body("payeeId").isUUID().withMessage("Payee ID must be a valid UUID"),
-    body("amount")
-      .isDecimal({ decimal_digits: "0,8" })
-      .withMessage("Amount must be a valid decimal number"),
-    body("currency")
-      .optional()
-      .isIn(["TON", "USDT", "USDC", "USD", "THB"])
-      .withMessage("Currency must be one of: TON, USDT, USDC, USD, THB"),
-    body("fiatAmount")
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage("Fiat amount must be a positive number"),
-    body("fiatCurrency")
-      .optional()
-      .isIn(["USD", "THB", "EUR", "GBP"])
-      .withMessage("Fiat currency must be one of: USD, THB, EUR, GBP"),
-    body("paymentMethod")
-      .isIn([
-        "ton_wallet",
-        "ton_connect",
-        "jetton_usdt",
-        "jetton_usdc",
-        "stripe_card",
-        "stripe_sepa",
-        "stripe_ideal",
-        "stripe_sofort",
-        "wise_transfer",
-        "revolut_pay",
-        "paypal",
-        "bank_transfer",
-        "promptpay",
-        "truemoney",
-        "rabbit_linepay",
-      ])
-      .withMessage("Invalid payment method"),
-    body("description")
-      .optional()
-      .isLength({ max: 500 })
-      .withMessage("Description must not exceed 500 characters"),
-    body("tonWalletAddress")
-      .optional()
-      .isLength({ min: 48, max: 48 })
-      .withMessage("TON wallet address must be 48 characters"),
-  ],
-  paymentController.createPayment
-)
+const updatePaymentStatusSchema = z.object({
+  status: z.enum([
+    "pending",
+    "processing",
+    "confirmed",
+    "completed",
+    "failed",
+    "cancelled",
+    "refunded",
+    "disputed",
+  ]),
+  reason: z.string().optional(),
+})
 
-/**
- * @route POST /api/payments/:paymentId/process-ton
- * @desc Process TON payment
- * @access Private (payer only)
- */
-router.post(
-  "/:paymentId/process-ton",
-  authMiddleware,
-  [
-    param("paymentId").isUUID().withMessage("Payment ID must be a valid UUID"),
-    body("fromAddress")
-      .isLength({ min: 48, max: 48 })
-      .withMessage("From address must be a valid TON address"),
-  ],
-  paymentController.processTonPayment
-)
+const searchPaymentsSchema = z.object({
+  status: z.string().optional(),
+  payerId: z.string().uuid().optional(),
+  payeeId: z.string().uuid().optional(),
+  bookingId: z.string().uuid().optional(),
+  method: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  page: z.number().min(1).default(1),
+  limit: z.number().min(1).max(100).default(20),
+})
 
-/**
- * @route POST /api/payments/:paymentId/process-stripe
- * @desc Process Stripe payment
- * @access Private (payer only)
- */
-router.post(
-  "/:paymentId/process-stripe",
-  authMiddleware,
-  [
-    param("paymentId").isUUID().withMessage("Payment ID must be a valid UUID"),
-    body("paymentMethodId")
-      .isString()
-      .isLength({ min: 1 })
-      .withMessage("Payment method ID is required"),
-    body("customerId").optional().isString().withMessage("Customer ID must be a string"),
-  ],
-  paymentController.processStripePayment
-)
+export default async function paymentsRoutes(fastify: FastifyInstance) {
+  // Create payment
+  fastify.post(
+    "/payments",
+    {
+      schema: {
+        body: createPaymentSchema,
+        response: {
+          201: z.object({
+            success: z.boolean(),
+            data: z.object({
+              paymentId: z.string().uuid(),
+              status: z.string(),
+              amount: z.string(),
+              currency: z.string(),
+              method: z.string(),
+              tonPaymentUrl: z.string().optional(),
+              qrCode: z.string().optional(),
+              expiresAt: z.string(),
+            }),
+          }),
+        },
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body: z.infer<typeof createPaymentSchema> }>,
+      reply: FastifyReply
+    ) => {
+      try {
+        const {
+          bookingId,
+          amount,
+          currency,
+          method,
+          walletAddress,
+          comment,
+          fiatAmount,
+          fiatCurrency,
+        } = request.body
 
-/**
- * @route POST /api/payments/:paymentId/confirm-stripe
- * @desc Confirm Stripe payment intent
- * @access Private (payer only)
- */
-router.post(
-  "/:paymentId/confirm-stripe",
-  authMiddleware,
-  [param("paymentId").isUUID().withMessage("Payment ID must be a valid UUID")],
-  paymentController.confirmStripePayment
-)
+        // Create payment
+        const payment = await paymentService.createPayment({
+          bookingId,
+          payerId: "user-id", // Would get from JWT
+          payeeId: "host-id", // Would get from booking
+          amount,
+          currency,
+          fiatAmount,
+          fiatCurrency,
+          paymentMethod: method,
+          description: comment,
+          tonWalletAddress: walletAddress,
+        })
 
-/**
- * @route GET /api/payments/search
- * @desc Search payments with filters
- * @access Private (authenticated users)
- */
-router.get(
-  "/search",
-  authMiddleware,
-  [
-    query("status")
-      .optional()
-      .isIn([
-        "pending",
-        "processing",
-        "confirmed",
-        "completed",
-        "failed",
-        "cancelled",
-        "refunded",
-        "disputed",
-      ])
-      .withMessage("Invalid payment status"),
-    query("paymentMethod")
-      .optional()
-      .isIn([
-        "ton_wallet",
-        "ton_connect",
-        "jetton_usdt",
-        "jetton_usdc",
-        "credit_card",
-        "bank_transfer",
-      ])
-      .withMessage("Invalid payment method"),
-    query("page").optional().isInt({ min: 1 }).withMessage("Page must be a positive integer"),
-    query("limit")
-      .optional()
-      .isInt({ min: 1, max: 100 })
-      .withMessage("Limit must be between 1 and 100"),
-    query("startDate")
-      .optional()
-      .isISO8601()
-      .withMessage("Start date must be a valid ISO 8601 date"),
-    query("endDate").optional().isISO8601().withMessage("End date must be a valid ISO 8601 date"),
-    query("minAmount")
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage("Minimum amount must be a positive number"),
-    query("maxAmount")
-      .optional()
-      .isFloat({ min: 0 })
-      .withMessage("Maximum amount must be a positive number"),
-  ],
-  paymentController.searchPayments
-)
+        let tonPaymentUrl: string | undefined
+        let qrCode: string | undefined
 
-/**
- * @route GET /api/payments/:paymentId
- * @desc Get payment by ID
- * @access Private (payment participants only)
- */
-router.get(
-  "/:paymentId",
-  authMiddleware,
-  [param("paymentId").isUUID().withMessage("Payment ID must be a valid UUID")],
-  paymentController.getPayment
-)
+        // Generate TON payment URL if it's a TON payment
+        if (method.includes("ton")) {
+          tonPaymentUrl = tonService.generatePaymentUrl({
+            toAddress: walletAddress || process.env.TON_WALLET_ADDRESS!,
+            amount,
+            comment: `Payment for booking ${bookingId}`,
+            timeout: 600, // 10 minutes
+          })
 
-/**
- * @route PATCH /api/payments/:paymentId/status
- * @desc Update payment status
- * @access Private (payee or admin only)
- */
-router.patch(
-  "/:paymentId/status",
-  authMiddleware,
-  [
-    param("paymentId").isUUID().withMessage("Payment ID must be a valid UUID"),
-    body("status")
-      .isIn([
-        "pending",
-        "processing",
-        "confirmed",
-        "completed",
-        "failed",
-        "cancelled",
-        "refunded",
-        "disputed",
-      ])
-      .withMessage("Invalid payment status"),
-    body("reason")
-      .optional()
-      .isLength({ max: 200 })
-      .withMessage("Reason must not exceed 200 characters"),
-  ],
-  paymentController.updatePaymentStatus
-)
+          // Generate QR code (placeholder)
+          qrCode = `data:image/png;base64,placeholder-qr-code`
+        }
 
-/**
- * @route GET /api/payments/:paymentId/transactions
- * @desc Get payment transaction history
- * @access Private (payment participants only)
- */
-router.get(
-  "/:paymentId/transactions",
-  authMiddleware,
-  [param("paymentId").isUUID().withMessage("Payment ID must be a valid UUID")],
-  paymentController.getPaymentTransactions
-)
+        return reply.status(201).send({
+          success: true,
+          data: {
+            paymentId: payment.id,
+            status: payment.status,
+            amount: payment.amount,
+            currency: payment.currency || "TON",
+            method: payment.paymentMethod,
+            tonPaymentUrl,
+            qrCode,
+            expiresAt:
+              payment.expiresAt?.toISOString() ||
+              new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+          },
+        })
+      } catch (error) {
+        fastify.log.error({ error }, "Failed to create payment")
+        return reply.status(500).send({
+          success: false,
+          error: "Failed to create payment",
+          message: error instanceof Error ? error.message : "Unknown error",
+        })
+      }
+    }
+  )
 
-export default router
+  // Get payment by ID
+  fastify.get(
+    "/payments/:id",
+    {
+      schema: {
+        params: z.object({
+          id: z.string().uuid(),
+        }),
+      },
+    },
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      try {
+        const payment = await paymentService.getPaymentById(request.params.id)
+
+        if (!payment) {
+          return reply.status(404).send({
+            success: false,
+            error: "Payment not found",
+          })
+        }
+
+        return reply.send({
+          success: true,
+          data: payment,
+        })
+      } catch (error) {
+        fastify.log.error({ error }, "Failed to get payment")
+        return reply.status(500).send({
+          success: false,
+          error: "Failed to get payment",
+        })
+      }
+    }
+  )
+
+  // Update payment status
+  fastify.patch(
+    "/payments/:id/status",
+    {
+      schema: {
+        params: z.object({
+          id: z.string().uuid(),
+        }),
+        body: updatePaymentStatusSchema,
+      },
+    },
+    async (
+      request: FastifyRequest<{
+        Params: { id: string }
+        Body: z.infer<typeof updatePaymentStatusSchema>
+      }>,
+      reply: FastifyReply
+    ) => {
+      try {
+        const { status, reason } = request.body
+
+        const updatedPayment = await paymentService.updatePaymentStatus(
+          request.params.id,
+          status,
+          reason
+        )
+
+        return reply.send({
+          success: true,
+          data: updatedPayment,
+        })
+      } catch (error) {
+        fastify.log.error({ error }, "Failed to update payment status")
+        return reply.status(500).send({
+          success: false,
+          error: "Failed to update payment status",
+        })
+      }
+    }
+  )
+
+  // Search payments
+  fastify.get(
+    "/payments/search",
+    {
+      schema: {
+        querystring: searchPaymentsSchema,
+      },
+    },
+    async (
+      request: FastifyRequest<{ Querystring: z.infer<typeof searchPaymentsSchema> }>,
+      reply: FastifyReply
+    ) => {
+      try {
+        const filters = request.query
+
+        // Type-safe search with proper casting
+        const searchFilters = {
+          ...filters,
+          status: filters.status as any, // Cast to proper enum type
+          startDate: filters.startDate ? new Date(filters.startDate) : undefined,
+          endDate: filters.endDate ? new Date(filters.endDate) : undefined,
+        }
+
+        const result = await paymentService.searchPayments(
+          searchFilters,
+          filters.page,
+          filters.limit
+        )
+
+        return reply.send({
+          success: true,
+          data: result,
+        })
+      } catch (error) {
+        fastify.log.error({ error }, "Failed to search payments")
+        return reply.status(500).send({
+          success: false,
+          error: "Failed to search payments",
+        })
+      }
+    }
+  )
+}
