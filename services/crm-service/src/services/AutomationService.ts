@@ -8,6 +8,8 @@ import {
   LeadStatus,
   LeadPriority,
 } from "@marketplace/shared-types"
+import { TemplateService } from "./TemplateService"
+import { CommunicationService } from "./CommunicationService"
 
 export interface WorkflowTriggerData {
   leadId?: string
@@ -29,6 +31,80 @@ export interface WorkflowExecution {
 }
 
 export class AutomationService {
+  private templateService: TemplateService
+  private communicationService?: CommunicationService
+
+  constructor(communicationService?: CommunicationService) {
+    this.templateService = new TemplateService()
+    this.communicationService = communicationService
+  }
+
+  // Initialize automation service with default automations
+  async initialize(): Promise<void> {
+    try {
+      await this.createDefaultAutomations()
+    } catch (error) {
+      console.error("Failed to initialize automation service:", error)
+    }
+  }
+
+  // Create default automations using templates
+  private async createDefaultAutomations(): Promise<void> {
+    const defaultAutomations = [
+      {
+        name: "New Lead Welcome",
+        description: "Send welcome message to new leads",
+        trigger: { type: "lead_created" as const, event: "new_lead" },
+        conditions: [],
+        actions: [
+          {
+            type: "send_message" as const,
+            parameters: {
+              name: "New Lead Welcome",
+              channel: CommunicationChannel.EMAIL,
+              templateName: "welcome_email",
+            },
+          },
+        ],
+        isActive: true,
+        createdBy: "system",
+      },
+      {
+        name: "Lead Follow-up",
+        description: "Follow up with leads after 3 days",
+        trigger: { type: "custom_event" as const, event: "lead_follow_up" },
+        conditions: [
+          {
+            field: "daysSinceLastContact",
+            operator: "gte",
+            value: 3,
+          },
+        ],
+        actions: [
+          {
+            type: "send_message" as const,
+            parameters: {
+              name: "Lead Follow-up",
+              channel: CommunicationChannel.TELEGRAM,
+              templateName: "follow_up_telegram",
+            },
+          },
+        ],
+        isActive: true,
+        createdBy: "system",
+      },
+    ]
+
+    for (const automation of defaultAutomations) {
+      // Check if automation already exists
+      const existing = await query("SELECT id FROM automations WHERE name = $1", [automation.name])
+
+      if (existing.rows.length === 0) {
+        await this.createAutomation(automation)
+        console.log(`✅ Created default automation: ${automation.name}`)
+      }
+    }
+  }
   // Trigger workflow by name or event
   async triggerWorkflow(eventName: string, data: WorkflowTriggerData): Promise<void> {
     try {
@@ -61,7 +137,7 @@ export class AutomationService {
         return []
       }
 
-      return result.rows.map((row) => ({
+      return result.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
         description: row.description,
@@ -172,18 +248,73 @@ export class AutomationService {
 
   // Send message action
   private async executeSendMessageAction(action: AutomationAction, data: WorkflowTriggerData): Promise<void> {
-    const { customerId, channel, templateId, content } = action.parameters
+    const { customerId, channel, templateId, templateName, content } = action.parameters
+    const targetCustomerId = customerId || data.customerId
 
-    // This would integrate with CommunicationService
-    console.log(`Sending message to customer ${customerId || data.customerId} via ${channel}`)
+    if (!targetCustomerId) {
+      console.error("No customer ID provided for send message action")
+      return
+    }
 
-    // TODO: Integrate with actual CommunicationService
-    // await this.communicationService.sendMessage({
-    //   customerId: customerId || data.customerId,
-    //   channel: channel || CommunicationChannel.EMAIL,
-    //   content: content || 'Automated message',
-    //   templateId
-    // })
+    try {
+      let messageContent = content
+      let messageSubject: string | undefined
+
+      // Use template if specified
+      if (templateId || templateName) {
+        // Get customer data for template context
+        const customerResult = await query("SELECT * FROM customers WHERE id = $1", [targetCustomerId])
+        const customer = customerResult.rows[0]
+
+        // Get lead data if available
+        let lead = null
+        if (data.leadId) {
+          const leadResult = await query("SELECT * FROM leads WHERE id = $1", [data.leadId])
+          lead = leadResult.rows[0]
+        }
+
+        // Build template context
+        const templateContext = {
+          customer,
+          lead,
+          trigger: data.trigger || "automation",
+          ...data, // Include all trigger data
+        }
+
+        // Render template
+        let renderedTemplate
+        if (templateId) {
+          renderedTemplate = await this.templateService.renderTemplate(templateId, templateContext)
+        } else if (templateName) {
+          renderedTemplate = await this.templateService.renderTemplateByName(templateName, templateContext)
+        }
+
+        if (renderedTemplate) {
+          messageContent = renderedTemplate.content
+          messageSubject = renderedTemplate.subject
+        }
+      }
+
+      console.log(`Executing automation: ${action.parameters.name || "Unnamed Action"}`)
+      console.log(`Sending message to customer ${targetCustomerId} via ${channel || "email"}`)
+
+      // Send message through CommunicationService if available
+      if (this.communicationService) {
+        await this.communicationService.sendMessage({
+          customerId: targetCustomerId,
+          channel: channel || CommunicationChannel.EMAIL,
+          content: messageContent || "Automated message",
+          subject: messageSubject,
+          templateId: templateId,
+        })
+      } else {
+        // For testing or when communication service is not available
+        console.log(`Would send message: ${messageContent}`)
+      }
+    } catch (error) {
+      console.error("Failed to send automated message:", error)
+      throw error
+    }
   }
 
   // Update lead action
@@ -312,7 +443,7 @@ export class AutomationService {
 
     const result = await query(`SELECT * FROM automations ${whereClause} ORDER BY created_at DESC`, params)
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       description: row.description,

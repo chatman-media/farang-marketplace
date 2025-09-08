@@ -35,10 +35,11 @@ export class CRMService {
 
     const result = await query(
       `INSERT INTO customers (
-        user_id, email, phone, telegram_id, whatsapp_id,
-        first_name, last_name, preferred_language, preferred_channel,
-        tags, custom_fields
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        user_id, email, phone, telegram_id, whatsapp_id, line_id,
+        first_name, last_name, company, job_title, website, address,
+        social_profiles, source, timezone, preferred_language, preferred_channel,
+        communication_preferences, tags, custom_fields, total_interactions, lifetime_value
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
       RETURNING *`,
       [
         data.userId || null,
@@ -46,12 +47,23 @@ export class CRMService {
         data.phone || null,
         data.telegramId || null,
         data.whatsappId || null,
+        data.lineId || null,
         data.firstName,
         data.lastName,
+        data.company || null,
+        data.jobTitle || null,
+        data.website || null,
+        data.address ? JSON.stringify(data.address) : null,
+        data.socialProfiles ? JSON.stringify(data.socialProfiles) : null,
+        data.source || null,
+        data.timezone || null,
         data.preferredLanguage || "en",
         data.preferredChannel || "email",
+        data.communicationPreferences ? JSON.stringify(data.communicationPreferences) : null,
         data.tags || [],
         JSON.stringify(data.customFields || {}),
+        0, // total_interactions starts at 0
+        0, // lifetimeValue starts at 0
       ],
     )
 
@@ -114,8 +126,56 @@ export class CRMService {
             updates.push(`whatsapp_id = $${paramIndex}`)
             values.push(value)
             break
+          case "lineId":
+            updates.push(`line_id = $${paramIndex}`)
+            values.push(value)
+            break
+          case "company":
+            updates.push(`company = $${paramIndex}`)
+            values.push(value)
+            break
+          case "jobTitle":
+            updates.push(`job_title = $${paramIndex}`)
+            values.push(value)
+            break
+          case "website":
+            updates.push(`website = $${paramIndex}`)
+            values.push(value)
+            break
+          case "address":
+            updates.push(`address = $${paramIndex}`)
+            values.push(JSON.stringify(value))
+            break
+          case "socialContacts":
+            updates.push(`social_profiles = $${paramIndex}`)
+            values.push(JSON.stringify(value))
+            break
+          case "source":
+            updates.push(`source = $${paramIndex}`)
+            values.push(value)
+            break
+          case "timezone":
+            updates.push(`timezone = $${paramIndex}`)
+            values.push(value)
+            break
+          case "communicationPreferences":
+            updates.push(`communication_preferences = $${paramIndex}`)
+            values.push(JSON.stringify(value))
+            break
           case "leadScore":
             updates.push(`lead_score = $${paramIndex}`)
+            values.push(value)
+            break
+          case "totalInteractions":
+            updates.push(`total_interactions = $${paramIndex}`)
+            values.push(value)
+            break
+          case "lastInteractionAt":
+            updates.push(`last_interaction_at = $${paramIndex}`)
+            values.push(value)
+            break
+          case "lifetimeValue":
+            updates.push(`lifetime_value = $${paramIndex}`)
             values.push(value)
             break
           case "customFields":
@@ -546,5 +606,78 @@ export class CRMService {
       topPerformingCampaigns: [], // TODO: Implement when campaigns are ready
       recentActivity: [], // TODO: Implement when communication history is ready
     }
+  }
+
+  // Methods for automatic metrics calculation
+  async incrementCustomerInteractions(customerId: string): Promise<void> {
+    await query(
+      `
+      UPDATE customers
+      SET
+        total_interactions = COALESCE(total_interactions, 0) + 1,
+        last_interaction_at = NOW(),
+        updated_at = NOW()
+      WHERE id = $1
+    `,
+      [customerId],
+    )
+  }
+
+  async updateCustomerLifetimeValue(customerId: string): Promise<void> {
+    // Calculate lifetime value based on orders/payments
+    // This would integrate with payment/booking services
+    const lifetimeValueResult = await query(
+      `
+      SELECT COALESCE(SUM(amount), 0) as total_value
+      FROM payments
+      WHERE customer_id = $1 AND status = 'completed'
+    `,
+      [customerId],
+    )
+
+    const lifetimeValue = parseFloat(lifetimeValueResult.rows[0]?.total_value || "0")
+
+    await query(
+      `
+      UPDATE customers
+      SET
+        lifetime_value = $1,
+        updated_at = NOW()
+      WHERE id = $2
+    `,
+      [lifetimeValue, customerId],
+    )
+  }
+
+  async recalculateAllCustomerMetrics(): Promise<void> {
+    // Recalculate total_interactions for all customers
+    await query(`
+      UPDATE customers
+      SET total_interactions = (
+        SELECT COUNT(*)
+        FROM communication_history
+        WHERE customer_id = customers.id
+      )
+    `)
+
+    // Recalculate last_interaction_at for all customers
+    await query(`
+      UPDATE customers
+      SET last_interaction_at = (
+        SELECT MAX(created_at)
+        FROM communication_history
+        WHERE customer_id = customers.id
+      )
+    `)
+
+    // Recalculate lifetime_value for all customers
+    await query(`
+      UPDATE customers
+      SET lifetime_value = (
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payments
+        WHERE customer_id = customers.id AND status = 'completed'
+      )
+    `)
   }
 }

@@ -2,6 +2,7 @@ import { EmailService } from "./EmailService"
 import { TelegramService } from "./TelegramService"
 import { WhatsAppService } from "./WhatsAppService"
 import { LineService } from "./LineService"
+import { CRMService } from "./CRMService"
 import { query } from "../db/connection"
 import {
   CommunicationChannel,
@@ -37,12 +38,14 @@ export class CommunicationService {
   private telegramService: TelegramService
   private whatsappService: WhatsAppService
   private lineService: LineService
+  private crmService: CRMService
 
   constructor() {
     this.emailService = new EmailService()
     this.telegramService = new TelegramService()
     this.whatsappService = new WhatsAppService()
     this.lineService = new LineService()
+    this.crmService = new CRMService()
   }
 
   async initialize(): Promise<void> {
@@ -143,6 +146,16 @@ export class CommunicationService {
 
         default:
           throw new Error(`Unsupported communication channel: ${channel}`)
+      }
+
+      // Update customer interaction metrics if message was sent successfully
+      if (result.success) {
+        try {
+          await this.crmService.incrementCustomerInteractions(request.customerId)
+        } catch (error) {
+          console.error("Failed to update customer interaction metrics:", error)
+          // Don't throw error here - message was sent successfully
+        }
       }
 
       return result

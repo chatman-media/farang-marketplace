@@ -1,6 +1,7 @@
 import Fastify from "fastify"
 import { config } from "dotenv"
 import { z } from "zod"
+import { CronService } from "./services/CronService"
 
 // Load environment variables
 config()
@@ -96,13 +97,21 @@ const createApp = async () => {
 
 // Graceful shutdown
 let appInstance: any = null
+let cronService: CronService | null = null
 
 const gracefulShutdown = async (signal: string) => {
   console.log(`${signal} received, shutting down gracefully`)
   try {
+    // Stop cron service first
+    if (cronService) {
+      await cronService.stop()
+    }
+
+    // Then close the app
     if (appInstance) {
       await appInstance.close()
     }
+
     console.log("CRM Service shut down successfully")
     process.exit(0)
   } catch (error) {
@@ -126,6 +135,13 @@ const startApp = async () => {
   console.log(`📊 Environment: ${env.NODE_ENV}`)
   console.log(`🔗 API Base URL: http://localhost:${env.PORT}/api/crm`)
   console.log(`💚 Health check: http://localhost:${env.PORT}/health`)
+
+  // Start cron service for background tasks
+  if (env.NODE_ENV !== "test") {
+    cronService = new CronService()
+    await cronService.start()
+    console.log(`⏰ CronService started with ${cronService.getAllJobs().length} background jobs`)
+  }
 }
 
 if (require.main === module) {

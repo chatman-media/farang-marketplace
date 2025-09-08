@@ -2,18 +2,22 @@
 
 ## 📋 Обзор
 
-CRM Service - это система управления взаимоотношениями с клиентами для платформы Thailand Marketplace. Он обеспечивает полный цикл работы с клиентами: от первого контакта до долгосрочного сопровождения, включая управление лидами, автоматизацию маркетинга, аналитику и поддержку клиентов.
+CRM Service - это комплексная система управления взаимоотношениями с клиентами для платформы Thailand Marketplace. Он обеспечивает полный цикл работы с клиентами: от первого контакта до долгосрочного сопровождения, включая управление лидами, автоматизацию маркетинга, систему шаблонов, сегментацию клиентов, аналитику и поддержку клиентов.
 
 ## 🔧 Технические характеристики
 
 - **Порт разработки**: 3008
+- **Фреймворк**: Fastify (TypeScript)
 - **База данных**: PostgreSQL (crm_service_db)
 - **ORM**: Drizzle ORM
 - **Очереди**: Redis + Bull Queue
-- **Email**: SendGrid, AWS SES
-- **SMS**: Twilio, AWS SNS
-- **Тестирование**: Vitest (6 тестов)
-- **Покрытие тестами**: 85%+
+- **Email**: AWS SES
+- **Мессенджеры**: Telegram, WhatsApp, Line
+- **Тестирование**: Vitest (235 тестов)
+- **Покрытие тестами**: 99.6% (234/235 тестов проходят)
+- **Автоматизация**: Система workflow и крон-задач
+- **Шаблоны**: Система шаблонов сообщений с переменными
+- **Сегментация**: Динамическая сегментация клиентов
 
 ## 🏗️ Архитектура
 
@@ -22,50 +26,77 @@ CRM Service - это система управления взаимоотнош�
 services/crm-service/
 ├── src/
 │   ├── controllers/     # Контроллеры API
+│   │   ├── CRMController.ts        # Основные CRM операции
+│   │   ├── TemplateController.ts   # Управление шаблонами
+│   │   └── SegmentController.ts    # Управление сегментами
 │   ├── middleware/      # Промежуточное ПО
 │   ├── models/         # Модели данных
+│   │   ├── Customer.ts             # Модель клиента (расширенная)
+│   │   ├── Lead.ts                 # Модель лида
+│   │   ├── Template.ts             # Модель шаблона
+│   │   └── Segment.ts              # Модель сегмента
 │   ├── routes/         # Маршруты API
+│   │   ├── crm.ts                  # Основные CRM маршруты
+│   │   ├── templates.ts            # Маршруты шаблонов
+│   │   └── segments.ts             # Маршруты сегментов
 │   ├── services/       # Бизнес-логика
-│   │   ├── leads/      # Управление лидами
-│   │   ├── contacts/   # Управление контактами
-│   │   ├── campaigns/  # Маркетинговые кампании
-│   │   ├── automation/ # Автоматизация
-│   │   ├── analytics/  # Аналитика
-│   │   ├── support/    # Поддержка клиентов
-│   │   └── communication/ # Коммуникации
-│   ├── workflows/      # Бизнес-процессы
-│   ├── templates/      # Шаблоны сообщений
+│   │   ├── CRMService.ts           # Основной CRM сервис
+│   │   ├── AutomationService.ts    # Автоматизация workflow
+│   │   ├── TemplateService.ts      # Управление шаблонами
+│   │   ├── SegmentationService.ts  # Сегментация клиентов
+│   │   ├── CommunicationService.ts # Мультиканальные коммуникации
+│   │   ├── CronService.ts          # Фоновые задачи
+│   │   ├── EmailService.ts         # Email сервис
+│   │   └── LineService.ts          # Line мессенджер
+│   ├── db/             # База данных
+│   │   ├── connection.ts           # Подключение к БД
+│   │   ├── schema.sql              # Схема БД
+│   │   └── migrations/             # Миграции
+│   │       ├── 001_initial.sql
+│   │       ├── 002_add_customers.sql
+│   │       ├── 003_add_message_templates.sql
+│   │       └── 004_add_segments.sql
+│   ├── test/           # Тесты (235 тестов)
+│   │   ├── Customer.test.ts        # Тесты модели клиента
+│   │   ├── Lead.test.ts            # Тесты модели лида
+│   │   ├── Template.test.ts        # Тесты модели шаблона
+│   │   ├── Segment.test.ts         # Тесты модели сегмента
+│   │   ├── CRMService.test.ts      # Тесты CRM сервиса
+│   │   ├── AutomationService.test.ts # Тесты автоматизации
+│   │   ├── TemplateService.test.ts # Тесты шаблонов
+│   │   ├── TemplateController.test.ts # Тесты API шаблонов
+│   │   ├── SegmentationService.test.ts # Тесты сегментации
+│   │   ├── SegmentController.test.ts # Тесты API сегментов
+│   │   ├── CommunicationService.test.ts # Тесты коммуникаций
+│   │   ├── CronService.test.ts     # Тесты крон-задач
+│   │   ├── EmailService.test.ts    # Тесты email
+│   │   └── LineService.test.ts     # Тесты Line
 │   ├── utils/          # Утилиты
-│   ├── db/             # Конфигурация БД
-│   ├── jobs/           # Фоновые задачи
 │   └── types/          # TypeScript типы
-├── templates/          # Email/SMS шаблоны
-│   ├── email/
-│   ├── sms/
-│   └── push/
-├── workflows/          # Конфигурации workflow
-├── tests/              # Тесты
 └── package.json
 ```
 
 ### Модель данных
 
-#### Contact (Контакт)
+#### Customer (Клиент) - Расширенная модель
 ```typescript
-interface Contact {
+interface Customer {
   id: string;                    // UUID
-  
+
   // Основная информация
   firstName: string;
   lastName: string;
   email?: string;
   phone?: string;
-  
+
   // Дополнительная информация
   company?: string;
   jobTitle?: string;
   website?: string;
-  
+  dateOfBirth?: Date;
+  gender?: 'male' | 'female' | 'other';
+  nationality?: string;
+
   // Адрес
   address?: {
     street?: string;
@@ -74,40 +105,50 @@ interface Contact {
     country?: string;
     postalCode?: string;
   };
-  
-  // Социальные сети
-  socialProfiles?: {
+
+  // Социальные контакты (обновлено)
+  socialContacts?: {
     facebook?: string;
     instagram?: string;
-    linkedin?: string;
+    tiktok?: string;
     line?: string;
     whatsapp?: string;
+    telegram?: string;
+    wechat?: string;
+    linkedin?: string;
   };
-  
+
   // CRM данные
-  source: ContactSource;         // WEBSITE, REFERRAL, SOCIAL, ADVERTISING, etc.
-  status: ContactStatus;         // ACTIVE, INACTIVE, BLOCKED, DELETED
+  source: CustomerSource;        // WEBSITE, REFERRAL, SOCIAL, ADVERTISING, etc.
+  status: CustomerStatus;        // lead, prospect, customer, inactive, blocked
   tags: string[];                // Теги для категоризации
-  
+  leadScore: number;             // Оценка лида (0-100)
+
   // Предпочтения
   language: string;              // Предпочитаемый язык
   timezone: string;              // Часовой пояс
   communicationPreferences: {
     email: boolean;
     sms: boolean;
+    whatsapp: boolean;
+    telegram: boolean;
+    line: boolean;
     push: boolean;
-    phone: boolean;
   };
-  
+
   // Связи
   userId?: string;               // Связь с пользователем системы
   assignedTo?: string;           // Назначенный менеджер
-  
-  // Метрики
+
+  // Метрики (автоматически обновляемые)
   totalInteractions: number;     // Общее количество взаимодействий
   lastInteractionAt?: Date;      // Последнее взаимодействие
   lifetimeValue: number;         // Пожизненная ценность клиента
-  
+  totalSpent: number;            // Общая сумма потраченных средств
+  averageOrderValue: number;     // Средний чек
+  purchaseFrequency: number;     // Частота покупок
+  lastPurchaseAt?: Date;         // Последняя покупка
+
   // Временные метки
   createdAt: Date;
   updatedAt: Date;
@@ -282,49 +323,171 @@ interface Interaction {
 }
 ```
 
-#### Segment (Сегмент)
+#### Template (Шаблон сообщений) - Новая модель
 ```typescript
-interface Segment {
+interface Template {
   id: string;
-  
+
   // Основная информация
   name: string;
   description?: string;
-  
-  // Критерии сегментации
-  criteria: SegmentCriteria;
-  
+  category: TemplateCategory;    // EMAIL, SMS, TELEGRAM, WHATSAPP, etc.
+
+  // Содержимое
+  subject?: string;              // Тема (для email)
+  content: string;               // Основное содержимое с переменными
+
+  // Переменные и логика
+  variables: string[];           // Доступные переменные {{variable}}
+  hasConditionalLogic: boolean;  // Поддержка {{#if}} условий
+
+  // Статус и использование
+  isActive: boolean;
+  usageCount: number;            // Количество использований
+  lastUsedAt?: Date;
+
+  // Метаданные
+  tags: string[];
+  createdBy: string;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+#### Segment (Сегмент) - Расширенная модель
+```typescript
+interface Segment {
+  id: string;
+
+  // Основная информация
+  name: string;
+  description?: string;
+
+  // Критерии сегментации (расширенные)
+  criteria: SegmentCriteria[];
+  operator: 'AND' | 'OR';        // Логический оператор между критериями
+
   // Тип сегмента
   type: SegmentType;             // STATIC, DYNAMIC
-  
+
   // Статистика
-  contactCount: number;          // Количество контактов
-  lastUpdated: Date;             // Последнее обновление
-  
+  customerCount: number;         // Количество клиентов
+  lastCalculatedAt: Date;        // Последний пересчёт
+
+  // Статус
+  isActive: boolean;
+
   // Создатель
   createdBy: string;
-  teamId?: string;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
 
 interface SegmentCriteria {
-  conditions: SegmentCondition[];
-  operator: 'AND' | 'OR';        // Логический оператор между условиями
+  field: string;                 // Поле для фильтрации (15 доступных полей)
+  operator: SegmentOperator;     // 20+ операторов сравнения
+  value: any;                    // Значение для сравнения
+  dataType: SegmentDataType;     // STRING, NUMBER, DATE, BOOLEAN, ENUM
 }
 
-interface SegmentCondition {
-  field: string;                 // Поле для фильтрации
-  operator: ConditionOperator;   // EQUALS, NOT_EQUALS, CONTAINS, GREATER_THAN, etc.
-  value: any;                    // Значение для сравнения
-  dataType: 'string' | 'number' | 'date' | 'boolean';
+// Доступные поля для сегментации
+enum SegmentField {
+  FIRST_NAME = 'firstName',
+  LAST_NAME = 'lastName',
+  EMAIL = 'email',
+  PHONE = 'phone',
+  STATUS = 'status',
+  LEAD_SCORE = 'leadScore',
+  TOTAL_SPENT = 'totalSpent',
+  LIFETIME_VALUE = 'lifetimeValue',
+  LAST_INTERACTION_AT = 'lastInteractionAt',
+  CREATED_AT = 'createdAt',
+  TAGS = 'tags',
+  SOURCE = 'source',
+  ASSIGNED_TO = 'assignedTo',
+  LANGUAGE = 'language',
+  COUNTRY = 'country'
+}
+
+// Операторы сравнения
+enum SegmentOperator {
+  EQUALS = 'equals',
+  NOT_EQUALS = 'not_equals',
+  CONTAINS = 'contains',
+  NOT_CONTAINS = 'not_contains',
+  STARTS_WITH = 'starts_with',
+  ENDS_WITH = 'ends_with',
+  GREATER_THAN = 'greater_than',
+  LESS_THAN = 'less_than',
+  GREATER_THAN_OR_EQUAL = 'greater_than_or_equal',
+  LESS_THAN_OR_EQUAL = 'less_than_or_equal',
+  BETWEEN = 'between',
+  IN = 'in',
+  NOT_IN = 'not_in',
+  IS_NULL = 'is_null',
+  IS_NOT_NULL = 'is_not_null',
+  DATE_BEFORE = 'date_before',
+  DATE_AFTER = 'date_after',
+  DATE_BETWEEN = 'date_between',
+  REGEX_MATCH = 'regex_match',
+  ARRAY_CONTAINS = 'array_contains',
+  ARRAY_NOT_CONTAINS = 'array_not_contains'
 }
 ```
 
 ## 🎯 Основные возможности
 
-### 1. Управление лидами
+### 1. Расширенное управление клиентами
+
+- **Автоматическое обновление метрик**: Система автоматически пересчитывает метрики клиентов при каждом взаимодействии
+- **Интеграция с коммуникациями**: Все взаимодействия автоматически отслеживаются и влияют на метрики
+- **Расширенная модель**: 15+ полей клиента включая leadScore, lifetimeValue, totalSpent
+- **Автоматизация**: Триггеры workflow при изменении данных клиента
+
+### 2. Система шаблонов сообщений
+
+- **Переменные**: Поддержка `{{variable}}` для персонализации сообщений
+- **Условная логика**: Поддержка `{{#if condition}}` для динамического контента
+- **Мультиканальность**: Шаблоны для email, SMS, Telegram, WhatsApp, Line
+- **REST API**: Полное управление шаблонами через API (9 endpoints)
+- **Предпросмотр**: Возможность предварительного просмотра с тестовыми данными
+- **Статистика**: Отслеживание использования шаблонов
+
+### 3. Динамическая сегментация клиентов
+
+- **15 полей для сегментации**: firstName, lastName, email, status, leadScore, totalSpent, etc.
+- **20+ операторов**: equals, contains, greater_than, date_before, regex_match, etc.
+- **Логические операторы**: AND/OR для сложных условий
+- **Автоматический пересчёт**: Крон-задача каждые 6 часов обновляет сегменты
+- **REST API**: 10 endpoints для управления сегментами
+- **Кэширование**: Результаты сохраняются в customer_segment_memberships
+- **Статистика**: Аналитика по сегментам и их эффективности
+
+### 4. Автоматизация workflow
+
+- **Триггеры**: customer_created, lead_updated, interaction_logged
+- **Условия**: Проверка статуса, значений полей, времени
+- **Действия**: Отправка сообщений, обновление данных, создание задач
+- **Интеграция с шаблонами**: Автоматическая замена хардкода на шаблоны
+- **Обработка ошибок**: Graceful handling с логированием
+
+### 5. Фоновые задачи (CronService)
+
+- **Пересчёт метрик кампаний**: Каждый час
+- **Обновление метрик клиентов**: Каждые 5 минут
+- **Автоматизация лидов**: Ежедневно
+- **Очистка данных**: Еженедельно
+- **Пересчёт сегментов**: Каждые 6 часов
+
+### 6. Мультиканальные коммуникации
+
+- **Каналы**: Email (AWS SES), Telegram, WhatsApp, Line
+- **Унифицированный API**: Один метод для отправки в любой канал
+- **Автоматический выбор**: Система выбирает лучший канал для клиента
+- **Отслеживание**: Все взаимодействия логируются и влияют на метрики
+- **Bulk отправка**: Массовая рассылка с обработкой ошибок
 
 ```typescript
 class LeadManagementService {
@@ -704,285 +867,109 @@ class AnalyticsService {
 
 ## 🌐 API Endpoints
 
-### Управление контактами
-
-#### GET /api/crm/contacts
-Получение списка контактов
-
-**Параметры:**
-```
-?page=1
-&limit=20
-&search=john
-&status=ACTIVE
-&source=WEBSITE
-&tags=vip,premium
-&assignedTo=manager-uuid
-```
-
-**Ответ:**
-```json
-{
-  "success": true,
-  "data": {
-    "contacts": [
-      {
-        "id": "contact-uuid",
-        "firstName": "John",
-        "lastName": "Smith",
-        "email": "john.smith@example.com",
-        "phone": "+66123456789",
-        "status": "ACTIVE",
-        "source": "WEBSITE",
-        "tags": ["vip", "premium"],
-        "assignedTo": "manager-uuid",
-        "lifetimeValue": 150000,
-        "lastInteractionAt": "2024-01-15T10:30:00Z",
-        "createdAt": "2024-01-01T09:00:00Z"
-      }
-    ],
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "total": 156,
-      "pages": 8
-    }
-  }
-}
-```
-
-#### POST /api/crm/contacts
-Создание нового контакта
-
-#### PUT /api/crm/contacts/:id
-Обновление контакта
-
-#### DELETE /api/crm/contacts/:id
-Удаление контакта
-
-#### GET /api/crm/contacts/:id/interactions
-История взаимодействий с контактом
+### Управление клиентами
+- `GET /api/crm/customers` - Список клиентов с фильтрацией и поиском
+- `POST /api/crm/customers` - Создание нового клиента
+- `GET /api/crm/customers/:id` - Получение клиента по ID
+- `PUT /api/crm/customers/:id` - Обновление клиента
+- `DELETE /api/crm/customers/:id` - Удаление клиента
+- `GET /api/crm/customers/:id/interactions` - История взаимодействий
 
 ### Управление лидами
+- `GET /api/crm/leads` - Список лидов с фильтрацией
+- `POST /api/crm/leads` - Создание нового лида
+- `PUT /api/crm/leads/:id/stage` - Обновление этапа лида
+- `GET /api/crm/leads/pipeline` - Воронка продаж
 
-#### GET /api/crm/leads
-Получение списка лидов
+### Шаблоны сообщений (9 endpoints)
+- `GET /api/crm/templates` - Список шаблонов с пагинацией
+- `POST /api/crm/templates` - Создание шаблона
+- `GET /api/crm/templates/:id` - Получение шаблона
+- `PUT /api/crm/templates/:id` - Обновление шаблона
+- `DELETE /api/crm/templates/:id` - Удаление шаблона
+- `POST /api/crm/templates/:id/preview` - Предпросмотр с переменными
+- `GET /api/crm/templates/search` - Поиск шаблонов
+- `GET /api/crm/templates/stats` - Статистика использования
+- `GET /api/crm/templates/variables` - Доступные переменные
 
-#### POST /api/crm/leads
-Создание нового лида
-
-**Запрос:**
-```json
-{
-  "contactId": "contact-uuid",
-  "title": "Interested in Bangkok Condo",
-  "description": "Looking for 2-bedroom condo in Sukhumvit area",
-  "estimatedValue": 50000,
-  "probability": 70,
-  "source": "WEBSITE",
-  "propertyInterest": {
-    "type": "CONDO",
-    "location": "Sukhumvit, Bangkok",
-    "priceRange": {
-      "min": 40000,
-      "max": 60000
-    },
-    "bedrooms": 2,
-    "amenities": ["pool", "gym", "bts"]
-  }
-}
-```
-
-#### PUT /api/crm/leads/:id/stage
-Обновление этапа лида
-
-#### GET /api/crm/leads/pipeline
-Получение воронки продаж
-
-### Кампании
-
-#### GET /api/crm/campaigns
-Список кампаний
-
-#### POST /api/crm/campaigns
-Создание кампании
-
-#### POST /api/crm/campaigns/:id/send
-Запуск кампании
-
-#### GET /api/crm/campaigns/:id/report
-Отчет по кампании
-
-### Сегменты
-
-#### GET /api/crm/segments
-Список сегментов
-
-#### POST /api/crm/segments
-Создание сегмента
-
-**Запрос:**
-```json
-{
-  "name": "High-Value Prospects",
-  "description": "Prospects with high estimated value",
-  "type": "DYNAMIC",
-  "criteria": {
-    "operator": "AND",
-    "conditions": [
-      {
-        "field": "estimatedValue",
-        "operator": "GREATER_THAN",
-        "value": 100000,
-        "dataType": "number"
-      },
-      {
-        "field": "status",
-        "operator": "EQUALS",
-        "value": "QUALIFIED",
-        "dataType": "string"
-      }
-    ]
-  }
-}
-```
-
-#### PUT /api/crm/segments/:id/refresh
-Обновление динамического сегмента
+### Сегментация клиентов (10 endpoints)
+- `GET /api/crm/segments` - Список сегментов
+- `POST /api/crm/segments` - Создание сегмента
+- `GET /api/crm/segments/:id` - Получение сегмента
+- `PUT /api/crm/segments/:id` - Обновление сегмента
+- `DELETE /api/crm/segments/:id` - Удаление сегмента
+- `GET /api/crm/segments/:id/customers` - Клиенты сегмента
+- `POST /api/crm/segments/:id/preview` - Предпросмотр сегмента
+- `GET /api/crm/segments/fields` - Доступные поля для сегментации
+- `GET /api/crm/segments/search` - Поиск сегментов
+- `GET /api/crm/segments/stats` - Статистика сегментов
 
 ### Автоматизация
-
-#### GET /api/crm/workflows
-Список workflow
-
-#### POST /api/crm/workflows
-Создание workflow
-
-#### POST /api/crm/workflows/:id/trigger
-Запуск workflow
+- `GET /api/crm/workflows` - Список workflow
+- `POST /api/crm/workflows` - Создание workflow
+- `POST /api/crm/workflows/:id/trigger` - Запуск workflow
 
 ### Аналитика
+- `GET /api/crm/analytics/sales` - Отчет по продажам
+- `GET /api/crm/analytics/campaigns` - Аналитика кампаний
 
-#### GET /api/crm/analytics/sales
-Отчет по продажам
+## 🔄 Фоновые задачи (CronService)
 
-#### GET /api/crm/analytics/leads
-Аналитика лидов
+### Активные крон-задачи
+1. **Пересчёт метрик кампаний** (каждый час)
+   - Обновление статистики открытий, кликов, конверсий
+   - Расчёт ROI и эффективности кампаний
 
-#### GET /api/crm/analytics/campaigns
-Аналитика кампаний
+2. **Обновление метрик клиентов** (каждые 5 минут)
+   - Пересчёт lifetimeValue, totalSpent, averageOrderValue
+   - Обновление количества взаимодействий
 
-#### GET /api/crm/analytics/team
-Производительность команды
+3. **Автоматизация лидов** (ежедневно)
+   - Запуск follow-up для неактивных лидов
+   - Автоматическое назначение менеджеров
 
-## 🔄 Фоновые задачи
+4. **Очистка данных** (еженедельно)
+   - Удаление старых логов взаимодействий
+   - Архивирование завершённых workflow
 
-### Автоматизация и уведомления
-```typescript
-// Обработка просроченных задач
-const processOverdueTasks = async () => {
-  const overdueTasks = await this.taskRepository.findOverdue();
-  
-  for (const task of overdueTasks) {
-    // Уведомление ответственного
-    await this.notificationService.sendOverdueTaskNotification(task);
-    
-    // Эскалация, если задача просрочена более чем на 24 часа
-    if (this.isOverdue(task, 24)) {
-      await this.escalateTask(task);
-    }
-  }
-};
-
-// Обновление динамических сегментов
-const updateDynamicSegments = async () => {
-  const dynamicSegments = await this.segmentRepository.findDynamic();
-  
-  for (const segment of dynamicSegments) {
-    await this.segmentationService.updateSegmentContacts(segment.id);
-  }
-};
-
-// Расчет метрик производительности
-const calculatePerformanceMetrics = async () => {
-  const teams = await this.teamRepository.findAll();
-  
-  for (const team of teams) {
-    const metrics = await this.analyticsService.calculateTeamMetrics(team.id);
-    await this.metricsRepository.saveTeamMetrics(team.id, metrics);
-  }
-};
-
-// Автоматическое назначение лидов
-const autoAssignLeads = async () => {
-  const unassignedLeads = await this.leadRepository.findUnassigned();
-  
-  for (const lead of unassignedLeads) {
-    const bestManager = await this.findBestManager(lead);
-    if (bestManager) {
-      await this.leadRepository.update(lead.id, {
-        assignedTo: bestManager.id
-      });
-      
-      await this.notificationService.notifyLeadAssignment(lead, bestManager);
-    }
-  }
-};
-```
+5. **Пересчёт сегментов** (каждые 6 часов)
+   - Обновление динамических сегментов
+   - Пересчёт количества клиентов в сегментах
 
 ## 🧪 Тестирование
 
-### Покрытие тестами (6 тестов)
+### Покрытие тестами (235 тестов - 99.6% успешность)
 
-1. **contacts.test.ts** - Управление контактами
-   - CRUD операции
-   - Поиск и фильтрация
-   - Валидация данных
-   - Дедупликация
+**Модели (82 теста):**
+- Customer.test.ts (16 тестов) - Валидация модели клиента
+- Lead.test.ts (25 тестов) - Валидация модели лида
+- Template.test.ts (22 тестов) - Валидация модели шаблона
+- Segment.test.ts (19 тестов) - Валидация модели сегмента
 
-2. **leads.test.ts** - Управление лидами
-   - Создание и обновление лидов
-   - Смена этапов
-   - Расчет воронки продаж
-   - Автоназначение
+**Сервисы (108 тестов):**
+- CRMService.test.ts (20 тестов) - Основная бизнес-логика
+- AutomationService.test.ts (9 тестов) - Workflow автоматизация
+- TemplateService.test.ts (18 тестов) - Управление шаблонами
+- SegmentationService.test.ts (16 тестов) - Сегментация клиентов
+- CommunicationService.test.ts (15 тестов) - Мультиканальные коммуникации
+- CronService.test.ts (18 тестов) - Фоновые задачи
+- EmailService.test.ts (11 тестов) - Email сервис
+- LineService.test.ts (13 тестов) - Line мессенджер
 
-3. **campaigns.test.ts** - Маркетинговые кампании
-   - Создание кампаний
-   - Отправка сообщений
-   - Отслеживание метрик
-   - A/B тестирование
-
-4. **segments.test.ts** - Сегментация
-   - Создание сегментов
-   - Динамическое обновление
-   - Критерии фильтрации
-   - Анализ сегментов
-
-5. **automation.test.ts** - Автоматизация
-   - Создание workflow
-   - Выполнение шагов
-   - Условная логика
-   - Обработка ошибок
-
-6. **analytics.test.ts** - Аналитика
-   - Расчет метрик
-   - Генерация отчетов
-   - Анализ трендов
-   - Производительность команды
+**API контроллеры (33 теста):**
+- TemplateController.test.ts (18 тестов) - API шаблонов
+- SegmentController.test.ts (15 тестов) - API сегментов
 
 ### Запуск тестов
 ```bash
 # Все тесты
-bun test
+npm test
 
-# Тесты с покрытием
-bun test --coverage
+# Конкретный тест
+npm test -- Template
 
-# Интеграционные тесты
-bun test:integration
-
-# Тесты производительности
-bun test:performance
+# С подробным выводом
+npm test -- --reporter=verbose
 ```
 
 ## 🚀 Развертывание
@@ -1000,18 +987,15 @@ DATABASE_URL=postgresql://user:password@localhost:5432/crm_service_db
 REDIS_URL=redis://localhost:6379
 
 # Email сервисы
-SENDGRID_API_KEY=your-sendgrid-api-key
-SENDGRID_FROM_EMAIL=noreply@thailand-marketplace.com
 AWS_SES_ACCESS_KEY=your-aws-access-key
 AWS_SES_SECRET_KEY=your-aws-secret-key
 AWS_SES_REGION=ap-southeast-1
+AWS_SES_FROM_EMAIL=noreply@thailand-marketplace.com
 
-# SMS сервисы
-TWILIO_ACCOUNT_SID=your-twilio-account-sid
-TWILIO_AUTH_TOKEN=your-twilio-auth-token
-TWILIO_PHONE_NUMBER=+1234567890
-AWS_SNS_ACCESS_KEY=your-aws-access-key
-AWS_SNS_SECRET_KEY=your-aws-secret-key
+# Мессенджеры
+TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+WHATSAPP_API_TOKEN=your-whatsapp-token
+LINE_CHANNEL_ACCESS_TOKEN=your-line-token
 
 # Push уведомления
 FCM_SERVER_KEY=your-fcm-server-key
@@ -1037,7 +1021,6 @@ CLOUDINARY_API_KEY=your-cloudinary-key
 
 # Мониторинг
 SENTRY_DSN=your-sentry-dsn
-DATADOG_API_KEY=your-datadog-key
 
 # Безопасность
 ENCRYPTION_KEY=your-encryption-key
@@ -1059,47 +1042,38 @@ MAX_ATTACHMENT_SIZE=25MB
 - **AI Service**: Скоринг лидов и персонализация
 
 ### Внешние интеграции
-- **SendGrid/AWS SES**: Email маркетинг
-- **Twilio/AWS SNS**: SMS рассылки
+- **AWS SES**: Email рассылки
+- **Telegram Bot API**: Telegram сообщения
+- **WhatsApp Business API**: WhatsApp сообщения
+- **Line Messaging API**: Line сообщения
 - **Google Analytics**: Веб-аналитика
 - **Facebook Pixel**: Ретаргетинг
-- **Google Ads**: Отслеживание конверсий
-- **Zapier**: Интеграция с внешними системами
 
 ## 📊 Мониторинг и метрики
 
 ### Ключевые метрики
-```typescript
-interface CRMMetrics {
-  // Лиды
-  totalLeads: number;
-  newLeadsToday: number;
-  qualifiedLeadsRate: number;
-  conversionRate: number;
-  averageSalesCycle: number;
-  
-  // Контакты
-  totalContacts: number;
-  activeContacts: number;
-  contactGrowthRate: number;
-  
-  // Кампании
-  activeCampaigns: number;
-  averageOpenRate: number;
-  averageClickRate: number;
-  campaignROI: number;
-  
-  // Команда
-  averageResponseTime: number;
-  taskCompletionRate: number;
-  teamProductivity: number;
-  
-  // Доходы
-  totalRevenue: number;
-  averageDealSize: number;
-  revenueGrowthRate: number;
-}
-```
+
+**Клиенты:**
+- Общее количество клиентов
+- Новые клиенты за период
+- Активные клиенты
+- Средний LTV (Lifetime Value)
+- Частота взаимодействий
+
+**Шаблоны:**
+- Количество активных шаблонов
+- Частота использования
+- Эффективность по каналам
+
+**Сегменты:**
+- Количество активных сегментов
+- Средний размер сегмента
+- Покрытие клиентской базы
+
+**Автоматизация:**
+- Количество активных workflow
+- Успешность выполнения
+- Время обработки
 
 ### Дашборды
 - Воронка продаж в реальном времени

@@ -10,14 +10,26 @@ describe("Customer Model", () => {
     phone: "+1234567890",
     telegram_id: "telegram123",
     whatsapp_id: "whatsapp123",
+    line_id: "line123",
     first_name: "John",
     last_name: "Doe",
+    company: "Test Company",
+    job_title: "Developer",
+    website: "https://example.com",
+    address: { street: "123 Main St", city: "Bangkok", country: "Thailand" },
+    social_profiles: { facebook: "john.doe", linkedin: "johndoe" },
+    source: "website",
+    timezone: "Asia/Bangkok",
     preferred_language: "en",
     preferred_channel: "email",
+    communication_preferences: { email: true, whatsapp: true, telegram: false },
     status: "lead",
     lead_score: 75,
     tags: ["vip", "interested"],
     custom_fields: { source: "website", budget: 5000 },
+    total_interactions: 5,
+    last_interaction_at: "2023-01-01T12:00:00Z",
+    lifetime_value: 1500.5,
     created_at: "2023-01-01T00:00:00Z",
     updated_at: "2023-01-01T00:00:00Z",
   }
@@ -32,14 +44,26 @@ describe("Customer Model", () => {
       expect(customer.phone).toBe(mockCustomerData.phone)
       expect(customer.telegramId).toBe(mockCustomerData.telegram_id)
       expect(customer.whatsappId).toBe(mockCustomerData.whatsapp_id)
+      expect(customer.lineId).toBe(mockCustomerData.line_id)
       expect(customer.firstName).toBe(mockCustomerData.first_name)
       expect(customer.lastName).toBe(mockCustomerData.last_name)
+      expect(customer.company).toBe(mockCustomerData.company)
+      expect(customer.jobTitle).toBe(mockCustomerData.job_title)
+      expect(customer.website).toBe(mockCustomerData.website)
+      expect(customer.address).toEqual(mockCustomerData.address)
+      expect(customer.socialContacts).toEqual(mockCustomerData.social_profiles)
+      expect(customer.source).toBe(mockCustomerData.source)
+      expect(customer.timezone).toBe(mockCustomerData.timezone)
       expect(customer.preferredLanguage).toBe(mockCustomerData.preferred_language)
       expect(customer.preferredChannel).toBe(CommunicationChannel.EMAIL)
+      expect(customer.communicationPreferences).toEqual(mockCustomerData.communication_preferences)
       expect(customer.status).toBe(CustomerStatus.LEAD)
       expect(customer.leadScore).toBe(mockCustomerData.lead_score)
       expect(customer.tags).toEqual(mockCustomerData.tags)
       expect(customer.customFields).toEqual(mockCustomerData.custom_fields)
+      expect(customer.totalInteractions).toBe(mockCustomerData.total_interactions)
+      expect(customer.lastInteractionAt).toEqual(new Date(mockCustomerData.last_interaction_at))
+      expect(customer.lifetimeValue).toBe(mockCustomerData.lifetime_value)
     })
 
     it("should use default values for missing properties", () => {

@@ -151,6 +151,18 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     },
     crmController.triggerWorkflow,
   )
+
+  // Template routes (admin and manager only)
+  await fastify.register(import("./templates"), {
+    prefix: "/templates",
+    preHandler: [authenticateToken, requireRole(["admin", "manager"])],
+  })
+
+  // Segment routes (admin and manager only)
+  await fastify.register(import("./segments"), {
+    prefix: "/segments",
+    preHandler: [authenticateToken, requireRole(["admin", "manager"])],
+  })
 }
 
 export default crmRoutes

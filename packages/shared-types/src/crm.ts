@@ -44,7 +44,7 @@ export interface Customer {
   jobTitle?: string
   website?: string
   address?: CustomerAddress
-  socialProfiles?: CustomerSocialProfiles
+  socialContacts?: CustomerSocialProfiles // Renamed from socialProfiles to avoid conflicts
   source?: LeadSource
   timezone?: string
   preferredLanguage: string

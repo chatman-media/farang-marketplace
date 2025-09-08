@@ -2,6 +2,7 @@ import {
   Customer as ICustomer,
   CustomerStatus,
   CommunicationChannel,
+  LeadSource,
   CreateCustomerRequest,
   UpdateCustomerRequest,
 } from "@marketplace/shared-types"
@@ -13,14 +14,26 @@ export class Customer implements ICustomer {
   phone?: string
   telegramId?: string
   whatsappId?: string
+  lineId?: string
   firstName: string
   lastName: string
+  company?: string
+  jobTitle?: string
+  website?: string
+  address?: any // CustomerAddress
+  socialContacts?: any // Renamed from socialProfiles
+  source?: LeadSource
+  timezone?: string
   preferredLanguage: string
   preferredChannel: CommunicationChannel
+  communicationPreferences?: any // CommunicationPreferences
   status: CustomerStatus
   leadScore: number
   tags: string[]
   customFields: Record<string, any>
+  totalInteractions?: number
+  lastInteractionAt?: Date
+  lifetimeValue?: number
   createdAt: Date
   updatedAt: Date
 
@@ -31,14 +44,26 @@ export class Customer implements ICustomer {
     this.phone = data.phone
     this.telegramId = data.telegram_id
     this.whatsappId = data.whatsapp_id
+    this.lineId = data.line_id
     this.firstName = data.first_name
     this.lastName = data.last_name
+    this.company = data.company
+    this.jobTitle = data.job_title
+    this.website = data.website
+    this.address = data.address
+    this.socialContacts = data.social_profiles // Renamed from social_profiles
+    this.source = data.source
+    this.timezone = data.timezone
     this.preferredLanguage = data.preferred_language || "en"
     this.preferredChannel = data.preferred_channel || CommunicationChannel.EMAIL
+    this.communicationPreferences = data.communication_preferences
     this.status = data.status || CustomerStatus.LEAD
     this.leadScore = data.lead_score || 0
     this.tags = data.tags || []
     this.customFields = data.custom_fields || {}
+    this.totalInteractions = data.total_interactions || 0
+    this.lastInteractionAt = data.last_interaction_at ? new Date(data.last_interaction_at) : undefined
+    this.lifetimeValue = data.lifetime_value
     this.createdAt = new Date(data.created_at)
     this.updatedAt = new Date(data.updated_at)
   }
@@ -163,14 +188,26 @@ export class Customer implements ICustomer {
       phone: this.phone,
       telegram_id: this.telegramId,
       whatsapp_id: this.whatsappId,
+      line_id: this.lineId,
       first_name: this.firstName,
       last_name: this.lastName,
+      company: this.company,
+      job_title: this.jobTitle,
+      website: this.website,
+      address: this.address,
+      social_profiles: this.socialContacts, // Renamed field
+      source: this.source,
+      timezone: this.timezone,
       preferred_language: this.preferredLanguage,
       preferred_channel: this.preferredChannel,
+      communication_preferences: this.communicationPreferences,
       status: this.status,
       lead_score: this.leadScore,
       tags: this.tags,
       custom_fields: this.customFields,
+      total_interactions: this.totalInteractions,
+      last_interaction_at: this.lastInteractionAt,
+      lifetime_value: this.lifetimeValue,
       created_at: this.createdAt,
       updated_at: this.updatedAt,
     }
@@ -185,14 +222,26 @@ export class Customer implements ICustomer {
       phone: this.phone,
       telegramId: this.telegramId,
       whatsappId: this.whatsappId,
+      lineId: this.lineId,
       firstName: this.firstName,
       lastName: this.lastName,
+      company: this.company,
+      jobTitle: this.jobTitle,
+      website: this.website,
+      address: this.address,
+      socialContacts: this.socialContacts,
+      source: this.source,
+      timezone: this.timezone,
       preferredLanguage: this.preferredLanguage,
       preferredChannel: this.preferredChannel,
+      communicationPreferences: this.communicationPreferences,
       status: this.status,
       leadScore: this.leadScore,
       tags: this.tags,
       customFields: this.customFields,
+      totalInteractions: this.totalInteractions,
+      lastInteractionAt: this.lastInteractionAt,
+      lifetimeValue: this.lifetimeValue,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     }
