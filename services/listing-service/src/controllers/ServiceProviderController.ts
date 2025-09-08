@@ -112,7 +112,7 @@ interface AuthenticatedRequest extends FastifyRequest {
   }
 }
 
-export class FastifyServiceProviderController {
+export class ServiceProviderController {
   private serviceProviderService: ServiceProviderService
 
   constructor() {
@@ -125,7 +125,7 @@ export class FastifyServiceProviderController {
       const validatedData = CreateServiceProviderSchema.parse(request.body)
 
       if (!request.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           success: false,
           message: "Authentication required",
         })
@@ -165,7 +165,7 @@ export class FastifyServiceProviderController {
 
       const serviceProvider = await this.serviceProviderService.createServiceProvider(serviceProviderData)
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         data: serviceProvider,
         message: "Service provider created successfully",
@@ -174,14 +174,14 @@ export class FastifyServiceProviderController {
       console.error("Create service provider error:", error)
 
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Validation error",
           errors: error.issues,
         })
       }
 
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to create service provider",
       })
@@ -199,7 +199,7 @@ export class FastifyServiceProviderController {
       const serviceProvider = await this.serviceProviderService.getServiceProviderById(id)
 
       if (!serviceProvider) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Service provider not found",
         })
@@ -212,7 +212,7 @@ export class FastifyServiceProviderController {
       })
     } catch (error) {
       console.error("Get service provider error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to retrieve service provider",
       })
@@ -261,14 +261,14 @@ export class FastifyServiceProviderController {
       console.error("Search service providers error:", error)
 
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Validation error",
           errors: error.issues,
         })
       }
 
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to search service providers",
       })
@@ -285,7 +285,7 @@ export class FastifyServiceProviderController {
       const validatedData = UpdateServiceProviderSchema.parse(request.body)
 
       if (!request.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           success: false,
           message: "Authentication required",
         })
@@ -327,7 +327,7 @@ export class FastifyServiceProviderController {
       const serviceProvider = await this.serviceProviderService.updateServiceProvider(id, updateData, request.user.id)
 
       if (!serviceProvider) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Service provider not found or access denied",
         })
@@ -342,14 +342,14 @@ export class FastifyServiceProviderController {
       console.error("Update service provider error:", error)
 
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Validation error",
           errors: error.issues,
         })
       }
 
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to update service provider",
       })
@@ -365,7 +365,7 @@ export class FastifyServiceProviderController {
       const { id } = request.params
 
       if (!request.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           success: false,
           message: "Authentication required",
         })
@@ -374,7 +374,7 @@ export class FastifyServiceProviderController {
       const success = await this.serviceProviderService.deleteServiceProvider(id, request.user.id)
 
       if (!success) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Service provider not found or access denied",
         })
@@ -386,7 +386,7 @@ export class FastifyServiceProviderController {
       })
     } catch (error) {
       console.error("Delete service provider error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to delete service provider",
       })

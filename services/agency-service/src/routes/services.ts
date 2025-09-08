@@ -6,7 +6,7 @@ const servicesRoutes: FastifyPluginAsync = async (fastify) => {
   // Get all services
   fastify.get("/", {
     handler: async (_request, reply) => {
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: [],
         message: "Services retrieved successfully (placeholder)",
@@ -27,7 +27,7 @@ const servicesRoutes: FastifyPluginAsync = async (fastify) => {
     },
     handler: async (request, reply) => {
       const { id } = request.params as { id: string }
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: { id, name: "Sample Service" },
         message: "Service retrieved successfully (placeholder)",
@@ -52,7 +52,7 @@ const servicesRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     handler: async (request, reply) => {
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         data: { id: "new-service-id", ...(request.body as any) },
         message: "Service created successfully (placeholder)",
@@ -83,7 +83,7 @@ const servicesRoutes: FastifyPluginAsync = async (fastify) => {
     },
     handler: async (request, reply) => {
       const { id } = request.params as { id: string }
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: { id, ...(request.body as any) },
         message: "Service updated successfully (placeholder)",
@@ -104,7 +104,7 @@ const servicesRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     handler: async (request, reply) => {
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         message: "Service deleted successfully (placeholder)",
       })

@@ -46,7 +46,7 @@ export class AuthController {
       // Authenticate user
       const authResponse = await this.authService.login(loginData)
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: authResponse,
         message: "Login successful",
@@ -56,7 +56,7 @@ export class AuthController {
 
       // Check for specific error types
       if (errorMessage.includes("Invalid email or password") || errorMessage.includes("Account is deactivated")) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "AUTHENTICATION_FAILED",
             message: errorMessage,
@@ -68,7 +68,7 @@ export class AuthController {
 
       // Validation errors
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -80,7 +80,7 @@ export class AuthController {
       }
 
       // Generic server error
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -99,7 +99,7 @@ export class AuthController {
       // Register user
       const authResponse = await this.authService.register(registerData)
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         data: authResponse,
         message: "Registration successful",
@@ -109,7 +109,7 @@ export class AuthController {
 
       // Check for specific error types
       if (errorMessage.includes("already exists")) {
-        return reply.status(409).send({
+        return reply.code(409).send({
           error: {
             code: "CONFLICT",
             message: errorMessage,
@@ -121,7 +121,7 @@ export class AuthController {
 
       // Validation errors
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -133,7 +133,7 @@ export class AuthController {
       }
 
       // Generic server error
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -152,7 +152,7 @@ export class AuthController {
       // Refresh tokens
       const authResponse = await this.authService.refreshTokens(refreshData)
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: authResponse,
         message: "Token refresh successful",
@@ -162,7 +162,7 @@ export class AuthController {
 
       // Check for specific error types
       if (errorMessage.includes("Invalid") || errorMessage.includes("expired")) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "INVALID_REFRESH_TOKEN",
             message: errorMessage,
@@ -174,7 +174,7 @@ export class AuthController {
 
       // Validation errors
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -186,7 +186,7 @@ export class AuthController {
       }
 
       // Generic server error
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -201,7 +201,7 @@ export class AuthController {
   getProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -213,7 +213,7 @@ export class AuthController {
 
       // Get user data (this would typically come from UserService)
       // For now, we'll return the token payload data
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: {
           userId: req.user.userId,
@@ -223,7 +223,7 @@ export class AuthController {
         message: "Profile retrieved successfully",
       })
     } catch (error) {
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -240,7 +240,7 @@ export class AuthController {
     // by removing the tokens from storage. However, we can provide this endpoint
     // for consistency and future token blacklisting if needed.
 
-    return reply.status(200).send({
+    return reply.code(200).send({
       success: true,
       message: "Logout successful",
     })
@@ -253,7 +253,7 @@ export class AuthController {
       const token = AuthService.extractTokenFromHeader(authHeader)
 
       if (!token) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           error: {
             code: "MISSING_TOKEN",
             message: "Access token is required",
@@ -265,7 +265,7 @@ export class AuthController {
 
       const payload = await this.authService.validateAccessToken(token)
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: {
           valid: true,
@@ -274,7 +274,7 @@ export class AuthController {
         message: "Token is valid",
       })
     } catch (error) {
-      return reply.status(401).send({
+      return reply.code(401).send({
         error: {
           code: "INVALID_TOKEN",
           message: "Token validation failed",

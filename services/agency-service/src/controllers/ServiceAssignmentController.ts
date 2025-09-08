@@ -16,14 +16,14 @@ export class ServiceAssignmentController {
       const assignmentData = req.body as any
       const assignment = await this.serviceAssignmentService.createAssignment(assignmentData)
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         message: "Service assignment created successfully",
         data: assignment,
       })
     } catch (error) {
       console.error("Error creating assignment:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to create assignment",
       })
@@ -37,7 +37,7 @@ export class ServiceAssignmentController {
     try {
       const { id } = req.params as { id: string }
       if (!id) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Assignment ID is required",
         })
@@ -46,7 +46,7 @@ export class ServiceAssignmentController {
       const assignment = await this.serviceAssignmentService.getAssignmentById(id)
 
       if (!assignment) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Assignment not found",
         })
@@ -58,7 +58,7 @@ export class ServiceAssignmentController {
       })
     } catch (error) {
       console.error("Error getting assignment:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignment",
       })
@@ -72,7 +72,7 @@ export class ServiceAssignmentController {
     try {
       const { agencyId } = req.params as { agencyId: string }
       if (!agencyId) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Agency ID is required",
         })
@@ -86,7 +86,7 @@ export class ServiceAssignmentController {
       })
     } catch (error) {
       console.error("Error getting assignments by agency:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignments",
       })
@@ -100,7 +100,7 @@ export class ServiceAssignmentController {
     try {
       const { listingId } = req.params as { listingId: string }
       if (!listingId) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Listing ID is required",
         })
@@ -114,7 +114,7 @@ export class ServiceAssignmentController {
       })
     } catch (error) {
       console.error("Error getting assignments by listing:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignments",
       })
@@ -130,7 +130,7 @@ export class ServiceAssignmentController {
       const { status, notes } = req.body as { status: "active" | "paused" | "completed" | "cancelled"; notes?: string }
 
       if (!id) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Assignment ID is required",
         })
@@ -139,7 +139,7 @@ export class ServiceAssignmentController {
       const assignment = await this.serviceAssignmentService.updateAssignmentStatus(id, status, notes)
 
       if (!assignment) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Assignment not found",
         })
@@ -152,7 +152,7 @@ export class ServiceAssignmentController {
       })
     } catch (error) {
       console.error("Error updating assignment status:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update assignment status",
       })
@@ -168,7 +168,7 @@ export class ServiceAssignmentController {
       const { rating, feedback } = req.body as { rating: number; feedback?: string }
 
       if (!id) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Assignment ID is required",
         })
@@ -177,7 +177,7 @@ export class ServiceAssignmentController {
       const assignment = await this.serviceAssignmentService.addCustomerFeedback(id, rating, feedback)
 
       if (!assignment) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Assignment not found",
         })
@@ -190,7 +190,7 @@ export class ServiceAssignmentController {
       })
     } catch (error) {
       console.error("Error adding customer feedback:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to add customer feedback",
       })
@@ -220,7 +220,7 @@ export class ServiceAssignmentController {
       })
     } catch (error) {
       console.error("Error searching assignments:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to search assignments",
       })
@@ -234,7 +234,7 @@ export class ServiceAssignmentController {
     try {
       const { agencyId } = req.params as { agencyId: string }
       if (!agencyId) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Agency ID is required",
         })
@@ -248,7 +248,7 @@ export class ServiceAssignmentController {
       })
     } catch (error) {
       console.error("Error getting assignment stats:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignment stats",
       })

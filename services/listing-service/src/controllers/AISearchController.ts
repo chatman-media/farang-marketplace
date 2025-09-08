@@ -80,7 +80,7 @@ const serviceMatchingSchema = z.object({
   preferredProvider: z.enum(["openai", "deepseek", "claude"]).optional(),
 })
 
-export class FastifyAISearchController {
+export class AISearchController {
   private aiService: AIService
 
   constructor() {
@@ -119,7 +119,7 @@ export class FastifyAISearchController {
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Validation Error",
           errors: error.issues,
@@ -127,7 +127,7 @@ export class FastifyAISearchController {
       }
 
       console.error("Enhanced search error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to perform enhanced search",
       })
@@ -147,7 +147,7 @@ export class FastifyAISearchController {
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Validation Error",
           errors: error.issues,
@@ -155,7 +155,7 @@ export class FastifyAISearchController {
       }
 
       console.error("Query analysis error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to analyze query",
       })
@@ -175,7 +175,7 @@ export class FastifyAISearchController {
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Validation Error",
           errors: error.issues,
@@ -183,7 +183,7 @@ export class FastifyAISearchController {
       }
 
       console.error("Get suggestions error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to get suggestions",
       })
@@ -213,7 +213,7 @@ export class FastifyAISearchController {
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Validation Error",
           errors: error.issues,
@@ -221,7 +221,7 @@ export class FastifyAISearchController {
       }
 
       console.error("Get recommendations error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to get recommendations",
       })
@@ -247,7 +247,7 @@ export class FastifyAISearchController {
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Validation Error",
           errors: error.issues,
@@ -255,7 +255,7 @@ export class FastifyAISearchController {
       }
 
       console.error("Service matching error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to match services",
       })
@@ -278,7 +278,7 @@ export class FastifyAISearchController {
       })
     } catch (error) {
       console.error("Get AI status error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to get AI status",
       })
@@ -297,7 +297,7 @@ export class FastifyAISearchController {
       })
     } catch (error) {
       console.error("Get cost estimate error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to get cost estimate",
       })

@@ -26,7 +26,7 @@ export class BookingIntegrationController {
       })
     } catch (error) {
       console.error("Error finding matching agencies:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to find matching agencies",
       })
@@ -41,14 +41,14 @@ export class BookingIntegrationController {
       const { bookingRequest, agencyMatch } = req.body as any
       const result = await this.bookingIntegrationService.assignServiceToAgency(bookingRequest, agencyMatch)
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         message: "Service assigned to agency successfully",
         data: result,
       })
     } catch (error) {
       console.error("Error assigning service to agency:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to assign service to agency",
       })
@@ -64,20 +64,20 @@ export class BookingIntegrationController {
       const result = await this.bookingIntegrationService.autoAssignBestMatch(bookingRequest)
 
       if (!result) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "No matching agencies found for this request",
         })
       }
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         message: "Service auto-assigned successfully",
         data: result,
       })
     } catch (error) {
       console.error("Error auto-assigning service:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to auto-assign service",
       })
@@ -93,7 +93,7 @@ export class BookingIntegrationController {
       const { finalPrice } = req.body as { finalPrice: number }
 
       if (!assignmentId) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Assignment ID is required",
         })
@@ -107,7 +107,7 @@ export class BookingIntegrationController {
       })
     } catch (error) {
       console.error("Error calculating commission:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to calculate commission",
       })
@@ -122,7 +122,7 @@ export class BookingIntegrationController {
       const { assignmentId } = req.params as { assignmentId: string }
 
       if (!assignmentId) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Assignment ID is required",
         })
@@ -131,7 +131,7 @@ export class BookingIntegrationController {
       const status = await this.bookingIntegrationService.getAssignmentStatus(assignmentId)
 
       if (!status) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Assignment not found",
         })
@@ -143,7 +143,7 @@ export class BookingIntegrationController {
       })
     } catch (error) {
       console.error("Error getting assignment status:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignment status",
       })
@@ -176,7 +176,7 @@ export class BookingIntegrationController {
       })
     } catch (error) {
       console.error("Error getting service categories:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get service categories",
       })

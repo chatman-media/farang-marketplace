@@ -28,7 +28,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
     const authHeader = request.headers.authorization
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      reply.status(401).send({
+      reply.code(401).send({
         error: "Unauthorized",
         message: "No token provided or invalid format",
         timestamp: new Date().toISOString(),
@@ -39,7 +39,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
     const token = authHeader.substring(7) // Remove 'Bearer ' prefix
 
     if (!token) {
-      reply.status(401).send({
+      reply.code(401).send({
         error: "Unauthorized",
         message: "No token provided",
         timestamp: new Date().toISOString(),
@@ -51,7 +51,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
     const jwtSecret = process.env.JWT_SECRET
     if (!jwtSecret) {
       request.log.error("JWT_SECRET not configured")
-      reply.status(500).send({
+      reply.code(500).send({
         error: "Internal Server Error",
         message: "Authentication configuration error",
         timestamp: new Date().toISOString(),
@@ -73,7 +73,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
       // Continue to next handler
     } catch (jwtError: any) {
       if (jwtError.name === "TokenExpiredError") {
-        reply.status(401).send({
+        reply.code(401).send({
           error: "Unauthorized",
           message: "Token has expired",
           timestamp: new Date().toISOString(),
@@ -82,7 +82,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
       }
 
       if (jwtError.name === "JsonWebTokenError") {
-        reply.status(401).send({
+        reply.code(401).send({
           error: "Unauthorized",
           message: "Invalid token",
           timestamp: new Date().toISOString(),
@@ -92,7 +92,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
 
       // Other JWT errors
       request.log.error("JWT verification error:", jwtError)
-      reply.status(401).send({
+      reply.code(401).send({
         error: "Unauthorized",
         message: "Token verification failed",
         timestamp: new Date().toISOString(),
@@ -101,7 +101,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
     }
   } catch (error: any) {
     request.log.error("Authentication middleware error:", error)
-    reply.status(500).send({
+    reply.code(500).send({
       error: "Internal Server Error",
       message: "Authentication failed",
       timestamp: new Date().toISOString(),
@@ -150,7 +150,7 @@ export const optionalAuthMiddleware = async (request: FastifyRequest, _reply: Fa
 export const requireRole = (allowedRoles: string[]) => {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     if (!request.user) {
-      reply.status(401).send({
+      reply.code(401).send({
         error: "Unauthorized",
         message: "Authentication required",
         timestamp: new Date().toISOString(),
@@ -159,7 +159,7 @@ export const requireRole = (allowedRoles: string[]) => {
     }
 
     if (!allowedRoles.includes(request.user.role)) {
-      reply.status(403).send({
+      reply.code(403).send({
         error: "Forbidden",
         message: `Access denied. Required roles: ${allowedRoles.join(", ")}`,
         timestamp: new Date().toISOString(),
@@ -171,7 +171,7 @@ export const requireRole = (allowedRoles: string[]) => {
 
 export const requireVerified = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
   if (!request.user) {
-    reply.status(401).send({
+    reply.code(401).send({
       error: "Unauthorized",
       message: "Authentication required",
       timestamp: new Date().toISOString(),
@@ -180,7 +180,7 @@ export const requireVerified = async (request: FastifyRequest, reply: FastifyRep
   }
 
   if (!request.user.verified) {
-    reply.status(403).send({
+    reply.code(403).send({
       error: "Forbidden",
       message: "Account verification required",
       timestamp: new Date().toISOString(),

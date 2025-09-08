@@ -78,7 +78,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
         return reply.send({ success: true, processed: true })
       } catch (error) {
         fastify.log.error({ error }, "Failed to process TON webhook")
-        return reply.status(500).send({
+        return reply.code(500).send({
           success: false,
           error: "Failed to process webhook",
         })
@@ -96,7 +96,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
         const payload = request.body as string
 
         if (!signature || !payload) {
-          return reply.status(400).send({ error: "Missing signature or payload" })
+          return reply.code(400).send({ error: "Missing signature or payload" })
         }
 
         try {
@@ -108,10 +108,10 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           const providedSignature = signature.split("=")[1]
 
           if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(providedSignature))) {
-            return reply.status(400).send({ error: "Invalid signature" })
+            return reply.code(400).send({ error: "Invalid signature" })
           }
         } catch (error) {
-          return reply.status(400).send({ error: "Signature verification failed" })
+          return reply.code(400).send({ error: "Signature verification failed" })
         }
       },
       schema: {
@@ -147,7 +147,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
         return reply.send({ success: true, processed: true })
       } catch (error) {
         fastify.log.error({ error }, "Failed to process Stripe webhook")
-        return reply.status(500).send({
+        return reply.code(500).send({
           success: false,
           error: "Failed to process webhook",
         })
@@ -195,7 +195,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
         return reply.send({ success: true, processed: true })
       } catch (error) {
         fastify.log.error({ error }, "Failed to process payment webhook")
-        return reply.status(500).send({
+        return reply.code(500).send({
           success: false,
           error: "Failed to process webhook",
         })
@@ -226,7 +226,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
         return reply.send({ success: true, processed: true })
       } catch (error) {
         fastify.log.error({ error }, "Failed to process refund webhook")
-        return reply.status(500).send({
+        return reply.code(500).send({
           success: false,
           error: "Failed to process webhook",
         })

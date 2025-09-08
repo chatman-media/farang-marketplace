@@ -25,10 +25,10 @@ import { ContentAnalysisService } from "./services/ContentAnalysisService"
 import { UserBehaviorService } from "./services/UserBehaviorService"
 
 // Import controllers
-import { FastifyRecommendationController } from "./controllers/FastifyRecommendationController"
+import { RecommendationController } from "./controllers/RecommendationController"
 import { ContentAnalysisController } from "./controllers/ContentAnalysisController"
-import { FastifyInsightsController } from "./controllers/FastifyInsightsController"
-import { FastifyMarketplaceIntegrationController } from "./controllers/FastifyMarketplaceIntegrationController"
+import { InsightsController } from "./controllers/InsightsController"
+import { MarketplaceIntegrationController } from "./controllers/MarketplaceIntegrationController"
 
 // Import routes
 import contentAnalysisRoutes from "./routes/fastify-content-analysis"
@@ -75,10 +75,10 @@ export const createApp = async (): Promise<FastifyInstance> => {
   const userBehaviorService = new UserBehaviorService(aiProviderService)
 
   // Initialize controllers
-  const recommendationController = new FastifyRecommendationController(recommendationEngine)
+  const recommendationController = new RecommendationController(recommendationEngine)
   const contentAnalysisController = new ContentAnalysisController(contentAnalysisService)
-  const fastifyInsightsController = new FastifyInsightsController(userBehaviorService)
-  const marketplaceController = new FastifyMarketplaceIntegrationController()
+  const insightsController = new InsightsController(userBehaviorService)
+  const marketplaceController = new MarketplaceIntegrationController()
 
   // Root endpoint
   app.get("/", async () => {
@@ -137,7 +137,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
       }
     } catch (error) {
       app.log.error("Error getting service status:", error)
-      reply.status(500)
+      reply.code(500)
       return {
         success: false,
         message: "Failed to get service status",
@@ -161,7 +161,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
       }
     } catch (error) {
       app.log.error("Error getting providers:", error)
-      reply.status(500)
+      reply.code(500)
       return {
         success: false,
         message: "Failed to get AI providers",
@@ -178,7 +178,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
       }
     } catch (error) {
       app.log.error("Error getting provider stats:", error)
-      reply.status(500)
+      reply.code(500)
       return {
         success: false,
         message: "Failed to get provider statistics",
@@ -192,7 +192,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
     recommendationController,
   })
   app.register(contentAnalysisRoutes, { prefix: "/api/v1/content", contentAnalysisController })
-  app.register(insightsRoutes, { prefix: "/api/insights", insightsController: fastifyInsightsController })
+  app.register(insightsRoutes, { prefix: "/api/insights", insightsController })
   app.register(marketplaceIntegrationRoutes, { prefix: "/api/marketplace", marketplaceController })
   // app.register(aiProviderRoutes, { prefix: '/api/v1/providers', aiProviderController })
   // app.register(modelManagementRoutes, { prefix: '/api/v1/models', modelManagementController })

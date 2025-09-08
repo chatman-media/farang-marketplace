@@ -1,18 +1,98 @@
-import { Request, Response } from "express"
-import { validationResult } from "express-validator"
+import { FastifyRequest, FastifyReply } from "fastify"
+import { z } from "zod"
 import { MarketplaceIntegrationService } from "../services/MarketplaceIntegrationService"
 import { AIProviderService } from "../services/AIProviderService"
 import { RecommendationEngine } from "../services/RecommendationEngine"
 import { UserBehaviorService } from "../services/UserBehaviorService"
 import { ContentAnalysisService } from "../services/ContentAnalysisService"
+import type { AuthenticatedUser } from "../middleware/fastify-auth"
 
-// Extend Request interface to include user property
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string
-    role: string
-    email?: string
-  }
+// Zod schemas for validation
+export const bookingIntelligenceSchema = z.object({
+  listingId: z.string().min(1),
+  userId: z.string().min(1),
+  checkIn: z.string().datetime(),
+  checkOut: z.string().datetime(),
+  guests: z.number().int().min(1),
+  budget: z.number().min(0).optional(),
+  preferences: z.array(z.string()).optional(),
+  context: z.record(z.string(), z.any()).optional(),
+})
+
+export const priceSuggestionsSchema = z.object({
+  listingId: z.string().min(1),
+  checkIn: z.string().datetime(),
+  checkOut: z.string().datetime(),
+  guests: z.number().int().min(1),
+  marketData: z
+    .object({
+      competitors: z
+        .array(
+          z.object({
+            id: z.string(),
+            price: z.number(),
+            rating: z.number().optional(),
+          }),
+        )
+        .optional(),
+      seasonality: z.string().optional(),
+      events: z.array(z.string()).optional(),
+    })
+    .optional(),
+})
+
+export const smartNotificationSchema = z.object({
+  userId: z.string().min(1),
+  type: z.enum(["booking_reminder", "price_alert", "recommendation", "engagement"]),
+  data: z.record(z.string(), z.any()),
+  preferences: z
+    .object({
+      channels: z.array(z.enum(["email", "push", "sms"])),
+      timing: z.string().optional(),
+      frequency: z.enum(["immediate", "daily", "weekly"]).optional(),
+    })
+    .optional(),
+})
+
+export const fraudDetectionSchema = z.object({
+  transactionId: z.string().min(1),
+  userId: z.string().min(1),
+  listingId: z.string().min(1),
+  amount: z.number().min(0),
+  paymentMethod: z.string(),
+  userBehavior: z.object({
+    ipAddress: z.string(),
+    userAgent: z.string(),
+    sessionDuration: z.number().optional(),
+    previousBookings: z.number().optional(),
+  }),
+  bookingDetails: z.object({
+    checkIn: z.string().datetime(),
+    checkOut: z.string().datetime(),
+    guests: z.number().int().min(1),
+    bookingTime: z.string().datetime(),
+  }),
+})
+
+export const analyticsQuerySchema = z.object({
+  timeframe: z.enum(["1d", "7d", "30d", "90d"]).optional(),
+  metrics: z.array(z.enum(["bookings", "revenue", "conversion", "user_engagement"])).optional(),
+  filters: z
+    .object({
+      category: z.string().optional(),
+      location: z.string().optional(),
+      priceRange: z
+        .object({
+          min: z.number().optional(),
+          max: z.number().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+})
+
+interface AuthenticatedRequest extends FastifyRequest {
+  user?: AuthenticatedUser
 }
 
 export class MarketplaceIntegrationController {
@@ -35,46 +115,40 @@ export class MarketplaceIntegrationController {
 
   /**
    * Generate booking intelligence
-   * POST /api/ai/marketplace/booking-intelligence
    */
-  generateBookingIntelligence = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async generateBookingIntelligence(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
+      const body = bookingIntelligenceSchema.parse(request.body)
 
-      const { userId, listingId, bookingData } = req.body
-      const authenticatedUserId = req.user?.id
+      const intelligence = await this.marketplaceService.generateBookingIntelligence(body.userId, body.listingId, {
+        checkIn: new Date(body.checkIn),
+        checkOut: new Date(body.checkOut),
+        guests: body.guests,
+        budget: body.budget,
+        preferences: body.preferences || [],
+        context: body.context || {},
+      })
 
-      // Ensure user can only access their own data or is admin
-      if (authenticatedUserId !== userId && req.user?.role !== "admin") {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Access denied to user data",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      const intelligence = await this.marketplaceService.generateBookingIntelligence(userId, listingId, bookingData)
-
-      res.status(200).json({
+      reply.send({
         success: true,
         data: intelligence,
-        message: "Booking intelligence generated successfully",
         timestamp: new Date().toISOString(),
       })
-    } catch (error: any) {
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return reply.code(400).send({
+          success: false,
+          error: "Validation Error",
+          details: error.issues,
+          timestamp: new Date().toISOString(),
+        })
+      }
+
       console.error("Error generating booking intelligence:", error)
-      res.status(500).json({
+      reply.code(500).send({
+        success: false,
         error: "Internal Server Error",
-        message: error.message || "Failed to generate booking intelligence",
+        message: error instanceof Error ? error.message : "Failed to generate booking intelligence",
         timestamp: new Date().toISOString(),
       })
     }
@@ -82,129 +156,115 @@ export class MarketplaceIntegrationController {
 
   /**
    * Generate price suggestions
-   * POST /api/ai/marketplace/price-suggestions
    */
-  generatePriceSuggestions = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async generatePriceSuggestions(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
+      const validatedData = priceSuggestionsSchema.parse(request.body)
 
-      const { listingId, currentPrice, marketContext } = req.body
+      const suggestions = await this.marketplaceService.generatePriceSuggestions(
+        validatedData.listingId,
+        undefined, // currentPrice
+        {
+          checkIn: validatedData.checkIn,
+          checkOut: validatedData.checkOut,
+          guests: validatedData.guests,
+          ...validatedData.marketData,
+        },
+      )
 
-      const suggestions = await this.marketplaceService.generatePriceSuggestions(listingId, currentPrice, marketContext)
-
-      res.status(200).json({
+      reply.send({
         success: true,
         data: suggestions,
-        message: "Price suggestions generated successfully",
-        timestamp: new Date().toISOString(),
       })
-    } catch (error: any) {
-      console.error("Error generating price suggestions:", error)
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: error.message || "Failed to generate price suggestions",
-        timestamp: new Date().toISOString(),
-      })
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        reply.code(400).send({
+          success: false,
+          error: "Validation failed",
+          details: error.issues,
+        })
+      } else {
+        reply.code(500).send({
+          success: false,
+          error: error instanceof Error ? error.message : "Failed to generate price suggestions",
+        })
+      }
     }
   }
 
   /**
    * Create smart notification
-   * POST /api/ai/marketplace/smart-notifications
    */
-  createSmartNotification = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async createSmartNotification(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
+      const validatedData = smartNotificationSchema.parse(request.body)
 
-      const { userId, type, context } = req.body
-      const authenticatedUserId = req.user?.id
+      const notification = await this.marketplaceService.createSmartNotification(
+        validatedData.userId,
+        validatedData.type,
+        validatedData.data,
+      )
 
-      // Ensure user can only create notifications for themselves or is admin
-      if (authenticatedUserId !== userId && req.user?.role !== "admin") {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Access denied to create notifications for other users",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      const notification = await this.marketplaceService.createSmartNotification(userId, type, context)
-
-      res.status(201).json({
+      reply.send({
         success: true,
         data: notification,
-        message: "Smart notification created successfully",
-        timestamp: new Date().toISOString(),
       })
-    } catch (error: any) {
-      console.error("Error creating smart notification:", error)
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: error.message || "Failed to create smart notification",
-        timestamp: new Date().toISOString(),
-      })
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        reply.code(400).send({
+          success: false,
+          error: "Validation failed",
+          details: error.issues,
+        })
+      } else {
+        reply.code(500).send({
+          success: false,
+          error: error instanceof Error ? error.message : "Failed to create smart notification",
+        })
+      }
     }
   }
 
   /**
    * Detect fraud
-   * POST /api/ai/marketplace/fraud-detection
    */
-  detectFraud = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async detectFraud(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
+      const body = fraudDetectionSchema.parse(request.body)
 
-      const { userId, listingId, transactionData } = req.body
-      const authenticatedUserId = req.user?.id
+      const fraudAnalysis = await this.marketplaceService.detectFraud(body.userId, body.listingId, {
+        transactionId: body.transactionId,
+        amount: body.amount,
+        paymentMethod: body.paymentMethod,
+        userBehavior: body.userBehavior,
+        bookingDetails: {
+          checkIn: new Date(body.bookingDetails.checkIn),
+          checkOut: new Date(body.bookingDetails.checkOut),
+          guests: body.bookingDetails.guests,
+          bookingTime: new Date(body.bookingDetails.bookingTime),
+        },
+      })
 
-      // Only allow fraud detection for own data or by admin/moderator
-      if (authenticatedUserId !== userId && !["admin", "moderator"].includes(req.user?.role || "")) {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Access denied to fraud detection for other users",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      const fraudResult = await this.marketplaceService.detectFraud(userId, listingId, transactionData)
-
-      res.status(200).json({
+      reply.send({
         success: true,
-        data: fraudResult,
-        message: "Fraud detection completed successfully",
+        data: fraudAnalysis,
         timestamp: new Date().toISOString(),
       })
-    } catch (error: any) {
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return reply.code(400).send({
+          success: false,
+          error: "Validation Error",
+          details: error.issues,
+          timestamp: new Date().toISOString(),
+        })
+      }
+
       console.error("Error detecting fraud:", error)
-      res.status(500).json({
+      reply.code(500).send({
+        success: false,
         error: "Internal Server Error",
-        message: error.message || "Failed to detect fraud",
+        message: error instanceof Error ? error.message : "Failed to detect fraud",
         timestamp: new Date().toISOString(),
       })
     }
@@ -212,110 +272,42 @@ export class MarketplaceIntegrationController {
 
   /**
    * Get marketplace analytics
-   * GET /api/ai/marketplace/analytics
    */
-  getMarketplaceAnalytics = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async getMarketplaceAnalytics(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const { timeframe = "7d", category, location } = req.query
-
-      // Only allow admin/moderator access to analytics
-      if (!["admin", "moderator"].includes(req.user?.role || "")) {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Access denied to marketplace analytics",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      // Mock analytics data - in real implementation, this would aggregate real data
-      const analytics = {
-        timeframe,
-        category,
-        location,
-        metrics: {
-          totalBookings: 1250,
-          averageBookingValue: 2500,
-          fraudDetectionRate: 0.03,
-          priceOptimizationImpact: 0.15,
-          notificationEngagementRate: 0.42,
-        },
-        trends: {
-          bookingGrowth: 0.12,
-          priceStability: 0.85,
-          userSatisfaction: 0.89,
-          fraudReduction: 0.25,
-        },
-        insights: [
-          {
-            type: "opportunity",
-            message: "Price optimization could increase revenue by 15%",
-            confidence: 0.8,
-          },
-          {
-            type: "warning",
-            message: "Fraud attempts increased by 5% this week",
-            confidence: 0.9,
-          },
-          {
-            type: "success",
-            message: "Smart notifications improved engagement by 42%",
-            confidence: 0.95,
-          },
-        ],
-        generatedAt: new Date().toISOString(),
-      }
-
-      res.status(200).json({
+      // Simplified analytics response since the service doesn't have this method
+      reply.send({
         success: true,
-        data: analytics,
-        message: "Marketplace analytics retrieved successfully",
-        timestamp: new Date().toISOString(),
+        data: {
+          message: "Analytics endpoint not yet implemented",
+          timestamp: new Date().toISOString(),
+        },
       })
-    } catch (error: any) {
-      console.error("Error getting marketplace analytics:", error)
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: error.message || "Failed to get marketplace analytics",
-        timestamp: new Date().toISOString(),
+    } catch (error) {
+      reply.code(500).send({
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to get analytics",
       })
     }
   }
 
   /**
-   * Health check for marketplace integration
-   * GET /api/ai/marketplace/health
+   * Health check
    */
-  healthCheck = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
+  async healthCheck(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const health = {
-        status: "healthy",
-        services: {
-          aiProvider: "operational",
-          recommendationEngine: "operational",
-          userBehaviorService: "operational",
-          contentAnalysisService: "operational",
-          marketplaceIntegration: "operational",
-        },
-        metrics: {
-          uptime: process.uptime(),
-          memoryUsage: process.memoryUsage(),
+      reply.send({
+        success: true,
+        data: {
+          status: "healthy",
+          service: "marketplace-integration",
           timestamp: new Date().toISOString(),
         },
-      }
-
-      res.status(200).json({
-        success: true,
-        data: health,
-        message: "Marketplace integration service is healthy",
-        timestamp: new Date().toISOString(),
       })
-    } catch (error: any) {
-      console.error("Error checking health:", error)
-      res.status(500).json({
-        error: "Internal Server Error",
-        message: error.message || "Health check failed",
-        timestamp: new Date().toISOString(),
+    } catch (error) {
+      reply.code(500).send({
+        success: false,
+        error: error instanceof Error ? error.message : "Health check failed",
       })
     }
   }

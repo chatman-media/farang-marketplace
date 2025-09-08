@@ -1,5 +1,5 @@
-import { Request, Response } from "express"
-import { validationResult } from "express-validator"
+import { FastifyRequest, FastifyReply } from "fastify"
+import { z } from "zod"
 import { BookingService } from "../services/BookingService"
 import type {
   CreateBookingRequest,
@@ -7,6 +7,106 @@ import type {
   UpdateStatusRequest,
   BookingFilters,
 } from "@marketplace/shared-types"
+
+// Zod schemas for validation
+export const createBookingSchema = {
+  body: z.object({
+    listingId: z.string().uuid("Listing ID must be a valid UUID"),
+    checkIn: z
+      .string()
+      .datetime("Check-in date must be a valid ISO 8601 date")
+      .refine((date) => new Date(date) > new Date(), "Check-in date must be in the future"),
+    checkOut: z
+      .string()
+      .datetime("Check-out date must be a valid ISO 8601 date")
+      .optional()
+      .refine((date, ctx) => {
+        if (date && ctx.parent.checkIn) {
+          return new Date(date) > new Date(ctx.parent.checkIn)
+        }
+        return true
+      }, "Check-out date must be after check-in date"),
+    guests: z.number().int().min(1).max(20, "Number of guests must be between 1 and 20"),
+    specialRequests: z.string().max(1000, "Special requests must not exceed 1000 characters").optional(),
+  }),
+}
+
+export const createServiceBookingSchema = {
+  body: z.object({
+    listingId: z.string().uuid("Listing ID must be a valid UUID"),
+    serviceType: z.enum(["consultation", "project", "hourly", "package", "subscription"], {
+      errorMap: () => ({ message: "Invalid service type" }),
+    }),
+    scheduledDate: z
+      .string()
+      .datetime("Scheduled date must be a valid ISO 8601 date")
+      .refine((date) => new Date(date) > new Date(), "Scheduled date must be in the future"),
+    scheduledTime: z
+      .string()
+      .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Scheduled time must be in HH:MM format")
+      .optional(),
+    duration: z.object({
+      value: z.number().int().positive("Duration value must be a positive integer"),
+      unit: z.enum(["minutes", "hours", "days", "weeks", "months"], {
+        errorMap: () => ({ message: "Invalid duration unit" }),
+      }),
+    }),
+    deliveryMethod: z.enum(["online", "in_person", "hybrid"], {
+      errorMap: () => ({ message: "Invalid delivery method" }),
+    }),
+    requirements: z.array(z.string()).optional(),
+    deliverables: z.array(z.string()).optional(),
+    communicationPreference: z.enum(["email", "phone", "chat", "video_call"], {
+      errorMap: () => ({ message: "Invalid communication preference" }),
+    }),
+    timezone: z.string().min(1).max(50, "Timezone must be between 1 and 50 characters").optional(),
+  }),
+}
+
+export const updateStatusSchema = {
+  params: z.object({
+    bookingId: z.string().uuid("Booking ID must be a valid UUID"),
+  }),
+  body: z.object({
+    status: z.enum(["pending", "confirmed", "active", "completed", "cancelled", "disputed"], {
+      errorMap: () => ({ message: "Invalid booking status" }),
+    }),
+    reason: z.string().max(500, "Reason must not exceed 500 characters").optional(),
+  }),
+}
+
+export const bookingIdSchema = {
+  params: z.object({
+    bookingId: z.string().uuid("Booking ID must be a valid UUID"),
+  }),
+}
+
+export const searchSchema = {
+  querystring: z.object({
+    page: z.string().transform(Number).pipe(z.number().int().positive()).optional(),
+    limit: z.string().transform(Number).pipe(z.number().int().min(1).max(100)).optional(),
+    status: z.enum(["pending", "confirmed", "active", "completed", "cancelled", "disputed"]).optional(),
+    type: z.enum(["accommodation", "transportation", "tour", "activity", "dining", "event", "service"]).optional(),
+    paymentStatus: z
+      .enum(["pending", "processing", "completed", "failed", "refunded", "partially_refunded"])
+      .optional(),
+    guestId: z.string().uuid().optional(),
+    hostId: z.string().uuid().optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
+    minPrice: z.string().transform(Number).pipe(z.number().nonnegative()).optional(),
+    maxPrice: z.string().transform(Number).pipe(z.number().nonnegative()).optional(),
+  }),
+}
+
+// Authenticated request interface
+interface AuthenticatedRequest extends FastifyRequest {
+  user?: {
+    id: string
+    role: string
+    email: string
+  }
+}
 
 export class BookingController {
   private bookingService: BookingService
@@ -16,24 +116,13 @@ export class BookingController {
   }
 
   // Create a new accommodation booking
-  createBooking = async (req: Request, res: Response): Promise<void> => {
+  createBooking = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      // Check for validation errors
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      const bookingRequest: CreateBookingRequest = req.body
-      const guestId = req.user?.id // From auth middleware
+      const bookingRequest: CreateBookingRequest = request.body as CreateBookingRequest
+      const guestId = request.user?.id
 
       if (!guestId) {
-        res.status(401).json({
+        reply.code(401).send({
           error: "Unauthorized",
           message: "User authentication required",
           timestamp: new Date().toISOString(),
@@ -41,11 +130,11 @@ export class BookingController {
         return
       }
 
-      // Get host ID from listing (would typically fetch from listing service)
+      // Get host ID from listing
       const hostId = await this.getHostIdFromListing(bookingRequest.listingId)
 
       if (!hostId) {
-        res.status(404).json({
+        reply.code(404).send({
           error: "Not Found",
           message: "Listing not found or host not available",
           timestamp: new Date().toISOString(),
@@ -53,43 +142,36 @@ export class BookingController {
         return
       }
 
-      const booking = await this.bookingService.createBooking(bookingRequest, guestId, hostId)
+      const booking = await this.bookingService.createBooking({
+        ...bookingRequest,
+        guestId,
+        hostId,
+      })
 
-      res.status(201).json({
+      reply.code(201).send({
         success: true,
         data: booking,
         message: "Booking created successfully",
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error creating booking:", error)
-
-      res.status(error.message.includes("not available") ? 409 : 500).json({
-        error: error.message.includes("not available") ? "Conflict" : "Internal Server Error",
-        message: error.message || "Failed to create booking",
+      request.log.error("Error creating booking:", error)
+      reply.code(500).send({
+        error: "Internal Server Error",
+        message: "Failed to create booking",
         timestamp: new Date().toISOString(),
       })
     }
   }
 
   // Create a new service booking
-  createServiceBooking = async (req: Request, res: Response): Promise<void> => {
+  createServiceBooking = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      const serviceBookingRequest: CreateServiceBookingRequest = req.body
-      const guestId = req.user?.id
+      const serviceBookingRequest: CreateServiceBookingRequest = request.body as CreateServiceBookingRequest
+      const guestId = request.user?.id
 
       if (!guestId) {
-        res.status(401).json({
+        reply.code(401).send({
           error: "Unauthorized",
           message: "User authentication required",
           timestamp: new Date().toISOString(),
@@ -97,45 +179,47 @@ export class BookingController {
         return
       }
 
-      // Get provider ID from listing
       const providerId = await this.getProviderIdFromListing(serviceBookingRequest.listingId)
 
       if (!providerId) {
-        res.status(404).json({
+        reply.code(404).send({
           error: "Not Found",
-          message: "Service provider not found",
+          message: "Service listing not found or provider not available",
           timestamp: new Date().toISOString(),
         })
         return
       }
 
-      const serviceBooking = await this.bookingService.createServiceBooking(serviceBookingRequest, guestId, providerId)
+      const serviceBooking = await this.bookingService.createServiceBooking({
+        ...serviceBookingRequest,
+        guestId,
+        providerId,
+      })
 
-      res.status(201).json({
+      reply.code(201).send({
         success: true,
         data: serviceBooking,
         message: "Service booking created successfully",
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error creating service booking:", error)
-
-      res.status(error.message.includes("not available") ? 409 : 500).json({
-        error: error.message.includes("not available") ? "Conflict" : "Internal Server Error",
-        message: error.message || "Failed to create service booking",
+      request.log.error("Error creating service booking:", error)
+      reply.code(500).send({
+        error: "Internal Server Error",
+        message: "Failed to create service booking",
         timestamp: new Date().toISOString(),
       })
     }
   }
 
-  // Get booking by ID
-  getBooking = async (req: Request, res: Response): Promise<void> => {
+  // Get a specific booking
+  getBooking = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const { bookingId } = req.params
-      const userId = req.user?.id
+      const { bookingId } = request.params as { bookingId: string }
+      const userId = request.user?.id
 
       if (!userId) {
-        res.status(401).json({
+        reply.code(401).send({
           error: "Unauthorized",
           message: "User authentication required",
           timestamp: new Date().toISOString(),
@@ -143,51 +227,40 @@ export class BookingController {
         return
       }
 
-      const booking = await this.bookingService.getBookingById(bookingId)
+      const booking = await this.bookingService.getBooking(bookingId, userId)
 
       if (!booking) {
-        res.status(404).json({
+        reply.code(404).send({
           error: "Not Found",
-          message: "Booking not found",
+          message: "Booking not found or access denied",
           timestamp: new Date().toISOString(),
         })
         return
       }
 
-      // Check if user has access to this booking
-      if (booking.guestId !== userId && booking.hostId !== userId) {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Access denied to this booking",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      res.json({
+      reply.send({
         success: true,
         data: booking,
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error getting booking:", error)
-
-      res.status(500).json({
+      request.log.error("Error fetching booking:", error)
+      reply.code(500).send({
         error: "Internal Server Error",
-        message: "Failed to retrieve booking",
+        message: "Failed to fetch booking",
         timestamp: new Date().toISOString(),
       })
     }
   }
 
-  // Get service booking by ID
-  getServiceBooking = async (req: Request, res: Response): Promise<void> => {
+  // Get a specific service booking
+  getServiceBooking = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const { bookingId } = req.params
-      const userId = req.user?.id
+      const { bookingId } = request.params as { bookingId: string }
+      const userId = request.user?.id
 
       if (!userId) {
-        res.status(401).json({
+        reply.code(401).send({
           error: "Unauthorized",
           message: "User authentication required",
           timestamp: new Date().toISOString(),
@@ -195,62 +268,41 @@ export class BookingController {
         return
       }
 
-      const serviceBooking = await this.bookingService.getServiceBookingById(bookingId)
+      const serviceBooking = await this.bookingService.getServiceBooking(bookingId, userId)
 
       if (!serviceBooking) {
-        res.status(404).json({
+        reply.code(404).send({
           error: "Not Found",
-          message: "Service booking not found",
+          message: "Service booking not found or access denied",
           timestamp: new Date().toISOString(),
         })
         return
       }
 
-      // Check if user has access to this booking
-      if (serviceBooking.guestId !== userId && serviceBooking.hostId !== userId) {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Access denied to this service booking",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      res.json({
+      reply.send({
         success: true,
         data: serviceBooking,
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error getting service booking:", error)
-
-      res.status(500).json({
+      request.log.error("Error fetching service booking:", error)
+      reply.code(500).send({
         error: "Internal Server Error",
-        message: "Failed to retrieve service booking",
+        message: "Failed to fetch service booking",
         timestamp: new Date().toISOString(),
       })
     }
   }
 
   // Update booking status
-  updateBookingStatus = async (req: Request, res: Response): Promise<void> => {
+  updateBookingStatus = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      const { bookingId } = req.params
-      const updateRequest: UpdateStatusRequest = req.body
-      const userId = req.user?.id
+      const { bookingId } = request.params as { bookingId: string }
+      const updateRequest: UpdateStatusRequest = request.body as UpdateStatusRequest
+      const userId = request.user?.id
 
       if (!userId) {
-        res.status(401).json({
+        reply.code(401).send({
           error: "Unauthorized",
           message: "User authentication required",
           timestamp: new Date().toISOString(),
@@ -258,54 +310,46 @@ export class BookingController {
         return
       }
 
-      // Check if user has permission to update this booking
-      const existingBooking = await this.bookingService.getBookingById(bookingId)
-      if (!existingBooking) {
-        res.status(404).json({
+      const updatedBooking = await this.bookingService.updateBookingStatus(
+        bookingId,
+        updateRequest.status,
+        userId,
+        updateRequest.reason,
+      )
+
+      if (!updatedBooking) {
+        reply.code(404).send({
           error: "Not Found",
-          message: "Booking not found",
+          message: "Booking not found or access denied",
           timestamp: new Date().toISOString(),
         })
         return
       }
 
-      if (existingBooking.guestId !== userId && existingBooking.hostId !== userId) {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Access denied to update this booking",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      const updatedBooking = await this.bookingService.updateBookingStatus(bookingId, updateRequest, userId)
-
-      res.json({
+      reply.send({
         success: true,
         data: updatedBooking,
         message: "Booking status updated successfully",
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error updating booking status:", error)
-
-      const statusCode = error.message.includes("Invalid status transition") ? 400 : 500
-
-      res.status(statusCode).json({
-        error: statusCode === 400 ? "Bad Request" : "Internal Server Error",
-        message: error.message || "Failed to update booking status",
+      request.log.error("Error updating booking status:", error)
+      reply.code(500).send({
+        error: "Internal Server Error",
+        message: "Failed to update booking status",
         timestamp: new Date().toISOString(),
       })
     }
   }
 
-  // Search bookings with filters
-  searchBookings = async (req: Request, res: Response): Promise<void> => {
+  // Search bookings
+  searchBookings = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const userId = req.user?.id
+      const filters: BookingFilters = request.query as BookingFilters
+      const userId = request.user?.id
 
       if (!userId) {
-        res.status(401).json({
+        reply.code(401).send({
           error: "Unauthorized",
           message: "User authentication required",
           timestamp: new Date().toISOString(),
@@ -313,81 +357,22 @@ export class BookingController {
         return
       }
 
-      const page = parseInt(req.query.page as string) || 1
-      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100)
+      const result = await this.bookingService.searchBookings(filters, userId)
 
-      // Build filters from query parameters
-      const filters: BookingFilters = {
-        ...(req.query.status && { status: req.query.status as any }),
-        ...(req.query.type && { type: req.query.type as any }),
-        ...(req.query.paymentStatus && {
-          paymentStatus: req.query.paymentStatus as any,
-        }),
-        ...(req.query.guestId && { guestId: req.query.guestId as string }),
-        ...(req.query.hostId && { hostId: req.query.hostId as string }),
-        ...(req.query.startDate &&
-          req.query.endDate && {
-            dateRange: {
-              startDate: req.query.startDate as string,
-              endDate: req.query.endDate as string,
-            },
-          }),
-        ...(req.query.minPrice &&
-          req.query.maxPrice && {
-            priceRange: {
-              min: parseFloat(req.query.minPrice as string),
-              max: parseFloat(req.query.maxPrice as string),
-              currency: "THB",
-            },
-          }),
-      }
-
-      // Ensure user can only see their own bookings unless they're an admin
-      const userRole = req.user?.role
-      if (userRole !== "admin") {
-        // User can see bookings where they are either guest or host
-        if (!filters.guestId && !filters.hostId) {
-          // If no specific filter, show user's bookings
-          filters.guestId = userId
-        } else {
-          // Validate user has access to the filtered bookings
-          if (filters.guestId && filters.guestId !== userId) {
-            res.status(403).json({
-              error: "Forbidden",
-              message: "Access denied to other users bookings",
-              timestamp: new Date().toISOString(),
-            })
-            return
-          }
-          if (filters.hostId && filters.hostId !== userId) {
-            res.status(403).json({
-              error: "Forbidden",
-              message: "Access denied to other hosts bookings",
-              timestamp: new Date().toISOString(),
-            })
-            return
-          }
-        }
-      }
-
-      const result = await this.bookingService.searchBookings(filters, page, limit)
-
-      res.json({
+      reply.send({
         success: true,
         data: result.bookings,
         pagination: {
-          page: result.page,
-          limit: result.limit,
-          total: result.total,
-          hasMore: result.hasMore,
-          totalPages: Math.ceil(result.total / result.limit),
+          page: result.pagination.page,
+          limit: result.pagination.limit,
+          total: result.pagination.total,
+          totalPages: result.pagination.totalPages,
         },
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error searching bookings:", error)
-
-      res.status(500).json({
+      request.log.error("Error searching bookings:", error)
+      reply.code(500).send({
         error: "Internal Server Error",
         message: "Failed to search bookings",
         timestamp: new Date().toISOString(),
@@ -396,13 +381,13 @@ export class BookingController {
   }
 
   // Get booking status history
-  getBookingStatusHistory = async (req: Request, res: Response): Promise<void> => {
+  getBookingStatusHistory = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const { bookingId } = req.params
-      const userId = req.user?.id
+      const { bookingId } = request.params as { bookingId: string }
+      const userId = request.user?.id
 
       if (!userId) {
-        res.status(401).json({
+        reply.code(401).send({
           error: "Unauthorized",
           message: "User authentication required",
           timestamp: new Date().toISOString(),
@@ -410,54 +395,40 @@ export class BookingController {
         return
       }
 
-      // Check if user has access to this booking
-      const booking = await this.bookingService.getBookingById(bookingId)
-      if (!booking) {
-        res.status(404).json({
+      const history = await this.bookingService.getBookingStatusHistory(bookingId, userId)
+
+      if (!history) {
+        reply.code(404).send({
           error: "Not Found",
-          message: "Booking not found",
+          message: "Booking not found or access denied",
           timestamp: new Date().toISOString(),
         })
         return
       }
 
-      if (booking.guestId !== userId && booking.hostId !== userId) {
-        res.status(403).json({
-          error: "Forbidden",
-          message: "Access denied to this booking history",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      const history = await this.bookingService.getBookingStatusHistory(bookingId)
-
-      res.json({
+      reply.send({
         success: true,
         data: history,
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error getting booking status history:", error)
-
-      res.status(500).json({
+      request.log.error("Error fetching booking status history:", error)
+      reply.code(500).send({
         error: "Internal Server Error",
-        message: "Failed to retrieve booking status history",
+        message: "Failed to fetch booking status history",
         timestamp: new Date().toISOString(),
       })
     }
   }
 
-  // Private helper methods
-  private async getHostIdFromListing(listingId: string): Promise<string | null> {
-    // Mock implementation - would fetch from listing service
-    // In real implementation, this would make an HTTP request to listing service
-    return "host-123"
+  // Helper methods
+  private async getHostIdFromListing(_listingId: string): Promise<string | null> {
+    // TODO: Implement actual listing service integration
+    return "host-123" // Mock implementation
   }
 
-  private async getProviderIdFromListing(listingId: string): Promise<string | null> {
-    // Mock implementation - would fetch from listing service
-    // In real implementation, this would make an HTTP request to listing service
-    return "provider-123"
+  private async getProviderIdFromListing(_listingId: string): Promise<string | null> {
+    // TODO: Implement actual listing service integration
+    return "provider-123" // Mock implementation
   }
 }

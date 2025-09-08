@@ -1,9 +1,9 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify"
-import { FastifyServiceProviderController } from "../controllers/FastifyServiceProviderController"
+import { ServiceProviderController } from "../controllers/ServiceProviderController"
 import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth"
 
 interface ServiceProviderRouteOptions {
-  serviceProviderController: FastifyServiceProviderController
+  serviceProviderController: ServiceProviderController
 }
 
 const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = async (

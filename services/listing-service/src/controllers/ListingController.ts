@@ -4,14 +4,14 @@ export class ListingController {
   // Create vehicle listing
   createVehicle = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         data: { id: "placeholder", message: "Vehicle creation endpoint migrated to Fastify" },
         message: "Vehicle listing created successfully",
       })
     } catch (error) {
       console.error("Create vehicle error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to create vehicle listing",
       })
@@ -21,14 +21,14 @@ export class ListingController {
   // Create product listing
   createProduct = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         data: { id: "placeholder", message: "Product creation endpoint migrated to Fastify" },
         message: "Product listing created successfully",
       })
     } catch (error) {
       console.error("Create product error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to create product listing",
       })
@@ -45,7 +45,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Get vehicles error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to retrieve vehicles",
       })
@@ -62,7 +62,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Get products error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to retrieve products",
       })
@@ -81,7 +81,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Get vehicle by ID error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to retrieve vehicle",
       })
@@ -100,7 +100,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Get product by ID error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to retrieve product",
       })
@@ -119,7 +119,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Update vehicle error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to update vehicle listing",
       })
@@ -138,7 +138,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Update product error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to update product listing",
       })
@@ -156,7 +156,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Delete vehicle error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to delete vehicle listing",
       })
@@ -174,7 +174,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Delete product error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to delete product listing",
       })
@@ -191,7 +191,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Search listings error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to search listings",
       })
@@ -208,7 +208,7 @@ export class ListingController {
       })
     } catch (error) {
       console.error("Get featured listings error:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: "Failed to retrieve featured listings",
       })

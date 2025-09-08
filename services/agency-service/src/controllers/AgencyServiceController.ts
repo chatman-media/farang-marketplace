@@ -19,14 +19,14 @@ export class AgencyServiceController {
         agencyId: req.user?.agencyId,
       })
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         message: "Service created successfully",
         data: service,
       })
     } catch (error) {
       console.error("Error creating service:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to create service",
       })
@@ -40,7 +40,7 @@ export class AgencyServiceController {
     try {
       const { id } = req.params as { id: string }
       if (!id) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Service ID is required",
         })
@@ -49,7 +49,7 @@ export class AgencyServiceController {
       const service = await this.agencyServiceService.getServiceById(id)
 
       if (!service) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Service not found",
         })
@@ -61,7 +61,7 @@ export class AgencyServiceController {
       })
     } catch (error) {
       console.error("Error getting service:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get service",
       })
@@ -75,7 +75,7 @@ export class AgencyServiceController {
     try {
       const { agencyId } = req.params as { agencyId: string }
       if (!agencyId) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Agency ID is required",
         })
@@ -89,7 +89,7 @@ export class AgencyServiceController {
       })
     } catch (error) {
       console.error("Error getting services by agency:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get services",
       })
@@ -103,7 +103,7 @@ export class AgencyServiceController {
     try {
       const { id } = req.params as { id: string }
       if (!id) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Service ID is required",
         })
@@ -113,7 +113,7 @@ export class AgencyServiceController {
       const service = await this.agencyServiceService.updateService(id, updates)
 
       if (!service) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Service not found",
         })
@@ -126,7 +126,7 @@ export class AgencyServiceController {
       })
     } catch (error) {
       console.error("Error updating service:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update service",
       })
@@ -140,7 +140,7 @@ export class AgencyServiceController {
     try {
       const { id } = req.params as { id: string }
       if (!id) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Service ID is required",
         })
@@ -149,7 +149,7 @@ export class AgencyServiceController {
       const deleted = await this.agencyServiceService.deleteService(id)
 
       if (!deleted) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Service not found",
         })
@@ -161,7 +161,7 @@ export class AgencyServiceController {
       })
     } catch (error) {
       console.error("Error deleting service:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to delete service",
       })
@@ -191,7 +191,7 @@ export class AgencyServiceController {
       })
     } catch (error) {
       console.error("Error searching services:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to search services",
       })
@@ -205,7 +205,7 @@ export class AgencyServiceController {
     try {
       const { id } = req.params as { id: string }
       if (!id) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Service ID is required",
         })
@@ -214,7 +214,7 @@ export class AgencyServiceController {
       const service = await this.agencyServiceService.toggleServiceStatus(id)
 
       if (!service) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Service not found",
         })
@@ -227,7 +227,7 @@ export class AgencyServiceController {
       })
     } catch (error) {
       console.error("Error toggling service status:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to toggle service status",
       })
@@ -243,7 +243,7 @@ export class AgencyServiceController {
       const { priceMultiplier } = req.body as { priceMultiplier: number }
 
       if (!agencyId) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           message: "Agency ID is required",
         })
@@ -258,7 +258,7 @@ export class AgencyServiceController {
       })
     } catch (error) {
       console.error("Error bulk updating prices:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update prices",
       })

@@ -43,14 +43,14 @@ export class CRMController {
       const customerData: CreateCustomerRequest = request.body as CreateCustomerRequest
       const customer = await this.crmService.createCustomer(customerData)
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         data: customer.toJSON(),
         message: "Customer created successfully",
       })
     } catch (error: any) {
       request.log.error("Error creating customer:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -80,7 +80,7 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error getting customers:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -93,7 +93,7 @@ export class CRMController {
       const customer = await this.crmService.getCustomerById(id)
 
       if (!customer) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: "Not Found",
           message: "Customer not found",
         })
@@ -106,7 +106,7 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error getting customer:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -121,7 +121,7 @@ export class CRMController {
       const customer = await this.crmService.updateCustomer(id, updateData)
 
       if (!customer) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: "Not Found",
           message: "Customer not found",
         })
@@ -134,7 +134,7 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error updating customer:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -147,7 +147,7 @@ export class CRMController {
       const success = await this.crmService.deleteCustomer(id)
 
       if (!success) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: "Not Found",
           message: "Customer not found",
         })
@@ -159,7 +159,7 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error deleting customer:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -172,14 +172,14 @@ export class CRMController {
       const leadData: CreateLeadRequest = request.body as CreateLeadRequest
       const lead = await this.crmService.createLead(leadData)
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         data: lead.toJSON(),
         message: "Lead created successfully",
       })
     } catch (error: any) {
       request.log.error("Error creating lead:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -219,7 +219,7 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error getting leads:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -232,7 +232,7 @@ export class CRMController {
       const lead = await this.crmService.getLeadById(id)
 
       if (!lead) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: "Not Found",
           message: "Lead not found",
         })
@@ -245,7 +245,7 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error getting lead:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -260,7 +260,7 @@ export class CRMController {
       const lead = await this.crmService.updateLead(id, updateData)
 
       if (!lead) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: "Not Found",
           message: "Lead not found",
         })
@@ -273,7 +273,7 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error updating lead:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -286,7 +286,7 @@ export class CRMController {
       const success = await this.crmService.deleteLead(id)
 
       if (!success) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: "Not Found",
           message: "Lead not found",
         })
@@ -298,7 +298,7 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error deleting lead:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })
@@ -320,7 +320,7 @@ export class CRMController {
       })
     } catch (error: any) {
       request.log.error("Error getting analytics:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: "Internal Server Error",
         message: error.message,
       })

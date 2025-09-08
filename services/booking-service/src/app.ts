@@ -3,9 +3,9 @@ import { config } from "dotenv"
 import { z } from "zod"
 import { checkDatabaseConnection } from "./db/connection"
 import { authMiddleware } from "./middleware/fastify-auth"
-import { FastifyBookingController } from "./controllers/FastifyBookingController"
-import { FastifyAvailabilityController } from "./controllers/FastifyAvailabilityController"
-import { FastifyPricingController } from "./controllers/FastifyPricingController"
+import { BookingController } from "./controllers/BookingController"
+import { AvailabilityController } from "./controllers/AvailabilityController"
+import { PricingController } from "./controllers/PricingController"
 import { AvailabilityService } from "./services/AvailabilityService"
 import { PricingService } from "./services/PricingService"
 
@@ -103,9 +103,9 @@ export const createApp = async (): Promise<FastifyInstance> => {
   const pricingService = new PricingService()
 
   // Initialize controllers
-  const bookingController = new FastifyBookingController()
-  const availabilityController = new FastifyAvailabilityController(availabilityService)
-  const pricingController = new FastifyPricingController(pricingService)
+  const bookingController = new BookingController()
+  const availabilityController = new AvailabilityController(availabilityService)
+  const pricingController = new PricingController(pricingService)
 
   // Register routes
   await app.register(import("./routes/bookings"), { prefix: "/api/bookings", bookingController })

@@ -1,15 +1,15 @@
 import { FastifyInstance } from "fastify"
-import { FastifyMarketplaceIntegrationController } from "../controllers/FastifyMarketplaceIntegrationController"
+import { MarketplaceIntegrationController } from "../controllers/MarketplaceIntegrationController"
 import {
   bookingIntelligenceSchema,
   priceSuggestionsSchema,
   smartNotificationSchema,
   fraudDetectionSchema,
   analyticsQuerySchema,
-} from "../controllers/FastifyMarketplaceIntegrationController"
+} from "../controllers/MarketplaceIntegrationController"
 
 interface RouteOptions {
-  marketplaceController: FastifyMarketplaceIntegrationController
+  marketplaceController: MarketplaceIntegrationController
 }
 
 export default async function marketplaceIntegrationRoutes(fastify: FastifyInstance, options: RouteOptions) {

@@ -46,7 +46,7 @@ export default async function authPlugin(fastify: any) {
       const token = authHeader && authHeader.split(" ")[1] // Bearer TOKEN
 
       if (!token) {
-        reply.status(401)
+        reply.code(401)
         return {
           success: false,
           message: "Access token required",
@@ -55,7 +55,7 @@ export default async function authPlugin(fastify: any) {
 
       if (!env.JWT_SECRET) {
         fastify.log.error("JWT_SECRET not configured")
-        reply.status(500)
+        reply.code(500)
         return {
           success: false,
           message: "Server configuration error",
@@ -71,20 +71,20 @@ export default async function authPlugin(fastify: any) {
       }
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        reply.status(401)
+        reply.code(401)
         return {
           success: false,
           message: "Token expired",
         }
       } else if (error instanceof jwt.JsonWebTokenError) {
-        reply.status(401)
+        reply.code(401)
         return {
           success: false,
           message: "Invalid token",
         }
       } else {
         fastify.log.error("Authentication error:", error)
-        reply.status(500)
+        reply.code(500)
         return {
           success: false,
           message: "Authentication failed",
@@ -129,7 +129,7 @@ export default async function authPlugin(fastify: any) {
    */
   fastify.decorate("requireAdmin", async (request: FastifyRequest, reply: FastifyReply) => {
     if (!request.user) {
-      reply.status(401)
+      reply.code(401)
       return {
         success: false,
         message: "Authentication required",
@@ -137,7 +137,7 @@ export default async function authPlugin(fastify: any) {
     }
 
     if (request.user.role !== "admin") {
-      reply.status(403)
+      reply.code(403)
       return {
         success: false,
         message: "Admin access required",
@@ -150,7 +150,7 @@ export default async function authPlugin(fastify: any) {
    */
   fastify.decorate("requireAgencyStaff", async (request: FastifyRequest, reply: FastifyReply) => {
     if (!request.user) {
-      reply.status(401)
+      reply.code(401)
       return {
         success: false,
         message: "Authentication required",
@@ -159,7 +159,7 @@ export default async function authPlugin(fastify: any) {
 
     const allowedRoles = ["admin", "agency_owner", "agency_manager"]
     if (!allowedRoles.includes(request.user.role)) {
-      reply.status(403)
+      reply.code(403)
       return {
         success: false,
         message: "Agency staff access required",
@@ -172,7 +172,7 @@ export default async function authPlugin(fastify: any) {
    */
   fastify.decorate("requireAgencyOwnership", async (request: FastifyRequest, reply: FastifyReply) => {
     if (!request.user) {
-      reply.status(401)
+      reply.code(401)
       return {
         success: false,
         message: "Authentication required",
@@ -186,7 +186,7 @@ export default async function authPlugin(fastify: any) {
 
     // Check if user has agency role
     if (!["agency_owner", "agency_manager"].includes(request.user.role)) {
-      reply.status(403)
+      reply.code(403)
       return {
         success: false,
         message: "Agency access required",
@@ -196,7 +196,7 @@ export default async function authPlugin(fastify: any) {
     // For agency-specific resources, check agency ownership
     const agencyId = (request.params as any)?.agencyId
     if (agencyId && request.user.agencyId !== agencyId) {
-      reply.status(403)
+      reply.code(403)
       return {
         success: false,
         message: "Access denied: You can only access your own agency resources",
@@ -210,7 +210,7 @@ export default async function authPlugin(fastify: any) {
   fastify.decorate("requireResourceAccess", (resourceType: string) => {
     return async (request: FastifyRequest, reply: FastifyReply) => {
       if (!request.user) {
-        reply.status(401)
+        reply.code(401)
         return {
           success: false,
           message: "Authentication required",
@@ -226,7 +226,7 @@ export default async function authPlugin(fastify: any) {
       if (resourceType === "user") {
         const userId = (request.params as any)?.userId
         if (userId && request.user.id !== userId) {
-          reply.status(403)
+          reply.code(403)
           return {
             success: false,
             message: "Access denied: You can only access your own resources",

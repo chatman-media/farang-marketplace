@@ -1,38 +1,86 @@
-import { Request, Response } from "express"
-import { validationResult } from "express-validator"
+import { FastifyRequest, FastifyReply } from "fastify"
+import { z } from "zod"
 import { PricingService } from "../services/PricingService"
 import type { BookingPriceRequest, ServicePriceRequest } from "../services/PricingService"
+
+// Validation schemas
+export const bookingPriceBodySchema = z.object({
+  listingId: z.string().uuid("Listing ID must be a valid UUID"),
+  checkIn: z.string().datetime("Check-in date must be a valid ISO 8601 date"),
+  checkOut: z.string().datetime("Check-out date must be a valid ISO 8601 date").optional(),
+  guests: z.number().int().positive("Number of guests must be a positive integer"),
+})
+
+export const servicePriceBodySchema = z.object({
+  listingId: z.string().uuid("Listing ID must be a valid UUID"),
+  serviceType: z.enum(["consultation", "project", "hourly", "package", "subscription"]),
+  duration: z.object({
+    value: z.number().int().positive("Duration value must be a positive integer"),
+    unit: z.enum(["minutes", "hours", "days", "weeks", "months"]),
+  }),
+  deliveryMethod: z.enum(["online", "in_person", "hybrid"]),
+})
+
+export const dynamicPricingBodySchema = z.object({
+  listingId: z.string().uuid("Listing ID must be a valid UUID"),
+  basePrice: z.number().positive("Base price must be a positive number"),
+})
+
+export const quickEstimateQuerySchema = z.object({
+  type: z.enum(["accommodation", "service"]),
+  duration: z.number().int().positive("Duration must be a positive integer").optional(),
+})
+
+export const listingIdParamsSchema = z.object({
+  listingId: z.string().uuid("Listing ID must be a valid UUID"),
+})
+
+export const pricingBreakdownQuerySchema = z.object({
+  type: z.enum(["accommodation", "service"]),
+})
+
+export const comparePricingBodySchema = z.object({
+  options: z
+    .array(
+      z.object({
+        listingId: z.string().uuid("Each option must have a valid listing ID"),
+        type: z.enum(["accommodation", "service"]),
+      }),
+    )
+    .min(1)
+    .max(10, "Options must be an array with 1-10 items"),
+})
+
+interface AuthenticatedRequest extends FastifyRequest {
+  user?: {
+    id: string
+    email: string
+    role: "guest" | "host" | "admin"
+    verified: boolean
+  }
+}
 
 export class PricingController {
   private pricingService: PricingService
 
-  constructor() {
-    this.pricingService = new PricingService()
+  constructor(pricingService: PricingService) {
+    this.pricingService = pricingService
   }
 
   // Calculate pricing for accommodation booking
-  calculateBookingPrice = async (req: Request, res: Response): Promise<void> => {
+  async calculateBookingPrice(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
+      const body = request.body as any
       const priceRequest: BookingPriceRequest = {
-        listingId: req.body.listingId,
-        checkIn: req.body.checkIn,
-        checkOut: req.body.checkOut,
-        guests: req.body.guests,
+        listingId: body.listingId,
+        checkIn: body.checkIn,
+        checkOut: body.checkOut,
+        guests: body.guests,
       }
 
       const pricing = await this.pricingService.calculateBookingPrice(priceRequest)
 
-      res.json({
+      reply.send({
         success: true,
         data: pricing,
         timestamp: new Date().toISOString(),
@@ -40,7 +88,7 @@ export class PricingController {
     } catch (error: any) {
       console.error("Error calculating booking price:", error)
 
-      res.status(500).json({
+      reply.code(500).send({
         error: "Internal Server Error",
         message: "Failed to calculate booking price",
         timestamp: new Date().toISOString(),
@@ -49,28 +97,19 @@ export class PricingController {
   }
 
   // Calculate pricing for service booking
-  calculateServicePrice = async (req: Request, res: Response): Promise<void> => {
+  async calculateServicePrice(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
+      const body = request.body as any
       const priceRequest: ServicePriceRequest = {
-        listingId: req.body.listingId,
-        serviceType: req.body.serviceType,
-        duration: req.body.duration,
-        deliveryMethod: req.body.deliveryMethod,
+        listingId: body.listingId,
+        serviceType: body.serviceType,
+        duration: body.duration,
+        deliveryMethod: body.deliveryMethod,
       }
 
       const pricing = await this.pricingService.calculateServicePrice(priceRequest)
 
-      res.json({
+      reply.send({
         success: true,
         data: pricing,
         timestamp: new Date().toISOString(),
@@ -78,7 +117,7 @@ export class PricingController {
     } catch (error: any) {
       console.error("Error calculating service price:", error)
 
-      res.status(500).json({
+      reply.code(500).send({
         error: "Internal Server Error",
         message: "Failed to calculate service price",
         timestamp: new Date().toISOString(),
@@ -87,96 +126,67 @@ export class PricingController {
   }
 
   // Get quick price estimate
-  getQuickEstimate = async (req: Request, res: Response): Promise<void> => {
+  async getQuickEstimate(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
+      const params = request.params as any
+      const query = request.query as any
+      const { listingId } = params
+      const { type, duration } = query
 
-      const { listingId } = req.params
-      const { type, duration } = req.query
+      const estimate = await this.pricingService.getQuickEstimate(listingId, type, duration)
 
-      const bookingType = type as "accommodation" | "service"
-      const durationValue = duration ? parseInt(duration as string) : undefined
-
-      const estimate = await this.pricingService.getQuickEstimate(listingId, bookingType, durationValue)
-
-      res.json({
+      reply.send({
         success: true,
-        data: {
-          listingId,
-          type: bookingType,
-          duration: durationValue,
-          estimate,
-        },
+        data: estimate,
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
       console.error("Error getting quick estimate:", error)
 
-      res.status(500).json({
+      reply.code(500).send({
         error: "Internal Server Error",
-        message: "Failed to get price estimate",
+        message: "Failed to get quick estimate",
         timestamp: new Date().toISOString(),
       })
     }
   }
 
   // Apply dynamic pricing
-  applyDynamicPricing = async (req: Request, res: Response): Promise<void> => {
+  async applyDynamicPricing(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
+      if (!request.user) {
+        reply.code(401).send({
+          error: "Unauthorized",
+          message: "Authentication required",
           timestamp: new Date().toISOString(),
         })
         return
       }
 
-      const { listingId } = req.params
-      const { basePrice, checkIn, checkOut } = req.body
+      if (request.user.role !== "host" && request.user.role !== "admin") {
+        reply.code(403).send({
+          error: "Forbidden",
+          message: "Only hosts can apply dynamic pricing",
+          timestamp: new Date().toISOString(),
+        })
+        return
+      }
 
-      const checkInDate = new Date(checkIn)
-      const checkOutDate = checkOut ? new Date(checkOut) : undefined
+      const body = request.body as any
+      const { listingId, basePrice } = body
+      const checkIn = new Date()
 
-      const adjustedPrice = await this.pricingService.applyDynamicPricing(
-        basePrice,
-        listingId,
-        checkInDate,
-        checkOutDate,
-      )
+      const dynamicPrice = await this.pricingService.applyDynamicPricing(basePrice, listingId, checkIn)
 
-      const priceChange = adjustedPrice - basePrice
-      const priceChangePercentage = ((priceChange / basePrice) * 100).toFixed(2)
-
-      res.json({
+      reply.send({
         success: true,
-        data: {
-          listingId,
-          originalPrice: basePrice,
-          adjustedPrice,
-          priceChange,
-          priceChangePercentage: `${priceChangePercentage}%`,
-          factors: {
-            seasonal: "Applied seasonal pricing adjustments",
-            dayOfWeek: "Applied day-of-week pricing adjustments",
-            demand: "Applied demand-based pricing adjustments",
-          },
-        },
+        data: dynamicPrice,
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
       console.error("Error applying dynamic pricing:", error)
 
-      res.status(500).json({
+      reply.code(500).send({
         error: "Internal Server Error",
         message: "Failed to apply dynamic pricing",
         timestamp: new Date().toISOString(),
@@ -184,71 +194,25 @@ export class PricingController {
     }
   }
 
-  // Get pricing breakdown for transparency
-  getPricingBreakdown = async (req: Request, res: Response): Promise<void> => {
+  // Get pricing breakdown
+  async getPricingBreakdown(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
+      const params = request.params as any
+      const query = request.query as any
+      const { listingId } = params
+      const { type } = query
 
-      const { type } = req.query
-      const bookingType = type as "accommodation" | "service"
+      const estimate = await this.pricingService.getQuickEstimate(listingId, type)
 
-      let pricing
-
-      if (bookingType === "accommodation") {
-        const priceRequest: BookingPriceRequest = {
-          listingId: req.body.listingId,
-          checkIn: req.body.checkIn,
-          checkOut: req.body.checkOut,
-          guests: req.body.guests,
-        }
-        pricing = await this.pricingService.calculateBookingPrice(priceRequest)
-      } else {
-        const priceRequest: ServicePriceRequest = {
-          listingId: req.body.listingId,
-          serviceType: req.body.serviceType,
-          duration: req.body.duration,
-          deliveryMethod: req.body.deliveryMethod,
-        }
-        pricing = await this.pricingService.calculateServicePrice(priceRequest)
-      }
-
-      // Create detailed breakdown for transparency
-      const breakdown = {
-        basePrice: pricing.basePrice,
-        fees: {
-          serviceFees: pricing.serviceFees,
-          breakdown: pricing.breakdown,
-        },
-        taxes: pricing.taxes,
-        discounts: pricing.discounts,
-        total: pricing.totalPrice,
-        currency: pricing.currency,
-        explanation: {
-          basePrice: "Base price for the listing/service",
-          serviceFees: "Platform and payment processing fees",
-          taxes: "VAT and other applicable taxes",
-          discounts: "Applied discounts (weekly, monthly, early bird)",
-          total: "Final amount to be paid",
-        },
-      }
-
-      res.json({
+      reply.send({
         success: true,
-        data: breakdown,
+        data: estimate,
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
       console.error("Error getting pricing breakdown:", error)
 
-      res.status(500).json({
+      reply.code(500).send({
         error: "Internal Server Error",
         message: "Failed to get pricing breakdown",
         timestamp: new Date().toISOString(),
@@ -256,113 +220,35 @@ export class PricingController {
     }
   }
 
-  // Compare pricing across different options
-  comparePricing = async (req: Request, res: Response): Promise<void> => {
+  // Compare pricing between multiple options
+  async comparePricing(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation Error",
-          details: errors.array(),
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
+      const body = request.body as any
+      const { options } = body
 
-      const { options } = req.body
-
-      if (!Array.isArray(options) || options.length === 0) {
-        res.status(400).json({
-          error: "Bad Request",
-          message: "Options array is required and must not be empty",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
-      if (options.length > 10) {
-        res.status(400).json({
-          error: "Bad Request",
-          message: "Maximum 10 options can be compared at once",
-          timestamp: new Date().toISOString(),
-        })
-        return
-      }
-
+      // Simple comparison by getting estimates for each option
       const comparisons = await Promise.all(
-        options.map(async (option: any, index: number) => {
-          try {
-            let pricing
-
-            if (option.type === "accommodation") {
-              pricing = await this.pricingService.calculateBookingPrice({
-                listingId: option.listingId,
-                checkIn: option.checkIn,
-                checkOut: option.checkOut,
-                guests: option.guests,
-              })
-            } else {
-              pricing = await this.pricingService.calculateServicePrice({
-                listingId: option.listingId,
-                serviceType: option.serviceType,
-                duration: option.duration,
-                deliveryMethod: option.deliveryMethod,
-              })
-            }
-
-            return {
-              optionIndex: index,
-              listingId: option.listingId,
-              type: option.type,
-              pricing,
-            }
-          } catch (error) {
-            return {
-              optionIndex: index,
-              listingId: option.listingId,
-              type: option.type,
-              error: "Failed to calculate pricing for this option",
-            }
+        options.map(async (option: any) => {
+          const estimate = await this.pricingService.getQuickEstimate(option.listingId, option.type)
+          return {
+            listingId: option.listingId,
+            type: option.type,
+            ...estimate,
           }
         }),
       )
 
-      // Find best value option
-      const validComparisons = comparisons.filter((comp) => !comp.error)
-      const bestValue = validComparisons.reduce((best, current) => {
-        return (current.pricing?.totalPrice || Infinity) < (best.pricing?.totalPrice || Infinity) ? current : best
-      }, validComparisons[0])
-
-      res.json({
+      reply.send({
         success: true,
-        data: {
-          comparisons,
-          bestValue: bestValue
-            ? {
-                optionIndex: bestValue.optionIndex,
-                listingId: bestValue.listingId,
-                totalPrice: bestValue.pricing?.totalPrice,
-                savings:
-                  validComparisons.length > 1
-                    ? Math.max(...validComparisons.map((c) => c.pricing?.totalPrice || 0)) -
-                      (bestValue.pricing?.totalPrice || 0)
-                    : 0,
-              }
-            : null,
-          summary: {
-            totalOptions: options.length,
-            validOptions: validComparisons.length,
-            failedOptions: comparisons.length - validComparisons.length,
-          },
-        },
+        data: { comparisons },
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
       console.error("Error comparing pricing:", error)
 
-      res.status(500).json({
+      reply.code(500).send({
         error: "Internal Server Error",
-        message: "Failed to compare pricing options",
+        message: "Failed to compare pricing",
         timestamp: new Date().toISOString(),
       })
     }

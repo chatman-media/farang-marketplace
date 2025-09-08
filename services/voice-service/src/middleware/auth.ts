@@ -42,7 +42,7 @@ export default async function authPlugin(fastify: any) {
       const token = authHeader && authHeader.split(" ")[1] // Bearer TOKEN
 
       if (!token) {
-        reply.status(401)
+        reply.code(401)
         return {
           success: false,
           message: "Access token required",
@@ -52,7 +52,7 @@ export default async function authPlugin(fastify: any) {
       const jwtSecret = process.env.JWT_SECRET
       if (!jwtSecret) {
         fastify.log.error("JWT_SECRET not configured")
-        reply.status(500)
+        reply.code(500)
         return {
           success: false,
           message: "Server configuration error",
@@ -69,7 +69,7 @@ export default async function authPlugin(fastify: any) {
       return
     } catch (error) {
       fastify.log.error("Token verification error:", error)
-      reply.status(403)
+      reply.code(403)
       return {
         success: false,
         message: "Invalid or expired token",
@@ -114,7 +114,7 @@ export default async function authPlugin(fastify: any) {
   fastify.decorate("requireRole", (roles: string[]) => {
     return async (request: FastifyRequest, reply: FastifyReply) => {
       if (!request.user) {
-        reply.status(401)
+        reply.code(401)
         return {
           success: false,
           message: "Authentication required",
@@ -122,7 +122,7 @@ export default async function authPlugin(fastify: any) {
       }
 
       if (!roles.includes(request.user.role)) {
-        reply.status(403)
+        reply.code(403)
         return {
           success: false,
           message: "Insufficient permissions",
@@ -162,7 +162,7 @@ export default async function authPlugin(fastify: any) {
     }
 
     if (userRequests.count >= maxRequests) {
-      reply.status(429)
+      reply.code(429)
       return {
         success: false,
         error: "Rate limit exceeded",
@@ -182,7 +182,7 @@ export default async function authPlugin(fastify: any) {
     const data = await (request as any).file()
 
     if (!data) {
-      reply.status(400)
+      reply.code(400)
       return {
         success: false,
         error: "Audio file is required",
@@ -194,7 +194,7 @@ export default async function authPlugin(fastify: any) {
     const buffer = await data.toBuffer()
 
     if (buffer.length > maxSize) {
-      reply.status(400)
+      reply.code(400)
       return {
         success: false,
         error: `File too large. Maximum size: ${maxSize} bytes`,
@@ -216,7 +216,7 @@ export default async function authPlugin(fastify: any) {
     ]
 
     if (!allowedMimeTypes.includes(data.mimetype)) {
-      reply.status(400)
+      reply.code(400)
       return {
         success: false,
         error: "Unsupported audio format",
@@ -243,7 +243,7 @@ export default async function authPlugin(fastify: any) {
 
     // Must have either audio data or text
     if (!audioData && !text) {
-      reply.status(400)
+      reply.code(400)
       return {
         success: false,
         error: "Either audioData or text is required",
@@ -252,7 +252,7 @@ export default async function authPlugin(fastify: any) {
 
     // Validate language if provided
     if (language && typeof language !== "string") {
-      reply.status(400)
+      reply.code(400)
       return {
         success: false,
         error: "Language must be a string",
@@ -262,7 +262,7 @@ export default async function authPlugin(fastify: any) {
     // Validate audio data if provided
     if (audioData) {
       if (typeof audioData !== "string" && !Buffer.isBuffer(audioData)) {
-        reply.status(400)
+        reply.code(400)
         return {
           success: false,
           error: "Audio data must be a base64 string or buffer",
@@ -274,7 +274,7 @@ export default async function authPlugin(fastify: any) {
 
       const maxSize = Number.parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10)
       if (audioSize > maxSize) {
-        reply.status(400)
+        reply.code(400)
         return {
           success: false,
           error: `Audio data too large. Maximum size: ${maxSize} bytes`,
@@ -284,7 +284,7 @@ export default async function authPlugin(fastify: any) {
 
     // Validate text if provided
     if (text && typeof text !== "string") {
-      reply.status(400)
+      reply.code(400)
       return {
         success: false,
         error: "Text must be a string",
@@ -304,7 +304,7 @@ export const errorHandler = (error: Error, _req: FastifyRequest, reply: FastifyR
 
   // Handle specific error types
   if (error.name === "JsonWebTokenError") {
-    reply.status(401)
+    reply.code(401)
     reply.send({
       success: false,
       error: "Invalid token",
@@ -313,7 +313,7 @@ export const errorHandler = (error: Error, _req: FastifyRequest, reply: FastifyR
   }
 
   if (error.name === "TokenExpiredError") {
-    reply.status(401)
+    reply.code(401)
     reply.send({
       success: false,
       error: "Token expired",
@@ -322,7 +322,7 @@ export const errorHandler = (error: Error, _req: FastifyRequest, reply: FastifyR
   }
 
   if (error.name === "MulterError") {
-    reply.status(400)
+    reply.code(400)
     reply.send({
       success: false,
       error: "File upload error",
@@ -332,7 +332,7 @@ export const errorHandler = (error: Error, _req: FastifyRequest, reply: FastifyR
   }
 
   // Default error response
-  reply.status(500)
+  reply.code(500)
   reply.send({
     success: false,
     error: "Internal server error",

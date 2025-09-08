@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify"
 import { z } from "zod"
-import { FastifyAvailabilityController } from "../controllers/FastifyAvailabilityController"
+import { AvailabilityController } from "../controllers/AvailabilityController"
 
 // Validation schemas
 const listingIdParamsSchema = z.object({
@@ -100,7 +100,7 @@ const upcomingBookingsQuerySchema = z.object({
 })
 
 interface RouteOptions {
-  availabilityController: FastifyAvailabilityController
+  availabilityController: AvailabilityController
 }
 
 export default async function availabilityRoutes(fastify: FastifyInstance, options: RouteOptions) {

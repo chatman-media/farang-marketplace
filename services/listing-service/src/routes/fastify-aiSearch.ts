@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify"
-import { FastifyAISearchController } from "../controllers/FastifyAISearchController"
+import { AISearchController } from "../controllers/AISearchController"
 import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth"
 
 // Rate limiting configurations
@@ -33,7 +33,7 @@ interface AISearchRouteOptions extends FastifyPluginOptions {
 }
 
 export default async function aiSearchRoutes(fastify: FastifyInstance, _options: AISearchRouteOptions) {
-  const controller = new FastifyAISearchController()
+  const controller = new AISearchController()
 
   // Enhanced Search - POST /search/enhanced
   fastify.post(

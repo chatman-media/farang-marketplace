@@ -1,6 +1,6 @@
 import { FastifyPluginAsync } from "fastify"
 import {
-  FastifyContentAnalysisController,
+  ContentAnalysisController,
   analyzeContentSchema,
   batchAnalyzeSchema,
   sentimentAnalysisSchema,
@@ -9,10 +9,10 @@ import {
   moderationSchema,
   qualityAssessmentSchema,
   languageDetectionSchema,
-} from "../controllers/FastifyContentAnalysisController"
+} from "../controllers/ContentAnalysisController"
 
 interface ContentAnalysisRouteOptions {
-  contentAnalysisController: FastifyContentAnalysisController
+  contentAnalysisController: ContentAnalysisController
 }
 
 const contentAnalysisRoutes: FastifyPluginAsync<ContentAnalysisRouteOptions> = async (fastify, options) => {

@@ -66,7 +66,7 @@ export class ProfileController {
   getProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -78,7 +78,7 @@ export class ProfileController {
 
       const user = await this.userService.getUserById(req.user.userId)
       if (!user) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -88,13 +88,13 @@ export class ProfileController {
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: user,
         message: "Profile retrieved successfully",
       })
     } catch {
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -109,7 +109,7 @@ export class ProfileController {
   updateProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -128,7 +128,7 @@ export class ProfileController {
       })
 
       if (!updatedUser) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -138,14 +138,14 @@ export class ProfileController {
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: updatedUser,
         message: "Profile updated successfully",
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -157,7 +157,7 @@ export class ProfileController {
       }
 
       const errorMessage = error instanceof Error ? error.message : "Profile update failed"
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: errorMessage,
@@ -172,7 +172,7 @@ export class ProfileController {
   uploadAvatar = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -184,7 +184,7 @@ export class ProfileController {
 
       const file = (req as any).file
       if (!file) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           error: {
             code: "FILE_REQUIRED",
             message: "Avatar image file is required",
@@ -206,7 +206,7 @@ export class ProfileController {
       if (!updatedUser) {
         // Clean up uploaded file if user update fails
         await fs.unlink(file.path).catch(() => {})
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -216,7 +216,7 @@ export class ProfileController {
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: {
           user: updatedUser,
@@ -232,7 +232,7 @@ export class ProfileController {
       }
 
       const errorMessage = error instanceof Error ? error.message : "Avatar upload failed"
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: errorMessage,
@@ -247,7 +247,7 @@ export class ProfileController {
   requestVerification = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -263,7 +263,7 @@ export class ProfileController {
       // Check if user exists
       const user = await this.userService.getUserById(req.user.userId)
       if (!user) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -275,7 +275,7 @@ export class ProfileController {
 
       // Check if user is already verified
       if (user.profile.verificationStatus === VerificationStatus.VERIFIED) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           error: {
             code: "ALREADY_VERIFIED",
             message: "User is already verified",
@@ -287,7 +287,7 @@ export class ProfileController {
 
       // Check if there's already a pending verification request
       if (user.profile.verificationStatus === VerificationStatus.PENDING) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           error: {
             code: "VERIFICATION_PENDING",
             message: "Verification request is already pending",
@@ -305,14 +305,14 @@ export class ProfileController {
         },
       })
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: updatedUser,
         message: "Verification request submitted successfully",
       })
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
@@ -323,7 +323,7 @@ export class ProfileController {
         })
       }
 
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -338,7 +338,7 @@ export class ProfileController {
   approveVerification = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -350,7 +350,7 @@ export class ProfileController {
 
       // Check if user has admin or manager role
       if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
-        return reply.status(403).send({
+        return reply.code(403).send({
           error: {
             code: "INSUFFICIENT_PERMISSIONS",
             message: "Admin or Manager role required",
@@ -364,7 +364,7 @@ export class ProfileController {
       const user = await this.userService.getUserById(userId)
 
       if (!user) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -374,12 +374,12 @@ export class ProfileController {
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         message: "User verification approved successfully",
       })
     } catch {
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -394,7 +394,7 @@ export class ProfileController {
   rejectVerification = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -406,7 +406,7 @@ export class ProfileController {
 
       // Check if user has admin or manager role
       if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
-        return reply.status(403).send({
+        return reply.code(403).send({
           error: {
             code: "INSUFFICIENT_PERMISSIONS",
             message: "Admin or Manager role required",
@@ -421,7 +421,7 @@ export class ProfileController {
       const user = await this.userService.getUserById(userId)
 
       if (!user) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -440,7 +440,7 @@ export class ProfileController {
       })
 
       if (!updatedUser) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -450,7 +450,7 @@ export class ProfileController {
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: updatedUser,
         message: "User verification rejected successfully",
@@ -461,7 +461,7 @@ export class ProfileController {
         },
       })
     } catch {
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",
@@ -476,7 +476,7 @@ export class ProfileController {
   getUserProfile = async (req: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
-        return reply.status(401).send({
+        return reply.code(401).send({
           error: {
             code: "AUTHENTICATION_REQUIRED",
             message: "Authentication required",
@@ -493,7 +493,7 @@ export class ProfileController {
         req.user.userId === userId || req.user.role === UserRole.ADMIN || req.user.role === UserRole.MANAGER
 
       if (!canAccess) {
-        return reply.status(403).send({
+        return reply.code(403).send({
           error: {
             code: "INSUFFICIENT_PERMISSIONS",
             message: "Access denied",
@@ -505,7 +505,7 @@ export class ProfileController {
 
       const user = await this.userService.getUserById(userId)
       if (!user) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           error: {
             code: "USER_NOT_FOUND",
             message: "User not found",
@@ -515,13 +515,13 @@ export class ProfileController {
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: user,
         message: "Profile retrieved successfully",
       })
     } catch {
-      return reply.status(500).send({
+      return reply.code(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred",

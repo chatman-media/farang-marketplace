@@ -30,7 +30,7 @@ export default async function voiceRoutes(fastify: FastifyInstance) {
         return result
       } catch (error) {
         fastify.log.error(error as Error, "Speech to text error")
-        reply.status(500)
+        reply.code(500)
         return {
           success: false,
           error: "Internal server error",
@@ -54,7 +54,7 @@ export default async function voiceRoutes(fastify: FastifyInstance) {
         return result
       } catch (error) {
         fastify.log.error(error as Error, "Text to speech error")
-        reply.status(500)
+        reply.code(500)
         return {
           success: false,
           error: "Internal server error",
@@ -78,7 +78,7 @@ export default async function voiceRoutes(fastify: FastifyInstance) {
         return result
       } catch (error) {
         fastify.log.error(error as Error, "Voice command error")
-        reply.status(500)
+        reply.code(500)
         return {
           success: false,
           error: "Internal server error",

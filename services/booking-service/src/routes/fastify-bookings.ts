@@ -1,15 +1,15 @@
 import { FastifyPluginAsync } from "fastify"
 import {
-  FastifyBookingController,
+  BookingController,
   createBookingSchema,
   createServiceBookingSchema,
   updateStatusSchema,
   bookingIdSchema,
   searchSchema,
-} from "../controllers/FastifyBookingController"
+} from "../controllers/BookingController"
 
 interface BookingRouteOptions {
-  bookingController: FastifyBookingController
+  bookingController: BookingController
 }
 
 const bookingRoutes: FastifyPluginAsync<BookingRouteOptions> = async (fastify, options) => {

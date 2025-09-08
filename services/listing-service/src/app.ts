@@ -73,16 +73,16 @@ export const createApp = async (): Promise<FastifyInstance> => {
   await app.register(import("./routes/listings"), { prefix: "/api/listings" })
 
   // Import controllers for Fastify routes
-  const { FastifyServiceProviderController } = await import("./controllers/FastifyServiceProviderController")
+  const { ServiceProviderController } = await import("./controllers/ServiceProviderController")
 
-  const serviceProviderController = new FastifyServiceProviderController()
+  const serviceProviderController = new ServiceProviderController()
 
   await app.register((await import("./routes/fastify-serviceProviders")).default, {
     prefix: "/api/service-providers",
-    serviceProviderController
+    serviceProviderController,
   })
   await app.register((await import("./routes/fastify-aiSearch")).default, {
-    prefix: "/api/ai"
+    prefix: "/api/ai",
   })
 
   // Static file serving for uploads
@@ -96,7 +96,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
     app.log.error(error)
 
     if (error.validation) {
-      return reply.status(400).send({
+      return reply.code(400).send({
         success: false,
         message: "Validation Error",
         details: error.validation,
@@ -104,13 +104,13 @@ export const createApp = async (): Promise<FastifyInstance> => {
     }
 
     if (error.statusCode) {
-      return reply.status(error.statusCode).send({
+      return reply.code(error.statusCode).send({
         success: false,
         message: error.message,
       })
     }
 
-    return reply.status(500).send({
+    return reply.code(500).send({
       success: false,
       message: env.NODE_ENV === "production" ? "Internal server error" : error.message,
       ...(env.NODE_ENV === "development" && { stack: error.stack }),
@@ -119,7 +119,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
 
   // 404 handler
   app.setNotFoundHandler(async (request, reply) => {
-    return reply.status(404).send({
+    return reply.code(404).send({
       success: false,
       message: "Endpoint not found",
       path: request.url,

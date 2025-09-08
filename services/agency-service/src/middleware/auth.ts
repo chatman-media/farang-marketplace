@@ -22,7 +22,7 @@ export async function authenticateToken(request: FastifyRequest, reply: FastifyR
   const token = authHeader && authHeader.split(" ")[1] // Bearer TOKEN
 
   if (!token) {
-    return reply.status(401).send({
+    return reply.code(401).send({
       success: false,
       message: "Access token required",
     })
@@ -31,7 +31,7 @@ export async function authenticateToken(request: FastifyRequest, reply: FastifyR
   const jwtSecret = process.env.JWT_SECRET
   if (!jwtSecret) {
     console.error("JWT_SECRET environment variable is not set")
-    return reply.status(500).send({
+    return reply.code(500).send({
       success: false,
       message: "Server configuration error",
     })
@@ -42,7 +42,7 @@ export async function authenticateToken(request: FastifyRequest, reply: FastifyR
     request.user = decoded
   } catch (error) {
     console.error("JWT verification failed:", error)
-    return reply.status(403).send({
+    return reply.code(403).send({
       success: false,
       message: "Invalid or expired token",
     })
@@ -55,14 +55,14 @@ export async function authenticateToken(request: FastifyRequest, reply: FastifyR
 export function requireRole(...allowedRoles: string[]) {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     if (!request.user) {
-      return reply.status(401).send({
+      return reply.code(401).send({
         success: false,
         message: "Authentication required",
       })
     }
 
     if (!allowedRoles.includes(request.user.role)) {
-      return reply.status(403).send({
+      return reply.code(403).send({
         success: false,
         message: "Insufficient permissions",
       })
@@ -75,7 +75,7 @@ export function requireRole(...allowedRoles: string[]) {
  */
 export async function requireAgencyOwnership(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   if (!request.user) {
-    return reply.status(401).send({
+    return reply.code(401).send({
       success: false,
       message: "Authentication required",
     })
@@ -95,7 +95,7 @@ export async function requireAgencyOwnership(request: FastifyRequest, reply: Fas
     }
   }
 
-  return reply.status(403).send({
+  return reply.code(403).send({
     success: false,
     message: "Access denied: You can only manage your own agency",
   })
@@ -141,7 +141,7 @@ export const requireAgencyStaff = requireRole("agency_owner", "agency_manager", 
  */
 export async function requireUserOrAdmin(request: FastifyRequest, reply: FastifyReply): Promise<void> {
   if (!request.user) {
-    return reply.status(401).send({
+    return reply.code(401).send({
       success: false,
       message: "Authentication required",
     })
@@ -153,7 +153,7 @@ export async function requireUserOrAdmin(request: FastifyRequest, reply: Fastify
     return
   }
 
-  return reply.status(403).send({
+  return reply.code(403).send({
     success: false,
     message: "Access denied: You can only access your own data",
   })

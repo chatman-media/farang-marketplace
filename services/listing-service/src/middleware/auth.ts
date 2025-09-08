@@ -24,7 +24,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
     const authHeader = request.headers.authorization
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return reply.status(401).send({
+      return reply.code(401).send({
         success: false,
         message: "Access token required",
       })
@@ -42,21 +42,21 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
     }
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      return reply.status(401).send({
+      return reply.code(401).send({
         success: false,
         message: "Invalid access token",
       })
     }
 
     if (error instanceof jwt.TokenExpiredError) {
-      return reply.status(401).send({
+      return reply.code(401).send({
         success: false,
         message: "Access token expired",
       })
     }
 
     console.error("Auth middleware error:", error)
-    return reply.status(500).send({
+    return reply.code(500).send({
       success: false,
       message: "Authentication failed",
     })
@@ -89,14 +89,14 @@ export const optionalAuthMiddleware = async (request: FastifyRequest, reply: Fas
 
 export const adminMiddleware = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
   if (!request.user) {
-    return reply.status(401).send({
+    return reply.code(401).send({
       success: false,
       message: "Authentication required",
     })
   }
 
   if (request.user.role !== "admin" && request.user.role !== "manager") {
-    return reply.status(403).send({
+    return reply.code(403).send({
       success: false,
       message: "Admin access required",
     })

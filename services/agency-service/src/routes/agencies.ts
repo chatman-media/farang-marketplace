@@ -14,7 +14,7 @@ const agenciesRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get("/search", {
     preHandler: [optionalAuth],
     handler: async (_request, reply) => {
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: [],
         message: "Agency search (placeholder)",

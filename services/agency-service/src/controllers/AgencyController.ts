@@ -20,14 +20,14 @@ export class FastifyAgencyController {
 
       const agency = await this.agencyService.createAgency(agencyData)
 
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         message: "Agency created successfully",
         data: agency,
       })
     } catch (error) {
       console.error("Error creating agency:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to create agency",
       })
@@ -43,19 +43,19 @@ export class FastifyAgencyController {
       const agency = await this.agencyService.getAgencyById(id)
 
       if (!agency) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Agency not found",
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: agency,
       })
     } catch (error) {
       console.error("Error getting agency:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get agency",
       })
@@ -77,7 +77,7 @@ export class FastifyAgencyController {
         },
       )
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: result.agencies,
         pagination: {
@@ -90,7 +90,7 @@ export class FastifyAgencyController {
       })
     } catch (error) {
       console.error("Error getting agencies:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get agencies",
       })
@@ -108,20 +108,20 @@ export class FastifyAgencyController {
       const agency = await this.agencyService.updateAgency(id, updateData)
 
       if (!agency) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Agency not found",
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         message: "Agency updated successfully",
         data: agency,
       })
     } catch (error) {
       console.error("Error updating agency:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update agency",
       })
@@ -138,19 +138,19 @@ export class FastifyAgencyController {
       const success = await this.agencyService.deleteAgency(id)
 
       if (!success) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Agency not found",
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         message: "Agency deleted successfully",
       })
     } catch (error) {
       console.error("Error deleting agency:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to delete agency",
       })
@@ -165,13 +165,13 @@ export class FastifyAgencyController {
       const { id } = request.params as { id: string }
       const stats = await this.agencyService.getAgencyStats(id)
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: stats,
       })
     } catch (error) {
       console.error("Error getting agency stats:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get agency statistics",
       })
@@ -186,13 +186,13 @@ export class FastifyAgencyController {
       const userId = request.user!.id
       const agency = await this.agencyService.getAgencyByUserId(userId)
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: agency ? [agency] : [],
       })
     } catch (error) {
       console.error("Error getting user agencies:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get user agencies",
       })
@@ -210,7 +210,7 @@ export class FastifyAgencyController {
       // Validate status
       const validStatuses = ["pending", "active", "suspended", "inactive", "rejected"] as const
       if (!validStatuses.includes(status as any)) {
-        return reply.status(400).send({
+        return reply.code(400).send({
           success: false,
           error: "Invalid status",
           validStatuses,
@@ -220,20 +220,20 @@ export class FastifyAgencyController {
       const agency = await this.agencyService.updateAgencyStatus(id, status as any)
 
       if (!agency) {
-        return reply.status(404).send({
+        return reply.code(404).send({
           success: false,
           message: "Agency not found",
         })
       }
 
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         message: "Agency status updated successfully",
         data: agency,
       })
     } catch (error) {
       console.error("Error updating agency status:", error)
-      return reply.status(500).send({
+      return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update agency status",
       })

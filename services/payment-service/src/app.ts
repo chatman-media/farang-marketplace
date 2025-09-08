@@ -138,7 +138,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
     app.log.error(error)
 
     if (error.validation) {
-      return reply.status(400).send({
+      return reply.code(400).send({
         error: "Validation Error",
         message: error.message,
         details: error.validation,
@@ -146,13 +146,13 @@ export const createApp = async (): Promise<FastifyInstance> => {
     }
 
     if (error.statusCode) {
-      return reply.status(error.statusCode).send({
+      return reply.code(error.statusCode).send({
         error: error.name,
         message: error.message,
       })
     }
 
-    return reply.status(500).send({
+    return reply.code(500).send({
       error: "Internal Server Error",
       message: env.NODE_ENV === "production" ? "Something went wrong" : error.message,
     })
@@ -160,7 +160,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
 
   // 404 handler
   app.setNotFoundHandler(async (request, reply) => {
-    return reply.status(404).send({
+    return reply.code(404).send({
       error: "Not Found",
       message: `Route ${request.method} ${request.url} not found`,
     })

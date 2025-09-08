@@ -1,7 +1,112 @@
-import { Response } from "express"
-import { body, validationResult } from "express-validator"
+import { FastifyRequest, FastifyReply } from "fastify"
 import { ContentAnalysisService } from "../services/ContentAnalysisService"
-import type { AuthenticatedRequest } from "../middleware/auth"
+import { z } from "zod"
+
+// Zod schemas for validation
+export const analyzeContentSchema = {
+  body: z.object({
+    type: z.enum(["listing", "review", "message", "profile"]),
+    content: z.object({
+      title: z.string().min(1).max(500).optional(),
+      description: z.string().min(1).max(5000).optional(),
+      text: z.string().min(1).max(10000).optional(),
+    }),
+    language: z.string().min(2).max(5).optional(),
+    options: z
+      .object({
+        sentiment: z.boolean().default(true),
+        keywords: z.boolean().default(true),
+        categories: z.boolean().default(true),
+        language: z.boolean().default(true),
+        moderation: z.boolean().default(true),
+        quality: z.boolean().default(true),
+      })
+      .optional(),
+  }),
+}
+
+export const batchAnalyzeSchema = {
+  body: z.object({
+    items: z
+      .array(
+        z.object({
+          type: z.enum(["listing", "review", "message", "profile"]),
+          content: z.object({
+            title: z.string().min(1).max(500).optional(),
+            description: z.string().min(1).max(5000).optional(),
+            text: z.string().min(1).max(10000).optional(),
+          }),
+          language: z.string().min(2).max(5).optional(),
+        }),
+      )
+      .min(1)
+      .max(50),
+  }),
+}
+
+export const sentimentAnalysisSchema = {
+  body: z.object({
+    text: z.string().min(1).max(10000),
+    type: z.enum(["listing", "review", "message", "profile"]).optional(),
+    language: z.string().min(2).max(5).optional(),
+  }),
+}
+
+export const keywordExtractionSchema = {
+  body: z.object({
+    text: z.string().min(1).max(10000),
+    type: z.enum(["listing", "review", "message", "profile"]).optional(),
+    language: z.string().min(2).max(5).optional(),
+  }),
+}
+
+export const categorizationSchema = {
+  body: z.object({
+    type: z.enum(["listing", "review", "message", "profile"]),
+    content: z.object({
+      title: z.string().min(1).max(500).optional(),
+      description: z.string().min(1).max(5000).optional(),
+      text: z.string().min(1).max(10000).optional(),
+    }),
+    language: z.string().min(2).max(5).optional(),
+  }),
+}
+
+export const moderationSchema = {
+  body: z.object({
+    text: z.string().min(1).max(10000),
+    type: z.enum(["listing", "review", "message", "profile"]).optional(),
+    language: z.string().min(2).max(5).optional(),
+  }),
+}
+
+export const qualityAssessmentSchema = {
+  body: z.object({
+    type: z.enum(["listing", "review", "message", "profile"]),
+    content: z.object({
+      title: z.string().min(1).max(500).optional(),
+      description: z.string().min(1).max(5000).optional(),
+      text: z.string().min(1).max(10000).optional(),
+    }),
+    language: z.string().min(2).max(5).optional(),
+  }),
+}
+
+export const languageDetectionSchema = {
+  body: z.object({
+    text: z.string().min(1).max(10000),
+    type: z.enum(["listing", "review", "message", "profile"]).optional(),
+  }),
+}
+
+interface AuthenticatedRequest extends FastifyRequest {
+  user?: {
+    id: string
+    email: string
+    role: "guest" | "host" | "admin"
+    verified: boolean
+  }
+}
 
 export class ContentAnalysisController {
   private contentAnalysisService: ContentAnalysisService
@@ -13,197 +118,133 @@ export class ContentAnalysisController {
   /**
    * Analyze single content item
    */
-  async analyzeContent(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async analyzeContent(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
+      const { type, content, language, options } = request.body as z.infer<typeof analyzeContentSchema.body>
 
       const analysisRequest = {
         id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        type: req.body.type,
-        content: req.body.content,
-        language: req.body.language,
+        type,
+        content,
+        language,
         options: {
-          sentiment: req.body.options?.sentiment !== false,
-          keywords: req.body.options?.keywords !== false,
-          categories: req.body.options?.categories !== false,
-          language: req.body.options?.language !== false,
-          moderation: req.body.options?.moderation !== false,
-          quality: req.body.options?.quality !== false,
+          sentiment: options?.sentiment !== false,
+          keywords: options?.keywords !== false,
+          categories: options?.categories !== false,
+          language: options?.language !== false,
+          moderation: options?.moderation !== false,
+          quality: options?.quality !== false,
         },
       }
 
       const result = await this.contentAnalysisService.analyzeContent(analysisRequest)
 
-      res.json({
+      reply.send({
         success: true,
         message: "Content analysis completed successfully",
         data: result,
       })
     } catch (error) {
-      console.error("Error analyzing content:", error)
-      res.status(500).json({
+      request.log.error("Error analyzing content:", error)
+      reply.code(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to analyze content",
+        message: "Failed to analyze content",
+        error: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }
 
   /**
-   * Analyze multiple content items in batch
+   * Batch analyze multiple content items
    */
-  async batchAnalyzeContent(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async batchAnalyzeContent(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
+      const { items } = request.body as z.infer<typeof batchAnalyzeSchema.body>
 
-      const requests = req.body.items.map((item: any, index: number) => ({
-        id: item.id || `batch_${Date.now()}_${index}`,
+      const analysisRequests = items.map((item, index) => ({
+        id: `batch_analysis_${Date.now()}_${index}`,
         type: item.type,
         content: item.content,
         language: item.language,
         options: {
-          sentiment: item.options?.sentiment !== false,
-          keywords: item.options?.keywords !== false,
-          categories: item.options?.categories !== false,
-          language: item.options?.language !== false,
-          moderation: item.options?.moderation !== false,
-          quality: item.options?.quality !== false,
+          sentiment: true,
+          keywords: true,
+          categories: true,
+          language: true,
+          moderation: true,
+          quality: true,
         },
       }))
 
-      const results = await this.contentAnalysisService.batchAnalyze(requests)
+      const results = await this.contentAnalysisService.batchAnalyzeContent(analysisRequests)
 
-      res.json({
+      reply.send({
         success: true,
-        message: `Analyzed ${results.length} content items`,
-        data: {
-          results,
-          totalItems: requests.length,
-          successfulAnalyses: results.filter((r) => r.sentiment || r.keywords || r.categories).length,
-        },
+        message: "Batch content analysis completed successfully",
+        data: results,
       })
     } catch (error) {
-      console.error("Error in batch content analysis:", error)
-      res.status(500).json({
+      request.log.error("Error in batch content analysis:", error)
+      reply.code(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to analyze content batch",
+        message: "Failed to analyze content batch",
+        error: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }
 
   /**
-   * Analyze sentiment only
+   * Analyze sentiment of text
    */
-  async analyzeSentiment(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async analyzeSentiment(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
+      const { text, type, language } = request.body as z.infer<typeof sentimentAnalysisSchema.body>
 
-      const analysisRequest = {
-        id: `sentiment_${Date.now()}`,
-        type: req.body.type || "text",
-        content: {
-          text: req.body.text,
-        },
-        language: req.body.language,
-        options: {
-          sentiment: true,
-          keywords: false,
-          categories: false,
-          language: false,
-          moderation: false,
-          quality: false,
-        },
-      }
+      const result = await this.contentAnalysisService.analyzeSentiment({
+        text,
+        type,
+        language,
+      })
 
-      const result = await this.contentAnalysisService.analyzeContent(analysisRequest)
-
-      res.json({
+      reply.send({
         success: true,
-        message: "Sentiment analysis completed",
-        data: {
-          id: result.id,
-          sentiment: result.sentiment,
-          processingTime: result.processingTime,
-          timestamp: result.timestamp,
-        },
+        message: "Sentiment analysis completed successfully",
+        data: result,
       })
     } catch (error) {
-      console.error("Error analyzing sentiment:", error)
-      res.status(500).json({
+      request.log.error("Error analyzing sentiment:", error)
+      reply.code(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to analyze sentiment",
+        message: "Failed to analyze sentiment",
+        error: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }
 
   /**
-   * Extract keywords only
+   * Extract keywords from text
    */
-  async extractKeywords(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async extractKeywords(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
+      const { text, type, language } = request.body as z.infer<typeof keywordExtractionSchema.body>
 
-      const analysisRequest = {
-        id: `keywords_${Date.now()}`,
-        type: req.body.type || "text",
-        content: {
-          text: req.body.text,
-        },
-        language: req.body.language,
-        options: {
-          sentiment: false,
-          keywords: true,
-          categories: false,
-          language: false,
-          moderation: false,
-          quality: false,
-        },
-      }
+      const result = await this.contentAnalysisService.extractKeywords({
+        text,
+        type,
+        language,
+      })
 
-      const result = await this.contentAnalysisService.analyzeContent(analysisRequest)
-
-      res.json({
+      reply.send({
         success: true,
-        message: "Keyword extraction completed",
-        data: {
-          id: result.id,
-          keywords: result.keywords,
-          processingTime: result.processingTime,
-          timestamp: result.timestamp,
-        },
+        message: "Keyword extraction completed successfully",
+        data: result,
       })
     } catch (error) {
-      console.error("Error extracting keywords:", error)
-      res.status(500).json({
+      request.log.error("Error extracting keywords:", error)
+      reply.code(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to extract keywords",
+        message: "Failed to extract keywords",
+        error: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }
@@ -211,101 +252,55 @@ export class ContentAnalysisController {
   /**
    * Categorize content
    */
-  async categorizeContent(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async categorizeContent(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
+      const { type, content, language } = request.body as z.infer<typeof categorizationSchema.body>
 
-      const analysisRequest = {
-        id: `categories_${Date.now()}`,
-        type: req.body.type,
-        content: req.body.content,
-        language: req.body.language,
-        options: {
-          sentiment: false,
-          keywords: false,
-          categories: true,
-          language: false,
-          moderation: false,
-          quality: false,
-        },
-      }
+      const result = await this.contentAnalysisService.categorizeContent({
+        type,
+        content,
+        language,
+      })
 
-      const result = await this.contentAnalysisService.analyzeContent(analysisRequest)
-
-      res.json({
+      reply.send({
         success: true,
-        message: "Content categorization completed",
-        data: {
-          id: result.id,
-          categories: result.categories,
-          processingTime: result.processingTime,
-          timestamp: result.timestamp,
-        },
+        message: "Content categorization completed successfully",
+        data: result,
       })
     } catch (error) {
-      console.error("Error categorizing content:", error)
-      res.status(500).json({
+      request.log.error("Error categorizing content:", error)
+      reply.code(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to categorize content",
+        message: "Failed to categorize content",
+        error: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }
 
   /**
-   * Moderate content for inappropriate material
+   * Moderate content
    */
-  async moderateContent(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async moderateContent(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
+      const { text, type, language } = request.body as z.infer<typeof moderationSchema.body>
 
-      const analysisRequest = {
-        id: `moderation_${Date.now()}`,
-        type: req.body.type || "text",
-        content: {
-          text: req.body.text,
-        },
-        language: req.body.language,
-        options: {
-          sentiment: false,
-          keywords: false,
-          categories: false,
-          language: false,
-          moderation: true,
-          quality: false,
-        },
-      }
+      const result = await this.contentAnalysisService.moderateContent({
+        text,
+        type,
+        language,
+      })
 
-      const result = await this.contentAnalysisService.analyzeContent(analysisRequest)
-
-      res.json({
+      reply.send({
         success: true,
-        message: "Content moderation completed",
-        data: {
-          id: result.id,
-          moderation: result.moderation,
-          processingTime: result.processingTime,
-          timestamp: result.timestamp,
-        },
+        message: "Content moderation completed successfully",
+        data: result,
       })
     } catch (error) {
-      console.error("Error moderating content:", error)
-      res.status(500).json({
+      request.log.error("Error moderating content:", error)
+      reply.code(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to moderate content",
+        message: "Failed to moderate content",
+        error: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }
@@ -313,175 +308,77 @@ export class ContentAnalysisController {
   /**
    * Assess content quality
    */
-  async assessQuality(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async assessQuality(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
+      const { type, content, language } = request.body as z.infer<typeof qualityAssessmentSchema.body>
 
-      const analysisRequest = {
-        id: `quality_${Date.now()}`,
-        type: req.body.type,
-        content: req.body.content,
-        language: req.body.language,
-        options: {
-          sentiment: false,
-          keywords: false,
-          categories: false,
-          language: false,
-          moderation: false,
-          quality: true,
-        },
-      }
+      const result = await this.contentAnalysisService.assessQuality({
+        type,
+        content,
+        language,
+      })
 
-      const result = await this.contentAnalysisService.analyzeContent(analysisRequest)
-
-      res.json({
+      reply.send({
         success: true,
-        message: "Quality assessment completed",
-        data: {
-          id: result.id,
-          quality: result.quality,
-          processingTime: result.processingTime,
-          timestamp: result.timestamp,
-        },
+        message: "Quality assessment completed successfully",
+        data: result,
       })
     } catch (error) {
-      console.error("Error assessing quality:", error)
-      res.status(500).json({
+      request.log.error("Error assessing quality:", error)
+      reply.code(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to assess content quality",
+        message: "Failed to assess content quality",
+        error: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }
 
   /**
-   * Detect content language
+   * Detect language of text
    */
-  async detectLanguage(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async detectLanguage(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const errors = validationResult(req)
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Validation failed",
-          errors: errors.array(),
-        })
-      }
+      const { text, type } = request.body as z.infer<typeof languageDetectionSchema.body>
 
-      const analysisRequest = {
-        id: `language_${Date.now()}`,
-        type: req.body.type || "text",
-        content: {
-          text: req.body.text,
-        },
-        options: {
-          sentiment: false,
-          keywords: false,
-          categories: false,
-          language: true,
-          moderation: false,
-          quality: false,
-        },
-      }
+      const result = await this.contentAnalysisService.detectLanguage({
+        text,
+        type,
+      })
 
-      const result = await this.contentAnalysisService.analyzeContent(analysisRequest)
-
-      res.json({
+      reply.send({
         success: true,
-        message: "Language detection completed",
-        data: {
-          id: result.id,
-          language: result.language,
-          processingTime: result.processingTime,
-          timestamp: result.timestamp,
-        },
+        message: "Language detection completed successfully",
+        data: result,
       })
     } catch (error) {
-      console.error("Error detecting language:", error)
-      res.status(500).json({
+      request.log.error("Error detecting language:", error)
+      reply.code(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to detect language",
+        message: "Failed to detect language",
+        error: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }
 
   /**
-   * Get content analysis statistics
+   * Get analysis statistics
    */
-  async getAnalysisStats(req: AuthenticatedRequest, res: Response): Promise<any> {
+  async getAnalysisStats(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
       const stats = this.contentAnalysisService.getStats()
 
-      res.json({
+      reply.send({
         success: true,
+        message: "Analysis statistics retrieved successfully",
         data: stats,
       })
     } catch (error) {
-      console.error("Error getting analysis stats:", error)
-      res.status(500).json({
+      request.log.error("Error getting analysis stats:", error)
+      reply.code(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to get analysis statistics",
+        message: "Failed to get analysis statistics",
+        error: error instanceof Error ? error.message : "Unknown error",
       })
     }
   }
 }
-
-// Validation rules
-export const analyzeContentValidation = [
-  body("type").isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
-  body("content").isObject().withMessage("Content object is required"),
-  body("content.title").optional().isLength({ min: 1, max: 500 }).withMessage("Title must be 1-500 characters"),
-  body("content.description")
-    .optional()
-    .isLength({ min: 1, max: 5000 })
-    .withMessage("Description must be 1-5000 characters"),
-  body("content.text").optional().isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
-  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
-]
-
-export const batchAnalyzeValidation = [
-  body("items").isArray({ min: 1, max: 50 }).withMessage("Items array must contain 1-50 items"),
-  body("items.*.type").isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
-  body("items.*.content").isObject().withMessage("Content object is required"),
-]
-
-export const sentimentAnalysisValidation = [
-  body("text").isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
-  body("type").optional().isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
-  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
-]
-
-export const keywordExtractionValidation = [
-  body("text").isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
-  body("type").optional().isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
-  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
-]
-
-export const categorizationValidation = [
-  body("type").isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
-  body("content").isObject().withMessage("Content object is required"),
-  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
-]
-
-export const moderationValidation = [
-  body("text").isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
-  body("type").optional().isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
-  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
-]
-
-export const qualityAssessmentValidation = [
-  body("type").isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
-  body("content").isObject().withMessage("Content object is required"),
-  body("language").optional().isLength({ min: 2, max: 5 }).withMessage("Language code must be 2-5 characters"),
-]
-
-export const languageDetectionValidation = [
-  body("text").isLength({ min: 1, max: 10000 }).withMessage("Text must be 1-10000 characters"),
-  body("type").optional().isIn(["listing", "review", "message", "profile"]).withMessage("Invalid content type"),
-]

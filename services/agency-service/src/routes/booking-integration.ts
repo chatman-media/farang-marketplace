@@ -94,7 +94,7 @@ const bookingIntegrationRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     handler: async (request, reply) => {
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         message: "Webhook processed successfully",
       })

@@ -14,7 +14,7 @@ export const authenticateToken = async (request: FastifyRequest, reply: FastifyR
   const token = authHeader && authHeader.split(" ")[1]
 
   if (!token) {
-    return reply.status(401).send({
+    return reply.code(401).send({
       error: "Unauthorized",
       message: "Access token is required",
     })
@@ -28,7 +28,7 @@ export const authenticateToken = async (request: FastifyRequest, reply: FastifyR
       email: decoded.email,
     }
   } catch (error) {
-    return reply.status(403).send({
+    return reply.code(403).send({
       error: "Forbidden",
       message: "Invalid or expired token",
     })
@@ -39,14 +39,14 @@ export const requireRole = (roles: string[]) => {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const authRequest = request as AuthenticatedRequest
     if (!authRequest.user) {
-      return reply.status(401).send({
+      return reply.code(401).send({
         error: "Unauthorized",
         message: "Authentication required",
       })
     }
 
     if (!roles.includes(authRequest.user.role)) {
-      return reply.status(403).send({
+      return reply.code(403).send({
         error: "Forbidden",
         message: `Access denied. Required roles: ${roles.join(", ")}`,
       })

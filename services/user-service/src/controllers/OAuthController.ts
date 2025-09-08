@@ -16,12 +16,12 @@ export class OAuthController {
       const { provider } = req.params as { provider: string }
 
       if (!Object.values(AuthProvider).includes(provider as AuthProvider)) {
-        reply.status(400).send({ error: "Unsupported OAuth provider" })
+        reply.code(400).send({ error: "Unsupported OAuth provider" })
         return
       }
 
       if (provider === AuthProvider.TELEGRAM) {
-        reply.status(400).send({
+        reply.code(400).send({
           error: "Telegram uses Login Widget, not redirect flow",
           telegramBotUsername: process.env.TELEGRAM_BOT_USERNAME,
         })
@@ -37,7 +37,7 @@ export class OAuthController {
       reply.send({ authUrl, state })
     } catch (error) {
       console.error("OAuth initiation error:", error)
-      reply.status(500).send({ error: "Failed to initiate OAuth flow" })
+      reply.code(500).send({ error: "Failed to initiate OAuth flow" })
     }
   }
 
@@ -48,7 +48,7 @@ export class OAuthController {
       const { code, state, telegramData } = req.body as any
 
       if (!Object.values(AuthProvider).includes(provider as AuthProvider)) {
-        reply.status(400).send({ error: "Unsupported OAuth provider" })
+        reply.code(400).send({ error: "Unsupported OAuth provider" })
         return
       }
 
@@ -58,7 +58,7 @@ export class OAuthController {
         // Пока что пропускаем проверку state, так как у нас нет сессий
 
         if (!code) {
-          reply.status(400).send({ error: "Authorization code is required" })
+          reply.code(400).send({ error: "Authorization code is required" })
           return
         }
       }
@@ -75,7 +75,7 @@ export class OAuthController {
       reply.send(authResponse)
     } catch (error) {
       console.error("OAuth callback error:", error)
-      reply.status(500).send({
+      reply.code(500).send({
         error: error instanceof Error ? error.message : "OAuth authentication failed",
       })
     }
@@ -86,14 +86,14 @@ export class OAuthController {
     try {
       const userId = req.user?.userId
       if (!userId) {
-        reply.status(401).send({ error: "Authentication required" })
+        reply.code(401).send({ error: "Authentication required" })
         return
       }
 
       const { provider, code, state, telegramData } = req.body as any
 
       if (!Object.values(AuthProvider).includes(provider)) {
-        reply.status(400).send({ error: "Unsupported OAuth provider" })
+        reply.code(400).send({ error: "Unsupported OAuth provider" })
         return
       }
 
@@ -109,7 +109,7 @@ export class OAuthController {
       reply.send({ message: "Social account linked successfully" })
     } catch (error) {
       console.error("Link social account error:", error)
-      reply.status(500).send({
+      reply.code(500).send({
         error: error instanceof Error ? error.message : "Failed to link social account",
       })
     }
@@ -120,14 +120,14 @@ export class OAuthController {
     try {
       const userId = req.user?.userId
       if (!userId) {
-        reply.status(401).send({ error: "Authentication required" })
+        reply.code(401).send({ error: "Authentication required" })
         return
       }
 
       const { provider } = req.body as any
 
       if (!Object.values(AuthProvider).includes(provider)) {
-        reply.status(400).send({ error: "Unsupported OAuth provider" })
+        reply.code(400).send({ error: "Unsupported OAuth provider" })
         return
       }
 
@@ -140,7 +140,7 @@ export class OAuthController {
       reply.send({ message: "Social account unlinked successfully" })
     } catch (error) {
       console.error("Unlink social account error:", error)
-      reply.status(500).send({
+      reply.code(500).send({
         error: error instanceof Error ? error.message : "Failed to unlink social account",
       })
     }
@@ -151,7 +151,7 @@ export class OAuthController {
     try {
       const userId = req.user?.userId
       if (!userId) {
-        reply.status(401).send({ error: "Authentication required" })
+        reply.code(401).send({ error: "Authentication required" })
         return
       }
 
@@ -160,7 +160,7 @@ export class OAuthController {
       reply.send(socialAccounts)
     } catch (error) {
       console.error("Get social accounts error:", error)
-      reply.status(500).send({
+      reply.code(500).send({
         error: error instanceof Error ? error.message : "Failed to retrieve social accounts",
       })
     }
@@ -178,7 +178,7 @@ export class OAuthController {
       reply.send({ providers })
     } catch (error) {
       console.error("Get providers error:", error)
-      reply.status(500).send({ error: "Failed to retrieve available providers" })
+      reply.code(500).send({ error: "Failed to retrieve available providers" })
     }
   }
 

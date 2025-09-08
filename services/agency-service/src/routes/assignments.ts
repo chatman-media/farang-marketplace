@@ -6,7 +6,7 @@ const assignmentsRoutes: FastifyPluginAsync = async (fastify) => {
   fastify.get("/", {
     preHandler: [authenticateToken],
     handler: async (request, reply) => {
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: [],
         message: "Assignments retrieved successfully (placeholder)",
@@ -28,7 +28,7 @@ const assignmentsRoutes: FastifyPluginAsync = async (fastify) => {
     },
     handler: async (request, reply) => {
       const { id } = request.params as { id: string }
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: { id, status: "active" },
         message: "Assignment retrieved successfully (placeholder)",
@@ -52,7 +52,7 @@ const assignmentsRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     handler: async (request, reply) => {
-      return reply.status(201).send({
+      return reply.code(201).send({
         success: true,
         data: { id: "new-assignment-id", ...(request.body as any) },
         message: "Assignment created successfully (placeholder)",
@@ -81,7 +81,7 @@ const assignmentsRoutes: FastifyPluginAsync = async (fastify) => {
     },
     handler: async (request, reply) => {
       const { id } = request.params as { id: string }
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         data: { id, ...(request.body as any) },
         message: "Assignment updated successfully (placeholder)",
@@ -102,7 +102,7 @@ const assignmentsRoutes: FastifyPluginAsync = async (fastify) => {
       },
     },
     handler: async (request, reply) => {
-      return reply.status(200).send({
+      return reply.code(200).send({
         success: true,
         message: "Assignment deleted successfully (placeholder)",
       })

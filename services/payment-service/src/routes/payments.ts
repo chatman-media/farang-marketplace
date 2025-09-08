@@ -93,7 +93,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           qrCode = `data:image/png;base64,placeholder-qr-code`
         }
 
-        return reply.status(201).send({
+        return reply.code(201).send({
           success: true,
           data: {
             paymentId: payment.id,
@@ -108,7 +108,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         })
       } catch (error) {
         fastify.log.error({ error }, "Failed to create payment")
-        return reply.status(500).send({
+        return reply.code(500).send({
           success: false,
           error: "Failed to create payment",
           message: error instanceof Error ? error.message : "Unknown error",
@@ -132,7 +132,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         const payment = await paymentService.getPaymentById(request.params.id)
 
         if (!payment) {
-          return reply.status(404).send({
+          return reply.code(404).send({
             success: false,
             error: "Payment not found",
           })
@@ -144,7 +144,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         })
       } catch (error) {
         fastify.log.error({ error }, "Failed to get payment")
-        return reply.status(500).send({
+        return reply.code(500).send({
           success: false,
           error: "Failed to get payment",
         })
@@ -181,7 +181,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         })
       } catch (error) {
         fastify.log.error({ error }, "Failed to update payment status")
-        return reply.status(500).send({
+        return reply.code(500).send({
           success: false,
           error: "Failed to update payment status",
         })
@@ -217,7 +217,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         })
       } catch (error) {
         fastify.log.error({ error }, "Failed to search payments")
-        return reply.status(500).send({
+        return reply.code(500).send({
           success: false,
           error: "Failed to search payments",
         })
