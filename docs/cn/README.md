@@ -5,11 +5,13 @@
 ## 📚 可用部分
 
 ### 🔐 身份验证
+
 - [README.md](auth/README.md) - 身份验证系统概述
 - [oauth-api.md](auth/oauth-api.md) - OAuth API文档
 - [oauth-setup-guide.md](auth/oauth-setup-guide.md) - OAuth提供商设置指南
 
 ### 🛠️ 开发
+
 - [development.md](development.md) - 开发指南和环境设置
 
 ## 🌐 其他语言
@@ -20,6 +22,7 @@
 ## 🚀 快速开始
 
 ### 身份验证系统
+
 我们的平台支持多种登录方式：
 
 - ✅ **邮箱/密码** - 传统注册方式
@@ -33,17 +36,20 @@
 ### 开始使用
 
 1. **克隆仓库**
+
    ```bash
    git clone https://github.com/chatman-media/farang-marketplace.git
    cd thailand-marketplace
    ```
 
 2. **安装依赖**
+
    ```bash
    bun install
    ```
 
 3. **配置环境变量**
+
    ```bash
    cp services/user-service/.env.example services/user-service/.env
    # 使用您的设置编辑.env文件
@@ -77,6 +83,7 @@ docs/cn/
 ## 📞 支持
 
 获取帮助：
+
 - 📧 邮箱：dev-team@thailand-marketplace.com
 - 💬 Slack：#support
 - 🐛 问题：[GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues)
@@ -98,4 +105,4 @@ docs/cn/
 
 ---
 
-*最后更新：2024年1月*
+_最后更新：2024年1月_

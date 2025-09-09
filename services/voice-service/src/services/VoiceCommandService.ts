@@ -216,7 +216,10 @@ export class VoiceCommandService {
       // Numbers
       { type: "number", patterns: [/(\d+)/g] },
       // Property types
-      { type: "property_type", patterns: [/(condo|apartment|house|room|studio|บ้าน|คอนโด|ห้อง)/gi] },
+      {
+        type: "property_type",
+        patterns: [/(condo|apartment|house|room|studio|บ้าน|คอนโด|ห้อง)/gi],
+      },
     ]
 
     for (const { type, patterns } of entityPatterns) {

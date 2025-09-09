@@ -2,7 +2,11 @@
 
 ## 📋 Обзор
 
-Payment Service - это современный сервис обработки платежей для платформы Thailand Marketplace с интеграцией **TON Blockchain** и поддержкой традиционных платежных систем. Он обеспечивает безопасную обработку криптовалютных и фиатных платежей, управление кошельками, возвраты средств и интеграцию с локальными тайскими платежными провайдерами.
+Payment Service - это современный сервис обработки платежей для платформы
+Thailand Marketplace с интеграцией **TON Blockchain** и поддержкой традиционных
+платежных систем. Он обеспечивает безопасную обработку криптовалютных и фиатных
+платежей, управление кошельками, возвраты средств и интеграцию с локальными
+тайскими платежными провайдерами.
 
 ## 🔧 Технические характеристики
 
@@ -22,6 +26,7 @@ Payment Service - это современный сервис обработки 
 ## 🏗️ Архитектура
 
 ### Структура проекта
+
 ```
 services/payment-service/
 ├── src/
@@ -55,191 +60,200 @@ services/payment-service/
 ### Модель данных
 
 #### Payment (Платеж)
+
 ```typescript
 interface Payment {
-  id: string;                    // UUID
-  bookingId: string;             // ID бронирования
-  payerId: string;               // ID плательщика
-  payeeId: string;               // ID получателя
+  id: string // UUID
+  bookingId: string // ID бронирования
+  payerId: string // ID плательщика
+  payeeId: string // ID получателя
 
   // Сумма и валюта
-  amount: number;                // Основная сумма платежа
-  currency: string;              // Валюта (TON, USD, THB)
-  fiatAmount?: number;           // Фиатная сумма (для крипто платежей)
-  fiatCurrency?: string;         // Фиатная валюта (USD, THB)
+  amount: number // Основная сумма платежа
+  currency: string // Валюта (TON, USD, THB)
+  fiatAmount?: number // Фиатная сумма (для крипто платежей)
+  fiatCurrency?: string // Фиатная валюта (USD, THB)
 
   // Статусы и метод
-  status: PaymentStatus;         // pending, processing, confirmed, completed, failed
-  paymentMethod: PaymentMethodType; // ton_wallet, ton_connect, jetton_usdt, jetton_usdc, stripe_card, promptpay
+  status: PaymentStatus // pending, processing, confirmed, completed, failed
+  paymentMethod: PaymentMethodType // ton_wallet, ton_connect, jetton_usdt, jetton_usdc, stripe_card, promptpay
 
   // Blockchain детали (для TON платежей)
-  tonTransactionHash?: string;   // Хеш транзакции в TON
-  tonWalletAddress?: string;     // Адрес TON кошелька
-  tonAmount?: number;            // Сумма в TON
-  confirmationBlocks?: number;   // Количество подтверждений
-  requiredConfirmations?: number; // Требуемые подтверждения
+  tonTransactionHash?: string // Хеш транзакции в TON
+  tonWalletAddress?: string // Адрес TON кошелька
+  tonAmount?: number // Сумма в TON
+  confirmationBlocks?: number // Количество подтверждений
+  requiredConfirmations?: number // Требуемые подтверждения
 
   // Комиссии
-  platformFee: number;           // Комиссия платформы
-  processingFee: number;         // Комиссия обработки
-  totalFees: number;             // Общие комиссии
+  platformFee: number // Комиссия платформы
+  processingFee: number // Комиссия обработки
+  totalFees: number // Общие комиссии
 
   // Детали платежа
-  description?: string;
-  metadata?: Record<string, any>; // Дополнительные данные
+  description?: string
+  metadata?: Record<string, any> // Дополнительные данные
 
   // Внешние интеграции
-  externalPaymentId?: string;    // ID во внешней системе
-  stripePaymentIntentId?: string; // Stripe Payment Intent ID
-  stripeChargeId?: string;       // Stripe Charge ID
-  webhookData?: Record<string, any>; // Данные webhook
+  externalPaymentId?: string // ID во внешней системе
+  stripePaymentIntentId?: string // Stripe Payment Intent ID
+  stripeChargeId?: string // Stripe Charge ID
+  webhookData?: Record<string, any> // Данные webhook
 
   // Временные метки
-  createdAt: Date;
-  updatedAt: Date;
-  processedAt?: Date;
-  failedAt?: Date;
+  createdAt: Date
+  updatedAt: Date
+  processedAt?: Date
+  failedAt?: Date
 }
 ```
 
 #### PaymentStatus (Статус платежа)
+
 ```typescript
 enum PaymentStatus {
-  PENDING = 'pending',           // Ожидает обработки
-  PROCESSING = 'processing',     // В процессе обработки
-  CONFIRMED = 'confirmed',       // Подтвержден (блокчейн)
-  COMPLETED = 'completed',       // Завершен успешно
-  FAILED = 'failed',            // Неудачный
-  CANCELLED = 'cancelled',       // Отменен
-  REFUNDED = 'refunded',        // Возвращен
-  DISPUTED = 'disputed'         // Спорный платеж
+  PENDING = "pending", // Ожидает обработки
+  PROCESSING = "processing", // В процессе обработки
+  CONFIRMED = "confirmed", // Подтвержден (блокчейн)
+  COMPLETED = "completed", // Завершен успешно
+  FAILED = "failed", // Неудачный
+  CANCELLED = "cancelled", // Отменен
+  REFUNDED = "refunded", // Возвращен
+  DISPUTED = "disputed", // Спорный платеж
 }
 ```
 
 #### Wallet (Кошелек)
+
 ```typescript
 interface Wallet {
-  id: string;
-  userId: string;                // Владелец кошелька
-  currency: Currency;
-  
+  id: string
+  userId: string // Владелец кошелька
+  currency: Currency
+
   // Балансы
-  availableBalance: number;      // Доступный баланс
-  pendingBalance: number;        // Заблокированный баланс
-  totalBalance: number;          // Общий баланс
-  
+  availableBalance: number // Доступный баланс
+  pendingBalance: number // Заблокированный баланс
+  totalBalance: number // Общий баланс
+
   // Лимиты
-  dailyLimit: number;           // Дневной лимит
-  monthlyLimit: number;         // Месячный лимит
-  dailySpent: number;           // Потрачено за день
-  monthlySpent: number;         // Потрачено за месяц
-  
+  dailyLimit: number // Дневной лимит
+  monthlyLimit: number // Месячный лимит
+  dailySpent: number // Потрачено за день
+  monthlySpent: number // Потрачено за месяц
+
   // Статус
-  status: WalletStatus;         // ACTIVE, SUSPENDED, FROZEN
-  verified: boolean;            // Верифицирован ли
-  
+  status: WalletStatus // ACTIVE, SUSPENDED, FROZEN
+  verified: boolean // Верифицирован ли
+
   // Метаданные
-  createdAt: Date;
-  updatedAt: Date;
-  lastTransactionAt?: Date;
+  createdAt: Date
+  updatedAt: Date
+  lastTransactionAt?: Date
 }
 ```
 
 #### Transaction (Транзакция)
+
 ```typescript
 interface Transaction {
-  id: string;
-  walletId: string;
-  paymentId?: string;           // Связанный платеж
-  
+  id: string
+  walletId: string
+  paymentId?: string // Связанный платеж
+
   // Тип и сумма
-  type: TransactionType;        // CREDIT, DEBIT, HOLD, RELEASE
-  amount: number;
-  currency: Currency;
-  
+  type: TransactionType // CREDIT, DEBIT, HOLD, RELEASE
+  amount: number
+  currency: Currency
+
   // Баланс после транзакции
-  balanceAfter: number;
-  
+  balanceAfter: number
+
   // Описание
-  description: string;
-  reference?: string;           // Внешняя ссылка
-  
+  description: string
+  reference?: string // Внешняя ссылка
+
   // Метаданные
-  metadata: Record<string, any>;
-  createdAt: Date;
+  metadata: Record<string, any>
+  createdAt: Date
 }
 ```
 
 #### PaymentMethod (Способ платежа)
+
 ```typescript
 enum PaymentMethodType {
-  TON_WALLET = 'ton_wallet',       // TON кошелек
-  TON_CONNECT = 'ton_connect',     // TON Connect интеграция
-  JETTON_USDT = 'jetton_usdt',     // USDT на TON
-  JETTON_USDC = 'jetton_usdc',     // USDC на TON
-  STRIPE_CARD = 'stripe_card',     // Банковская карта через Stripe
-  PROMPTPAY = 'promptpay'          // PromptPay (Таиланд)
+  TON_WALLET = "ton_wallet", // TON кошелек
+  TON_CONNECT = "ton_connect", // TON Connect интеграция
+  JETTON_USDT = "jetton_usdt", // USDT на TON
+  JETTON_USDC = "jetton_usdc", // USDC на TON
+  STRIPE_CARD = "stripe_card", // Банковская карта через Stripe
+  PROMPTPAY = "promptpay", // PromptPay (Таиланд)
 }
 ```
+
 ```typescript
 interface PaymentMethod {
-  id: string;
-  userId: string;
-  
+  id: string
+  userId: string
+
   // Тип
-  type: PaymentMethodType;      // ton_wallet, ton_connect, jetton_usdt, jetton_usdc, stripe_card, promptpay
-  provider: PaymentProvider;
-  providerMethodId: string;     // ID у провайдера
-  
+  type: PaymentMethodType // ton_wallet, ton_connect, jetton_usdt, jetton_usdc, stripe_card, promptpay
+  provider: PaymentProvider
+  providerMethodId: string // ID у провайдера
+
   // Детали карты (зашифрованы)
-  cardLast4?: string;
-  cardBrand?: string;           // VISA, MASTERCARD, etc.
-  cardExpMonth?: number;
-  cardExpYear?: number;
-  
+  cardLast4?: string
+  cardBrand?: string // VISA, MASTERCARD, etc.
+  cardExpMonth?: number
+  cardExpYear?: number
+
   // Банковский счет
-  bankName?: string;
-  accountLast4?: string;
-  
+  bankName?: string
+  accountLast4?: string
+
   // Статус
-  verified: boolean;
-  default: boolean;             // Способ по умолчанию
-  
+  verified: boolean
+  default: boolean // Способ по умолчанию
+
   // Метаданные
-  createdAt: Date;
-  updatedAt: Date;
-  lastUsedAt?: Date;
+  createdAt: Date
+  updatedAt: Date
+  lastUsedAt?: Date
 }
 ```
 
 ## � Платежные провайдеры
 
 ### 1. TON Blockchain (Основной)
+
 ```typescript
 class TonService {
   async createPayment(request: PaymentRequest): Promise<TonTransaction> {
-    const amount = toNano(request.amount); // Конвертация в nanotons
+    const amount = toNano(request.amount) // Конвертация в nanotons
 
     const payment = await this.wallet.createTransfer({
       to: Address.parse(request.toAddress),
       value: amount,
-      body: request.comment ? beginCell()
-        .storeUint(0, 32)
-        .storeStringTail(request.comment)
-        .endCell() : undefined
-    });
+      body: request.comment
+        ? beginCell()
+            .storeUint(0, 32)
+            .storeStringTail(request.comment)
+            .endCell()
+        : undefined,
+    })
 
-    return payment;
+    return payment
   }
 
   async verifyTransaction(hash: string): Promise<boolean> {
-    const tx = await this.client.getTransaction(hash);
-    return tx.confirmed && tx.confirmations >= 1;
+    const tx = await this.client.getTransaction(hash)
+    return tx.confirmed && tx.confirmations >= 1
   }
 
   async getWalletBalance(address: string): Promise<string> {
-    const balance = await this.client.getBalance(Address.parse(address));
-    return fromNano(balance);
+    const balance = await this.client.getBalance(Address.parse(address))
+    return fromNano(balance)
   }
 }
 ```
@@ -247,20 +261,24 @@ class TonService {
 ### 2. Поддерживаемые платежные методы
 
 #### Криптовалютные платежи
+
 - **TON Wallet**: Прямые переводы TON
 - **TON Connect**: Интеграция с кошельками через TON Connect
 - **Jetton USDT**: Стейблкоин USDT на TON
 - **Jetton USDC**: Стейблкоин USDC на TON
 
 #### Традиционные платежи
+
 - **Stripe Card**: Банковские карты
 
 #### Тайские платежные системы
+
 - **PromptPay**: Национальная система QR-платежей Таиланда
 
 ## 🔗 TON Connect интеграция
 
 ### Преимущества TON платежей
+
 1. **Низкие комиссии**: ~$0.01 за транзакцию
 2. **Быстрые переводы**: Подтверждение за 5 секунд
 3. **Глобальность**: Работает в любой стране
@@ -269,14 +287,15 @@ class TonService {
 6. **Стейблкоины**: USDT/USDC для стабильности
 
 ### TON Connect Workflow
+
 ```typescript
 // 1. Инициализация подключения
 const tonConnectUI = new TonConnectUI({
-  manifestUrl: 'https://thailand-marketplace.com/tonconnect-manifest.json'
-});
+  manifestUrl: "https://thailand-marketplace.com/tonconnect-manifest.json",
+})
 
 // 2. Подключение кошелька
-const connectedWallet = await tonConnectUI.connectWallet();
+const connectedWallet = await tonConnectUI.connectWallet()
 
 // 3. Создание транзакции
 const transaction = {
@@ -285,16 +304,17 @@ const transaction = {
     {
       address: "EQD...", // Адрес получателя
       amount: toNano("135.5").toString(), // Сумма в nanotons
-      payload: "Booking payment #12345" // Комментарий
-    }
-  ]
-};
+      payload: "Booking payment #12345", // Комментарий
+    },
+  ],
+}
 
 // 4. Отправка транзакции
-const result = await tonConnectUI.sendTransaction(transaction);
+const result = await tonConnectUI.sendTransaction(transaction)
 ```
 
 ### Поддерживаемые кошельки
+
 - **Tonkeeper**: Самый популярный TON кошелек
 - **TON Wallet**: Официальный кошелек
 - **MyTonWallet**: Веб-кошелек
@@ -306,9 +326,11 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ### Создание платежа
 
 #### POST /api/payments/create
+
 Создание платежа (универсальный endpoint)
 
 **Запрос для TON платежа:**
+
 ```json
 {
   "bookingId": "booking-uuid",
@@ -321,6 +343,7 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ```
 
 **Запрос для Stripe платежа:**
+
 ```json
 {
   "bookingId": "booking-uuid",
@@ -333,6 +356,7 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ```
 
 **Запрос для PromptPay:**
+
 ```json
 {
   "bookingId": "booking-uuid",
@@ -344,6 +368,7 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -361,9 +386,11 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ```
 
 #### POST /api/payments/:id/confirm
+
 Подтверждение платежа
 
 **Запрос:**
+
 ```json
 {
   "paymentMethodId": "pm_1234567890",
@@ -374,12 +401,15 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ### Управление платежами
 
 #### GET /api/payments/:id
+
 Получение информации о платеже
 
 #### POST /api/payments/:id/refund
+
 Возврат средств
 
 **Запрос:**
+
 ```json
 {
   "amount": 5000,
@@ -389,9 +419,11 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ```
 
 #### GET /api/payments
+
 Получение списка платежей
 
 **Параметры:**
+
 ```
 ?status=COMPLETED
 &type=BOOKING
@@ -405,12 +437,15 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ### Кошельки
 
 #### GET /api/wallets/my
+
 Получение кошелька пользователя
 
 #### POST /api/wallets/topup
+
 Пополнение кошелька
 
 **Запрос:**
+
 ```json
 {
   "amount": 10000,
@@ -420,9 +455,11 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ```
 
 #### POST /api/wallets/withdraw
+
 Вывод средств
 
 **Запрос:**
+
 ```json
 {
   "amount": 5000,
@@ -432,17 +469,21 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ```
 
 #### GET /api/wallets/transactions
+
 История транзакций кошелька
 
 ### Способы платежа
 
 #### GET /api/payment-methods
+
 Получение способов платежа пользователя
 
 #### POST /api/payment-methods
+
 Добавление нового способа платежа
 
 **Запрос:**
+
 ```json
 {
   "type": "CARD",
@@ -452,14 +493,17 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ```
 
 #### DELETE /api/payment-methods/:id
+
 Удаление способа платежа
 
 ### Выплаты хозяевам
 
 #### POST /api/payouts
+
 Создание выплаты
 
 **Запрос:**
+
 ```json
 {
   "bookingId": "booking-uuid",
@@ -471,50 +515,54 @@ const result = await tonConnectUI.sendTransaction(transaction);
 ```
 
 #### GET /api/payouts
+
 Получение списка выплат
 
 ## 🔒 Безопасность
 
 ### PCI DSS соответствие
+
 - Токенизация карточных данных
 - Шифрование чувствительных данных
 - Безопасное хранение ключей
 - Аудит всех операций
 
 ### Защита от мошенничества
+
 ```typescript
 class FraudDetectionService {
   async analyzePayment(payment: Payment): Promise<FraudAnalysis> {
     const factors = {
       // Геолокация
       locationRisk: await this.checkLocationRisk(payment),
-      
+
       // Поведение пользователя
       behaviorRisk: await this.analyzeBehavior(payment.payerId),
-      
+
       // Карточные данные
       cardRisk: await this.checkCardRisk(payment.paymentMethodId),
-      
+
       // Сумма платежа
       amountRisk: this.analyzeAmount(payment.amount),
-      
+
       // Частота платежей
-      frequencyRisk: await this.checkFrequency(payment.payerId)
-    };
-    
-    const score = this.calculateRiskScore(factors);
-    
+      frequencyRisk: await this.checkFrequency(payment.payerId),
+    }
+
+    const score = this.calculateRiskScore(factors)
+
     return {
       score,
       riskLevel: this.getRiskLevel(score),
       factors,
-      recommendation: this.getRecommendation(score)
-    };
+      recommendation: this.getRecommendation(score),
+    }
   }
 }
 ```
 
 ### Правила безопасности
+
 1. **3D Secure** для карточных платежей
 2. **Лимиты транзакций** по времени и сумме
 3. **Мониторинг подозрительной активности**
@@ -524,6 +572,7 @@ class FraudDetectionService {
 ## 💰 Эскроу система
 
 ### Принцип работы
+
 ```typescript
 class EscrowService {
   async holdFunds(payment: Payment): Promise<EscrowHold> {
@@ -534,25 +583,26 @@ class EscrowService {
       releaseConditions: {
         checkIn: true,
         noDisputes: true,
-        timeElapsed: '24h'
-      }
-    });
-    
-    return hold;
+        timeElapsed: "24h",
+      },
+    })
+
+    return hold
   }
-  
+
   async releaseFunds(holdId: string, releaseAmount?: number) {
-    const hold = await this.getHold(holdId);
-    
+    const hold = await this.getHold(holdId)
+
     if (this.canRelease(hold)) {
-      await this.transferToHost(hold, releaseAmount);
-      await this.updateHoldStatus(holdId, 'RELEASED');
+      await this.transferToHost(hold, releaseAmount)
+      await this.updateHoldStatus(holdId, "RELEASED")
     }
   }
 }
 ```
 
 ### Условия освобождения средств
+
 1. **Успешное заселение** гостя
 2. **Отсутствие споров** в течение 24 часов
 3. **Подтверждение услуги** от гостя
@@ -561,34 +611,35 @@ class EscrowService {
 ## 🔄 Фоновые задачи
 
 ### Автоматические процессы
+
 ```typescript
 // Обработка отложенных выплат
 const processPendingPayouts = async () => {
-  const pendingPayouts = await payoutService.findPending();
-  
+  const pendingPayouts = await payoutService.findPending()
+
   for (const payout of pendingPayouts) {
     if (payout.canProcess()) {
-      await payoutService.process(payout.id);
+      await payoutService.process(payout.id)
     }
   }
-};
+}
 
 // Мониторинг неудачных платежей
 const retryFailedPayments = async () => {
-  const failedPayments = await paymentService.findRetryable();
-  
+  const failedPayments = await paymentService.findRetryable()
+
   for (const payment of failedPayments) {
     if (payment.retryCount < 3) {
-      await paymentService.retry(payment.id);
+      await paymentService.retry(payment.id)
     }
   }
-};
+}
 
 // Обновление курсов валют
 const updateExchangeRates = async () => {
-  const rates = await exchangeRateService.fetchLatest();
-  await cacheService.set('exchange_rates', rates, 3600);
-};
+  const rates = await exchangeRateService.fetchLatest()
+  await cacheService.set("exchange_rates", rates, 3600)
+}
 ```
 
 ## 🧪 Тестирование
@@ -596,6 +647,7 @@ const updateExchangeRates = async () => {
 ### Покрытие тестами (54 теста в 4 файлах)
 
 #### 1. **TonService.test.ts** (17 тестов)
+
 - **TON Address Validation** (2 теста)
   - Валидация формата TON адресов
   - Проверка компонентов адреса
@@ -623,6 +675,7 @@ const updateExchangeRates = async () => {
   - Валидация формата API ключей
 
 #### 2. **StripeService.test.ts** (8 тестов)
+
 - **Amount Conversions** (3 теста)
   - Конвертация USD в центы
   - Обработка валют без десятичных
@@ -638,6 +691,7 @@ const updateExchangeRates = async () => {
   - Валидация поддержки валют
 
 #### 3. **PaymentService.test.ts** (16 тестов)
+
 - **Payment Validation** (3 теста)
   - Валидация структуры запроса
   - Валидация типов платежных методов
@@ -663,6 +717,7 @@ const updateExchangeRates = async () => {
   - Сценарии неудачных платежей
 
 #### 4. **PaymentAPI.test.ts** (13 тестов)
+
 - **Payment Creation API** (2 теста)
   - Валидация структуры запроса создания
   - Требования для конкретных методов
@@ -684,31 +739,33 @@ const updateExchangeRates = async () => {
   - HTTP статус коды
 
 ### Тестовые данные
+
 ```typescript
 // Тестовые карты Stripe
 const TEST_CARDS = {
-  VISA_SUCCESS: '4242424242424242',
-  VISA_DECLINED: '4000000000000002',
-  MASTERCARD_SUCCESS: '5555555555554444',
-  AMEX_SUCCESS: '378282246310005'
-};
+  VISA_SUCCESS: "4242424242424242",
+  VISA_DECLINED: "4000000000000002",
+  MASTERCARD_SUCCESS: "5555555555554444",
+  AMEX_SUCCESS: "378282246310005",
+}
 
 // Тестовые сценарии
 const TEST_SCENARIOS = {
   SUCCESSFUL_PAYMENT: {
     amount: 10000,
-    currency: 'THB',
-    card: TEST_CARDS.VISA_SUCCESS
+    currency: "THB",
+    card: TEST_CARDS.VISA_SUCCESS,
   },
   DECLINED_PAYMENT: {
     amount: 5000,
-    currency: 'THB',
-    card: TEST_CARDS.VISA_DECLINED
-  }
-};
+    currency: "THB",
+    card: TEST_CARDS.VISA_DECLINED,
+  },
+}
 ```
 
 ### Запуск тестов
+
 ```bash
 # Все тесты
 bun test
@@ -726,6 +783,7 @@ bun test:security
 ## 🚀 Развертывание
 
 ### Переменные окружения
+
 ```env
 # Сервер
 PORT=3003
@@ -781,6 +839,7 @@ DATADOG_API_KEY=your-datadog-key
 ## 🔄 Интеграции
 
 ### Внутренние сервисы
+
 - **Booking Service**: Обработка платежей за бронирования
 - **User Service**: Аутентификация и профили
 - **CRM Service**: Уведомления о платежах
@@ -789,18 +848,22 @@ DATADOG_API_KEY=your-datadog-key
 ### Внешние сервисы
 
 #### Blockchain интеграции
+
 - **TON Network**: Основная блокчейн сеть
 - **TON Connect**: Интеграция с кошельками
 - **TON Center API**: Доступ к блокчейн данным
 - **Jetton Contracts**: USDT/USDC токены на TON
 
 #### Традиционные платежи
+
 - **Stripe**: Международные карточные платежи
 
 #### Тайские платежные системы
+
 - **PromptPay API**: Национальная система QR-платежей
 
 #### Курсы валют и аналитика
+
 - **CoinGecko API**: Курсы криптовалют
 - **Exchange Rates API**: Фиатные курсы
 - **TON API**: Данные о сети TON
@@ -809,59 +872,67 @@ DATADOG_API_KEY=your-datadog-key
 ## 📊 Финансовая отчетность
 
 ### Метрики платежей
+
 ```typescript
 interface PaymentMetrics {
-  totalVolume: number;           // Общий объем
-  successRate: number;           // Процент успешных платежей
-  averageAmount: number;         // Средняя сумма
-  refundRate: number;           // Процент возвратов
-  fraudRate: number;            // Процент мошенничества
-  processingTime: number;       // Среднее время обработки
+  totalVolume: number // Общий объем
+  successRate: number // Процент успешных платежей
+  averageAmount: number // Средняя сумма
+  refundRate: number // Процент возвратов
+  fraudRate: number // Процент мошенничества
+  processingTime: number // Среднее время обработки
 }
 
 const generateDailyReport = async (date: Date) => {
-  const payments = await paymentService.getByDate(date);
-  
+  const payments = await paymentService.getByDate(date)
+
   return {
     date,
     totalTransactions: payments.length,
     totalVolume: payments.reduce((sum, p) => sum + p.amount, 0),
-    successfulPayments: payments.filter(p => p.status === 'COMPLETED').length,
-    failedPayments: payments.filter(p => p.status === 'FAILED').length,
-    refunds: payments.filter(p => p.type === 'REFUND').length,
-    averageAmount: payments.reduce((sum, p) => sum + p.amount, 0) / payments.length
-  };
-};
+    successfulPayments: payments.filter(p => p.status === "COMPLETED").length,
+    failedPayments: payments.filter(p => p.status === "FAILED").length,
+    refunds: payments.filter(p => p.type === "REFUND").length,
+    averageAmount:
+      payments.reduce((sum, p) => sum + p.amount, 0) / payments.length,
+  }
+}
 ```
 
 ### Комиссии и сборы
 
 #### Криптовалютные платежи (TON)
+
 - **Сетевая комиссия TON**: ~0.01 TON (~$0.01)
 - **Jetton переводы**: ~0.05 TON (~$0.05)
 - **Платформенная комиссия**: 2.5% (ниже чем фиат)
 
 #### Традиционные платежи
+
 - **Платформенная комиссия**: 3.5% с каждого бронирования
 - **Stripe комиссия**: 2.9% + 30 центов
 - **Комиссия за валютное конвертирование**: 1.5%
 
 #### Тайские платежи
+
 - **PromptPay**: 0.5% (минимум 1 THB)
 
 #### Комиссии за вывод средств
+
 - **Фиат**: 50 THB
 - **Криптовалюта**: 0.1 TON
 
 ## 📈 Производительность
 
 ### Оптимизации
+
 - Кеширование курсов валют
 - Асинхронная обработка webhook'ов
 - Пакетная обработка выплат
 - Индексы базы данных для быстрого поиска
 
 ### Масштабирование
+
 - Горизонтальное масштабирование
 - Шардинг по регионам
 - Очереди для обработки платежей
@@ -870,6 +941,7 @@ const generateDailyReport = async (date: Date) => {
 ## 📊 Мониторинг
 
 ### Алерты
+
 - Высокий процент неудачных платежей
 - Подозрительная активность
 - Превышение лимитов транзакций
@@ -877,6 +949,7 @@ const generateDailyReport = async (date: Date) => {
 - Задержки в обработке
 
 ### Дашборды
+
 - **Объем платежей в реальном времени** (TON vs Fiat)
 - **Конверсия платежей** по методам
 - **Географическое распределение** пользователей
@@ -888,6 +961,7 @@ const generateDailyReport = async (date: Date) => {
 ## 🌏 Локализация для Таиланда
 
 ### Особенности тайского рынка
+
 1. **PromptPay доминирование**: 90% населения использует QR-платежи
 2. **Криптовалютная активность**: Высокое принятие TON и стейблкоинов
 3. **Мобильные платежи**: 95% транзакций с мобильных устройств
@@ -895,6 +969,7 @@ const generateDailyReport = async (date: Date) => {
 5. **Банковские ограничения**: Сложности с международными переводами
 
 ### Преимущества TON для Таиланда
+
 - **Обход банковских ограничений**: Прямые международные переводы
 - **Низкие комиссии**: Особенно важно для небольших сумм
 - **Быстрые переводы**: Мгновенные международные платежи
@@ -904,9 +979,12 @@ const generateDailyReport = async (date: Date) => {
 ---
 
 **Контакты для поддержки:**
+
 - 📧 Email: payment-service@thailand-marketplace.com
 - 📱 Slack: #payment-service-support
 - 🚨 Emergency: payment-emergency@thailand-marketplace.com
-- 📋 Issues: [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=payment-service)
+- 📋 Issues:
+  [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=payment-service)
 - 🔗 TON Support: [TON Community](https://t.me/toncoin)
-- 📖 Документация: [Thailand Marketplace Payment Docs](https://docs.thailand-marketplace.com/services/payment-service)
+- 📖 Документация:
+  [Thailand Marketplace Payment Docs](https://docs.thailand-marketplace.com/services/payment-service)

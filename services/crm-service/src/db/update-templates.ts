@@ -121,7 +121,10 @@ I noticed you viewed {{lastViewedProperty}}. Would you like more information abo
 
 Feel free to ask any questions! I'm here to help. 😊`,
         variables: ["firstName", "lastViewedProperty"],
-        conditions: { triggers: ["lead_follow_up"], conditions: { daysSinceLastContact: { $gte: 3 } } },
+        conditions: {
+          triggers: ["lead_follow_up"],
+          conditions: { daysSinceLastContact: { $gte: 3 } },
+        },
       },
     ]
 

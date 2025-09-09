@@ -158,14 +158,46 @@ export class BookingIntegrationController {
       const categories = [
         { id: "delivery", name: "Delivery Services", description: "Package and food delivery" },
         { id: "emergency", name: "Emergency Services", description: "24/7 emergency assistance" },
-        { id: "maintenance", name: "Maintenance Services", description: "Property maintenance and repairs" },
-        { id: "insurance", name: "Insurance Services", description: "Insurance claims and assessments" },
-        { id: "cleaning", name: "Cleaning Services", description: "Residential and commercial cleaning" },
-        { id: "security", name: "Security Services", description: "Security guards and surveillance" },
-        { id: "transportation", name: "Transportation", description: "Vehicle and logistics services" },
-        { id: "legal", name: "Legal Services", description: "Legal consultation and documentation" },
-        { id: "financial", name: "Financial Services", description: "Financial planning and advisory" },
-        { id: "marketing", name: "Marketing Services", description: "Digital marketing and advertising" },
+        {
+          id: "maintenance",
+          name: "Maintenance Services",
+          description: "Property maintenance and repairs",
+        },
+        {
+          id: "insurance",
+          name: "Insurance Services",
+          description: "Insurance claims and assessments",
+        },
+        {
+          id: "cleaning",
+          name: "Cleaning Services",
+          description: "Residential and commercial cleaning",
+        },
+        {
+          id: "security",
+          name: "Security Services",
+          description: "Security guards and surveillance",
+        },
+        {
+          id: "transportation",
+          name: "Transportation",
+          description: "Vehicle and logistics services",
+        },
+        {
+          id: "legal",
+          name: "Legal Services",
+          description: "Legal consultation and documentation",
+        },
+        {
+          id: "financial",
+          name: "Financial Services",
+          description: "Financial planning and advisory",
+        },
+        {
+          id: "marketing",
+          name: "Marketing Services",
+          description: "Digital marketing and advertising",
+        },
         { id: "consulting", name: "Consulting", description: "Business and technical consulting" },
         { id: "other", name: "Other Services", description: "Custom service categories" },
       ]

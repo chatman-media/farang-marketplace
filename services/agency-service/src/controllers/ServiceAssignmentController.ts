@@ -127,7 +127,10 @@ export class ServiceAssignmentController {
   async updateAssignmentStatus(req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
       const { id } = req.params as { id: string }
-      const { status, notes } = req.body as { status: "active" | "paused" | "completed" | "cancelled"; notes?: string }
+      const { status, notes } = req.body as {
+        status: "active" | "paused" | "completed" | "cancelled"
+        notes?: string
+      }
 
       if (!id) {
         return reply.code(400).send({

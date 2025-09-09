@@ -1,6 +1,7 @@
 # @thailand-marketplace/i18n
 
-Internationalization (i18n) package for Thailand Marketplace with support for 5 languages.
+Internationalization (i18n) package for Thailand Marketplace with support for 5
+languages.
 
 ## 🌐 Supported Languages
 
@@ -21,36 +22,36 @@ bun add @thailand-marketplace/i18n
 ### Basic Usage
 
 ```typescript
-import { t, tAuth, tCommon, changeLanguage } from '@thailand-marketplace/i18n';
+import { t, tAuth, tCommon, changeLanguage } from "@thailand-marketplace/i18n"
 
 // Basic translation
-console.log(t('common.welcome')); // "Welcome"
+console.log(t("common.welcome")) // "Welcome"
 
 // Namespace-specific translations
-console.log(tAuth('login')); // "Login"
-console.log(tCommon('search')); // "Search"
+console.log(tAuth("login")) // "Login"
+console.log(tCommon("search")) // "Search"
 
 // Change language
-await changeLanguage('ru');
-console.log(t('common.welcome')); // "Добро пожаловать"
+await changeLanguage("ru")
+console.log(t("common.welcome")) // "Добро пожаловать"
 ```
 
 ### React Integration
 
 ```tsx
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { LanguageSwitcher } from '@thailand-marketplace/i18n';
+import React from "react"
+import { useTranslation } from "react-i18next"
+import { LanguageSwitcher } from "@thailand-marketplace/i18n"
 
 function App() {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   return (
     <div>
-      <h1>{t('common.welcome')}</h1>
-      <LanguageSwitcher variant="dropdown" showFlags={true} />
+      <h1>{t("common.welcome")}</h1>
+      <LanguageSwitcher variant='dropdown' showFlags={true} />
     </div>
-  );
+  )
 }
 ```
 
@@ -84,9 +85,9 @@ function App() {
 
 ```tsx
 <LanguageSwitcher
-  variant="dropdown" // "dropdown" | "buttons" | "minimal"
-  showFlags={true}    // Show country flags
-  className="custom-class"
+  variant='dropdown' // "dropdown" | "buttons" | "minimal"
+  showFlags={true} // Show country flags
+  className='custom-class'
 />
 ```
 

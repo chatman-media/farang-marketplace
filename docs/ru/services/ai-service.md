@@ -2,7 +2,10 @@
 
 ## 📋 Обзор
 
-AI Service - это сервис искусственного интеллекта для платформы Thailand Marketplace. Он предоставляет возможности машинного обучения, обработки естественного языка, компьютерного зрения и рекомендательных систем для улучшения пользовательского опыта и автоматизации бизнес-процессов.
+AI Service - это сервис искусственного интеллекта для платформы Thailand
+Marketplace. Он предоставляет возможности машинного обучения, обработки
+естественного языка, компьютерного зрения и рекомендательных систем для
+улучшения пользовательского опыта и автоматизации бизнес-процессов.
 
 ## 🔧 Технические характеристики
 
@@ -22,7 +25,9 @@ AI Service - это сервис искусственного интеллект
 **Статус**: ✅ Завершена (Декабрь 2024)
 
 ### Изменения после миграции:
-- **Контроллеры**: Переименован `FastifyInsightsController` → `InsightsController`
+
+- **Контроллеры**: Переименован `FastifyInsightsController` →
+  `InsightsController`
 - **Роуты**: Обновлена структура без "fastify-" префиксов
 - **Middleware**: Оптимизирован `auth.ts` для Fastify
 - **Типизация**: Полная совместимость с `AuthenticatedUser` типом
@@ -32,6 +37,7 @@ AI Service - это сервис искусственного интеллект
 ## 🏗️ Архитектура
 
 ### Структура проекта (после миграции на Fastify)
+
 ```
 services/ai-service/
 ├── src/
@@ -71,82 +77,87 @@ services/ai-service/
 ### Основные интерфейсы
 
 #### RecommendationRequest (Запрос рекомендаций)
+
 ```typescript
 interface RecommendationRequest {
-  userId: string;
+  userId: string
   context?: {
-    location?: string;
-    priceRange?: [number, number];
-    propertyType?: string;
-    amenities?: string[];
-  };
-  limit?: number;
-  excludeIds?: string[];
+    location?: string
+    priceRange?: [number, number]
+    propertyType?: string
+    amenities?: string[]
+  }
+  limit?: number
+  excludeIds?: string[]
 }
 ```
 
 #### RecommendationResponse (Ответ с рекомендациями)
+
 ```typescript
 interface RecommendationResponse {
   recommendations: Array<{
-    listingId: string;
-    score: number;
-    reasons: string[];
-    confidence: number;
-  }>;
-  totalCount: number;
-  processingTime: number;
-  modelVersion: string;
+    listingId: string
+    score: number
+    reasons: string[]
+    confidence: number
+  }>
+  totalCount: number
+  processingTime: number
+  modelVersion: string
 }
 ```
 
 #### ContentAnalysisRequest (Запрос анализа контента)
+
 ```typescript
 interface ContentAnalysisRequest {
-  text: string;
-  language?: string;
-  analysisType: ('sentiment' | 'keywords' | 'quality' | 'amenities')[];
+  text: string
+  language?: string
+  analysisType: ("sentiment" | "keywords" | "quality" | "amenities")[]
 }
 ```
 
 #### ContentAnalysisResponse (Результат анализа контента)
+
 ```typescript
 interface ContentAnalysisResponse {
   sentiment?: {
-    score: number;
-    label: 'positive' | 'negative' | 'neutral';
-  };
-  keywords?: string[];
-  extractedAmenities?: string[];
-  qualityScore?: number;
-  suggestions?: string[];
-  detectedLanguage?: string;
+    score: number
+    label: "positive" | "negative" | "neutral"
+  }
+  keywords?: string[]
+  extractedAmenities?: string[]
+  qualityScore?: number
+  suggestions?: string[]
+  detectedLanguage?: string
 }
 ```
 
 #### UserBehaviorProfile (Профиль поведения пользователя)
+
 ```typescript
 interface UserBehaviorProfile {
-  userId: string;
+  userId: string
   preferences: {
-    propertyTypes: string[];
-    priceRange: [number, number];
-    locations: string[];
-    amenities: string[];
-  };
+    propertyTypes: string[]
+    priceRange: [number, number]
+    locations: string[]
+    amenities: string[]
+  }
   searchPatterns: {
-    frequency: number;
-    timeOfDay: string[];
-    seasonality: Record<string, number>;
-  };
+    frequency: number
+    timeOfDay: string[]
+    seasonality: Record<string, number>
+  }
   interactionHistory: {
-    views: number;
-    bookings: number;
-    favorites: number;
-    lastActivity: Date;
-  };
-  score: number;
-  lastUpdated: Date;
+    views: number
+    bookings: number
+    favorites: number
+    lastActivity: Date
+  }
+  score: number
+  lastUpdated: Date
 }
 ```
 
@@ -155,31 +166,35 @@ interface UserBehaviorProfile {
 ### 1. Обработка естественного языка (NLP)
 
 #### Анализ описаний недвижимости
+
 ```typescript
 class PropertyTextAnalyzer {
   async analyzeDescription(description: string): Promise<TextAnalysis> {
-    const analysis = await this.nlpModel.analyze(description);
-    
+    const analysis = await this.nlpModel.analyze(description)
+
     return {
-      sentiment: analysis.sentiment,        // Тональность описания
+      sentiment: analysis.sentiment, // Тональность описания
       amenities: analysis.extractedAmenities, // Извлеченные удобства
-      keywords: analysis.keywords,          // Ключевые слова
-      quality: analysis.qualityScore,       // Качество описания
-      language: analysis.detectedLanguage,  // Определенный язык
-      suggestions: analysis.improvements    // Предложения по улучшению
-    };
+      keywords: analysis.keywords, // Ключевые слова
+      quality: analysis.qualityScore, // Качество описания
+      language: analysis.detectedLanguage, // Определенный язык
+      suggestions: analysis.improvements, // Предложения по улучшению
+    }
   }
-  
-  async generateDescription(propertyFeatures: PropertyFeatures): Promise<string> {
-    const prompt = this.buildPrompt(propertyFeatures);
-    const description = await this.gptModel.generate(prompt);
-    
-    return this.postProcess(description);
+
+  async generateDescription(
+    propertyFeatures: PropertyFeatures
+  ): Promise<string> {
+    const prompt = this.buildPrompt(propertyFeatures)
+    const description = await this.gptModel.generate(prompt)
+
+    return this.postProcess(description)
   }
 }
 ```
 
 #### Многоязычная поддержка
+
 - **Автоматический перевод** описаний
 - **Определение языка** пользователя
 - **Локализация** контента
@@ -188,37 +203,39 @@ class PropertyTextAnalyzer {
 ### 2. Компьютерное зрение
 
 #### Анализ изображений недвижимости
+
 ```typescript
 class PropertyImageAnalyzer {
   async analyzeImages(imageUrls: string[]): Promise<ImageAnalysis> {
     const analyses = await Promise.all(
       imageUrls.map(url => this.analyzeImage(url))
-    );
-    
+    )
+
     return {
       roomTypes: this.extractRoomTypes(analyses),
       amenities: this.detectAmenities(analyses),
       condition: this.assessCondition(analyses),
       style: this.classifyStyle(analyses),
       quality: this.assessImageQuality(analyses),
-      suggestions: this.generateSuggestions(analyses)
-    };
+      suggestions: this.generateSuggestions(analyses),
+    }
   }
-  
+
   async detectObjects(imageUrl: string): Promise<DetectedObject[]> {
-    const image = await this.loadImage(imageUrl);
-    const predictions = await this.objectDetectionModel.predict(image);
-    
+    const image = await this.loadImage(imageUrl)
+    const predictions = await this.objectDetectionModel.predict(image)
+
     return predictions.map(pred => ({
       class: pred.class,
       confidence: pred.confidence,
-      bbox: pred.boundingBox
-    }));
+      bbox: pred.boundingBox,
+    }))
   }
 }
 ```
 
 #### Возможности анализа изображений
+
 - **Классификация комнат** (спальня, кухня, ванная)
 - **Детекция удобств** (бассейн, парковка, балкон)
 - **Оценка состояния** недвижимости
@@ -228,42 +245,43 @@ class PropertyImageAnalyzer {
 ### 3. Рекомендательная система
 
 #### Персонализированные рекомендации
+
 ```typescript
 class RecommendationEngine {
   async getRecommendations(
-    userId: string, 
+    userId: string,
     context: RecommendationContext
   ): Promise<Recommendation[]> {
-    
     // Получаем эмбеддинг пользователя
-    const userEmbedding = await this.getUserEmbedding(userId);
-    
+    const userEmbedding = await this.getUserEmbedding(userId)
+
     // Получаем кандидатов
-    const candidates = await this.getCandidateProperties(context);
-    
+    const candidates = await this.getCandidateProperties(context)
+
     // Вычисляем скоры
     const scoredCandidates = await Promise.all(
       candidates.map(async property => {
-        const propertyEmbedding = await this.getPropertyEmbedding(property.id);
-        const score = this.calculateSimilarity(userEmbedding, propertyEmbedding);
-        
+        const propertyEmbedding = await this.getPropertyEmbedding(property.id)
+        const score = this.calculateSimilarity(userEmbedding, propertyEmbedding)
+
         return {
           property,
           score,
-          reasons: this.explainRecommendation(userEmbedding, propertyEmbedding)
-        };
+          reasons: this.explainRecommendation(userEmbedding, propertyEmbedding),
+        }
       })
-    );
-    
+    )
+
     // Сортируем и возвращаем топ-N
     return scoredCandidates
       .sort((a, b) => b.score - a.score)
-      .slice(0, context.limit || 10);
+      .slice(0, context.limit || 10)
   }
 }
 ```
 
 #### Типы рекомендаций
+
 - **Collaborative Filtering**: На основе поведения похожих пользователей
 - **Content-Based**: На основе характеристик недвижимости
 - **Hybrid**: Комбинация подходов
@@ -272,37 +290,37 @@ class RecommendationEngine {
 ### 4. Динамическое ценообразование
 
 #### Предсказание оптимальной цены
+
 ```typescript
 class PricingEngine {
   async predictOptimalPrice(
     propertyFeatures: PropertyFeatures,
     marketConditions: MarketConditions
   ): Promise<PricePrediction> {
-    
-    const features = this.extractFeatures(propertyFeatures, marketConditions);
-    const prediction = await this.pricingModel.predict(features);
-    
+    const features = this.extractFeatures(propertyFeatures, marketConditions)
+    const prediction = await this.pricingModel.predict(features)
+
     return {
       suggestedPrice: prediction.price,
       confidence: prediction.confidence,
       priceRange: {
         min: prediction.price * 0.9,
-        max: prediction.price * 1.1
+        max: prediction.price * 1.1,
       },
       factors: this.explainPricing(features, prediction),
-      marketComparison: await this.getMarketComparison(propertyFeatures)
-    };
+      marketComparison: await this.getMarketComparison(propertyFeatures),
+    }
   }
-  
+
   async analyzePriceHistory(listingId: string): Promise<PriceAnalysis> {
-    const history = await this.getPriceHistory(listingId);
-    
+    const history = await this.getPriceHistory(listingId)
+
     return {
       trend: this.calculateTrend(history),
       volatility: this.calculateVolatility(history),
       seasonality: this.detectSeasonality(history),
-      recommendations: this.generatePriceRecommendations(history)
-    };
+      recommendations: this.generatePriceRecommendations(history),
+    }
   }
 }
 ```
@@ -310,37 +328,40 @@ class PricingEngine {
 ### 5. Детекция мошенничества
 
 #### Анализ подозрительной активности
+
 ```typescript
 class FraudDetectionService {
   async analyzeUser(userId: string): Promise<FraudAnalysis> {
-    const userBehavior = await this.getUserBehavior(userId);
-    const features = this.extractFraudFeatures(userBehavior);
-    
-    const fraudScore = await this.fraudModel.predict(features);
-    
+    const userBehavior = await this.getUserBehavior(userId)
+    const features = this.extractFraudFeatures(userBehavior)
+
+    const fraudScore = await this.fraudModel.predict(features)
+
     return {
       riskScore: fraudScore,
       riskLevel: this.getRiskLevel(fraudScore),
       suspiciousActivities: this.detectSuspiciousActivities(userBehavior),
-      recommendations: this.getSecurityRecommendations(fraudScore)
-    };
+      recommendations: this.getSecurityRecommendations(fraudScore),
+    }
   }
-  
+
   async analyzeListing(listingId: string): Promise<ListingFraudAnalysis> {
-    const listing = await this.getListing(listingId);
-    
+    const listing = await this.getListing(listingId)
+
     const checks = {
       imageAuthenticity: await this.checkImageAuthenticity(listing.images),
       priceAnomalies: await this.detectPriceAnomalies(listing),
-      descriptionQuality: await this.analyzeDescriptionQuality(listing.description),
-      ownerVerification: await this.verifyOwner(listing.ownerId)
-    };
-    
+      descriptionQuality: await this.analyzeDescriptionQuality(
+        listing.description
+      ),
+      ownerVerification: await this.verifyOwner(listing.ownerId),
+    }
+
     return {
       overallRisk: this.calculateOverallRisk(checks),
       checks,
-      actions: this.recommendActions(checks)
-    };
+      actions: this.recommendActions(checks),
+    }
   }
 }
 ```
@@ -350,9 +371,11 @@ class FraudDetectionService {
 ### Анализ текста
 
 #### POST /api/ai/text/analyze
+
 Анализ описания недвижимости
 
 **Запрос:**
+
 ```json
 {
   "text": "Beautiful 2-bedroom condo with stunning ocean view, modern amenities, and prime location in Phuket",
@@ -362,6 +385,7 @@ class FraudDetectionService {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -370,32 +394,30 @@ class FraudDetectionService {
       "score": 0.85,
       "label": "positive"
     },
-    "extractedAmenities": [
-      "ocean view",
-      "modern amenities"
-    ],
+    "extractedAmenities": ["ocean view", "modern amenities"],
     "qualityScore": 0.78,
     "keywords": ["beautiful", "stunning", "prime location"],
-    "suggestions": [
-      "Add more specific amenities",
-      "Include nearby attractions"
-    ]
+    "suggestions": ["Add more specific amenities", "Include nearby attractions"]
   }
 }
 ```
 
 #### POST /api/ai/text/generate
+
 Генерация описания
 
 #### POST /api/ai/text/translate
+
 Перевод текста
 
 ### Анализ изображений
 
 #### POST /api/ai/vision/analyze
+
 Анализ изображений недвижимости
 
 **Запрос:**
+
 ```json
 {
   "imageUrls": [
@@ -407,6 +429,7 @@ class FraudDetectionService {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -417,11 +440,7 @@ class FraudDetectionService {
       "kitchen": 1,
       "living_room": 1
     },
-    "detectedAmenities": [
-      "swimming_pool",
-      "balcony",
-      "air_conditioning"
-    ],
+    "detectedAmenities": ["swimming_pool", "balcony", "air_conditioning"],
     "condition": {
       "score": 0.82,
       "label": "excellent"
@@ -433,14 +452,17 @@ class FraudDetectionService {
 ```
 
 #### POST /api/ai/vision/detect-objects
+
 Детекция объектов на изображении
 
 ### Рекомендации
 
 #### GET /api/ai/recommendations/properties
+
 Получение рекомендаций недвижимости
 
 **Параметры:**
+
 ```
 ?userId=user-uuid
 &limit=10
@@ -450,6 +472,7 @@ class FraudDetectionService {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -477,14 +500,17 @@ class FraudDetectionService {
 ```
 
 #### POST /api/ai/recommendations/feedback
+
 Обратная связь по рекомендациям
 
 ### Ценообразование
 
 #### POST /api/ai/pricing/predict
+
 Предсказание оптимальной цены
 
 **Запрос:**
+
 ```json
 {
   "propertyFeatures": {
@@ -507,6 +533,7 @@ class FraudDetectionService {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -540,17 +567,21 @@ class FraudDetectionService {
 ### Детекция мошенничества
 
 #### POST /api/ai/fraud/analyze-user
+
 Анализ пользователя на мошенничество
 
 #### POST /api/ai/fraud/analyze-listing
+
 Анализ объявления на мошенничество
 
 ### Чат-бот
 
 #### POST /api/ai/chatbot/message
+
 Отправка сообщения чат-боту
 
 **Запрос:**
+
 ```json
 {
   "message": "I'm looking for a 2-bedroom condo in Bangkok under 30,000 THB",
@@ -561,6 +592,7 @@ class FraudDetectionService {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -586,38 +618,39 @@ class FraudDetectionService {
 ## 🔄 Фоновые задачи
 
 ### Обучение моделей
+
 ```typescript
 // Переобучение рекомендательной модели
 const retrainRecommendationModel = async () => {
-  const trainingData = await this.collectTrainingData();
-  const model = await this.trainModel(trainingData);
-  
+  const trainingData = await this.collectTrainingData()
+  const model = await this.trainModel(trainingData)
+
   if (model.performance > this.currentModel.performance) {
-    await this.deployModel(model);
-    await this.notifyModelUpdate(model);
+    await this.deployModel(model)
+    await this.notifyModelUpdate(model)
   }
-};
+}
 
 // Обновление эмбеддингов
 const updateEmbeddings = async () => {
-  const users = await this.getActiveUsers();
-  const properties = await this.getActiveProperties();
-  
+  const users = await this.getActiveUsers()
+  const properties = await this.getActiveProperties()
+
   await Promise.all([
     this.updateUserEmbeddings(users),
-    this.updatePropertyEmbeddings(properties)
-  ]);
-};
+    this.updatePropertyEmbeddings(properties),
+  ])
+}
 
 // Анализ новых изображений
 const processNewImages = async () => {
-  const unprocessedImages = await this.getUnprocessedImages();
-  
+  const unprocessedImages = await this.getUnprocessedImages()
+
   for (const image of unprocessedImages) {
-    const analysis = await this.analyzeImage(image);
-    await this.saveImageAnalysis(image.id, analysis);
+    const analysis = await this.analyzeImage(image)
+    await this.saveImageAnalysis(image.id, analysis)
   }
-};
+}
 ```
 
 ## 🧪 Тестирование
@@ -652,7 +685,8 @@ const processNewImages = async () => {
    - Сегментация пользователей
    - Аналитика поведения
 
-5. **MarketplaceIntegrationService.test.ts** (10 тестов) - Интеграция с маркетплейсом
+5. **MarketplaceIntegrationService.test.ts** (10 тестов) - Интеграция с
+   маркетплейсом
    - Синхронизация данных
    - Обработка событий
    - Интеграция с другими сервисами
@@ -660,45 +694,47 @@ const processNewImages = async () => {
    - Мониторинг производительности
 
 ### Тестирование моделей
+
 ```typescript
 // Валидация модели
 const validateModel = async (model: AIModel, testData: TestData[]) => {
   const predictions = await Promise.all(
     testData.map(data => model.predict(data.input))
-  );
-  
+  )
+
   const metrics = {
     accuracy: calculateAccuracy(predictions, testData),
     precision: calculatePrecision(predictions, testData),
     recall: calculateRecall(predictions, testData),
-    f1Score: calculateF1Score(predictions, testData)
-  };
-  
-  return metrics;
-};
+    f1Score: calculateF1Score(predictions, testData),
+  }
+
+  return metrics
+}
 
 // A/B тестирование рекомендаций
 const abTestRecommendations = async (userId: string) => {
-  const modelA = await this.getModel('recommendation_v1');
-  const modelB = await this.getModel('recommendation_v2');
-  
+  const modelA = await this.getModel("recommendation_v1")
+  const modelB = await this.getModel("recommendation_v2")
+
   const [recsA, recsB] = await Promise.all([
     modelA.getRecommendations(userId),
-    modelB.getRecommendations(userId)
-  ]);
-  
+    modelB.getRecommendations(userId),
+  ])
+
   // Случайный выбор модели для пользователя
-  const selectedModel = Math.random() < 0.5 ? 'A' : 'B';
-  const recommendations = selectedModel === 'A' ? recsA : recsB;
-  
+  const selectedModel = Math.random() < 0.5 ? "A" : "B"
+  const recommendations = selectedModel === "A" ? recsA : recsB
+
   // Логируем для анализа
-  await this.logABTest(userId, selectedModel, recommendations);
-  
-  return recommendations;
-};
+  await this.logABTest(userId, selectedModel, recommendations)
+
+  return recommendations
+}
 ```
 
 ### Запуск тестов
+
 ```bash
 # Все тесты
 bun test
@@ -719,6 +755,7 @@ bun test:load
 ## 🚀 Развертывание
 
 ### Переменные окружения
+
 ```env
 # Сервер
 PORT=3006
@@ -772,12 +809,14 @@ MAX_TEXT_LENGTH=10000
 ## 🔄 Интеграции
 
 ### Внутренние сервисы
+
 - **User Service**: Профили пользователей для персонализации
 - **Listing Service**: Данные недвижимости для анализа
 - **Booking Service**: История бронирований для рекомендаций
 - **Payment Service**: Данные о транзакциях для детекции мошенничества
 
 ### Внешние сервисы
+
 - **OpenAI GPT**: Генерация и анализ текста
 - **Google Vision API**: Анализ изображений
 - **Hugging Face**: Предобученные NLP модели
@@ -787,31 +826,33 @@ MAX_TEXT_LENGTH=10000
 ## 📊 Мониторинг и метрики
 
 ### Метрики производительности
+
 ```typescript
 interface AIMetrics {
   // Производительность моделей
-  modelAccuracy: Record<string, number>;
-  averageResponseTime: number;
-  requestsPerSecond: number;
-  
+  modelAccuracy: Record<string, number>
+  averageResponseTime: number
+  requestsPerSecond: number
+
   // Использование
-  totalPredictions: number;
-  activeModels: number;
-  cacheHitRate: number;
-  
+  totalPredictions: number
+  activeModels: number
+  cacheHitRate: number
+
   // Качество рекомендаций
-  clickThroughRate: number;
-  conversionRate: number;
-  userSatisfaction: number;
-  
+  clickThroughRate: number
+  conversionRate: number
+  userSatisfaction: number
+
   // Ресурсы
-  cpuUsage: number;
-  memoryUsage: number;
-  gpuUsage: number;
+  cpuUsage: number
+  memoryUsage: number
+  gpuUsage: number
 }
 ```
 
 ### Алерты
+
 - Снижение точности моделей
 - Высокое время ответа
 - Ошибки в предсказаниях
@@ -819,6 +860,7 @@ interface AIMetrics {
 - Проблемы с векторной БД
 
 ### Дашборды
+
 - Производительность моделей в реальном времени
 - Качество рекомендаций
 - Использование ресурсов
@@ -828,6 +870,7 @@ interface AIMetrics {
 ## 📈 Производительность
 
 ### Оптимизации
+
 - Кеширование предсказаний
 - Батчинг запросов
 - Квантизация моделей
@@ -835,6 +878,7 @@ interface AIMetrics {
 - GPU ускорение
 
 ### Масштабирование
+
 - Горизонтальное масштабирование
 - Балансировка нагрузки
 - Автоскейлинг на основе нагрузки
@@ -844,7 +888,9 @@ interface AIMetrics {
 ---
 
 **Контакты для поддержки:**
+
 - 📧 Email: ai-service@thailand-marketplace.com
 - 📱 Slack: #ai-service-support
 - 🤖 AI Team: ai-team@thailand-marketplace.com
-- 📋 Issues: [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=ai-service)
+- 📋 Issues:
+  [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=ai-service)

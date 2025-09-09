@@ -2,7 +2,12 @@
 
 ## 📋 Обзор
 
-Listing Service - это универсальный сервис управления объявлениями для Thailand Marketplace с поддержкой множественных категорий товаров и услуг. Включает специализированную поддержку недвижимости в стиле Airbnb + Avito с интегрированным ИИ-поиском и рекомендациями. Обеспечивает создание, управление и поиск объявлений с поддержкой геолокации, фильтрации и персонализированных рекомендаций.
+Listing Service - это универсальный сервис управления объявлениями для Thailand
+Marketplace с поддержкой множественных категорий товаров и услуг. Включает
+специализированную поддержку недвижимости в стиле Airbnb + Avito с
+интегрированным ИИ-поиском и рекомендациями. Обеспечивает создание, управление и
+поиск объявлений с поддержкой геолокации, фильтрации и персонализированных
+рекомендаций.
 
 ## 🔧 Технические характеристики
 
@@ -10,14 +15,17 @@ Listing Service - это универсальный сервис управле�
 - **База данных**: PostgreSQL (thailand_marketplace)
 - **ORM**: Drizzle ORM
 - **Фреймворк**: Fastify 5.x
-- **Поиск**: Расширенная фильтрация + планируется Elasticsearch + ИИ векторный поиск
+- **Поиск**: Расширенная фильтрация + планируется Elasticsearch + ИИ векторный
+  поиск
 - **Тестирование**: Vitest (4 теста)
-- **Категории**: Недвижимость, транспорт, туры, активности, рестораны, шоппинг, услуги, события, автомобили, товары
+- **Категории**: Недвижимость, транспорт, туры, активности, рестораны, шоппинг,
+  услуги, события, автомобили, товары
 - **Покрытие тестами**: 90%+
 
 ## 🏗️ Архитектура
 
 ### Структура проекта
+
 ```
 services/listing-service/
 ├── src/
@@ -48,169 +56,174 @@ services/listing-service/
 ### Модель данных
 
 #### Основные категории листингов
+
 ```typescript
 enum ListingCategory {
-  ACCOMMODATION = "accommodation",     // Размещение
-  REAL_ESTATE = "real_estate",        // Недвижимость
-  TRANSPORTATION = "transportation",   // Транспорт
-  TOURS = "tours",                    // Туры
-  ACTIVITIES = "activities",          // Активности
-  DINING = "dining",                  // Рестораны
-  SHOPPING = "shopping",              // Шоппинг
-  SERVICES = "services",              // Услуги
-  EVENTS = "events",                  // События
-  VEHICLES = "vehicles",              // Автомобили
-  PRODUCTS = "products",              // Товары
+  ACCOMMODATION = "accommodation", // Размещение
+  REAL_ESTATE = "real_estate", // Недвижимость
+  TRANSPORTATION = "transportation", // Транспорт
+  TOURS = "tours", // Туры
+  ACTIVITIES = "activities", // Активности
+  DINING = "dining", // Рестораны
+  SHOPPING = "shopping", // Шоппинг
+  SERVICES = "services", // Услуги
+  EVENTS = "events", // События
+  VEHICLES = "vehicles", // Автомобили
+  PRODUCTS = "products", // Товары
 }
 ```
 
 #### Базовый Listing (Объявление)
+
 ```typescript
 interface Listing {
-  id: string;                    // UUID
-  ownerId: string;              // ID владельца
-  title: string;                // Заголовок объявления
-  description: string;          // Подробное описание
-  category: ListingCategory;    // Категория листинга
-  type: ListingType;           // Тип в рамках категории
-  status: ListingStatus;       // Статус объявления
-  price: number;               // Цена в основной валюте
-  currency: Currency;          // THB, USD, EUR, etc.
+  id: string // UUID
+  ownerId: string // ID владельца
+  title: string // Заголовок объявления
+  description: string // Подробное описание
+  category: ListingCategory // Категория листинга
+  type: ListingType // Тип в рамках категории
+  status: ListingStatus // Статус объявления
+  price: number // Цена в основной валюте
+  currency: Currency // THB, USD, EUR, etc.
 
   // Местоположение
-  location: Location;
+  location: Location
 
   // Медиафайлы
-  images: string[];            // Массив URL изображений
-  videos?: string[];           // Массив URL видео
-  mainImage: string;           // Главное изображение
+  images: string[] // Массив URL изображений
+  videos?: string[] // Массив URL видео
+  mainImage: string // Главное изображение
 
   // Метаданные
-  tags: string[];              // Теги для поиска
-  views: number;               // Количество просмотров
-  favorites: number;           // Количество добавлений в избранное
-  inquiries: number;           // Количество запросов
-  averageRating: number;       // Средний рейтинг
-  reviewCount: number;         // Количество отзывов
+  tags: string[] // Теги для поиска
+  views: number // Количество просмотров
+  favorites: number // Количество добавлений в избранное
+  inquiries: number // Количество запросов
+  averageRating: number // Средний рейтинг
+  reviewCount: number // Количество отзывов
 
   // Временные метки
-  createdAt: Date;
-  updatedAt: Date;
-  publishedAt?: Date;
+  createdAt: Date
+  updatedAt: Date
+  publishedAt?: Date
 }
 ```
 
 #### RealEstate (Недвижимость) - Специализированная модель
+
 ```typescript
 interface RealEstate {
-  id: string;
-  listingId: string;           // Связь с основным листингом
+  id: string
+  listingId: string // Связь с основным листингом
 
   // Основные характеристики
-  propertyType: PropertyType;   // CONDO, HOUSE, VILLA, APARTMENT, etc.
-  propertyStatus: PropertyStatus; // AVAILABLE, RENTED, SOLD, etc.
-  listingPurpose: ListingPurpose; // RENT, SALE, SHORT_TERM_RENTAL, etc.
+  propertyType: PropertyType // CONDO, HOUSE, VILLA, APARTMENT, etc.
+  propertyStatus: PropertyStatus // AVAILABLE, RENTED, SOLD, etc.
+  listingPurpose: ListingPurpose // RENT, SALE, SHORT_TERM_RENTAL, etc.
 
   // Физические характеристики
-  bedrooms: number;
-  bathrooms: number;           // Может быть 2.5, etc.
-  area: number;                // Общая площадь в кв.м
-  livingArea?: number;         // Жилая площадь
-  landArea?: number;           // Площадь участка
-  floor?: number;              // Этаж
-  totalFloors?: number;        // Всего этажей в здании
+  bedrooms: number
+  bathrooms: number // Может быть 2.5, etc.
+  area: number // Общая площадь в кв.м
+  livingArea?: number // Жилая площадь
+  landArea?: number // Площадь участка
+  floor?: number // Этаж
+  totalFloors?: number // Всего этажей в здании
 
   // Детали здания
-  buildingType?: BuildingType;  // LOW_RISE, MID_RISE, HIGH_RISE, etc.
-  buildingAge?: number;         // Возраст здания в годах
-  yearBuilt?: number;           // Год постройки
-  yearRenovated?: number;       // Год ремонта
+  buildingType?: BuildingType // LOW_RISE, MID_RISE, HIGH_RISE, etc.
+  buildingAge?: number // Возраст здания в годах
+  yearBuilt?: number // Год постройки
+  yearRenovated?: number // Год ремонта
 
   // Состояние и меблировка
-  furnishing: Furnishing;       // UNFURNISHED, PARTIALLY_FURNISHED, etc.
-  condition: string;            // excellent, good, fair, needs_renovation
+  furnishing: Furnishing // UNFURNISHED, PARTIALLY_FURNISHED, etc.
+  condition: string // excellent, good, fair, needs_renovation
 
   // Виды и ориентация
-  views: ViewType[];            // Массив типов видов
-  orientation?: Orientation;    // Ориентация по сторонам света
-  balconies: number;            // Количество балконов
-  terraces: number;             // Количество террас
+  views: ViewType[] // Массив типов видов
+  orientation?: Orientation // Ориентация по сторонам света
+  balconies: number // Количество балконов
+  terraces: number // Количество террас
 
   // Ценообразование
-  price: number;                // Основная цена
-  pricePerSqm?: number;         // Цена за кв.м
-  currency: Currency;           // Валюта
-  priceType: PriceType;         // FIXED, NEGOTIABLE, AUCTION, etc.
+  price: number // Основная цена
+  pricePerSqm?: number // Цена за кв.м
+  currency: Currency // Валюта
+  priceType: PriceType // FIXED, NEGOTIABLE, AUCTION, etc.
 
   // Арендные ставки (стиль Airbnb)
-  dailyRate?: number;           // Суточная ставка
-  weeklyRate?: number;          // Недельная ставка
-  monthlyRate?: number;         // Месячная ставка
-  yearlyRate?: number;          // Годовая ставка
+  dailyRate?: number // Суточная ставка
+  weeklyRate?: number // Недельная ставка
+  monthlyRate?: number // Месячная ставка
+  yearlyRate?: number // Годовая ставка
 
   // Дополнительные расходы
-  maintenanceFee?: number;      // Плата за обслуживание
-  commonAreaFee?: number;       // Плата за общие зоны
-  securityDeposit?: number;     // Залог
-  cleaningFee?: number;         // Плата за уборку
+  maintenanceFee?: number // Плата за обслуживание
+  commonAreaFee?: number // Плата за общие зоны
+  securityDeposit?: number // Залог
+  cleaningFee?: number // Плата за уборку
 
   // Коммунальные услуги
-  electricityIncluded: boolean;
-  waterIncluded: boolean;
-  internetIncluded: boolean;
-  cableIncluded: boolean;
-  gasIncluded: boolean;
+  electricityIncluded: boolean
+  waterIncluded: boolean
+  internetIncluded: boolean
+  cableIncluded: boolean
+  gasIncluded: boolean
 
   // Парковка
-  parkingSpaces: number;        // Количество парковочных мест
-  parkingType?: string;         // covered, open, garage, street
-  parkingFee?: number;          // Плата за парковку
+  parkingSpaces: number // Количество парковочных мест
+  parkingType?: string // covered, open, garage, street
+  parkingFee?: number // Плата за парковку
 
   // Связанные данные
-  amenities?: PropertyAmenities; // Удобства
-  rules?: PropertyRules;        // Правила (для краткосрочной аренды)
+  amenities?: PropertyAmenities // Удобства
+  rules?: PropertyRules // Правила (для краткосрочной аренды)
 }
 ```
 
 #### PropertyAmenities (Удобства недвижимости)
+
 ```typescript
 interface PropertyAmenities {
   // Удобства здания
-  hasElevator: boolean;         // Лифт
-  hasSwimmingPool: boolean;     // Бассейн
-  hasFitnessCenter: boolean;    // Фитнес-центр
-  hasSauna: boolean;            // Сауна
-  hasGarden: boolean;           // Сад
-  hasPlayground: boolean;       // Детская площадка
-  hasSecurity: boolean;         // Охрана
-  hasCCTV: boolean;             // Видеонаблюдение
-  hasKeyCard: boolean;          // Карточный доступ
-  hasReception: boolean;        // Ресепшн
-  hasConcierge: boolean;        // Консьерж
+  hasElevator: boolean // Лифт
+  hasSwimmingPool: boolean // Бассейн
+  hasFitnessCenter: boolean // Фитнес-центр
+  hasSauna: boolean // Сауна
+  hasGarden: boolean // Сад
+  hasPlayground: boolean // Детская площадка
+  hasSecurity: boolean // Охрана
+  hasCCTV: boolean // Видеонаблюдение
+  hasKeyCard: boolean // Карточный доступ
+  hasReception: boolean // Ресепшн
+  hasConcierge: boolean // Консьерж
 
   // Удобства квартиры/дома
-  hasAirConditioning: boolean;  // Кондиционер
-  hasHeating: boolean;          // Отопление
-  hasWashingMachine: boolean;   // Стиральная машина
-  hasDryer: boolean;            // Сушилка
-  hasDishwasher: boolean;       // Посудомоечная машина
-  hasWifi: boolean;             // Wi-Fi
-  hasBalcony: boolean;          // Балкон
-  hasTerrace: boolean;          // Терраса
-  hasFireplace: boolean;        // Камин
+  hasAirConditioning: boolean // Кондиционер
+  hasHeating: boolean // Отопление
+  hasWashingMachine: boolean // Стиральная машина
+  hasDryer: boolean // Сушилка
+  hasDishwasher: boolean // Посудомоечная машина
+  hasWifi: boolean // Wi-Fi
+  hasBalcony: boolean // Балкон
+  hasTerrace: boolean // Терраса
+  hasFireplace: boolean // Камин
 
   // Доступность
-  isWheelchairAccessible: boolean; // Доступность для инвалидных колясок
+  isWheelchairAccessible: boolean // Доступность для инвалидных колясок
 
   // Политика домашних животных
-  petsAllowed: boolean;         // Разрешены ли питомцы
-  catsAllowed: boolean;         // Разрешены ли кошки
-  dogsAllowed: boolean;         // Разрешены ли собаки
-  petDeposit?: number;          // Залог за питомца
+  petsAllowed: boolean // Разрешены ли питомцы
+  catsAllowed: boolean // Разрешены ли кошки
+  dogsAllowed: boolean // Разрешены ли собаки
+  petDeposit?: number // Залог за питомца
 }
 ```
 
 #### PropertyRules (Правила недвижимости - стиль Airbnb)
+
 ```typescript
 interface PropertyRules {
   // Правила заезда/выезда (для краткосрочной аренды)
@@ -247,7 +260,7 @@ interface PropertyRules {
 }
   favorites: number;
   inquiries: number;
-  
+
   createdAt: Date;
   updatedAt: Date;
   publishedAt?: Date;
@@ -256,56 +269,61 @@ interface PropertyRules {
 ```
 
 #### Location (Местоположение)
+
 ```typescript
 interface Location {
-  id: string;
-  country: string;              // TH, US, etc.
-  province: string;             // Провинция/штат
-  city: string;                 // Город
-  district: string;             // Район
-  subDistrict?: string;         // Подрайон
-  postalCode?: string;          // Почтовый индекс
-  coordinates: GeoPoint;
-  
+  id: string
+  country: string // TH, US, etc.
+  province: string // Провинция/штат
+  city: string // Город
+  district: string // Район
+  subDistrict?: string // Подрайон
+  postalCode?: string // Почтовый индекс
+  coordinates: GeoPoint
+
   // Локализация
-  nameEn: string;
-  nameTh?: string;
-  nameRu?: string;
-  nameCn?: string;
+  nameEn: string
+  nameTh?: string
+  nameRu?: string
+  nameCn?: string
 }
 ```
 
 #### ListingImage (Изображение)
+
 ```typescript
 interface ListingImage {
-  id: string;
-  listingId: string;
-  url: string;                  // URL изображения
-  thumbnailUrl: string;         // URL миниатюры
-  alt: string;                  // Альтернативный текст
-  caption?: string;             // Подпись
-  order: number;                // Порядок отображения
-  type: ImageType;              // EXTERIOR, INTERIOR, FLOOR_PLAN, etc.
-  aiDescription?: string;       // ИИ описание изображения
-  createdAt: Date;
+  id: string
+  listingId: string
+  url: string // URL изображения
+  thumbnailUrl: string // URL миниатюры
+  alt: string // Альтернативный текст
+  caption?: string // Подпись
+  order: number // Порядок отображения
+  type: ImageType // EXTERIOR, INTERIOR, FLOOR_PLAN, etc.
+  aiDescription?: string // ИИ описание изображения
+  createdAt: Date
 }
 ```
 
 ## 🤖 ИИ-функциональность
 
 ### Векторный поиск
+
 - Преобразование текстовых запросов в векторы
 - Семантический поиск по описаниям
 - Поиск по изображениям
 - Многоязычная поддержка поиска
 
 ### Персонализированные рекомендации
+
 - Анализ поведения пользователей
 - Рекомендации на основе предпочтений
 - Похожие объявления
 - Трендовые предложения
 
 ### Автоматическая обработка
+
 - ИИ-генерация описаний
 - Автоматическое тегирование
 - Определение характеристик по фото
@@ -316,21 +334,27 @@ interface ListingImage {
 ### Общие листинги
 
 #### POST /api/listings
+
 Создание нового общего объявления (для всех категорий кроме недвижимости)
 
 #### GET /api/listings/:id
+
 Получение объявления по ID
 
 #### PUT /api/listings/:id
+
 Обновление объявления
 
 #### DELETE /api/listings/:id
+
 Удаление объявления
 
 #### GET /api/listings
+
 Получение списка объявлений с фильтрацией
 
 **Параметры запроса:**
+
 ```
 ?category=vehicles
 &type=car
@@ -345,9 +369,11 @@ interface ListingImage {
 ### Недвижимость (Real Estate)
 
 #### POST /api/real-estate
+
 Создание объявления недвижимости
 
 **Запрос:**
+
 ```json
 {
   "title": "Современная квартира в центре Бангкока",
@@ -405,18 +431,23 @@ interface ListingImage {
 ```
 
 #### GET /api/real-estate/:id
+
 Получение объявления недвижимости по ID
 
 #### PUT /api/real-estate/:id
+
 Обновление объявления недвижимости
 
 #### DELETE /api/real-estate/:id
+
 Удаление объявления недвижимости
 
 #### GET /api/real-estate
+
 Поиск недвижимости с фильтрами
 
 **Параметры запроса:**
+
 ```
 ?propertyType=condo,apartment
 &listingPurpose=rent,short_term_rental
@@ -441,12 +472,15 @@ interface ListingImage {
 ### Поиск и фильтрация
 
 #### GET /api/search
+
 Обычный поиск с фильтрами
 
 #### POST /api/search/ai
+
 ИИ-поиск с естественным языком
 
 **Запрос:**
+
 ```json
 {
   "query": "Найди квартиру с 2 спальнями рядом с BTS в Бангкоке до 40000 бат",
@@ -464,17 +498,21 @@ interface ListingImage {
 ```
 
 #### GET /api/search/similar/:id
+
 Поиск похожих объявлений
 
 #### GET /api/search/recommendations
+
 Персонализированные рекомендации
 
 ### Геолокационный поиск
 
 #### GET /api/geo/nearby
+
 Поиск объявлений поблизости
 
 **Параметры:**
+
 ```
 ?lat=13.7563
 &lng=100.5018
@@ -484,23 +522,29 @@ interface ListingImage {
 ```
 
 #### GET /api/geo/areas
+
 Получение популярных районов
 
 #### GET /api/geo/transit
+
 Поиск рядом с общественным транспортом
 
 ### Статистика и аналитика
 
 #### GET /api/listings/:id/stats
+
 Статистика просмотров объявления
 
 #### POST /api/listings/:id/view
+
 Отметка просмотра объявления
 
 #### POST /api/listings/:id/favorite
+
 Добавление в избранное
 
 #### GET /api/analytics/trends
+
 Тренды рынка недвижимости
 
 ## 🔍 Поисковые возможности
@@ -532,6 +576,7 @@ interface ListingImage {
    - Контекстные рекомендации
 
 ### Сортировка
+
 - По цене (возрастание/убывание)
 - По дате публикации
 - По популярности
@@ -542,37 +587,40 @@ interface ListingImage {
 ## 📊 Интеграция с ИИ сервисами
 
 ### AI Service интеграция
+
 ```typescript
 // Генерация описания
 const aiDescription = await aiService.generateDescription({
   type: listing.type,
   features: listing.features,
   location: listing.location,
-  images: listing.images
-});
+  images: listing.images,
+})
 
 // Векторизация для поиска
 const searchVector = await aiService.createEmbedding(
   `${listing.title} ${listing.description}`
-);
+)
 
 // Получение рекомендаций
 const recommendations = await aiService.getRecommendations({
   userId: user.id,
   currentListing: listing.id,
-  preferences: user.preferences
-});
+  preferences: user.preferences,
+})
 ```
 
 ## 🖼️ Управление медиафайлами
 
 ### Загрузка изображений
+
 - Поддержка JPEG, PNG, WebP
 - Автоматическое создание миниатюр
 - Оптимизация размера и качества
 - CDN для быстрой загрузки
 
 ### Обработка изображений
+
 - Автоматическое изменение размера
 - Водяные знаки
 - EXIF данные для геолокации
@@ -605,6 +653,7 @@ const recommendations = await aiService.getRecommendations({
    - Удаление файлов
 
 ### Запуск тестов
+
 ```bash
 # Все тесты
 bun test
@@ -619,6 +668,7 @@ bun test:integration
 ## 🚀 Развертывание
 
 ### Переменные окружения
+
 ```env
 # Сервер
 PORT=3002
@@ -657,12 +707,14 @@ SENTRY_DSN=your-sentry-dsn
 ## 🔄 Интеграции
 
 ### Внутренние сервисы
+
 - **AI Service**: ИИ-рекомендации и обработка
 - **User Service**: Аутентификация и профили
 - **Booking Service**: Связь с бронированиями
 - **Agency Service**: Управление агентствами
 
 ### Внешние сервисы
+
 - **Google Maps API**: Геолокация и карты
 - **AWS S3**: Хранение медиафайлов
 - **Elasticsearch**: Поисковый движок
@@ -672,6 +724,7 @@ SENTRY_DSN=your-sentry-dsn
 ## 📈 Производительность
 
 ### Оптимизации
+
 - Кеширование популярных поисковых запросов
 - Индексы базы данных для быстрого поиска
 - Пагинация результатов
@@ -679,6 +732,7 @@ SENTRY_DSN=your-sentry-dsn
 - Сжатие API ответов
 
 ### Масштабирование
+
 - Горизонтальное масштабирование
 - Шардинг базы данных по регионам
 - CDN для статических файлов
@@ -688,6 +742,7 @@ SENTRY_DSN=your-sentry-dsn
 ## 📊 Мониторинг
 
 ### Метрики
+
 - Количество объявлений
 - Поисковые запросы
 - Время ответа API
@@ -695,6 +750,7 @@ SENTRY_DSN=your-sentry-dsn
 - Популярные районы
 
 ### Алерты
+
 - Высокое время ответа
 - Ошибки ИИ сервисов
 - Проблемы с Elasticsearch
@@ -703,6 +759,8 @@ SENTRY_DSN=your-sentry-dsn
 ---
 
 **Контакты для поддержки:**
+
 - 📧 Email: listing-service@thailand-marketplace.com
 - 📱 Slack: #listing-service-support
-- 📋 Issues: [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=listing-service)
+- 📋 Issues:
+  [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=listing-service)

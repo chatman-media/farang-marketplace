@@ -288,7 +288,10 @@ export class AISearchController {
   // Get Cost Estimate
   getCostEstimate = async (request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const { operation = "search", dataSize = 1000 } = request.query as { operation?: string; dataSize?: number }
+      const { operation = "search", dataSize = 1000 } = request.query as {
+        operation?: string
+        dataSize?: number
+      }
       const estimate = await this.aiService.getCostEstimate(operation, dataSize)
 
       return reply.send({

@@ -2,7 +2,10 @@
 
 ## Overview
 
-This document describes the OAuth authentication API endpoints for the Thailand Marketplace platform. The OAuth system supports multiple authentication providers including Google, Apple, TikTok, Telegram, LINE, WhatsApp, and traditional email/password authentication.
+This document describes the OAuth authentication API endpoints for the Thailand
+Marketplace platform. The OAuth system supports multiple authentication
+providers including Google, Apple, TikTok, Telegram, LINE, WhatsApp, and
+traditional email/password authentication.
 
 ## Base URL
 
@@ -12,7 +15,8 @@ http://localhost:3001/api/oauth
 
 ## Authentication
 
-Some endpoints require authentication via Bearer token in the Authorization header:
+Some endpoints require authentication via Bearer token in the Authorization
+header:
 
 ```
 Authorization: Bearer <access_token>
@@ -58,7 +62,8 @@ Initiates the OAuth authentication flow for the specified provider.
 
 #### Parameters
 
-- `provider` (path): The OAuth provider name (google, apple, tiktok, line, whatsapp)
+- `provider` (path): The OAuth provider name (google, apple, tiktok, line,
+  whatsapp)
 - `redirect_uri` (query, optional): Custom redirect URI after authentication
 
 #### Response
@@ -89,6 +94,7 @@ Handles the OAuth callback and completes the authentication process.
 #### Request Body
 
 **For Google/Apple/TikTok/LINE/WhatsApp:**
+
 ```json
 {
   "code": "authorization_code_from_provider",
@@ -97,6 +103,7 @@ Handles the OAuth callback and completes the authentication process.
 ```
 
 **For Telegram:**
+
 ```json
 {
   "telegramData": {
@@ -277,7 +284,8 @@ All endpoints may return the following error responses:
 
 ### Apple OAuth
 
-- Requires `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and `APPLE_PRIVATE_KEY` environment variables
+- Requires `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and
+  `APPLE_PRIVATE_KEY` environment variables
 - Uses Apple's Sign in with Apple service
 - Supports both web and mobile flows
 
@@ -289,7 +297,8 @@ All endpoints may return the following error responses:
 
 ### Telegram Login Widget
 
-- Requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_USERNAME` environment variables
+- Requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_USERNAME` environment
+  variables
 - Uses Telegram Login Widget instead of traditional OAuth flow
 - No authorization URL - uses widget integration
 
@@ -302,7 +311,8 @@ All endpoints may return the following error responses:
 
 ### WhatsApp Business API
 
-- Requires `WHATSAPP_APP_ID`, `WHATSAPP_APP_SECRET`, and `WHATSAPP_PHONE_NUMBER_ID` environment variables
+- Requires `WHATSAPP_APP_ID`, `WHATSAPP_APP_SECRET`, and
+  `WHATSAPP_PHONE_NUMBER_ID` environment variables
 - Uses WhatsApp Business API for authentication
 - Requires phone number verification
 - Limited to approved business accounts
@@ -317,9 +327,11 @@ All endpoints may return the following error responses:
 
 ## Security Considerations
 
-1. **State Parameter**: Always validate the state parameter to prevent CSRF attacks
+1. **State Parameter**: Always validate the state parameter to prevent CSRF
+   attacks
 2. **HTTPS Only**: OAuth flows should only be used over HTTPS in production
-3. **Token Storage**: Store access tokens securely and implement proper token rotation
+3. **Token Storage**: Store access tokens securely and implement proper token
+   rotation
 4. **Scope Limitation**: Request only necessary scopes from OAuth providers
 5. **Rate Limiting**: Implement rate limiting on OAuth endpoints
 6. **Input Validation**: Validate all input parameters and OAuth responses
@@ -338,6 +350,7 @@ For testing OAuth flows in development:
 ### Complete OAuth Flow (Google)
 
 1. **Initialize OAuth:**
+
    ```bash
    curl "http://localhost:3001/api/oauth/google/auth"
    ```
@@ -372,6 +385,7 @@ curl -X POST "http://localhost:3001/api/oauth/telegram/link" \
 ### LINE Login Flow
 
 1. **Initialize LINE OAuth:**
+
    ```bash
    curl "http://localhost:3001/api/oauth/line/auth"
    ```

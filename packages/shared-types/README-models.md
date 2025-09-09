@@ -2,7 +2,8 @@
 
 ## 🎯 Overview
 
-Расширенная система типов данных для Thailand Marketplace, поддерживающая универсальную торговую площадку для любых товаров и услуг.
+Расширенная система типов данных для Thailand Marketplace, поддерживающая
+универсальную торговую площадку для любых товаров и услуг.
 
 ## 📋 Основные модели
 
@@ -11,6 +12,7 @@
 Универсальная модель для всех видов транспорта:
 
 #### Поддерживаемые типы транспорта:
+
 - **Скутеры** (SCOOTER) - Honda PCX, Yamaha NMAX, etc.
 - **Мотоциклы** (MOTORCYCLE) - Yamaha R3, Kawasaki Ninja, etc.
 - **Автомобили** (CAR) - седаны, хэтчбеки, внедорожники
@@ -21,30 +23,33 @@
 - **Квадроциклы** (ATV)
 
 #### Ключевые особенности:
+
 ```typescript
 interface Vehicle {
   // Базовая информация
-  type: VehicleType;
-  category: VehicleCategory; // economy, premium, luxury, sport
-  condition: VehicleCondition; // new, excellent, good, fair
-  status: VehicleStatus; // available, rented, maintenance
-  
+  type: VehicleType
+  category: VehicleCategory // economy, premium, luxury, sport
+  condition: VehicleCondition // new, excellent, good, fair
+  status: VehicleStatus // available, rented, maintenance
+
   // Детальные характеристики
-  specifications: VehicleSpecifications;
-  documents: VehicleDocuments; // номера, страховка, техосмотр
-  maintenance: VehicleMaintenance; // история обслуживания
-  pricing: VehiclePricing; // гибкая система ценообразования
-  location: VehicleLocation; // локация и доставка
+  specifications: VehicleSpecifications
+  documents: VehicleDocuments // номера, страховка, техосмотр
+  maintenance: VehicleMaintenance // история обслуживания
+  pricing: VehiclePricing // гибкая система ценообразования
+  location: VehicleLocation // локация и доставка
 }
 ```
 
 #### Система ценообразования:
+
 - **Базовые тарифы**: почасовая, дневная, недельная, месячная аренда
 - **Сезонные цены**: высокий/низкий сезон
 - **Скидки за длительность**: 4-7 дней, 8-14 дней, месячная аренда
 - **Дополнительные расходы**: залог, страховка, доставка, топливо
 
 #### Система обслуживания:
+
 - **История ТО**: даты, пробег, следующее обслуживание
 - **Состояние компонентов**: масла, тормоза, фильтры, свечи
 - **Аксессуары**: шлемы, замки, зарядки, GPS-трекеры
@@ -54,6 +59,7 @@ interface Vehicle {
 Универсальная модель для любых товаров:
 
 #### Поддерживаемые категории:
+
 - **Электроника** (ELECTRONICS) - смартфоны, ноутбуки, камеры
 - **Мебель** (FURNITURE) - диваны, столы, кровати
 - **Одежда** (CLOTHING) - рубашки, платья, обувь
@@ -68,30 +74,33 @@ interface Vehicle {
 - **Недвижимость** (REAL_ESTATE)
 
 #### Ключевые особенности:
+
 ```typescript
 interface Product {
   // Базовая информация
-  type: ProductType;
-  category: string; // конкретная категория
-  condition: ProductCondition; // new, like_new, excellent, good
-  status: ProductStatus; // active, sold, rented, reserved
-  listingType: ProductListingType; // sale, rent, both, service
-  
+  type: ProductType
+  category: string // конкретная категория
+  condition: ProductCondition // new, like_new, excellent, good
+  status: ProductStatus // active, sold, rented, reserved
+  listingType: ProductListingType // sale, rent, both, service
+
   // Детальная информация
-  specifications: ProductSpecifications; // гибкие характеристики
-  pricing: ProductPricing; // цены, скидки, рассрочка
-  availability: ProductAvailability; // наличие, доставка
-  seller: ProductSeller; // информация о продавце
+  specifications: ProductSpecifications // гибкие характеристики
+  pricing: ProductPricing // цены, скидки, рассрочка
+  availability: ProductAvailability // наличие, доставка
+  seller: ProductSeller // информация о продавце
 }
 ```
 
 #### Гибкая система характеристик:
+
 - **Технические спецификации**: любые ключ-значение пары
 - **Физические свойства**: размеры, вес, материал, цвет
 - **Комплектация**: что входит в комплект
 - **Гарантия**: тип, срок, поддержка
 
 #### Система ценообразования:
+
 - **Типы цен**: фиксированная, договорная, аукцион, по запросу
 - **Аренда**: почасовая, дневная, недельная, месячная
 - **Аукцион**: стартовая ставка, резервная цена, шаг торгов
@@ -103,42 +112,45 @@ interface Product {
 Расширенный профиль клиента для международного рынка:
 
 #### Документы и верификация:
+
 ```typescript
 interface CustomerProfile extends User {
   // Документы удостоверения личности
-  passportNumber?: string;
-  passportExpiry?: string;
-  passportCountry?: string;
-  nationalId?: string;
-  drivingLicense?: string;
-  drivingLicenseExpiry?: string;
-  
+  passportNumber?: string
+  passportExpiry?: string
+  passportCountry?: string
+  nationalId?: string
+  drivingLicense?: string
+  drivingLicenseExpiry?: string
+
   // Контактная информация
   emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  
+    name: string
+    phone: string
+    relationship: string
+  }
+
   // Уровень верификации
-  verificationLevel: 'none' | 'basic' | 'verified' | 'premium';
+  verificationLevel: "none" | "basic" | "verified" | "premium"
   verificationDocuments: {
-    passport: boolean;
-    drivingLicense: boolean;
-    nationalId: boolean;
-    proofOfAddress: boolean;
-    creditCheck: boolean;
-  };
+    passport: boolean
+    drivingLicense: boolean
+    nationalId: boolean
+    proofOfAddress: boolean
+    creditCheck: boolean
+  }
 }
 ```
 
 #### История аренды и предпочтения:
+
 - **Статистика**: общее количество аренд, потраченная сумма, рейтинг
 - **Предпочтения**: типы транспорта, ценовой диапазон, локации
 - **Коммуникации**: email, SMS, WhatsApp, Telegram, LINE
 - **Платежи**: карты, банковские переводы, цифровые кошельки, криптовалюты
 
 #### Система доверия:
+
 - **Оценка риска**: числовой скор от 0 до 100
 - **Черный список**: статус и причина блокировки
 - **Маркетинг**: согласие на рекламу, реферальные коды
@@ -152,39 +164,40 @@ interface CustomerProfile extends User {
 ```typescript
 // Специализированный листинг для транспорта
 interface VehicleListing extends Listing {
-  category: ListingCategory.VEHICLES;
-  vehicleType: VehicleType;
-  vehicle: Vehicle;
+  category: ListingCategory.VEHICLES
+  vehicleType: VehicleType
+  vehicle: Vehicle
   rentalTerms?: {
-    minimumAge: number;
-    licenseRequired: boolean;
-    depositRequired: boolean;
-    insuranceIncluded: boolean;
-    fuelPolicy: string;
-    mileageLimit?: number;
-    restrictions?: string[];
-  };
+    minimumAge: number
+    licenseRequired: boolean
+    depositRequired: boolean
+    insuranceIncluded: boolean
+    fuelPolicy: string
+    mileageLimit?: number
+    restrictions?: string[]
+  }
 }
 
 // Специализированный листинг для товаров
 interface ProductListing extends Listing {
-  category: ListingCategory.PRODUCTS;
-  productType: ProductType;
-  product: Product;
+  category: ListingCategory.PRODUCTS
+  productType: ProductType
+  product: Product
   shippingOptions?: {
-    localDelivery: boolean;
-    nationalShipping: boolean;
-    internationalShipping: boolean;
-    pickupAvailable: boolean;
-    shippingCost?: number;
-    freeShippingThreshold?: number;
-  };
+    localDelivery: boolean
+    nationalShipping: boolean
+    internationalShipping: boolean
+    pickupAvailable: boolean
+    shippingCost?: number
+    freeShippingThreshold?: number
+  }
 }
 ```
 
 ## 🛠️ Валидация и константы
 
 ### Правила валидации:
+
 ```typescript
 export const VEHICLE_VALIDATION = {
   SPECIFICATIONS: {
@@ -202,7 +215,7 @@ export const VEHICLE_VALIDATION = {
     MIN_COUNT: 1,
     MAX_COUNT: 20,
   },
-};
+}
 
 export const PRODUCT_VALIDATION = {
   TITLE: { MIN_LENGTH: 5, MAX_LENGTH: 200 },
@@ -210,20 +223,21 @@ export const PRODUCT_VALIDATION = {
   IMAGES: { MIN_COUNT: 1, MAX_COUNT: 30 },
   TAGS: { MIN_COUNT: 1, MAX_COUNT: 20 },
   PRICE: { MIN_AMOUNT: 0.01, MAX_AMOUNT: 10000000 },
-};
+}
 ```
 
 ## 🚀 Примеры использования
 
 ### Создание листинга скутера:
+
 ```typescript
 const scooterListing: VehicleListing = {
   category: ListingCategory.VEHICLES,
   vehicleType: VehicleType.SCOOTER,
   vehicle: {
     specifications: {
-      make: 'Honda',
-      model: 'PCX 150',
+      make: "Honda",
+      model: "PCX 150",
       year: 2022,
       fuelType: FuelType.GASOLINE,
       transmission: TransmissionType.CVT,
@@ -234,7 +248,7 @@ const scooterListing: VehicleListing = {
       weeklyRate: 5000,
       monthlyRate: 18000,
       securityDeposit: 5000,
-      currency: 'THB',
+      currency: "THB",
     },
     // ... остальные поля
   },
@@ -243,25 +257,26 @@ const scooterListing: VehicleListing = {
     licenseRequired: true,
     depositRequired: true,
     insuranceIncluded: true,
-    fuelPolicy: 'full_to_full',
+    fuelPolicy: "full_to_full",
   },
-};
+}
 ```
 
 ### Создание листинга товара:
+
 ```typescript
 const productListing: ProductListing = {
   category: ListingCategory.PRODUCTS,
   productType: ProductType.ELECTRONICS,
   product: {
-    title: 'iPhone 15 Pro Max 256GB',
+    title: "iPhone 15 Pro Max 256GB",
     type: ProductType.ELECTRONICS,
     condition: ProductCondition.NEW,
     listingType: ProductListingType.SALE,
     pricing: {
       price: 45000,
-      currency: 'THB',
-      priceType: 'fixed',
+      currency: "THB",
+      priceType: "fixed",
       installmentAvailable: true,
     },
     // ... остальные поля
@@ -272,12 +287,13 @@ const productListing: ProductListing = {
     pickupAvailable: true,
     freeShippingThreshold: 50000,
   },
-};
+}
 ```
 
 ## ✅ Готово к использованию
 
 Все типы протестированы и готовы для интеграции в:
+
 - ✅ **Listing Service** - создание и управление объявлениями
 - ✅ **Search Service** - поиск и фильтрация
 - ✅ **Booking Service** - бронирование и аренда

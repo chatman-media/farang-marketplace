@@ -17,14 +17,18 @@ The authentication system supports multiple login methods:
 ## Documents
 
 ### 📋 [oauth-api.md](../../auth/oauth-api.md)
+
 Main document describing all OAuth providers:
+
 - API endpoints for each provider
 - Request and response examples
 - Error handling
 - Security and validation
 
 ### 🔧 [oauth-setup-guide.md](../../auth/oauth-setup-guide.md)
+
 Technical setup guide:
+
 - Step-by-step setup for each provider
 - Configuration in developer consoles
 - Environment variables
@@ -33,6 +37,7 @@ Technical setup guide:
 ## Current Status
 
 ### ✅ Completed
+
 - Basic email/password authentication
 - JWT tokens (access + refresh)
 - User roles
@@ -41,10 +46,12 @@ Technical setup guide:
 - 176 tests passing successfully
 
 ### 🔄 In Development
+
 - Frontend components
 - Mobile applications
 
 ### 📋 Planned
+
 - Two-factor authentication (2FA)
 - Biometric authentication
 - SSO for corporate clients
@@ -52,6 +59,7 @@ Technical setup guide:
 ## Quick Start
 
 ### 1. Environment Variables Setup
+
 ```bash
 # Copy .env.example to .env
 cp .env.example .env
@@ -67,18 +75,21 @@ WHATSAPP_APP_ID=your_whatsapp_app_id
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 # Install dependencies
 bun install
 ```
 
 ### 3. Start Service
+
 ```bash
 # Start user-service
 bun run dev
 ```
 
 ### 4. Testing
+
 ```bash
 # Run tests
 bun run test
@@ -116,6 +127,7 @@ bun run test
 ## Security
 
 ### Core Principles
+
 - **State Parameter** - CSRF attack protection
 - **PKCE** - for mobile applications
 - **Token Rotation** - regular refresh token renewal
@@ -123,6 +135,7 @@ bun run test
 - **Signature Validation** - signature verification (Telegram)
 
 ### Validations
+
 - Validation of all OAuth callbacks
 - Token expiration checks
 - Audit of all authentication attempts
@@ -130,19 +143,20 @@ bun run test
 
 ## Supported Providers
 
-| Provider | Status | Features |
-|----------|--------|----------|
-| Google | ✅ | OAuth 2.0, profile + email |
-| Apple | ✅ | Sign in with Apple, JWT |
-| TikTok | ✅ | Login Kit, basic info |
-| Telegram | ✅ | Login Widget, hash validation |
-| LINE | ✅ | Popular in Asia |
-| WhatsApp | ✅ | Business API |
-| Email | ✅ | Traditional registration |
+| Provider | Status | Features                      |
+| -------- | ------ | ----------------------------- |
+| Google   | ✅     | OAuth 2.0, profile + email    |
+| Apple    | ✅     | Sign in with Apple, JWT       |
+| TikTok   | ✅     | Login Kit, basic info         |
+| Telegram | ✅     | Login Widget, hash validation |
+| LINE     | ✅     | Popular in Asia               |
+| WhatsApp | ✅     | Business API                  |
+| Email    | ✅     | Traditional registration      |
 
 ## API Endpoints
 
 ### Main Endpoints
+
 - `GET /api/oauth/providers` - list available providers
 - `GET /api/oauth/:provider/auth` - initiate OAuth
 - `POST /api/oauth/:provider/callback` - handle callback
@@ -150,6 +164,7 @@ bun run test
 - `DELETE /api/oauth/:provider/unlink` - unlink account
 
 ### Email Authentication
+
 - `POST /api/auth/register` - registration
 - `POST /api/auth/login` - login
 - `POST /api/auth/refresh` - token refresh
@@ -158,6 +173,7 @@ bun run test
 ## Support
 
 For authentication questions:
+
 - 📧 Email: dev-team@thailand-marketplace.com
 - 💬 Slack: #auth-support
 - 📖 Wiki: [Authentication Wiki](https://wiki.thailand-marketplace.com/auth)
@@ -165,12 +181,14 @@ For authentication questions:
 ## Changelog
 
 ### v1.1.0 (Current)
+
 - Added all OAuth providers
 - Complete implementation of WhatsApp, Apple, TikTok
 - Enhanced security
 - Complete documentation
 
 ### v1.0.0
+
 - Basic email/password authentication
 - JWT tokens
 - User roles

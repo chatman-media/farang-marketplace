@@ -2,7 +2,11 @@
 
 ## 📋 Обзор
 
-Agency Service - это сервис управления агентствами аренды на платформе Thailand Marketplace. Он обеспечивает регистрацию и управление агентствами, предоставляющими услуги аренды транспорта (скутеры, мотоциклы, автомобили), оборудования и недвижимости, управление назначениями услуг и интеграцию с системой бронирований.
+Agency Service - это сервис управления агентствами аренды на платформе Thailand
+Marketplace. Он обеспечивает регистрацию и управление агентствами,
+предоставляющими услуги аренды транспорта (скутеры, мотоциклы, автомобили),
+оборудования и недвижимости, управление назначениями услуг и интеграцию с
+системой бронирований.
 
 ## 🔧 Технические характеристики
 
@@ -16,6 +20,7 @@ Agency Service - это сервис управления агентствами
 ## 🏗️ Архитектура
 
 ### Структура проекта
+
 ```
 services/agency-service/
 ├── src/
@@ -51,172 +56,179 @@ services/agency-service/
 ### Модель данных
 
 #### Agency (Агентство аренды)
+
 ```typescript
 interface Agency {
-  id: string;                    // UUID
-  userId: string;                // ID владельца агентства
+  id: string // UUID
+  userId: string // ID владельца агентства
 
   // Основная информация
-  name: string;                  // Название агентства
-  description: string;           // Описание агентства
-  businessRegistrationNumber?: string; // Регистрационный номер
-  taxId?: string;                // Налоговый номер
+  name: string // Название агентства
+  description: string // Описание агентства
+  businessRegistrationNumber?: string // Регистрационный номер
+  taxId?: string // Налоговый номер
 
   // Контактная информация
-  email: string;
-  phone: string;
-  website?: string;
+  email: string
+  phone: string
+  website?: string
 
   // Локация и зоны покрытия
-  primaryLocation: Location;     // Основное местоположение
-  coverageAreas: Location[];     // Зоны обслуживания
+  primaryLocation: Location // Основное местоположение
+  coverageAreas: Location[] // Зоны обслуживания
 
   // Бизнес-настройки
-  commissionRate: number;        // Комиссия агентства (по умолчанию 15%)
-  minimumOrderValue: number;     // Минимальная сумма заказа
-  currency: string;              // Валюта (THB)
+  commissionRate: number // Комиссия агентства (по умолчанию 15%)
+  minimumOrderValue: number // Минимальная сумма заказа
+  currency: string // Валюта (THB)
 
   // Статус и верификация
-  status: AgencyStatus;          // pending, active, suspended, inactive, rejected
-  verificationStatus: VerificationStatus; // pending, verified, rejected, expired
-  isVerified: boolean;           // Верифицировано ли
+  status: AgencyStatus // pending, active, suspended, inactive, rejected
+  verificationStatus: VerificationStatus // pending, verified, rejected, expired
+  isVerified: boolean // Верифицировано ли
 
   // Метрики производительности
-  rating: number;                // Рейтинг (0-5)
-  totalReviews: number;          // Количество отзывов
-  totalOrders: number;           // Общее количество заказов
-  completedOrders: number;       // Завершенные заказы
+  rating: number // Рейтинг (0-5)
+  totalReviews: number // Количество отзывов
+  totalOrders: number // Общее количество заказов
+  completedOrders: number // Завершенные заказы
 
   // Документы и верификация
-  documents: Record<string, any>; // Документы для верификации
-  verificationNotes?: string;    // Заметки по верификации
+  documents: Record<string, any> // Документы для верификации
+  verificationNotes?: string // Заметки по верификации
 
   // Настройки
-  settings: Record<string, any>; // Настройки агентства
+  settings: Record<string, any> // Настройки агентства
 
   // Временные метки
-  createdAt: Date;
-  updatedAt: Date;
-  verifiedAt?: Date;
+  createdAt: Date
+  updatedAt: Date
+  verifiedAt?: Date
 }
 ```
 
 #### AgencyService (Услуга агентства)
+
 ```typescript
 interface AgencyService {
-  id: string;                    // UUID
-  agencyId: string;              // ID агентства
+  id: string // UUID
+  agencyId: string // ID агентства
 
   // Детали услуги
-  name: string;                  // Название услуги
-  description: string;           // Описание услуги
-  category: ServiceCategory;     // Категория (vehicles, equipment, property, etc.)
+  name: string // Название услуги
+  description: string // Описание услуги
+  category: ServiceCategory // Категория (vehicles, equipment, property, etc.)
 
   // Ценообразование
-  basePrice: number;             // Базовая цена
-  currency: string;              // Валюта (THB)
-  pricingModel: string;          // Модель ценообразования (fixed, hourly, per_item)
+  basePrice: number // Базовая цена
+  currency: string // Валюта (THB)
+  pricingModel: string // Модель ценообразования (fixed, hourly, per_item)
 
   // Конфигурация услуги
-  isActive: boolean;             // Активна ли услуга
-  requiresApproval: boolean;     // Требует ли одобрения
-  estimatedDuration?: string;    // Примерная продолжительность
+  isActive: boolean // Активна ли услуга
+  requiresApproval: boolean // Требует ли одобрения
+  estimatedDuration?: string // Примерная продолжительность
 
   // Требования и возможности
-  requirements: string[];        // Требования к клиенту
-  capabilities: string[];        // Возможности услуги
+  requirements: string[] // Требования к клиенту
+  capabilities: string[] // Возможности услуги
 
   // Метаданные
-  metadata: Record<string, any>; // Дополнительные данные
+  metadata: Record<string, any> // Дополнительные данные
 
   // Временные метки
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date
+  updatedAt: Date
 }
 ```
 
 #### ServiceCategory (Категории услуг)
+
 ```typescript
 enum ServiceCategory {
-  VEHICLES = 'vehicles',         // Транспорт (скутеры, мотоциклы, машины, велосипеды)
-  WATERCRAFT = 'watercraft',     // Водный транспорт (лодки, катеры, яхты)
-  EQUIPMENT = 'equipment',       // Оборудование (строительное, спортивное, профессиональное)
-  PROPERTY = 'property',         // Недвижимость (квартиры, дома, офисы)
-  ELECTRONICS = 'electronics',   // Электроника (камеры, ноутбуки, техника)
-  TOOLS = 'tools',              // Инструменты (строительные, садовые, ремонтные)
-  FURNITURE = 'furniture',       // Мебель (для мероприятий, офиса, дома)
-  EVENTS = 'events',            // Мероприятия (свадьбы, конференции, праздники)
-  RECREATION = 'recreation',     // Отдых (спорт, туризм, развлечения)
-  HOUSEHOLD = 'household',       // Бытовые товары
-  OTHER = 'other'               // Прочее
+  VEHICLES = "vehicles", // Транспорт (скутеры, мотоциклы, машины, велосипеды)
+  WATERCRAFT = "watercraft", // Водный транспорт (лодки, катеры, яхты)
+  EQUIPMENT = "equipment", // Оборудование (строительное, спортивное, профессиональное)
+  PROPERTY = "property", // Недвижимость (квартиры, дома, офисы)
+  ELECTRONICS = "electronics", // Электроника (камеры, ноутбуки, техника)
+  TOOLS = "tools", // Инструменты (строительные, садовые, ремонтные)
+  FURNITURE = "furniture", // Мебель (для мероприятий, офиса, дома)
+  EVENTS = "events", // Мероприятия (свадьбы, конференции, праздники)
+  RECREATION = "recreation", // Отдых (спорт, туризм, развлечения)
+  HOUSEHOLD = "household", // Бытовые товары
+  OTHER = "other", // Прочее
 }
 ```
 
 #### ServiceAssignment (Назначение услуги)
+
 ```typescript
 interface ServiceAssignment {
-  id: string;                    // UUID
-  agencyId: string;              // ID агентства
-  agencyServiceId: string;       // ID услуги агентства
+  id: string // UUID
+  agencyId: string // ID агентства
+  agencyServiceId: string // ID услуги агентства
 
   // Связанные сущности
-  listingId: string;             // ID объявления в listing-service
-  bookingId?: string;            // ID бронирования в booking-service (опционально)
+  listingId: string // ID объявления в listing-service
+  bookingId?: string // ID бронирования в booking-service (опционально)
 
   // Ценообразование и комиссия
-  servicePrice: number;          // Цена услуги
-  commissionAmount: number;      // Сумма комиссии
-  commissionRate: number;        // Процент комиссии
-  currency: string;              // Валюта (THB)
+  servicePrice: number // Цена услуги
+  commissionAmount: number // Сумма комиссии
+  commissionRate: number // Процент комиссии
+  currency: string // Валюта (THB)
 
   // Статус и отслеживание
-  status: ServiceAssignmentStatus; // active, paused, completed, cancelled
-  assignedAt: Date;              // Время назначения
-  startedAt?: Date;              // Время начала выполнения
-  completedAt?: Date;            // Время завершения
+  status: ServiceAssignmentStatus // active, paused, completed, cancelled
+  assignedAt: Date // Время назначения
+  startedAt?: Date // Время начала выполнения
+  completedAt?: Date // Время завершения
 
   // Отслеживание производительности
-  customerRating?: number;       // Оценка клиента (1-5)
-  customerFeedback?: string;     // Отзыв клиента
-  agencyNotes?: string;          // Заметки агентства
+  customerRating?: number // Оценка клиента (1-5)
+  customerFeedback?: string // Отзыв клиента
+  agencyNotes?: string // Заметки агентства
 
   // Метаданные
-  metadata: Record<string, any>; // Дополнительные данные
+  metadata: Record<string, any> // Дополнительные данные
 
   // Временные метки
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date
+  updatedAt: Date
 }
 ```
 
 #### ServiceAssignmentStatus (Статусы назначения услуг)
+
 ```typescript
 enum ServiceAssignmentStatus {
-  ACTIVE = 'active',             // Активное назначение
-  PAUSED = 'paused',             // Приостановлено
-  COMPLETED = 'completed',       // Завершено
-  CANCELLED = 'cancelled'        // Отменено
+  ACTIVE = "active", // Активное назначение
+  PAUSED = "paused", // Приостановлено
+  COMPLETED = "completed", // Завершено
+  CANCELLED = "cancelled", // Отменено
 }
 ```
 
 #### AgencyStatus (Статусы агентства)
+
 ```typescript
 enum AgencyStatus {
-  PENDING = 'pending',           // Ожидает рассмотрения
-  ACTIVE = 'active',             // Активное
-  SUSPENDED = 'suspended',       // Приостановлено
-  INACTIVE = 'inactive',         // Неактивное
-  REJECTED = 'rejected'          // Отклонено
+  PENDING = "pending", // Ожидает рассмотрения
+  ACTIVE = "active", // Активное
+  SUSPENDED = "suspended", // Приостановлено
+  INACTIVE = "inactive", // Неактивное
+  REJECTED = "rejected", // Отклонено
 }
 ```
 
 #### VerificationStatus (Статусы верификации)
+
 ```typescript
 enum VerificationStatus {
-  PENDING = 'pending',           // Ожидает верификации
-  VERIFIED = 'verified',         // Верифицировано
-  REJECTED = 'rejected',         // Отклонено
-  EXPIRED = 'expired'            // Истекло
+  PENDING = "pending", // Ожидает верификации
+  VERIFIED = "verified", // Верифицировано
+  REJECTED = "rejected", // Отклонено
+  EXPIRED = "expired", // Истекло
 }
 ```
 
@@ -225,9 +237,11 @@ enum VerificationStatus {
 ### Управление агентствами
 
 #### POST /api/agencies
+
 Регистрация нового агентства
 
 **Запрос:**
+
 ```json
 {
   "name": "Bangkok Premium Properties",
@@ -251,6 +265,7 @@ enum VerificationStatus {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -268,15 +283,19 @@ enum VerificationStatus {
 ```
 
 #### GET /api/agencies/:id
+
 Получение информации об агентстве
 
 #### PUT /api/agencies/:id
+
 Обновление информации об агентстве
 
 #### GET /api/agencies
+
 Получение списка агентств
 
 **Параметры:**
+
 ```
 ?status=ACTIVE
 &verified=true
@@ -291,9 +310,11 @@ enum VerificationStatus {
 ### Управление агентами
 
 #### POST /api/agencies/:agencyId/agents
+
 Добавление агента в агентство
 
 **Запрос:**
+
 ```json
 {
   "userId": "user-uuid",
@@ -308,20 +329,25 @@ enum VerificationStatus {
 ```
 
 #### GET /api/agencies/:agencyId/agents
+
 Получение списка агентов агентства
 
 #### PUT /api/agents/:id
+
 Обновление информации об агенте
 
 #### DELETE /api/agents/:id
+
 Удаление агента из агентства
 
 ### Управление объявлениями
 
 #### POST /api/agencies/:agencyId/listings
+
 Добавление объявления под управление агентства
 
 **Запрос:**
+
 ```json
 {
   "listingId": "listing-uuid",
@@ -337,17 +363,21 @@ enum VerificationStatus {
 ```
 
 #### GET /api/agencies/:agencyId/listings
+
 Получение объявлений агентства
 
 #### PUT /api/agency-listings/:id
+
 Обновление настроек объявления
 
 ### Комиссионная система
 
 #### GET /api/agencies/:agencyId/commissions
+
 Получение комиссий агентства
 
 **Параметры:**
+
 ```
 ?status=PAID
 &agentId=agent-uuid
@@ -358,9 +388,11 @@ enum VerificationStatus {
 ```
 
 #### POST /api/commissions/calculate
+
 Расчет комиссии для бронирования
 
 **Запрос:**
+
 ```json
 {
   "bookingId": "booking-uuid",
@@ -370,14 +402,17 @@ enum VerificationStatus {
 ```
 
 #### PUT /api/commissions/:id/pay
+
 Выплата комиссии
 
 ### Аналитика и отчеты
 
 #### GET /api/agencies/:agencyId/analytics
+
 Получение аналитики агентства
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -409,52 +444,57 @@ enum VerificationStatus {
 ```
 
 #### GET /api/agents/:agentId/analytics
+
 Получение аналитики агента
 
 #### GET /api/agencies/:agencyId/reports/monthly
+
 Месячный отчет агентства
 
 ## 💰 Комиссионная система
 
 ### Расчет комиссий
+
 ```typescript
 class CommissionCalculator {
   async calculateCommission(booking: Booking, agency: Agency, agent?: Agent) {
-    const bookingAmount = booking.totalPrice;
-    const agencyRate = agency.commissionSettings.rate;
-    
+    const bookingAmount = booking.totalPrice
+    const agencyRate = agency.commissionSettings.rate
+
     // Базовая комиссия агентства
-    const agencyCommission = bookingAmount * (agencyRate / 100);
-    
+    const agencyCommission = bookingAmount * (agencyRate / 100)
+
     // Комиссия агента (если есть)
-    let agentCommission = 0;
+    let agentCommission = 0
     if (agent) {
-      const agentRate = agent.commissionRate;
-      agentCommission = agencyCommission * (agentRate / 100);
+      const agentRate = agent.commissionRate
+      agentCommission = agencyCommission * (agentRate / 100)
     }
-    
+
     // Комиссия платформы
-    const platformRate = 3.5; // 3.5% платформенная комиссия
-    const platformCommission = bookingAmount * (platformRate / 100);
-    
+    const platformRate = 3.5 // 3.5% платформенная комиссия
+    const platformCommission = bookingAmount * (platformRate / 100)
+
     return {
       bookingAmount,
       agencyCommission: agencyCommission - agentCommission,
       agentCommission,
       platformCommission,
-      totalCommission: agencyCommission + platformCommission
-    };
+      totalCommission: agencyCommission + platformCommission,
+    }
   }
 }
 ```
 
 ### Типы комиссий
+
 1. **Процентная**: Фиксированный процент от суммы бронирования
 2. **Фиксированная**: Фиксированная сумма за бронирование
 3. **Ступенчатая**: Разные проценты в зависимости от суммы
 4. **Гибридная**: Комбинация фиксированной и процентной
 
 ### Схемы выплат
+
 - **Еженедельные выплаты**: Каждый понедельник
 - **Ежемесячные выплаты**: 1 числа каждого месяца
 - **По требованию**: Минимальная сумма 10,000 THB
@@ -464,45 +504,49 @@ class CommissionCalculator {
 ### Уровни верификации
 
 #### Basic (Базовый)
+
 - Проверка документов
 - Подтверждение контактов
 - Базовые функции платформы
 
 #### Premium (Премиум)
+
 - Проверка лицензий
 - Финансовая проверка
 - Расширенные функции аналитики
 - Приоритетная поддержка
 
 #### Enterprise (Корпоративный)
+
 - Полная юридическая проверка
 - Проверка страхования
 - Персональный менеджер
 - Кастомизация интерфейса
 
 ### Процесс верификации
+
 ```typescript
 class VerificationService {
   async verifyAgency(agencyId: string, level: VerificationLevel) {
-    const agency = await this.getAgency(agencyId);
-    
+    const agency = await this.getAgency(agencyId)
+
     const checks = {
       documents: await this.verifyDocuments(agency),
       licenses: await this.verifyLicenses(agency),
       financial: await this.verifyFinancial(agency),
-      legal: await this.verifyLegal(agency)
-    };
-    
-    const passed = this.evaluateChecks(checks, level);
-    
-    if (passed) {
-      await this.approveVerification(agencyId, level);
-      await this.notifyVerificationSuccess(agency);
-    } else {
-      await this.requestAdditionalDocuments(agencyId, checks);
+      legal: await this.verifyLegal(agency),
     }
-    
-    return { passed, checks };
+
+    const passed = this.evaluateChecks(checks, level)
+
+    if (passed) {
+      await this.approveVerification(agencyId, level)
+      await this.notifyVerificationSuccess(agency)
+    } else {
+      await this.requestAdditionalDocuments(agencyId, checks)
+    }
+
+    return { passed, checks }
   }
 }
 ```
@@ -510,55 +554,57 @@ class VerificationService {
 ## 📊 Аналитика и метрики
 
 ### Метрики агентства
+
 ```typescript
 interface AgencyMetrics {
   // Основные показатели
-  totalListings: number;
-  activeListings: number;
-  totalBookings: number;
-  totalRevenue: number;
-  totalCommission: number;
-  
+  totalListings: number
+  activeListings: number
+  totalBookings: number
+  totalRevenue: number
+  totalCommission: number
+
   // Производительность
-  conversionRate: number;        // Конверсия просмотров в бронирования
-  averageBookingValue: number;   // Средняя стоимость бронирования
-  repeatCustomerRate: number;    // Процент повторных клиентов
-  
+  conversionRate: number // Конверсия просмотров в бронирования
+  averageBookingValue: number // Средняя стоимость бронирования
+  repeatCustomerRate: number // Процент повторных клиентов
+
   // Качество
-  averageRating: number;         // Средний рейтинг
-  responseTime: number;          // Среднее время ответа (минуты)
-  cancellationRate: number;      // Процент отмен
-  
+  averageRating: number // Средний рейтинг
+  responseTime: number // Среднее время ответа (минуты)
+  cancellationRate: number // Процент отмен
+
   // Рост
   monthlyGrowth: {
-    bookings: number;
-    revenue: number;
-    listings: number;
-  };
+    bookings: number
+    revenue: number
+    listings: number
+  }
 }
 ```
 
 ### Метрики агента
+
 ```typescript
 interface AgentMetrics {
   // Продажи
-  totalSales: number;
-  monthlyBookings: number;
-  averageDealSize: number;
-  
+  totalSales: number
+  monthlyBookings: number
+  averageDealSize: number
+
   // Активность
-  activeListings: number;
-  clientInteractions: number;
-  responseRate: number;
-  
+  activeListings: number
+  clientInteractions: number
+  responseRate: number
+
   // Качество
-  customerRating: number;
-  dealClosureRate: number;
-  clientRetentionRate: number;
-  
+  customerRating: number
+  dealClosureRate: number
+  clientRetentionRate: number
+
   // Сравнение с коллегами
-  rankInAgency: number;
-  performanceScore: number;
+  rankInAgency: number
+  performanceScore: number
 }
 ```
 
@@ -589,6 +635,7 @@ interface AgentMetrics {
    - Управление жизненным циклом заказов
 
 ### Запуск тестов
+
 ```bash
 # Все тесты
 bun test
@@ -603,6 +650,7 @@ bun test:integration
 ## 🚀 Развертывание
 
 ### Переменные окружения
+
 ```env
 # Сервер
 PORT=3005
@@ -643,6 +691,7 @@ SENTRY_DSN=your-sentry-dsn
 ## 🔄 Интеграции
 
 ### Внутренние сервисы
+
 - **User Service**: Аутентификация и профили агентов
 - **Listing Service**: Управление объявлениями
 - **Booking Service**: Обработка бронирований
@@ -650,6 +699,7 @@ SENTRY_DSN=your-sentry-dsn
 - **CRM Service**: Коммуникации с клиентами
 
 ### Внешние сервисы
+
 - **Verification APIs**: Проверка документов и лицензий
 - **Banking APIs**: Выплаты комиссий
 - **Document Storage**: Хранение документов верификации
@@ -658,12 +708,14 @@ SENTRY_DSN=your-sentry-dsn
 ## 📈 Производительность
 
 ### Оптимизации
+
 - Кеширование метрик агентств
 - Индексы для быстрого поиска
 - Пагинация больших списков
 - Асинхронная обработка отчетов
 
 ### Масштабирование
+
 - Горизонтальное масштабирование
 - Шардинг по регионам
 - Очереди для фоновых задач
@@ -672,12 +724,14 @@ SENTRY_DSN=your-sentry-dsn
 ## 📊 Мониторинг
 
 ### Метрики системы
+
 - Количество активных агентств
 - Общий объем комиссий
 - Время обработки верификации
 - Производительность агентов
 
 ### Алерты
+
 - Проблемы с выплатами комиссий
 - Высокое время ответа API
 - Ошибки верификации
@@ -686,6 +740,8 @@ SENTRY_DSN=your-sentry-dsn
 ---
 
 **Контакты для поддержки:**
+
 - 📧 Email: agency-service@thailand-marketplace.com
 - 📱 Slack: #agency-service-support
-- 📋 Issues: [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=agency-service)
+- 📋 Issues:
+  [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=agency-service)

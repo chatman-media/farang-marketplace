@@ -1,17 +1,23 @@
 # CRM Service
 
-A comprehensive Customer Relationship Management (CRM) service for the Thailand Marketplace platform. This service handles customer data management, lead tracking, and provides analytics for sales and marketing teams.
+A comprehensive Customer Relationship Management (CRM) service for the Thailand
+Marketplace platform. This service handles customer data management, lead
+tracking, and provides analytics for sales and marketing teams.
 
 ## 🎯 Features
 
 ### Customer Management
+
 - **Customer Profiles**: Complete customer information with contact details
-- **Multi-channel Communication**: Support for Email, Telegram, WhatsApp, SMS, Phone
-- **Lead Scoring**: Automated scoring based on customer behavior and lead quality
+- **Multi-channel Communication**: Support for Email, Telegram, WhatsApp, SMS,
+  Phone
+- **Lead Scoring**: Automated scoring based on customer behavior and lead
+  quality
 - **Custom Fields**: Flexible custom data storage for business-specific needs
 - **Tagging System**: Organize customers with custom tags
 
 ### Lead Management
+
 - **Lead Lifecycle**: Track leads from initial contact to conversion
 - **Priority Management**: Assign priority levels (Low, Medium, High, Urgent)
 - **Assignment System**: Assign leads to team members
@@ -19,6 +25,7 @@ A comprehensive Customer Relationship Management (CRM) service for the Thailand 
 - **Source Tracking**: Track lead sources (Website, Telegram, WhatsApp, etc.)
 
 ### Analytics & Reporting
+
 - **Conversion Metrics**: Track lead-to-customer conversion rates
 - **Performance Analytics**: Monitor team and individual performance
 - **Communication Stats**: Track message delivery and response rates
@@ -37,6 +44,7 @@ A comprehensive Customer Relationship Management (CRM) service for the Thailand 
 ## 📊 Database Schema
 
 ### Core Tables
+
 - **customers**: Customer profiles and contact information
 - **leads**: Lead tracking and management
 - **communication_history**: Multi-channel communication logs
@@ -46,6 +54,7 @@ A comprehensive Customer Relationship Management (CRM) service for the Thailand 
 - **automations**: Automated workflow definitions
 
 ### Key Features
+
 - **UUID Primary Keys**: Secure and scalable identifiers
 - **JSONB Fields**: Flexible data storage for custom fields and metadata
 - **Indexes**: Optimized for common query patterns
@@ -54,6 +63,7 @@ A comprehensive Customer Relationship Management (CRM) service for the Thailand 
 ## 🚀 API Endpoints
 
 ### Customer Endpoints
+
 ```
 POST   /api/crm/customers          # Create customer
 GET    /api/crm/customers          # List customers (with filters)
@@ -63,6 +73,7 @@ DELETE /api/crm/customers/:id      # Delete customer (admin only)
 ```
 
 ### Lead Endpoints
+
 ```
 POST   /api/crm/leads              # Create lead
 GET    /api/crm/leads              # List leads (with filters)
@@ -72,11 +83,13 @@ DELETE /api/crm/leads/:id          # Delete lead (admin/manager only)
 ```
 
 ### Analytics Endpoints
+
 ```
 GET    /api/crm/analytics          # Get CRM analytics (admin/manager only)
 ```
 
 ### Health Check
+
 ```
 GET    /api/crm/health             # Service health check
 ```
@@ -84,6 +97,7 @@ GET    /api/crm/health             # Service health check
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```bash
 # Server
 PORT=3007
@@ -106,11 +120,13 @@ CORS_ORIGIN=*
 ## 🏃‍♂️ Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ or Bun runtime
 - PostgreSQL database
 - Redis (for future caching features)
 
 ### Installation
+
 ```bash
 # Install dependencies
 bun install
@@ -129,6 +145,7 @@ bun run build
 ```
 
 ### Database Setup
+
 ```bash
 # Run migrations to create tables
 bun run migrate
@@ -139,6 +156,7 @@ bun run migrate
 ## 📝 Usage Examples
 
 ### Create a Customer
+
 ```typescript
 const customer = await crmService.createCustomer({
   email: "customer@example.com",
@@ -149,12 +167,13 @@ const customer = await crmService.createCustomer({
   tags: ["vip", "interested"],
   customFields: {
     source: "website",
-    budget: 10000
-  }
+    budget: 10000,
+  },
 })
 ```
 
 ### Create a Lead
+
 ```typescript
 const lead = await crmService.createLead({
   customerId: "customer-uuid",
@@ -162,16 +181,17 @@ const lead = await crmService.createLead({
   priority: LeadPriority.HIGH,
   value: 5000,
   notes: "Interested in premium package",
-  followUpDate: new Date("2024-01-15")
+  followUpDate: new Date("2024-01-15"),
 })
 ```
 
 ### Update Lead Status
+
 ```typescript
 const updatedLead = await crmService.updateLead("lead-uuid", {
   status: LeadStatus.QUALIFIED,
   assignedTo: "sales-rep-uuid",
-  notes: "Customer confirmed interest"
+  notes: "Customer confirmed interest",
 })
 ```
 
@@ -231,4 +251,5 @@ bun test --coverage
 
 ## 📄 License
 
-This project is part of the Thailand Marketplace platform and follows the same licensing terms.
+This project is part of the Thailand Marketplace platform and follows the same
+licensing terms.

@@ -392,7 +392,10 @@ export class SegmentationService {
 
       case SegmentOperator.DATE_BETWEEN:
         params.push(value[0], value[1])
-        return { sql: `${dbField} BETWEEN $${paramIndex}::timestamp AND $${paramIndex + 1}::timestamp`, params }
+        return {
+          sql: `${dbField} BETWEEN $${paramIndex}::timestamp AND $${paramIndex + 1}::timestamp`,
+          params,
+        }
 
       case SegmentOperator.DAYS_AGO:
         return { sql: `${dbField} >= NOW() - INTERVAL '${value} days'`, params }
@@ -435,7 +438,10 @@ export class SegmentationService {
       averageSegmentSize: Math.round(parseFloat(avgSizeResult.rows[0].avg_size) || 0),
       largestSegment:
         largestResult.rows.length > 0
-          ? { name: largestResult.rows[0].name, customerCount: largestResult.rows[0].customer_count }
+          ? {
+              name: largestResult.rows[0].name,
+              customerCount: largestResult.rows[0].customer_count,
+            }
           : null,
     }
   }

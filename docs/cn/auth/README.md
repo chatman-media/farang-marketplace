@@ -17,14 +17,18 @@
 ## 文档
 
 ### 📋 [oauth-api.md](../../auth/oauth-api.md)
+
 描述所有OAuth提供商的主要文档：
+
 - 每个提供商的API端点
 - 请求和响应示例
 - 错误处理
 - 安全性和验证
 
 ### 🔧 [oauth-setup-guide.md](../../auth/oauth-setup-guide.md)
+
 技术设置指南：
+
 - 每个提供商的分步设置
 - 开发者控制台配置
 - 环境变量
@@ -33,6 +37,7 @@
 ## 当前状态
 
 ### ✅ 已完成
+
 - 基本邮箱/密码身份验证
 - JWT令牌（访问+刷新）
 - 用户角色
@@ -41,10 +46,12 @@
 - 176个测试成功通过
 
 ### 🔄 开发中
+
 - 前端组件
 - 移动应用程序
 
 ### 📋 计划中
+
 - 双因素身份验证（2FA）
 - 生物识别身份验证
 - 企业客户SSO
@@ -52,6 +59,7 @@
 ## 快速开始
 
 ### 1. 环境变量设置
+
 ```bash
 # 复制.env.example到.env
 cp .env.example .env
@@ -67,18 +75,21 @@ WHATSAPP_APP_ID=your_whatsapp_app_id
 ```
 
 ### 2. 安装依赖
+
 ```bash
 # 安装依赖
 bun install
 ```
 
 ### 3. 启动服务
+
 ```bash
 # 启动用户服务
 bun run dev
 ```
 
 ### 4. 测试
+
 ```bash
 # 运行测试
 bun run test
@@ -116,6 +127,7 @@ bun run test
 ## 安全性
 
 ### 核心原则
+
 - **状态参数** - CSRF攻击防护
 - **PKCE** - 用于移动应用程序
 - **令牌轮换** - 定期刷新令牌更新
@@ -123,6 +135,7 @@ bun run test
 - **签名验证** - 签名验证（Telegram）
 
 ### 验证
+
 - 验证所有OAuth回调
 - 令牌过期检查
 - 所有身份验证尝试的审计
@@ -130,19 +143,20 @@ bun run test
 
 ## 支持的提供商
 
-| 提供商 | 状态 | 功能 |
-|--------|------|------|
-| Google | ✅ | OAuth 2.0，个人资料+邮箱 |
-| Apple | ✅ | 使用Apple登录，JWT |
-| TikTok | ✅ | 登录套件，基本信息 |
-| Telegram | ✅ | 登录小部件，哈希验证 |
-| LINE | ✅ | 在亚洲流行 |
-| WhatsApp | ✅ | 商业API |
-| 邮箱 | ✅ | 传统注册 |
+| 提供商   | 状态 | 功能                     |
+| -------- | ---- | ------------------------ |
+| Google   | ✅   | OAuth 2.0，个人资料+邮箱 |
+| Apple    | ✅   | 使用Apple登录，JWT       |
+| TikTok   | ✅   | 登录套件，基本信息       |
+| Telegram | ✅   | 登录小部件，哈希验证     |
+| LINE     | ✅   | 在亚洲流行               |
+| WhatsApp | ✅   | 商业API                  |
+| 邮箱     | ✅   | 传统注册                 |
 
 ## API端点
 
 ### 主要端点
+
 - `GET /api/oauth/providers` - 列出可用提供商
 - `GET /api/oauth/:provider/auth` - 启动OAuth
 - `POST /api/oauth/:provider/callback` - 处理回调
@@ -150,6 +164,7 @@ bun run test
 - `DELETE /api/oauth/:provider/unlink` - 取消链接账户
 
 ### 邮箱身份验证
+
 - `POST /api/auth/register` - 注册
 - `POST /api/auth/login` - 登录
 - `POST /api/auth/refresh` - 令牌刷新
@@ -158,6 +173,7 @@ bun run test
 ## 支持
 
 身份验证问题咨询：
+
 - 📧 邮箱：dev-team@thailand-marketplace.com
 - 💬 Slack：#auth-support
 - 📖 Wiki：[身份验证Wiki](https://wiki.thailand-marketplace.com/auth)
@@ -165,12 +181,14 @@ bun run test
 ## 更新日志
 
 ### v1.1.0（当前版本）
+
 - 添加了所有OAuth提供商
 - 完整实现WhatsApp、Apple、TikTok
 - 增强安全性
 - 完整文档
 
 ### v1.0.0
+
 - 基本邮箱/密码身份验证
 - JWT令牌
 - 用户角色

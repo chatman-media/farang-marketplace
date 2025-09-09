@@ -2,7 +2,10 @@
 
 ## 📋 Обзор
 
-Booking Service - это сервис управления бронированиями и резервациями недвижимости. Он обеспечивает полный цикл бронирования от проверки доступности до подтверждения и управления статусами бронирований с интеграцией платежной системы.
+Booking Service - это сервис управления бронированиями и резервациями
+недвижимости. Он обеспечивает полный цикл бронирования от проверки доступности
+до подтверждения и управления статусами бронирований с интеграцией платежной
+системы.
 
 ## 🔧 Технические характеристики
 
@@ -21,6 +24,7 @@ Booking Service - это сервис управления бронирован�
 **Статус**: ✅ Завершена (Сентябрь 2025)
 
 ### Изменения после миграции:
+
 - **Производительность**: Улучшена скорость обработки запросов на 40%
 - **Типизация**: Полная типизация запросов и ответов
 - **Валидация**: Автоматическая валидация с Zod schemas
@@ -31,6 +35,7 @@ Booking Service - это сервис управления бронирован�
 ## 🏗️ Архитектура
 
 ### Структура проекта
+
 ```
 services/booking-service/
 ├── src/
@@ -64,102 +69,107 @@ services/booking-service/
 ### Модель данных
 
 #### Booking (Бронирование)
+
 ```typescript
 interface Booking {
-  id: string;                    // UUID
-  listingId: string;             // ID объявления
-  guestId: string;               // ID гостя
-  hostId: string;                // ID хозяина
-  agencyId?: string;             // ID агентства
-  
+  id: string // UUID
+  listingId: string // ID объявления
+  guestId: string // ID гостя
+  hostId: string // ID хозяина
+  agencyId?: string // ID агентства
+
   // Даты и время
-  checkIn: Date;                 // Дата заезда
-  checkOut: Date;                // Дата выезда
-  nights: number;                // Количество ночей
-  
+  checkIn: Date // Дата заезда
+  checkOut: Date // Дата выезда
+  nights: number // Количество ночей
+
   // Гости
-  adults: number;                // Количество взрослых
-  children: number;              // Количество детей
-  infants: number;               // Количество младенцев
-  totalGuests: number;           // Общее количество гостей
-  
+  adults: number // Количество взрослых
+  children: number // Количество детей
+  infants: number // Количество младенцев
+  totalGuests: number // Общее количество гостей
+
   // Финансы
-  basePrice: number;             // Базовая цена за ночь
-  totalPrice: number;            // Общая стоимость
-  currency: Currency;            // Валюта
-  fees: BookingFee[];           // Дополнительные сборы
-  taxes: BookingTax[];          // Налоги
-  
+  basePrice: number // Базовая цена за ночь
+  totalPrice: number // Общая стоимость
+  currency: Currency // Валюта
+  fees: BookingFee[] // Дополнительные сборы
+  taxes: BookingTax[] // Налоги
+
   // Статусы
-  status: BookingStatus;         // PENDING, CONFIRMED, CANCELLED, etc.
-  paymentStatus: PaymentStatus;  // PENDING, PAID, REFUNDED, etc.
-  
+  status: BookingStatus // PENDING, CONFIRMED, CANCELLED, etc.
+  paymentStatus: PaymentStatus // PENDING, PAID, REFUNDED, etc.
+
   // Контактная информация
-  guestInfo: GuestInfo;
-  specialRequests?: string;      // Особые пожелания
-  
+  guestInfo: GuestInfo
+  specialRequests?: string // Особые пожелания
+
   // Метаданные
-  source: BookingSource;         // WEB, MOBILE, API, PHONE
-  cancellationPolicy: CancellationPolicy;
-  
+  source: BookingSource // WEB, MOBILE, API, PHONE
+  cancellationPolicy: CancellationPolicy
+
   // Временные метки
-  createdAt: Date;
-  updatedAt: Date;
-  confirmedAt?: Date;
-  cancelledAt?: Date;
-  expiresAt: Date;               // Время истечения неподтвержденного бронирования
+  createdAt: Date
+  updatedAt: Date
+  confirmedAt?: Date
+  cancelledAt?: Date
+  expiresAt: Date // Время истечения неподтвержденного бронирования
 }
 ```
 
 #### BookingStatus (Статус бронирования)
+
 ```typescript
 enum BookingStatus {
-  PENDING = 'PENDING',           // Ожидает подтверждения
-  CONFIRMED = 'CONFIRMED',       // Подтверждено
-  CHECKED_IN = 'CHECKED_IN',     // Заселение произошло
-  CHECKED_OUT = 'CHECKED_OUT',   // Выселение произошло
-  CANCELLED = 'CANCELLED',       // Отменено
-  NO_SHOW = 'NO_SHOW',          // Не явился
-  EXPIRED = 'EXPIRED'            // Истекло время подтверждения
+  PENDING = "PENDING", // Ожидает подтверждения
+  CONFIRMED = "CONFIRMED", // Подтверждено
+  CHECKED_IN = "CHECKED_IN", // Заселение произошло
+  CHECKED_OUT = "CHECKED_OUT", // Выселение произошло
+  CANCELLED = "CANCELLED", // Отменено
+  NO_SHOW = "NO_SHOW", // Не явился
+  EXPIRED = "EXPIRED", // Истекло время подтверждения
 }
 ```
 
 #### Availability (Доступность)
+
 ```typescript
 interface Availability {
-  id: string;
-  listingId: string;
-  date: Date;                    // Конкретная дата
-  available: boolean;            // Доступно ли
-  price: number;                 // Цена за эту дату
-  minStay: number;              // Минимальное количество ночей
-  maxStay: number;              // Максимальное количество ночей
-  checkInAllowed: boolean;       // Разрешен ли заезд
-  checkOutAllowed: boolean;      // Разрешен ли выезд
-  restrictions: DateRestriction[]; // Ограничения
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  listingId: string
+  date: Date // Конкретная дата
+  available: boolean // Доступно ли
+  price: number // Цена за эту дату
+  minStay: number // Минимальное количество ночей
+  maxStay: number // Максимальное количество ночей
+  checkInAllowed: boolean // Разрешен ли заезд
+  checkOutAllowed: boolean // Разрешен ли выезд
+  restrictions: DateRestriction[] // Ограничения
+  createdAt: Date
+  updatedAt: Date
 }
 ```
 
 #### BookingFee (Сбор)
+
 ```typescript
 interface BookingFee {
-  id: string;
-  bookingId: string;
-  type: FeeType;                 // CLEANING, SERVICE, SECURITY_DEPOSIT, etc.
-  name: string;                  // Название сбора
-  amount: number;                // Сумма
-  currency: Currency;
-  taxable: boolean;              // Облагается ли налогом
-  mandatory: boolean;            // Обязательный ли
-  description?: string;
+  id: string
+  bookingId: string
+  type: FeeType // CLEANING, SERVICE, SECURITY_DEPOSIT, etc.
+  name: string // Название сбора
+  amount: number // Сумма
+  currency: Currency
+  taxable: boolean // Облагается ли налогом
+  mandatory: boolean // Обязательный ли
+  description?: string
 }
 ```
 
 ## 🗓️ Календарная система
 
 ### Управление доступностью
+
 - Календарь доступности на 2 года вперед
 - Блокировка дат для обслуживания
 - Сезонное ценообразование
@@ -167,6 +177,7 @@ interface BookingFee {
 - Ограничения на заезд/выезд
 
 ### Правила бронирования
+
 - Advance booking (заблаговременное бронирование)
 - Same-day booking (бронирование в день заезда)
 - Instant booking (мгновенное бронирование)
@@ -177,23 +188,27 @@ interface BookingFee {
 ### Проверка доступности
 
 #### GET /api/availability/listings/:listingId/check
+
 Проверка доступности объявления (Fastify роут)
 
 **Параметры запроса:**
+
 ```typescript
 interface AvailabilityQuery {
-  checkIn: string;    // ISO 8601 дата
-  checkOut?: string;  // ISO 8601 дата (опционально)
-  guests?: number;    // Количество гостей
+  checkIn: string // ISO 8601 дата
+  checkOut?: string // ISO 8601 дата (опционально)
+  guests?: number // Количество гостей
 }
 ```
 
 **Пример запроса:**
+
 ```
 GET /api/availability/listings/123e4567-e89b-12d3-a456-426614174000/check?checkIn=2024-03-15&checkOut=2024-03-20&guests=2
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -221,27 +236,41 @@ GET /api/availability/listings/123e4567-e89b-12d3-a456-426614174000/check?checkI
 ```
 
 #### POST /api/availability/bulk
+
 Проверка доступности для нескольких объявлений
 
 ### Создание бронирования
 
 #### POST /api/bookings
+
 Создание нового бронирования (Fastify с Zod валидацией)
 
 **Схема валидации:**
+
 ```typescript
 const createBookingSchema = {
   body: z.object({
     listingId: z.string().uuid("Listing ID must be a valid UUID"),
     checkIn: z.string().datetime("Check-in date must be a valid ISO 8601 date"),
-    checkOut: z.string().datetime("Check-out date must be a valid ISO 8601 date").optional(),
-    guests: z.number().int().min(1).max(20, "Number of guests must be between 1 and 20"),
-    specialRequests: z.string().max(1000, "Special requests must not exceed 1000 characters").optional(),
-  })
+    checkOut: z
+      .string()
+      .datetime("Check-out date must be a valid ISO 8601 date")
+      .optional(),
+    guests: z
+      .number()
+      .int()
+      .min(1)
+      .max(20, "Number of guests must be between 1 and 20"),
+    specialRequests: z
+      .string()
+      .max(1000, "Special requests must not exceed 1000 characters")
+      .optional(),
+  }),
 }
 ```
 
 **Пример запроса:**
+
 ```json
 {
   "listingId": "123e4567-e89b-12d3-a456-426614174000",
@@ -253,6 +282,7 @@ const createBookingSchema = {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -275,15 +305,19 @@ const createBookingSchema = {
 ### Управление бронированиями
 
 #### GET /api/bookings/:id
+
 Получение информации о бронировании
 
 #### PUT /api/bookings/:id/confirm
+
 Подтверждение бронирования
 
 #### PUT /api/bookings/:id/cancel
+
 Отмена бронирования
 
 **Запрос:**
+
 ```json
 {
   "reason": "GUEST_CANCELLED",
@@ -292,9 +326,11 @@ const createBookingSchema = {
 ```
 
 #### GET /api/bookings
+
 Получение списка бронирований
 
 **Параметры:**
+
 ```
 ?status=CONFIRMED
 &checkIn=2024-03-01
@@ -307,12 +343,15 @@ const createBookingSchema = {
 ### Календарь хозяина
 
 #### GET /api/host/calendar/:listingId
+
 Получение календаря для хозяина
 
 #### PUT /api/host/availability/:listingId
+
 Обновление доступности
 
 **Запрос:**
+
 ```json
 {
   "dates": [
@@ -332,17 +371,21 @@ const createBookingSchema = {
 ```
 
 #### POST /api/host/block-dates
+
 Блокировка дат
 
 ### Чек-ин/чек-аут
 
 #### POST /api/bookings/:id/checkin
+
 Отметка о заселении
 
 #### POST /api/bookings/:id/checkout
+
 Отметка о выселении
 
 **Запрос:**
+
 ```json
 {
   "actualCheckIn": "2024-03-15T15:30:00Z",
@@ -354,23 +397,25 @@ const createBookingSchema = {
 ## 💰 Интеграция с платежами
 
 ### Payment Service интеграция
+
 ```typescript
 // Создание платежного намерения
 const paymentIntent = await paymentService.createIntent({
   amount: booking.totalPrice,
   currency: booking.currency,
   bookingId: booking.id,
-  customerId: booking.guestId
-});
+  customerId: booking.guestId,
+})
 
 // Обработка успешного платежа
 const handlePaymentSuccess = async (paymentIntentId: string) => {
-  const booking = await bookingService.confirmPayment(paymentIntentId);
-  await notificationService.sendConfirmation(booking);
-};
+  const booking = await bookingService.confirmPayment(paymentIntentId)
+  await notificationService.sendConfirmation(booking)
+}
 ```
 
 ### Политики отмены
+
 - **Flexible**: Полный возврат за 24 часа до заезда
 - **Moderate**: Полный возврат за 5 дней до заезда
 - **Strict**: Возврат 50% за 7 дней до заезда
@@ -380,6 +425,7 @@ const handlePaymentSuccess = async (paymentIntentId: string) => {
 ## 📱 Уведомления
 
 ### Типы уведомлений
+
 1. **Подтверждение бронирования**
 2. **Напоминание о платеже**
 3. **Инструкции для заселения**
@@ -388,6 +434,7 @@ const handlePaymentSuccess = async (paymentIntentId: string) => {
 6. **Уведомления об отмене**
 
 ### Каналы уведомлений
+
 - Email
 - SMS
 - Push уведомления
@@ -396,23 +443,24 @@ const handlePaymentSuccess = async (paymentIntentId: string) => {
 ## 🔄 Фоновые задачи
 
 ### Автоматические процессы
+
 ```typescript
 // Истечение неподтвержденных бронирований
 const expireBookings = async () => {
-  const expiredBookings = await bookingService.findExpired();
+  const expiredBookings = await bookingService.findExpired()
   for (const booking of expiredBookings) {
-    await bookingService.expire(booking.id);
-    await availabilityService.releaseBlocked(booking.listingId, booking.dates);
+    await bookingService.expire(booking.id)
+    await availabilityService.releaseBlocked(booking.listingId, booking.dates)
   }
-};
+}
 
 // Автоматический чек-аут
 const autoCheckout = async () => {
-  const overdueBookings = await bookingService.findOverdueCheckouts();
+  const overdueBookings = await bookingService.findOverdueCheckouts()
   for (const booking of overdueBookings) {
-    await bookingService.autoCheckout(booking.id);
+    await bookingService.autoCheckout(booking.id)
   }
-};
+}
 ```
 
 ## 🧪 Тестирование
@@ -444,6 +492,7 @@ const autoCheckout = async () => {
    - Часовые пояса
 
 ### Запуск тестов
+
 ```bash
 # Все тесты
 bun test
@@ -458,6 +507,7 @@ bun test:integration
 ## 🚀 Развертывание
 
 ### Переменные окружения
+
 ```env
 # Сервер
 PORT=3003
@@ -494,12 +544,14 @@ SENTRY_DSN=your-sentry-dsn
 ## 🔄 Интеграции
 
 ### Внутренние сервисы
+
 - **Payment Service**: Обработка платежей и возвратов
 - **Listing Service**: Получение информации об объявлениях
 - **User Service**: Аутентификация и профили пользователей
 - **CRM Service**: Уведомления и коммуникации
 
 ### Внешние сервисы
+
 - **Stripe**: Обработка платежей
 - **Twilio**: SMS уведомления
 - **SendGrid**: Email уведомления
@@ -508,6 +560,7 @@ SENTRY_DSN=your-sentry-dsn
 ## 📊 Бизнес-логика
 
 ### Правила бронирования
+
 1. **Проверка доступности** перед созданием
 2. **Блокировка дат** на время обработки платежа
 3. **Автоматическое истечение** неоплаченных бронирований
@@ -515,30 +568,33 @@ SENTRY_DSN=your-sentry-dsn
 5. **Минимальные/максимальные сроки** проживания
 
 ### Расчет стоимости
+
 ```typescript
 const calculateTotalPrice = (booking: BookingRequest) => {
-  const basePrice = calculateBasePrice(booking.dates, booking.listingId);
-  const fees = calculateFees(booking.listingId, basePrice);
-  const taxes = calculateTaxes(basePrice + fees, booking.location);
-  
+  const basePrice = calculateBasePrice(booking.dates, booking.listingId)
+  const fees = calculateFees(booking.listingId, basePrice)
+  const taxes = calculateTaxes(basePrice + fees, booking.location)
+
   return {
     basePrice,
     fees,
     taxes,
-    total: basePrice + fees + taxes
-  };
-};
+    total: basePrice + fees + taxes,
+  }
+}
 ```
 
 ## 📈 Производительность
 
 ### Оптимизации
+
 - Кеширование календарей доступности
 - Индексы базы данных для быстрого поиска
 - Пагинация списков бронирований
 - Асинхронная обработка уведомлений
 
 ### Масштабирование
+
 - Горизонтальное масштабирование
 - Шардинг по регионам
 - Очереди для фоновых задач
@@ -547,6 +603,7 @@ const calculateTotalPrice = (booking: BookingRequest) => {
 ## 📊 Мониторинг
 
 ### Метрики
+
 - Количество бронирований
 - Конверсия из просмотров в бронирования
 - Средняя стоимость бронирования
@@ -554,6 +611,7 @@ const calculateTotalPrice = (booking: BookingRequest) => {
 - Процент отмен
 
 ### Алерты
+
 - Высокое время ответа API
 - Ошибки платежной системы
 - Превышение лимита неподтвержденных бронирований
@@ -562,6 +620,8 @@ const calculateTotalPrice = (booking: BookingRequest) => {
 ---
 
 **Контакты для поддержки:**
+
 - 📧 Email: booking-service@thailand-marketplace.com
 - 📱 Slack: #booking-service-support
-- 📋 Issues: [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=booking-service)
+- 📋 Issues:
+  [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=booking-service)

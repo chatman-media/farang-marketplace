@@ -175,10 +175,10 @@ interface UserProfile {
 }
 
 enum UserRole {
-  USER = 'user',
-  AGENCY = 'agency',
-  MANAGER = 'manager',
-  ADMIN = 'admin',
+  USER = "user",
+  AGENCY = "agency",
+  MANAGER = "manager",
+  ADMIN = "admin",
 }
 ```
 
@@ -212,15 +212,15 @@ interface Listing {
 }
 
 enum ListingCategory {
-  BIKES = 'bikes',
-  CARS = 'cars',
-  EQUIPMENT = 'equipment',
+  BIKES = "bikes",
+  CARS = "cars",
+  EQUIPMENT = "equipment",
 }
 
 enum ListingType {
-  RENT = 'rent',
-  SALE = 'sale',
-  BOTH = 'both',
+  RENT = "rent",
+  SALE = "sale",
+  BOTH = "both",
 }
 
 interface Price {
@@ -259,12 +259,12 @@ interface Booking {
 }
 
 enum BookingStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  ACTIVE = 'active',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  DISPUTED = 'disputed',
+  PENDING = "pending",
+  CONFIRMED = "confirmed",
+  ACTIVE = "active",
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
+  DISPUTED = "disputed",
 }
 ```
 
@@ -301,10 +301,10 @@ interface AgencyServiceType {
 }
 
 enum ServiceCategory {
-  DELIVERY = 'delivery',
-  EMERGENCY = 'emergency',
-  MAINTENANCE = 'maintenance',
-  INSURANCE = 'insurance',
+  DELIVERY = "delivery",
+  EMERGENCY = "emergency",
+  MAINTENANCE = "maintenance",
+  INSURANCE = "insurance",
 }
 ```
 
@@ -340,9 +340,9 @@ interface Message {
 }
 
 enum MessageRole {
-  USER = 'user',
-  AI = 'ai',
-  MANAGER = 'manager',
+  USER = "user",
+  AI = "ai",
+  MANAGER = "manager",
 }
 
 interface ConversationContext {

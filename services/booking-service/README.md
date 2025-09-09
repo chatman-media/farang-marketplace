@@ -1,28 +1,38 @@
 # Booking Service
 
-The Booking Service is a comprehensive microservice that handles all booking-related operations for the Thailand Marketplace platform. It manages accommodation bookings, service bookings, availability checking, pricing calculations, and booking lifecycle management.
+The Booking Service is a comprehensive microservice that handles all
+booking-related operations for the Thailand Marketplace platform. It manages
+accommodation bookings, service bookings, availability checking, pricing
+calculations, and booking lifecycle management.
 
 ## 🚀 Features
 
 ### Core Booking Management
+
 - **Accommodation Bookings**: Create and manage property rental bookings
 - **Service Bookings**: Handle service provider appointments and consultations
 - **Booking Lifecycle**: Complete status management from pending to completed
-- **Multi-type Support**: Accommodation, transportation, tours, activities, dining, events, and services
+- **Multi-type Support**: Accommodation, transportation, tours, activities,
+  dining, events, and services
 
 ### Availability Management
+
 - **Real-time Availability**: Check listing and service provider availability
 - **Conflict Resolution**: Prevent double bookings and scheduling conflicts
 - **Calendar Management**: Generate availability calendars for listings
 - **Date Blocking**: Allow hosts to block dates for maintenance or personal use
 
 ### Pricing Engine
-- **Dynamic Pricing**: Seasonal, demand-based, and day-of-week pricing adjustments
-- **Fee Calculation**: Platform fees, payment processing, taxes, and service charges
+
+- **Dynamic Pricing**: Seasonal, demand-based, and day-of-week pricing
+  adjustments
+- **Fee Calculation**: Platform fees, payment processing, taxes, and service
+  charges
 - **Discount System**: Weekly, monthly, and early bird discounts
 - **Price Comparison**: Compare pricing across multiple options
 
 ### Business Logic
+
 - **Status Transitions**: Enforced booking status workflow
 - **Validation**: Comprehensive booking validation and business rules
 - **History Tracking**: Complete audit trail of booking changes
@@ -31,6 +41,7 @@ The Booking Service is a comprehensive microservice that handles all booking-rel
 ## 📋 API Endpoints
 
 ### Booking Management
+
 ```
 POST   /api/bookings                    # Create accommodation booking
 POST   /api/bookings/service            # Create service booking
@@ -42,6 +53,7 @@ GET    /api/bookings/:id/history        # Get booking status history
 ```
 
 ### Availability Management
+
 ```
 GET    /api/availability/listings/:id/check           # Check listing availability
 POST   /api/availability/providers/:id/check         # Check service provider availability
@@ -53,6 +65,7 @@ GET    /api/availability/listings/:id/upcoming       # Get upcoming bookings
 ```
 
 ### Pricing Engine
+
 ```
 POST   /api/pricing/booking             # Calculate accommodation pricing
 POST   /api/pricing/service             # Calculate service pricing
@@ -65,6 +78,7 @@ POST   /api/pricing/compare             # Compare multiple pricing options
 ## 🏗️ Architecture
 
 ### Database Schema
+
 - **bookings**: Main booking records with status and payment info
 - **service_bookings**: Extended data for service-specific bookings
 - **booking_status_history**: Complete audit trail of status changes
@@ -72,11 +86,13 @@ POST   /api/pricing/compare             # Compare multiple pricing options
 - **disputes**: Handle booking disputes and resolutions
 
 ### Services
+
 - **BookingService**: Core booking business logic and CRUD operations
 - **AvailabilityService**: Availability checking and conflict management
 - **PricingService**: Dynamic pricing calculations and fee management
 
 ### Key Features
+
 - **Transaction Safety**: All booking operations use database transactions
 - **Conflict Prevention**: Robust availability checking prevents double bookings
 - **Status Validation**: Enforced state machine for booking status transitions
@@ -95,11 +111,13 @@ POST   /api/pricing/compare             # Compare multiple pricing options
 ## 🚦 Getting Started
 
 ### Prerequisites
+
 - Bun >= 1.0.0
 - PostgreSQL >= 14
 - Node.js >= 18 (for compatibility)
 
 ### Installation
+
 ```bash
 # Install dependencies
 bun install
@@ -118,6 +136,7 @@ bun run dev
 ```
 
 ### Environment Variables
+
 ```env
 # Server Configuration
 PORT=3004
@@ -159,8 +178,11 @@ bun test BookingService.test.ts
 ```
 
 ### Test Coverage
-- **BookingService**: 25+ tests covering booking creation, status management, and search
-- **AvailabilityService**: 20+ tests for availability checking and conflict management
+
+- **BookingService**: 25+ tests covering booking creation, status management,
+  and search
+- **AvailabilityService**: 20+ tests for availability checking and conflict
+  management
 - **PricingService**: 15+ tests for pricing calculations and dynamic adjustments
 - **Controllers**: Integration tests for all API endpoints
 - **Validation**: Tests for all request validation rules
@@ -168,6 +190,7 @@ bun test BookingService.test.ts
 ## 📊 Business Logic
 
 ### Booking Status Flow
+
 ```
 pending → confirmed → active → completed
     ↓         ↓         ↓
@@ -175,6 +198,7 @@ cancelled  cancelled  disputed
 ```
 
 ### Pricing Components
+
 1. **Base Price**: Listing/service base rate
 2. **Dynamic Adjustments**: Seasonal, demand, day-of-week
 3. **Discounts**: Weekly (7+ nights), monthly (28+ nights), early bird
@@ -182,6 +206,7 @@ cancelled  cancelled  disputed
 5. **Taxes**: VAT (7% in Thailand)
 
 ### Availability Rules
+
 - No overlapping bookings for the same listing
 - Service providers can't have conflicting appointments
 - Hosts can block dates for maintenance
@@ -208,12 +233,14 @@ cancelled  cancelled  disputed
 ## 🔧 Configuration
 
 ### Booking Rules
+
 - **Advance Booking**: Minimum 1 hour, maximum 365 days
 - **Cancellation**: 24-hour cancellation policy (configurable)
 - **Auto-confirmation**: 24-hour timeout for host confirmation
 - **Payment**: 30-minute payment timeout
 
 ### Pricing Rules
+
 - **Platform Fee**: 3% of booking value
 - **Payment Processing**: 2.9% + fixed fee
 - **VAT**: 7% (Thailand standard rate)
@@ -224,6 +251,7 @@ cancelled  cancelled  disputed
 ## 🚀 Deployment
 
 ### Production Checklist
+
 - [ ] Set secure JWT_SECRET
 - [ ] Configure production database
 - [ ] Set up Redis for caching
@@ -233,6 +261,7 @@ cancelled  cancelled  disputed
 - [ ] Set up SSL/TLS certificates
 
 ### Docker Support
+
 ```dockerfile
 FROM oven/bun:1 as base
 WORKDIR /app
@@ -246,7 +275,8 @@ CMD ["bun", "start"]
 
 ## 📝 API Documentation
 
-Detailed API documentation is available at `/api/docs` when running in development mode. The documentation includes:
+Detailed API documentation is available at `/api/docs` when running in
+development mode. The documentation includes:
 
 - Complete endpoint reference
 - Request/response schemas
@@ -264,4 +294,5 @@ Detailed API documentation is available at `/api/docs` when running in developme
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for
+details.

@@ -10,7 +10,7 @@ coverage:
   precision: 2
   round: down
   range: "70...100"
-  
+
   status:
     project:
       default:
@@ -18,7 +18,7 @@ coverage:
         threshold: 2%
         base: auto
         if_ci_failed: error
-    
+
     patch:
       default:
         target: 75%
@@ -41,42 +41,42 @@ flags:
     paths:
       - services/payment-service/
     carryforward: true
-    
+
   user-service:
     paths:
       - services/user-service/
     carryforward: true
-    
+
   listing-service:
     paths:
       - services/listing-service/
     carryforward: true
-    
+
   booking-service:
     paths:
       - services/booking-service/
     carryforward: true
-    
+
   notification-service:
     paths:
       - services/notification-service/
     carryforward: true
-    
+
   ai-service:
     paths:
       - services/ai-service/
     carryforward: true
-    
+
   voice-service:
     paths:
       - services/voice-service/
     carryforward: true
-    
+
   crm-service:
     paths:
       - services/crm-service/
     carryforward: true
-    
+
   agency-service:
     paths:
       - services/agency-service/
@@ -87,12 +87,12 @@ flags:
     paths:
       - apps/web/
     carryforward: true
-    
+
   mobile-app:
     paths:
       - apps/mobile/
     carryforward: true
-    
+
   admin-dashboard:
     paths:
       - apps/admin/
@@ -103,7 +103,7 @@ flags:
     paths:
       - packages/types/
     carryforward: true
-    
+
   shared-utils:
     paths:
       - packages/utils/
@@ -147,7 +147,6 @@ ignore:
 # GitHub integration
 github_checks:
   annotations: true
-
 # Slack notifications (optional)
 # slack:
 #   url: "secret:slack_webhook_url"

@@ -2,7 +2,10 @@
 
 ## Обзор
 
-Этот документ описывает OAuth API endpoints для платформы Thailand Marketplace. OAuth система поддерживает множественные провайдеры аутентификации включая Google, Apple, TikTok, Telegram, LINE, WhatsApp и традиционную email/password аутентификацию.
+Этот документ описывает OAuth API endpoints для платформы Thailand Marketplace.
+OAuth система поддерживает множественные провайдеры аутентификации включая
+Google, Apple, TikTok, Telegram, LINE, WhatsApp и традиционную email/password
+аутентификацию.
 
 ## Базовый URL
 
@@ -12,7 +15,8 @@ http://localhost:3001/api/oauth
 
 ## Аутентификация
 
-Некоторые endpoints требуют аутентификации через Bearer токен в заголовке Authorization:
+Некоторые endpoints требуют аутентификации через Bearer токен в заголовке
+Authorization:
 
 ```
 Authorization: Bearer <access_token>
@@ -58,8 +62,10 @@ Authorization: Bearer <access_token>
 
 #### Параметры
 
-- `provider` (path): Имя OAuth провайдера (google, apple, tiktok, line, whatsapp)
-- `redirect_uri` (query, опционально): Пользовательский redirect URI после аутентификации
+- `provider` (path): Имя OAuth провайдера (google, apple, tiktok, line,
+  whatsapp)
+- `redirect_uri` (query, опционально): Пользовательский redirect URI после
+  аутентификации
 
 #### Ответ
 
@@ -89,6 +95,7 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 #### Тело запроса
 
 **Для Google/Apple/TikTok/LINE/WhatsApp:**
+
 ```json
 {
   "code": "authorization_code_from_provider",
@@ -97,6 +104,7 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 ```
 
 **Для Telegram:**
+
 ```json
 {
   "telegramData": {
@@ -277,7 +285,8 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 
 ### Apple OAuth
 
-- Требует переменные окружения `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`, `APPLE_KEY_ID` и `APPLE_PRIVATE_KEY`
+- Требует переменные окружения `APPLE_CLIENT_ID`, `APPLE_TEAM_ID`,
+  `APPLE_KEY_ID` и `APPLE_PRIVATE_KEY`
 - Использует сервис Apple Sign in with Apple
 - Поддерживает веб и мобильные потоки
 
@@ -302,7 +311,8 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 
 ### WhatsApp Business API
 
-- Требует переменные окружения `WHATSAPP_APP_ID`, `WHATSAPP_APP_SECRET` и `WHATSAPP_PHONE_NUMBER_ID`
+- Требует переменные окружения `WHATSAPP_APP_ID`, `WHATSAPP_APP_SECRET` и
+  `WHATSAPP_PHONE_NUMBER_ID`
 - Использует WhatsApp Business API для аутентификации
 - Требует верификацию номера телефона
 - Ограничено одобренными бизнес-аккаунтами
@@ -313,16 +323,22 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 - Всегда доступна (не требует внешней конфигурации)
 - Включает регистрацию, вход, сброс пароля
 - Использует JWT токены для управления сессиями
-- Доступна по адресам `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh`
+- Доступна по адресам `/api/auth/register`, `/api/auth/login`,
+  `/api/auth/refresh`
 
 ## Соображения безопасности
 
-1. **State Parameter**: Всегда валидируйте state параметр для предотвращения CSRF атак
-2. **Только HTTPS**: OAuth потоки должны использоваться только через HTTPS в продакшене
-3. **Хранение токенов**: Храните access токены безопасно и реализуйте правильную ротацию токенов
-4. **Ограничение Scope**: Запрашивайте только необходимые scopes от OAuth провайдеров
+1. **State Parameter**: Всегда валидируйте state параметр для предотвращения
+   CSRF атак
+2. **Только HTTPS**: OAuth потоки должны использоваться только через HTTPS в
+   продакшене
+3. **Хранение токенов**: Храните access токены безопасно и реализуйте правильную
+   ротацию токенов
+4. **Ограничение Scope**: Запрашивайте только необходимые scopes от OAuth
+   провайдеров
 5. **Rate Limiting**: Реализуйте ограничение скорости на OAuth endpoints
-6. **Валидация входных данных**: Валидируйте все входные параметры и OAuth ответы
+6. **Валидация входных данных**: Валидируйте все входные параметры и OAuth
+   ответы
 
 ## Тестирование
 
@@ -330,7 +346,8 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 
 1. Настройте тестовые приложения у каждого OAuth провайдера
 2. Сконфигурируйте переменные окружения с тестовыми credentials
-3. Используйте ngrok или похожие инструменты для экспонирования localhost для OAuth callbacks
+3. Используйте ngrok или похожие инструменты для экспонирования localhost для
+   OAuth callbacks
 4. Тестируйте как успешные, так и ошибочные сценарии
 
 ## Примеры
@@ -338,6 +355,7 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 ### Полный OAuth поток (Google)
 
 1. **Инициировать OAuth:**
+
    ```bash
    curl "http://localhost:3001/api/oauth/google/auth"
    ```
@@ -372,6 +390,7 @@ curl -X POST "http://localhost:3001/api/oauth/telegram/link" \
 ### LINE Login поток
 
 1. **Инициировать LINE OAuth:**
+
    ```bash
    curl "http://localhost:3001/api/oauth/line/auth"
    ```

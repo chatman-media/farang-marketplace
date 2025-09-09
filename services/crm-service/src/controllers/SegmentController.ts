@@ -257,7 +257,10 @@ export class SegmentController {
       const limit = parseInt(query.limit || "20")
       const offset = (page - 1) * limit
 
-      const result = await this.segmentationService.getCustomersInSegment(params.id, { limit, offset })
+      const result = await this.segmentationService.getCustomersInSegment(params.id, {
+        limit,
+        offset,
+      })
 
       return reply.code(200).send({
         success: true,

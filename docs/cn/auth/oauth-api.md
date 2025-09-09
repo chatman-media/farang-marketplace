@@ -89,6 +89,7 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 #### 请求体
 
 **对于Google/Apple/TikTok/LINE/WhatsApp:**
+
 ```json
 {
   "code": "authorization_code_from_provider",
@@ -97,6 +98,7 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 ```
 
 **对于Telegram:**
+
 ```json
 {
   "telegramData": {
@@ -277,7 +279,8 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 
 ### Apple OAuth
 
-- 需要 `APPLE_CLIENT_ID`、`APPLE_TEAM_ID`、`APPLE_KEY_ID` 和 `APPLE_PRIVATE_KEY` 环境变量
+- 需要 `APPLE_CLIENT_ID`、`APPLE_TEAM_ID`、`APPLE_KEY_ID` 和 `APPLE_PRIVATE_KEY`
+  环境变量
 - 使用Apple的Sign in with Apple服务
 - 支持网页和移动端流程
 
@@ -302,7 +305,8 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 
 ### WhatsApp商业API
 
-- 需要 `WHATSAPP_APP_ID`、`WHATSAPP_APP_SECRET` 和 `WHATSAPP_PHONE_NUMBER_ID` 环境变量
+- 需要 `WHATSAPP_APP_ID`、`WHATSAPP_APP_SECRET` 和 `WHATSAPP_PHONE_NUMBER_ID`
+  环境变量
 - 使用WhatsApp商业API进行身份验证
 - 需要电话号码验证
 - 仅限已批准的商业账户
@@ -338,6 +342,7 @@ curl "http://localhost:3001/api/oauth/google/auth?redirect_uri=http://localhost:
 ### 完整的OAuth流程（Google）
 
 1. **初始化OAuth:**
+
    ```bash
    curl "http://localhost:3001/api/oauth/google/auth"
    ```
@@ -372,6 +377,7 @@ curl -X POST "http://localhost:3001/api/oauth/telegram/link" \
 ### LINE登录流程
 
 1. **初始化LINE OAuth:**
+
    ```bash
    curl "http://localhost:3001/api/oauth/line/auth"
    ```

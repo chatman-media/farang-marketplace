@@ -2,16 +2,23 @@
 
 ## Overview
 
-The AI-powered search and recommendations system enhances the Thailand Marketplace with intelligent search capabilities, personalized recommendations, and smart service matching using multiple AI providers (OpenAI, DeepSeek, Claude).
+The AI-powered search and recommendations system enhances the Thailand
+Marketplace with intelligent search capabilities, personalized recommendations,
+and smart service matching using multiple AI providers (OpenAI, DeepSeek,
+Claude).
 
 ## Features
 
-- **Multi-Provider Support**: OpenAI, DeepSeek, and Claude with automatic fallback
+- **Multi-Provider Support**: OpenAI, DeepSeek, and Claude with automatic
+  fallback
 - **Enhanced Search**: AI-improved query understanding and result ranking
-- **Personalized Recommendations**: User-specific suggestions based on behavior and preferences
-- **Service Matching**: Intelligent matching of service providers to user requirements
+- **Personalized Recommendations**: User-specific suggestions based on behavior
+  and preferences
+- **Service Matching**: Intelligent matching of service providers to user
+  requirements
 - **Auto-suggestions**: Real-time search suggestions as users type
-- **Cost Optimization**: Automatic provider selection based on cost and performance
+- **Cost Optimization**: Automatic provider selection based on cost and
+  performance
 - **Rate Limiting**: Built-in protection against API abuse
 - **Fallback Mechanisms**: Graceful degradation when AI services are unavailable
 
@@ -52,7 +59,8 @@ CLAUDE_RPD=800
 
 - **DeepSeek**: Default provider - best cost/performance ratio
 - **OpenAI**: Fallback for structured data and code generation
-- **Claude Sonnet 4**: Premium provider for highest quality reasoning and creative content
+- **Claude Sonnet 4**: Premium provider for highest quality reasoning and
+  creative content
 
 ## API Endpoints
 
@@ -83,6 +91,7 @@ Performs AI-enhanced search with query understanding and result ranking.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -134,6 +143,7 @@ Analyzes search intent and extracts entities from user queries.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -162,6 +172,7 @@ Analyzes search intent and extracts entities from user queries.
 Provides real-time search suggestions as users type.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -204,6 +215,7 @@ Generates personalized recommendations based on user profile and behavior.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -258,6 +270,7 @@ Intelligently matches service providers to user requirements.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -276,7 +289,10 @@ Intelligently matches service providers to user requirements.
       }
     ],
     "searchStrategy": "Location proximity with service requirements matching",
-    "alternatives": ["Consider extending search radius", "Check weekend availability"]
+    "alternatives": [
+      "Consider extending search radius",
+      "Check weekend availability"
+    ]
   }
 }
 ```
@@ -288,6 +304,7 @@ Intelligently matches service providers to user requirements.
 Returns the health and metrics of AI providers (requires authentication).
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -324,6 +341,7 @@ Returns the health and metrics of AI providers (requires authentication).
 Estimates costs for AI operations across providers.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -343,7 +361,8 @@ Estimates costs for AI operations across providers.
 ## Rate Limiting
 
 - **General AI endpoints**: 50 requests per 15 minutes per IP
-- **Expensive operations** (recommendations, service matching): 20 requests per 15 minutes per IP
+- **Expensive operations** (recommendations, service matching): 20 requests per
+  15 minutes per IP
 - **Suggestions**: 30 requests per minute per IP
 
 ## Error Handling
@@ -361,7 +380,8 @@ All endpoints return consistent error responses:
 
 ## Best Practices
 
-1. **Provider Selection**: Use DeepSeek for cost-effective operations, OpenAI for structured data, Claude for creative content
+1. **Provider Selection**: Use DeepSeek for cost-effective operations, OpenAI
+   for structured data, Claude for creative content
 2. **Caching**: Cache AI responses for repeated queries to reduce costs
 3. **Fallback**: Always implement fallback mechanisms for when AI services fail
 4. **Rate Limiting**: Respect rate limits to avoid service interruption
@@ -376,46 +396,48 @@ All endpoints return consistent error responses:
 // Enhanced search with AI
 const searchWithAI = async (query, filters) => {
   try {
-    const response = await fetch('/api/ai/search/enhanced', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("/api/ai/search/enhanced", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query,
         filters,
         userContext: getUserContext(),
       }),
-    });
-    
-    const result = await response.json();
-    return result.data;
+    })
+
+    const result = await response.json()
+    return result.data
   } catch (error) {
     // Fallback to basic search
-    return basicSearch(query, filters);
+    return basicSearch(query, filters)
   }
-};
+}
 
 // Real-time suggestions
-const getSuggestions = async (partialQuery) => {
-  const response = await fetch(`/api/ai/suggestions?q=${encodeURIComponent(partialQuery)}`);
-  const result = await response.json();
-  return result.data.suggestions;
-};
+const getSuggestions = async partialQuery => {
+  const response = await fetch(
+    `/api/ai/suggestions?q=${encodeURIComponent(partialQuery)}`
+  )
+  const result = await response.json()
+  return result.data.suggestions
+}
 ```
 
 ### Backend Integration
 
 ```javascript
-import { AIService } from './ai/AIService.js';
-import { getAIConfig } from './ai/config.js';
+import { AIService } from "./ai/AIService.js"
+import { getAIConfig } from "./ai/config.js"
 
-const aiService = new AIService(getAIConfig());
+const aiService = new AIService(getAIConfig())
 
 // Use in your service layer
 const enhancedResults = await aiService.enhanceSearch({
   query: userQuery,
   filters: searchFilters,
   userContext: userProfile,
-});
+})
 ```
 
 ## Monitoring and Alerts

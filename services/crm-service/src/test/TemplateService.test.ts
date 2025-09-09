@@ -247,7 +247,11 @@ describe("TemplateService", () => {
   describe("findMatchingTemplates", () => {
     it("should find templates matching conditions", async () => {
       const template1 = { ...mockTemplateData, conditions: { triggers: ["new_customer"] } }
-      const template2 = { ...mockTemplateData, id: "template-2", conditions: { triggers: ["follow_up"] } }
+      const template2 = {
+        ...mockTemplateData,
+        id: "template-2",
+        conditions: { triggers: ["follow_up"] },
+      }
 
       mockQuery
         .mockResolvedValueOnce({

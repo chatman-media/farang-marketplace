@@ -95,7 +95,8 @@ thailand-marketplace/
 
 ### Monorepo Structure
 
-This project uses Turbo for monorepo management with the following workspace structure:
+This project uses Turbo for monorepo management with the following workspace
+structure:
 
 - **Apps**: Frontend applications built with Vite + React
 - **Services**: Backend microservices built with Node.js/TypeScript
@@ -127,7 +128,8 @@ This project uses Turbo for monorepo management with the following workspace str
 
 ## Shared Types Package
 
-The `@marketplace/shared-types` package contains all TypeScript interfaces and types used across the platform:
+The `@marketplace/shared-types` package contains all TypeScript interfaces and
+types used across the platform:
 
 - **User Types**: User profiles, authentication, roles
 - **Listing Types**: Product/service listings, categories
@@ -162,7 +164,8 @@ TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 
 ### Service-Specific Configuration
 
-Each service may have additional environment variables. Check the `.env.example` file in each service directory.
+Each service may have additional environment variables. Check the `.env.example`
+file in each service directory.
 
 ## Development Workflow
 

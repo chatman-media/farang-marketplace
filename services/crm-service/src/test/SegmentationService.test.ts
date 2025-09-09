@@ -292,21 +292,27 @@ describe("SegmentationService", () => {
         },
         testUserId,
       )
-      testSegmentId = segment.id
+      const segmentId = segment.id
 
-      // Update the segment
-      const updateData = {
-        name: `Updated Test Segment ${Date.now()}`,
-        description: "Updated description",
-        isActive: false,
+      try {
+        // Update the segment
+        const updateData = {
+          name: `Updated Test Segment ${Date.now()}`,
+          description: "Updated description",
+          isActive: false,
+        }
+
+        const updatedSegment = await segmentationService.updateSegment(segmentId, updateData)
+
+        expect(updatedSegment).toBeInstanceOf(Segment)
+        expect(updatedSegment?.name).toBe(updateData.name)
+        expect(updatedSegment?.description).toBe(updateData.description)
+        expect(updatedSegment?.isActive).toBe(updateData.isActive)
+      } finally {
+        // Clean up the test segment
+        await query("DELETE FROM customer_segment_memberships WHERE segment_id = $1", [segmentId])
+        await query("DELETE FROM customer_segments WHERE id = $1", [segmentId])
       }
-
-      const updatedSegment = await segmentationService.updateSegment(testSegmentId, updateData)
-
-      expect(updatedSegment).toBeInstanceOf(Segment)
-      expect(updatedSegment?.name).toBe(updateData.name)
-      expect(updatedSegment?.description).toBe(updateData.description)
-      expect(updatedSegment?.isActive).toBe(updateData.isActive)
     })
 
     it("should return null for non-existent segment", async () => {

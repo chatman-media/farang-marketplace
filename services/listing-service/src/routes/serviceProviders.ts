@@ -152,7 +152,10 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
                 radius: { type: "number", minimum: 1, maximum: 100 },
               },
             },
-            verificationLevel: { type: "string", enum: ["unverified", "basic", "premium", "enterprise"] },
+            verificationLevel: {
+              type: "string",
+              enum: ["unverified", "basic", "premium", "enterprise"],
+            },
             rating: { type: "number", minimum: 1, maximum: 5 },
             priceRange: {
               type: "object",
@@ -170,7 +173,11 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
             },
             page: { type: "integer", minimum: 1, default: 1 },
             limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
-            sortBy: { type: "string", enum: ["rating", "price", "distance", "created_at"], default: "rating" },
+            sortBy: {
+              type: "string",
+              enum: ["rating", "price", "distance", "created_at"],
+              default: "rating",
+            },
             sortOrder: { type: "string", enum: ["asc", "desc"], default: "desc" },
           },
         },

@@ -5,14 +5,16 @@ Advanced AI-powered service providing intelligent recommendations, content analy
 ## 🎯 **Features**
 
 ### 🧠 **Multi-Provider AI Integration**
+
 - **OpenAI GPT-4/3.5** - Advanced language understanding
-- **DeepSeek** - Cost-effective AI processing  
+- **DeepSeek** - Cost-effective AI processing
 - **Claude (Anthropic)** - High-quality text analysis
 - **Mock Provider** - Testing and development
 - **Automatic Failover** - Seamless provider switching
 - **Rate Limiting** - Cost optimization and quota management
 
 ### 📊 **Recommendation Engine**
+
 - **Collaborative Filtering** - User-based recommendations
 - **Content-Based Filtering** - Item similarity matching
 - **AI-Enhanced Scoring** - Machine learning powered suggestions
@@ -21,6 +23,7 @@ Advanced AI-powered service providing intelligent recommendations, content analy
 - **Diversity Application** - Balanced recommendation variety
 
 ### 📝 **Content Analysis**
+
 - **Sentiment Analysis** - Emotional tone detection
 - **Keyword Extraction** - Important term identification
 - **Content Categorization** - Automatic classification
@@ -30,6 +33,7 @@ Advanced AI-powered service providing intelligent recommendations, content analy
 - **Batch Processing** - Efficient bulk analysis
 
 ### 👤 **User Behavior Analytics**
+
 - **Real-time Tracking** - Live user action monitoring
 - **Pattern Recognition** - Behavior trend analysis
 - **Insight Generation** - AI-powered user insights
@@ -40,23 +44,27 @@ Advanced AI-powered service providing intelligent recommendations, content analy
 ## 🚀 **Quick Start**
 
 ### Prerequisites
+
 - Node.js 18+ or Bun
 - TypeScript
 - Environment variables configured
 
 ### Installation
+
 ```bash
 cd services/ai-service
 bun install
 ```
 
 ### Environment Setup
+
 ```bash
 cp .env.example .env
 # Configure your environment variables
 ```
 
 ### Development
+
 ```bash
 # Start development server
 bun run dev
@@ -74,6 +82,7 @@ bun run type-check
 ## 📡 **API Endpoints**
 
 ### 🎯 **Recommendations**
+
 ```http
 # Get personalized recommendations
 GET /api/recommendations?type=listings&limit=20&category=electronics
@@ -88,13 +97,14 @@ GET /api/recommendations/trending?category=fashion&location=Bangkok
 POST /api/recommendations/behavior
 {
   "action": "view",
-  "entityType": "listing", 
+  "entityType": "listing",
   "entityId": "listing_123",
   "metadata": { "category": "electronics" }
 }
 ```
 
 ### 📝 **Content Analysis**
+
 ```http
 # Analyze content
 POST /api/content-analysis/analyze
@@ -134,6 +144,7 @@ POST /api/content-analysis/batch-analyze
 ```
 
 ### 📊 **User Insights**
+
 ```http
 # Track user behavior
 POST /api/insights/behavior
@@ -164,6 +175,7 @@ GET /api/insights/trends?timeframe=7d&category=fashion
 ## 🔧 **Configuration**
 
 ### Environment Variables
+
 ```bash
 # Server Configuration
 PORT=3006
@@ -196,6 +208,7 @@ LISTING_SERVICE_URL=http://localhost:3002
 ## 🏗️ **Architecture**
 
 ### Service Structure
+
 ```
 src/
 ├── controllers/          # API endpoint handlers
@@ -223,6 +236,7 @@ src/
 ## 🧪 **Testing**
 
 ### Test Coverage
+
 - **23 Unit Tests** - Core functionality testing
 - **Provider Integration** - AI provider testing
 - **Rate Limiting** - Quota management testing
@@ -230,6 +244,7 @@ src/
 - **Mock Providers** - Development testing
 
 ### Running Tests
+
 ```bash
 # Run all tests
 bun test
@@ -247,6 +262,7 @@ bun test --watch
 ## 📈 **Performance**
 
 ### Optimization Features
+
 - **Provider Failover** - Automatic switching on failure
 - **Rate Limiting** - Cost and quota management
 - **Batch Processing** - Efficient bulk operations
@@ -254,6 +270,7 @@ bun test --watch
 - **Async Processing** - Non-blocking operations
 
 ### Monitoring
+
 - **Provider Statistics** - Usage and performance metrics
 - **Cost Tracking** - AI provider cost monitoring
 - **Rate Limit Monitoring** - Quota usage tracking
@@ -262,12 +279,14 @@ bun test --watch
 ## 🔒 **Security**
 
 ### Authentication & Authorization
+
 - **JWT Authentication** - Secure token-based auth
 - **Role-Based Access** - User, Admin, Agency roles
 - **Resource Protection** - User-specific data access
 - **Rate Limiting** - DDoS protection
 
 ### Data Protection
+
 - **Input Validation** - Request sanitization
 - **Content Moderation** - Inappropriate content filtering
 - **Secure Headers** - Helmet.js security
@@ -276,6 +295,7 @@ bun test --watch
 ## 🚀 **Deployment**
 
 ### Production Setup
+
 ```bash
 # Build for production
 bun run build
@@ -288,6 +308,7 @@ curl http://localhost:3006/health
 ```
 
 ### Health Monitoring
+
 ```http
 # Health check endpoint
 GET /health

@@ -2,7 +2,10 @@
 
 ## 📋 Обзор
 
-Voice Service - это сервис голосовых технологий для платформы Thailand Marketplace. Он предоставляет возможности распознавания речи, синтеза речи, голосового поиска и голосового управления для улучшения доступности и пользовательского опыта платформы.
+Voice Service - это сервис голосовых технологий для платформы Thailand
+Marketplace. Он предоставляет возможности распознавания речи, синтеза речи,
+голосового поиска и голосового управления для улучшения доступности и
+пользовательского опыта платформы.
 
 ## 🔧 Технические характеристики
 
@@ -17,6 +20,7 @@ Voice Service - это сервис голосовых технологий дл
 ## 🏗️ Архитектура
 
 ### Структура проекта
+
 ```
 services/voice-service/
 ├── src/
@@ -45,133 +49,138 @@ services/voice-service/
 ### Основные интерфейсы
 
 #### SpeechRecognitionRequest (Запрос распознавания речи)
+
 ```typescript
 interface SpeechRecognitionRequest {
-  audioData: string;             // Base64 encoded audio
-  format: 'wav' | 'mp3' | 'ogg' | 'webm';
-  language?: string;             // Язык (th-TH, en-US, ru-RU, etc.)
-  enhanceAudio?: boolean;        // Улучшение качества аудио
-  enablePunctuation?: boolean;   // Включить пунктуацию
+  audioData: string // Base64 encoded audio
+  format: "wav" | "mp3" | "ogg" | "webm"
+  language?: string // Язык (th-TH, en-US, ru-RU, etc.)
+  enhanceAudio?: boolean // Улучшение качества аудио
+  enablePunctuation?: boolean // Включить пунктуацию
 }
 ```
 
 #### SpeechRecognitionResponse (Результат распознавания речи)
+
 ```typescript
 interface SpeechRecognitionResponse {
-  text: string;                  // Распознанный текст
-  confidence: number;            // Уверенность (0-1)
-  language: string;              // Определенный язык
+  text: string // Распознанный текст
+  confidence: number // Уверенность (0-1)
+  language: string // Определенный язык
   alternatives?: Array<{
-    text: string;
-    confidence: number;
-  }>;
-  processingTime: number;        // Время обработки (мс)
+    text: string
+    confidence: number
+  }>
+  processingTime: number // Время обработки (мс)
 }
 ```
 
 #### VoiceCommandRequest (Запрос голосовой команды)
+
 ```typescript
 interface VoiceCommandRequest {
-  audioData: string;             // Base64 encoded audio
-  userId?: string;               // ID пользователя
-  sessionId?: string;            // ID сессии
+  audioData: string // Base64 encoded audio
+  userId?: string // ID пользователя
+  sessionId?: string // ID сессии
   context?: {
-    currentPage?: string;
-    location?: string;
-    preferences?: Record<string, any>;
-  };
+    currentPage?: string
+    location?: string
+    preferences?: Record<string, any>
+  }
 }
 ```
 
 #### VoiceCommandResponse (Результат обработки команды)
+
 ```typescript
 interface VoiceCommandResponse {
-  recognizedText: string;        // Распознанный текст
-  intent: string;                // Определенное намерение
-  entities: Record<string, any>; // Извлеченные сущности
+  recognizedText: string // Распознанный текст
+  intent: string // Определенное намерение
+  entities: Record<string, any> // Извлеченные сущности
   command?: {
-    action: string;
-    parameters: Record<string, any>;
-  };
-  result?: any;                  // Результат выполнения команды
+    action: string
+    parameters: Record<string, any>
+  }
+  result?: any // Результат выполнения команды
   response: {
-    text: string;                // Текстовый ответ
-    audioUrl?: string;           // URL аудио ответа
-  };
-  confidence: number;            // Уверенность
-  processingTime: number;        // Время обработки
+    text: string // Текстовый ответ
+    audioUrl?: string // URL аудио ответа
+  }
+  confidence: number // Уверенность
+  processingTime: number // Время обработки
 }
 ```
 
 #### SupportedLanguage (Поддерживаемые языки)
+
 ```typescript
 interface SupportedLanguage {
-  code: string;                  // Код языка (th-TH, en-US)
-  name: string;                  // Название языка
-  nativeName: string;            // Название на родном языке
-  speechToText: boolean;         // Поддержка STT
-  textToSpeech: boolean;         // Поддержка TTS
-  voiceCommands: boolean;        // Поддержка голосовых команд
+  code: string // Код языка (th-TH, en-US)
+  name: string // Название языка
+  nativeName: string // Название на родном языке
+  speechToText: boolean // Поддержка STT
+  textToSpeech: boolean // Поддержка TTS
+  voiceCommands: boolean // Поддержка голосовых команд
 }
 ```
 
 ## 🎤 Возможности распознавания речи
 
 ### Многоязычное распознавание
+
 ```typescript
 class SpeechRecognitionService {
   async recognizeSpeech(
     audioBuffer: ArrayBuffer,
     options: RecognitionOptions
   ): Promise<RecognitionResult> {
-    
     // Предобработка аудио
     const processedAudio = await this.preprocessAudio(audioBuffer, {
       noiseReduction: options.enhanceAudio,
       normalization: true,
-      format: 'wav'
-    });
-    
+      format: "wav",
+    })
+
     // Определение языка (если не указан)
-    const language = options.language || 
-      await this.detectLanguage(processedAudio);
-    
+    const language =
+      options.language || (await this.detectLanguage(processedAudio))
+
     // Распознавание речи
     const recognition = await this.speechEngine.recognize(
       processedAudio,
       language
-    );
-    
+    )
+
     return {
       text: recognition.text,
       confidence: recognition.confidence,
       language: recognition.detectedLanguage,
       alternatives: recognition.alternatives,
       timestamps: recognition.wordTimestamps,
-      processingTime: recognition.processingTime
-    };
+      processingTime: recognition.processingTime,
+    }
   }
-  
+
   async recognizeStream(
     audioStream: ReadableStream,
     options: StreamRecognitionOptions
   ): Promise<AsyncIterable<PartialRecognitionResult>> {
-    
     const recognitionStream = this.speechEngine.createStream({
       language: options.language,
       interimResults: options.interimResults,
-      punctuation: options.enablePunctuation
-    });
-    
+      punctuation: options.enablePunctuation,
+    })
+
     // Обработка потока
-    audioStream.pipeTo(recognitionStream);
-    
-    return recognitionStream.results();
+    audioStream.pipeTo(recognitionStream)
+
+    return recognitionStream.results()
   }
 }
 ```
 
 ### Поддерживаемые языки
+
 - **Тайский** (th-TH) - основной язык
 - **Английский** (en-US, en-GB) - международный
 - **Русский** (ru-RU) - для русскоязычных пользователей
@@ -180,6 +189,7 @@ class SpeechRecognitionService {
 - **Корейский** (ko-KR) - для корейских туристов
 
 ### Улучшение качества
+
 ```typescript
 class AudioEnhancementService {
   async enhanceAudio(audioBuffer: ArrayBuffer): Promise<ArrayBuffer> {
@@ -187,34 +197,34 @@ class AudioEnhancementService {
       this.noiseReduction,
       this.echoCancellation,
       this.volumeNormalization,
-      this.speechEnhancement
-    ];
-    
-    let enhanced = audioBuffer;
+      this.speechEnhancement,
+    ]
+
+    let enhanced = audioBuffer
     for (const enhancement of enhancements) {
-      enhanced = await enhancement(enhanced);
+      enhanced = await enhancement(enhanced)
     }
-    
-    return enhanced;
+
+    return enhanced
   }
-  
+
   private async noiseReduction(audio: ArrayBuffer): Promise<ArrayBuffer> {
     // Применение фильтра шумоподавления
-    const audioContext = new AudioContext();
-    const audioBuffer = await audioContext.decodeAudioData(audio);
-    
+    const audioContext = new AudioContext()
+    const audioBuffer = await audioContext.decodeAudioData(audio)
+
     // Создание фильтра
-    const filter = audioContext.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.value = 300; // Убираем низкочастотный шум
-    
+    const filter = audioContext.createBiquadFilter()
+    filter.type = "highpass"
+    filter.frequency.value = 300 // Убираем низкочастотный шум
+
     // Обработка
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(filter);
-    
+    const source = audioContext.createBufferSource()
+    source.buffer = audioBuffer
+    source.connect(filter)
+
     // Возвращаем обработанный аудио
-    return this.audioBufferToArrayBuffer(audioBuffer);
+    return this.audioBufferToArrayBuffer(audioBuffer)
   }
 }
 ```
@@ -222,185 +232,184 @@ class AudioEnhancementService {
 ## 🔊 Синтез речи (TTS)
 
 ### Многоголосный синтез
+
 ```typescript
 class TextToSpeechService {
   async synthesizeSpeech(
     text: string,
     options: SynthesisOptions
   ): Promise<SynthesisResult> {
-    
     // Предобработка текста
     const processedText = await this.preprocessText(text, {
       language: options.language,
       ssml: options.enableSSML,
-      pronunciation: options.customPronunciation
-    });
-    
+      pronunciation: options.customPronunciation,
+    })
+
     // Выбор голоса
     const voice = await this.selectVoice({
       language: options.language,
       gender: options.voiceGender,
       style: options.voiceStyle,
-      userId: options.userId // Для персонализации
-    });
-    
+      userId: options.userId, // Для персонализации
+    })
+
     // Синтез
     const synthesis = await this.ttsEngine.synthesize(processedText, {
       voice: voice,
       rate: options.speechRate || 1.0,
       pitch: options.pitch || 1.0,
       volume: options.volume || 1.0,
-      format: options.audioFormat || 'mp3'
-    });
-    
+      format: options.audioFormat || "mp3",
+    })
+
     return {
       audioUrl: synthesis.audioUrl,
       audioBuffer: synthesis.audioBuffer,
       duration: synthesis.duration,
       format: synthesis.format,
       voice: voice,
-      processingTime: synthesis.processingTime
-    };
+      processingTime: synthesis.processingTime,
+    }
   }
-  
+
   async synthesizeSSML(
     ssml: string,
     options: SSMLSynthesisOptions
   ): Promise<SynthesisResult> {
-    
     // Валидация SSML
-    const validatedSSML = await this.validateSSML(ssml);
-    
+    const validatedSSML = await this.validateSSML(ssml)
+
     // Парсинг SSML тегов
-    const parsedSSML = await this.parseSSML(validatedSSML);
-    
+    const parsedSSML = await this.parseSSML(validatedSSML)
+
     // Синтез с учетом SSML разметки
-    return await this.ttsEngine.synthesizeSSML(parsedSSML, options);
+    return await this.ttsEngine.synthesizeSSML(parsedSSML, options)
   }
 }
 ```
 
 ### Доступные голоса
+
 ```typescript
 interface VoiceOption {
-  id: string;
-  name: string;
-  language: string;
-  gender: 'male' | 'female' | 'neutral';
-  style: 'standard' | 'neural' | 'premium';
-  description: string;
+  id: string
+  name: string
+  language: string
+  gender: "male" | "female" | "neutral"
+  style: "standard" | "neural" | "premium"
+  description: string
 }
 
 const availableVoices: VoiceOption[] = [
   // Тайские голоса
   {
-    id: 'th-TH-Premwadee',
-    name: 'Premwadee',
-    language: 'th-TH',
-    gender: 'female',
-    style: 'neural',
-    description: 'Естественный женский тайский голос'
+    id: "th-TH-Premwadee",
+    name: "Premwadee",
+    language: "th-TH",
+    gender: "female",
+    style: "neural",
+    description: "Естественный женский тайский голос",
   },
   {
-    id: 'th-TH-Niran',
-    name: 'Niran',
-    language: 'th-TH',
-    gender: 'male',
-    style: 'neural',
-    description: 'Естественный мужской тайский голос'
+    id: "th-TH-Niran",
+    name: "Niran",
+    language: "th-TH",
+    gender: "male",
+    style: "neural",
+    description: "Естественный мужской тайский голос",
   },
-  
+
   // Английские голоса
   {
-    id: 'en-US-AriaNeural',
-    name: 'Aria',
-    language: 'en-US',
-    gender: 'female',
-    style: 'neural',
-    description: 'Современный американский женский голос'
+    id: "en-US-AriaNeural",
+    name: "Aria",
+    language: "en-US",
+    gender: "female",
+    style: "neural",
+    description: "Современный американский женский голос",
   },
   {
-    id: 'en-US-GuyNeural',
-    name: 'Guy',
-    language: 'en-US',
-    gender: 'male',
-    style: 'neural',
-    description: 'Современный американский мужской голос'
+    id: "en-US-GuyNeural",
+    name: "Guy",
+    language: "en-US",
+    gender: "male",
+    style: "neural",
+    description: "Современный американский мужской голос",
   },
-  
+
   // Русские голоса
   {
-    id: 'ru-RU-SvetlanaNeural',
-    name: 'Светлана',
-    language: 'ru-RU',
-    gender: 'female',
-    style: 'neural',
-    description: 'Естественный русский женский голос'
-  }
-];
+    id: "ru-RU-SvetlanaNeural",
+    name: "Светлана",
+    language: "ru-RU",
+    gender: "female",
+    style: "neural",
+    description: "Естественный русский женский голос",
+  },
+]
 ```
 
 ## 🎯 Голосовые команды
 
 ### Система команд
+
 ```typescript
 class VoiceCommandService {
   async processCommand(
     recognizedText: string,
     context: CommandContext
   ): Promise<CommandResult> {
-    
     // Нормализация текста
-    const normalizedText = this.normalizeText(recognizedText);
-    
+    const normalizedText = this.normalizeText(recognizedText)
+
     // Определение намерения
-    const intent = await this.intentClassifier.classify(normalizedText);
-    
+    const intent = await this.intentClassifier.classify(normalizedText)
+
     // Извлечение сущностей
-    const entities = await this.entityExtractor.extract(normalizedText);
-    
+    const entities = await this.entityExtractor.extract(normalizedText)
+
     // Поиск подходящей команды
-    const command = await this.findMatchingCommand(intent, entities, context);
-    
+    const command = await this.findMatchingCommand(intent, entities, context)
+
     if (!command) {
-      return this.handleUnknownCommand(recognizedText, context);
+      return this.handleUnknownCommand(recognizedText, context)
     }
-    
+
     // Выполнение команды
-    const result = await this.executeCommand(command, entities, context);
-    
+    const result = await this.executeCommand(command, entities, context)
+
     return {
       command: command,
       result: result,
       response: await this.generateResponse(command, result, context),
-      confidence: intent.confidence
-    };
+      confidence: intent.confidence,
+    }
   }
-  
+
   private async executeCommand(
     command: VoiceCommand,
     entities: Record<string, any>,
     context: CommandContext
   ): Promise<any> {
-    
     switch (command.action) {
-      case 'SEARCH_PROPERTIES':
-        return await this.searchProperties(entities, context);
-        
-      case 'BOOK_PROPERTY':
-        return await this.bookProperty(entities, context);
-        
-      case 'GET_DIRECTIONS':
-        return await this.getDirections(entities, context);
-        
-      case 'CALL_SUPPORT':
-        return await this.callSupport(entities, context);
-        
-      case 'TRANSLATE_TEXT':
-        return await this.translateText(entities, context);
-        
+      case "SEARCH_PROPERTIES":
+        return await this.searchProperties(entities, context)
+
+      case "BOOK_PROPERTY":
+        return await this.bookProperty(entities, context)
+
+      case "GET_DIRECTIONS":
+        return await this.getDirections(entities, context)
+
+      case "CALL_SUPPORT":
+        return await this.callSupport(entities, context)
+
+      case "TRANSLATE_TEXT":
+        return await this.translateText(entities, context)
+
       default:
-        throw new Error(`Unknown command action: ${command.action}`);
+        throw new Error(`Unknown command action: ${command.action}`)
     }
   }
 }
@@ -409,6 +418,7 @@ class VoiceCommandService {
 ### Примеры команд
 
 #### Поиск недвижимости
+
 ```
 "Найди квартиру в Бангкоке до 30 тысяч бат"
 "Show me condos near BTS Asok"
@@ -416,6 +426,7 @@ class VoiceCommandService {
 ```
 
 #### Бронирование
+
 ```
 "Забронируй эту квартиру на завтра"
 "Book this condo for next week"
@@ -423,6 +434,7 @@ class VoiceCommandService {
 ```
 
 #### Навигация
+
 ```
 "Как добраться до этого отеля?"
 "Get directions to Siam Paragon"
@@ -430,6 +442,7 @@ class VoiceCommandService {
 ```
 
 #### Поддержка
+
 ```
 "Позвони в службу поддержки"
 "Call customer service"
@@ -441,9 +454,11 @@ class VoiceCommandService {
 ### Распознавание речи
 
 #### POST /api/voice/recognize
+
 Распознавание аудио файла
 
 **Запрос:**
+
 ```json
 {
   "audioData": "base64-encoded-audio",
@@ -455,6 +470,7 @@ class VoiceCommandService {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -474,17 +490,21 @@ class VoiceCommandService {
 ```
 
 #### POST /api/voice/recognize/stream
+
 Потоковое распознавание речи
 
 #### POST /api/voice/recognize/realtime
+
 Распознавание в реальном времени
 
 ### Синтез речи
 
 #### POST /api/voice/synthesize
+
 Синтез речи из текста
 
 **Запрос:**
+
 ```json
 {
   "text": "ยินดีต้อนรับสู่ Thailand Marketplace",
@@ -498,6 +518,7 @@ class VoiceCommandService {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -516,9 +537,11 @@ class VoiceCommandService {
 ```
 
 #### POST /api/voice/synthesize/ssml
+
 Синтез с SSML разметкой
 
 **Запрос:**
+
 ```json
 {
   "ssml": "<speak><prosody rate='slow'>ยินดีต้อนรับ</prosody> <break time='500ms'/> <prosody pitch='high'>Thailand Marketplace</prosody></speak>",
@@ -530,9 +553,11 @@ class VoiceCommandService {
 ### Голосовые команды
 
 #### POST /api/voice/command
+
 Обработка голосовой команды
 
 **Запрос:**
+
 ```json
 {
   "audioData": "base64-encoded-audio",
@@ -549,6 +574,7 @@ class VoiceCommandService {
 ```
 
 **Ответ:**
+
 ```json
 {
   "success": true,
@@ -580,92 +606,102 @@ class VoiceCommandService {
 ```
 
 #### GET /api/voice/commands
+
 Получение списка доступных команд
 
 ### Голосовые сессии
 
 #### POST /api/voice/session/start
+
 Начало голосовой сессии
 
 #### PUT /api/voice/session/:id/end
+
 Завершение голосовой сессии
 
 #### GET /api/voice/session/:id/history
+
 История взаимодействий в сессии
 
 ### Голосовые профили
 
 #### GET /api/voice/profile
+
 Получение голосового профиля пользователя
 
 #### PUT /api/voice/profile
+
 Обновление голосового профиля
 
 #### POST /api/voice/profile/calibrate
+
 Калибровка голосового профиля
 
 ### Настройки и конфигурация
 
 #### GET /api/voice/voices
+
 Список доступных голосов
 
 #### GET /api/voice/languages
+
 Поддерживаемые языки
 
 #### POST /api/voice/feedback
+
 Обратная связь по качеству распознавания
 
 ## 🔄 Фоновые задачи
 
 ### Обработка аудио
+
 ```typescript
 // Обработка загруженных аудио файлов
 const processAudioFiles = async () => {
-  const unprocessedFiles = await this.getUnprocessedAudioFiles();
-  
+  const unprocessedFiles = await this.getUnprocessedAudioFiles()
+
   for (const file of unprocessedFiles) {
     try {
       // Улучшение качества
-      const enhanced = await this.enhanceAudio(file.audioData);
-      
+      const enhanced = await this.enhanceAudio(file.audioData)
+
       // Распознавание речи
-      const recognition = await this.recognizeSpeech(enhanced);
-      
+      const recognition = await this.recognizeSpeech(enhanced)
+
       // Сохранение результатов
-      await this.saveRecognitionResult(file.id, recognition);
-      
+      await this.saveRecognitionResult(file.id, recognition)
+
       // Обновление статуса
-      await this.updateFileStatus(file.id, 'PROCESSED');
-      
+      await this.updateFileStatus(file.id, "PROCESSED")
     } catch (error) {
-      await this.handleProcessingError(file.id, error);
+      await this.handleProcessingError(file.id, error)
     }
   }
-};
+}
 
 // Обучение голосовых моделей
 const trainVoiceModels = async () => {
-  const trainingData = await this.collectTrainingData();
-  
+  const trainingData = await this.collectTrainingData()
+
   if (trainingData.length > 1000) {
-    const model = await this.trainRecognitionModel(trainingData);
-    
+    const model = await this.trainRecognitionModel(trainingData)
+
     if (model.accuracy > this.currentModel.accuracy) {
-      await this.deployModel(model);
+      await this.deployModel(model)
     }
   }
-};
+}
 
 // Очистка старых аудио файлов
 const cleanupOldAudioFiles = async () => {
-  const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 дней
-  
-  const oldFiles = await this.getAudioFilesOlderThan(cutoffDate);
-  
+  const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // 30 дней
+
+  const oldFiles = await this.getAudioFilesOlderThan(cutoffDate)
+
   for (const file of oldFiles) {
-    await this.deleteAudioFile(file.id);
+    await this.deleteAudioFile(file.id)
   }
-};
+}
 ```
 
 ## 🧪 Тестирование
@@ -691,43 +727,45 @@ const cleanupOldAudioFiles = async () => {
    - Интеграция с другими сервисами
 
 ### Тестирование качества
+
 ```typescript
 // Тест точности распознавания
 const testRecognitionAccuracy = async () => {
-  const testCases = await this.loadTestAudioFiles();
-  let correctRecognitions = 0;
-  
+  const testCases = await this.loadTestAudioFiles()
+  let correctRecognitions = 0
+
   for (const testCase of testCases) {
-    const result = await this.recognizeSpeech(testCase.audio);
-    
+    const result = await this.recognizeSpeech(testCase.audio)
+
     if (this.compareTexts(result.text, testCase.expectedText) > 0.9) {
-      correctRecognitions++;
+      correctRecognitions++
     }
   }
-  
-  const accuracy = correctRecognitions / testCases.length;
-  expect(accuracy).toBeGreaterThan(0.85); // Минимум 85% точности
-};
+
+  const accuracy = correctRecognitions / testCases.length
+  expect(accuracy).toBeGreaterThan(0.85) // Минимум 85% точности
+}
 
 // Тест качества синтеза
 const testSynthesisQuality = async () => {
   const testTexts = [
-    'สวัสดีครับ ยินดีต้อนรับ',
-    'Hello, welcome to Thailand Marketplace',
-    'Добро пожаловать в Thailand Marketplace'
-  ];
-  
+    "สวัสดีครับ ยินดีต้อนรับ",
+    "Hello, welcome to Thailand Marketplace",
+    "Добро пожаловать в Thailand Marketplace",
+  ]
+
   for (const text of testTexts) {
-    const synthesis = await this.synthesizeSpeech(text);
-    
-    expect(synthesis.audioUrl).toBeDefined();
-    expect(synthesis.duration).toBeGreaterThan(0);
-    expect(synthesis.processingTime).toBeLessThan(5000); // Максимум 5 секунд
+    const synthesis = await this.synthesizeSpeech(text)
+
+    expect(synthesis.audioUrl).toBeDefined()
+    expect(synthesis.duration).toBeGreaterThan(0)
+    expect(synthesis.processingTime).toBeLessThan(5000) // Максимум 5 секунд
   }
-};
+}
 ```
 
 ### Запуск тестов
+
 ```bash
 # Все тесты
 bun test
@@ -745,6 +783,7 @@ bun test:audio-quality
 ## 🚀 Развертывание
 
 ### Переменные окружения
+
 ```env
 # Сервер
 PORT=3007
@@ -792,12 +831,14 @@ MAX_AUDIO_DURATION=300
 ## 🔄 Интеграции
 
 ### Внутренние сервисы
+
 - **AI Service**: Обработка намерений и сущностей
 - **User Service**: Голосовые профили пользователей
 - **Listing Service**: Голосовой поиск недвижимости
 - **Booking Service**: Голосовое бронирование
 
 ### Внешние сервисы
+
 - **Google Cloud Speech-to-Text**: Распознавание речи
 - **Azure Cognitive Services**: Многоязычное распознавание
 - **AWS Polly**: Синтез речи
@@ -807,41 +848,43 @@ MAX_AUDIO_DURATION=300
 ## 📊 Мониторинг и метрики
 
 ### Метрики производительности
+
 ```typescript
 interface VoiceMetrics {
   // Распознавание речи
-  recognitionAccuracy: number;
-  averageRecognitionTime: number;
-  recognitionRequestsPerSecond: number;
-  
+  recognitionAccuracy: number
+  averageRecognitionTime: number
+  recognitionRequestsPerSecond: number
+
   // Синтез речи
-  synthesisQuality: number;
-  averageSynthesisTime: number;
-  synthesisRequestsPerSecond: number;
-  
+  synthesisQuality: number
+  averageSynthesisTime: number
+  synthesisRequestsPerSecond: number
+
   // Голосовые команды
-  commandSuccessRate: number;
-  averageCommandProcessingTime: number;
-  popularCommands: string[];
-  
+  commandSuccessRate: number
+  averageCommandProcessingTime: number
+  popularCommands: string[]
+
   // Качество аудио
-  averageNoiseLevel: number;
-  averageSpeechClarity: number;
-  audioQualityScore: number;
-  
+  averageNoiseLevel: number
+  averageSpeechClarity: number
+  audioQualityScore: number
+
   // Использование
-  activeSessions: number;
-  totalInteractions: number;
-  averageSessionDuration: number;
-  
+  activeSessions: number
+  totalInteractions: number
+  averageSessionDuration: number
+
   // Ресурсы
-  cpuUsage: number;
-  memoryUsage: number;
-  audioStorageUsage: number;
+  cpuUsage: number
+  memoryUsage: number
+  audioStorageUsage: number
 }
 ```
 
 ### Алерты
+
 - Снижение точности распознавания
 - Высокое время обработки
 - Ошибки в синтезе речи
@@ -849,6 +892,7 @@ interface VoiceMetrics {
 - Проблемы с качеством аудио
 
 ### Дашборды
+
 - Качество распознавания в реальном времени
 - Популярные голосовые команды
 - Использование различных языков
@@ -858,6 +902,7 @@ interface VoiceMetrics {
 ## 📈 Производительность
 
 ### Оптимизации
+
 - Кеширование результатов распознавания
 - Предварительная загрузка голосовых моделей
 - Сжатие аудио файлов
@@ -865,6 +910,7 @@ interface VoiceMetrics {
 - Локальное кеширование синтезированной речи
 
 ### Масштабирование
+
 - Горизонтальное масштабирование
 - Балансировка нагрузки
 - CDN для аудио файлов
@@ -874,7 +920,9 @@ interface VoiceMetrics {
 ---
 
 **Контакты для поддержки:**
+
 - 📧 Email: voice-service@thailand-marketplace.com
 - 📱 Slack: #voice-service-support
 - 🎙️ Voice Team: voice-team@thailand-marketplace.com
-- 📋 Issues: [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=voice-service)
+- 📋 Issues:
+  [GitHub Issues](https://github.com/chatman-media/farang-marketplace/issues?label=voice-service)
