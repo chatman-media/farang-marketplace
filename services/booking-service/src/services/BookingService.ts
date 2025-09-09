@@ -53,6 +53,13 @@ export class BookingService {
         guests: request.guests,
       })
 
+      // Calculate nights
+      const checkInDate = new Date(request.checkIn)
+      const checkOutDate = request.checkOut
+        ? new Date(request.checkOut)
+        : new Date(checkInDate.getTime() + 24 * 60 * 60 * 1000)
+      const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
+
       // 3. Create booking record
       const [newBooking] = await tx
         .insert(bookings)
@@ -60,9 +67,14 @@ export class BookingService {
           listingId: request.listingId,
           guestId,
           hostId,
+          agencyId: request.agencyId,
           type: "accommodation" as const,
-          checkIn: new Date(request.checkIn),
-          checkOut: request.checkOut ? new Date(request.checkOut) : null,
+          checkIn: checkInDate,
+          checkOut: request.checkOut ? checkOutDate : null,
+          nights,
+          adults: request.adults || 1,
+          children: request.children || 0,
+          infants: request.infants || 0,
           guests: request.guests,
           basePrice: pricing.basePrice.toString(),
           serviceFees: pricing.serviceFees.toString(),
@@ -129,6 +141,10 @@ export class BookingService {
           type: "service" as const,
           checkIn: new Date(request.scheduledDate),
           checkOut: null,
+          nights: 0, // Services don't have nights
+          adults: 1,
+          children: 0,
+          infants: 0,
           guests: 1,
           basePrice: pricing.basePrice.toString(),
           serviceFees: pricing.serviceFees.toString(),
@@ -293,11 +309,15 @@ export class BookingService {
     }
 
     const validTransitions: Record<BookingStatus, BookingStatus[]> = {
-      pending: ["confirmed", "cancelled"],
-      confirmed: ["active", "cancelled"],
+      pending: ["confirmed", "cancelled", "expired"],
+      confirmed: ["checked_in", "active", "cancelled"],
+      checked_in: ["checked_out", "active", "cancelled", "no_show"],
+      checked_out: ["completed"],
       active: ["completed", "cancelled", "disputed"],
       completed: ["disputed"],
       cancelled: [],
+      no_show: [],
+      expired: [],
       disputed: ["cancelled"], // Disputed bookings can only be cancelled
     }
 
@@ -427,10 +447,15 @@ export class BookingService {
       listingId: dbBooking.listingId,
       guestId: dbBooking.guestId,
       hostId: dbBooking.hostId,
+      agencyId: dbBooking.agencyId,
       type: dbBooking.type,
       status: dbBooking.status,
       checkIn: dbBooking.checkIn.toISOString(),
       checkOut: dbBooking.checkOut?.toISOString(),
+      nights: dbBooking.nights,
+      adults: dbBooking.adults,
+      children: dbBooking.children,
+      infants: dbBooking.infants,
       guests: dbBooking.guests,
       totalPrice: parseFloat(dbBooking.totalPrice),
       currency: dbBooking.currency,

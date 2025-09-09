@@ -6,7 +6,7 @@ Booking Service - это сервис управления бронирован�
 
 ## 🔧 Технические характеристики
 
-- **Порт разработки**: 3003
+- **Порт разработки**: 3004
 - **Framework**: Fastify 5.x
 - **База данных**: PostgreSQL (booking_service_db)
 - **ORM**: Drizzle ORM
@@ -18,7 +18,7 @@ Booking Service - это сервис управления бронирован�
 
 ## 🚀 Миграция на Fastify
 
-**Статус**: ✅ Завершена (Декабрь 2024)
+**Статус**: ✅ Завершена (Сентябрь 2025)
 
 ### Изменения после миграции:
 - **Производительность**: Улучшена скорость обработки запросов на 40%
@@ -47,8 +47,7 @@ services/booking-service/
 │   ├── services/       # Бизнес-логика
 │   │   ├── BookingService.ts
 │   │   ├── AvailabilityService.ts
-│   │   ├── PricingService.ts
-│   │   └── NotificationService.ts
+│   │   └── PricingService.ts
 │   ├── db/             # Drizzle ORM конфигурация
 │   │   ├── schema.ts   # Схемы базы данных
 │   │   └── connection.ts

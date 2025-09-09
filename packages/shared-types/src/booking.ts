@@ -19,9 +19,13 @@ export enum ServiceBookingType {
 export enum BookingStatus {
   PENDING = "pending",
   CONFIRMED = "confirmed",
+  CHECKED_IN = "checked_in",
+  CHECKED_OUT = "checked_out",
   ACTIVE = "active",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
+  NO_SHOW = "no_show",
+  EXPIRED = "expired",
   DISPUTED = "disputed",
 }
 
@@ -36,10 +40,15 @@ export interface Booking {
   listingId: string
   guestId: string
   hostId: string
+  agencyId?: string
   type: BookingType
   status: BookingStatus
   checkIn: string
   checkOut: string
+  nights: number
+  adults: number
+  children: number
+  infants: number
   guests: number
   totalPrice: number
   currency: string
@@ -88,8 +97,14 @@ export interface CreateBookingRequest {
   listingId: string
   checkIn: string
   checkOut: string
+  adults?: number
+  children?: number
+  infants?: number
   guests: number
+  agencyId?: string
+  guestInfo?: GuestInfo
   specialRequests?: string
+  source?: BookingSource
 }
 
 export interface CreateServiceBookingRequest {
@@ -225,6 +240,75 @@ export const BOOKING_VALIDATION = {
 export interface UpdateStatusRequest {
   status: BookingStatus
   reason?: string
+}
+
+// Additional interfaces mentioned in documentation
+export interface GuestInfo {
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  specialRequests?: string
+}
+
+export interface BookingFee {
+  id: string
+  bookingId: string
+  type: FeeType
+  name: string
+  amount: number
+  currency: string
+  taxable: boolean
+  mandatory: boolean
+  description?: string
+}
+
+export interface BookingTax {
+  id: string
+  bookingId: string
+  type: TaxType
+  name: string
+  rate: number
+  amount: number
+  currency: string
+}
+
+export interface CancellationPolicy {
+  type: "flexible" | "moderate" | "strict" | "super_strict" | "non_refundable"
+  refundPercentage: number
+  deadlineHours: number
+  description: string
+}
+
+export interface DateRestriction {
+  type: "min_stay" | "max_stay" | "check_in_only" | "check_out_only" | "blocked"
+  value?: number
+  reason?: string
+}
+
+export enum FeeType {
+  CLEANING = "cleaning",
+  SERVICE = "service",
+  SECURITY_DEPOSIT = "security_deposit",
+  PLATFORM = "platform",
+  PAYMENT_PROCESSING = "payment_processing",
+  EXTRA_GUEST = "extra_guest",
+  PET = "pet",
+}
+
+export enum TaxType {
+  VAT = "vat",
+  CITY_TAX = "city_tax",
+  TOURISM_TAX = "tourism_tax",
+  SERVICE_TAX = "service_tax",
+}
+
+export enum BookingSource {
+  WEB = "web",
+  MOBILE = "mobile",
+  API = "api",
+  PHONE = "phone",
+  ADMIN = "admin",
 }
 
 export interface BookingResponse extends Booking {

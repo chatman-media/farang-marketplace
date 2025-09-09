@@ -27,9 +27,13 @@ export const bookingTypeEnum = pgEnum("booking_type", [
 export const bookingStatusEnum = pgEnum("booking_status", [
   "pending",
   "confirmed",
+  "checked_in",
+  "checked_out",
   "active",
   "completed",
   "cancelled",
+  "no_show",
+  "expired",
   "disputed",
 ])
 
@@ -76,13 +80,20 @@ export const bookings = pgTable(
     listingId: uuid("listing_id").notNull(),
     guestId: uuid("guest_id").notNull(),
     hostId: uuid("host_id").notNull(),
+    agencyId: uuid("agency_id"),
     type: bookingTypeEnum("type").notNull(),
     status: bookingStatusEnum("status").notNull().default("pending"),
 
     // Booking Details
     checkIn: timestamp("check_in", { withTimezone: true }).notNull(),
     checkOut: timestamp("check_out", { withTimezone: true }),
-    guests: integer("guests").notNull().default(1),
+    nights: integer("nights").notNull(),
+
+    // Guest Details
+    adults: integer("adults").notNull().default(1),
+    children: integer("children").notNull().default(0),
+    infants: integer("infants").notNull().default(0),
+    guests: integer("guests").notNull().default(1), // total guests
 
     // Pricing
     basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),

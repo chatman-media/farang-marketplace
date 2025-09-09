@@ -17,7 +17,11 @@ export const createBookingSchema = {
       .datetime("Check-in date must be a valid ISO 8601 date")
       .refine((date) => new Date(date) > new Date(), "Check-in date must be in the future"),
     checkOut: z.string().datetime("Check-out date must be a valid ISO 8601 date").optional(),
+    adults: z.number().int().min(1).max(20, "Number of adults must be between 1 and 20").optional(),
+    children: z.number().int().min(0).max(10, "Number of children must be between 0 and 10").optional(),
+    infants: z.number().int().min(0).max(5, "Number of infants must be between 0 and 5").optional(),
     guests: z.number().int().min(1).max(20, "Number of guests must be between 1 and 20"),
+    agencyId: z.string().uuid("Agency ID must be a valid UUID").optional(),
     specialRequests: z.string().max(1000, "Special requests must not exceed 1000 characters").optional(),
   }),
 }
