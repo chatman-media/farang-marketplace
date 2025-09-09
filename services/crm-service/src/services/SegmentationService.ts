@@ -176,7 +176,7 @@ export class SegmentationService {
 
   async deleteSegment(id: string): Promise<boolean> {
     const result = await query("DELETE FROM customer_segments WHERE id = $1", [id])
-    return result.rowCount > 0
+    return (result.rowCount || 0) > 0
   }
 
   // Segment membership calculation

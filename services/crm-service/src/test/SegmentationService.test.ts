@@ -296,7 +296,7 @@ describe("SegmentationService", () => {
 
       // Update the segment
       const updateData = {
-        name: "Updated Test Segment",
+        name: `Updated Test Segment ${Date.now()}`,
         description: "Updated description",
         isActive: false,
       }
