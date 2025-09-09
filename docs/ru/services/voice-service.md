@@ -7,11 +7,11 @@ Voice Service - это сервис голосовых технологий дл
 ## 🔧 Технические характеристики
 
 - **Порт разработки**: 3007
-- **База данных**: PostgreSQL (voice_service_db)
-- **ORM**: Drizzle ORM
+- **Хранение данных**: In-memory обработка + внешние API
+- **Аудио обработка**: FFmpeg, Google Cloud Speech, Azure Cognitive Services
 - **Аудио обработка**: Web Audio API, FFmpeg
 - **Очереди**: Redis + Bull Queue
-- **Тестирование**: Vitest (2 теста)
+- **Тестирование**: Vitest (56 тестов в 2 файлах)
 - **Покрытие тестами**: 75%+
 
 ## 🏗️ Архитектура
@@ -21,167 +21,97 @@ Voice Service - это сервис голосовых технологий дл
 services/voice-service/
 ├── src/
 │   ├── controllers/     # Контроллеры API
+│   │   └── VoiceController.ts
 │   ├── middleware/      # Промежуточное ПО
+│   │   └── auth.ts
 │   ├── models/         # Модели данных
+│   │   └── index.ts
 │   ├── routes/         # Маршруты API
+│   │   └── voice.ts
 │   ├── services/       # Бизнес-логика
-│   │   ├── speech/     # Распознавание речи
-│   │   ├── synthesis/  # Синтез речи
-│   │   ├── processing/ # Обработка аудио
-│   │   ├── translation/ # Голосовой перевод
-│   │   └── commands/   # Голосовые команды
-│   ├── audio/          # Аудио утилиты
-│   │   ├── codecs/     # Кодеки
-│   │   ├── filters/    # Фильтры
-│   │   └── analysis/   # Анализ аудио
+│   │   ├── SpeechToTextService.ts
+│   │   ├── VoiceCommandService.ts
+│   │   └── providers/  # Внешние провайдеры
+│   ├── test/           # Vitest тесты (56 тестов)
+│   │   ├── SpeechToTextService.test.ts (24 теста)
+│   │   ├── VoiceCommandService.test.ts (32 теста)
+│   │   └── setup.ts
 │   ├── utils/          # Утилиты
-│   ├── db/             # Конфигурация БД
-│   ├── jobs/           # Фоновые задачи
-│   └── types/          # TypeScript типы
-├── audio-models/       # Голосовые модели
-│   ├── recognition/    # Модели распознавания
-│   ├── synthesis/      # Модели синтеза
-│   └── enhancement/    # Модели улучшения
-├── tests/              # Тесты
+│   ├── app.ts          # Fastify приложение
+│   └── index.ts        # Точка входа
 └── package.json
 ```
 
-### Модель данных
+### Основные интерфейсы
 
-#### VoiceSession (Голосовая сессия)
+#### SpeechRecognitionRequest (Запрос распознавания речи)
 ```typescript
-interface VoiceSession {
-  id: string;                    // UUID
-  userId: string;                // ID пользователя
-  
-  // Конфигурация сессии
-  language: string;              // Язык (th, en, ru, zh)
-  mode: VoiceMode;               // RECOGNITION, SYNTHESIS, CONVERSATION
-  quality: AudioQuality;         // LOW, MEDIUM, HIGH, ULTRA
-  
-  // Статус
-  status: SessionStatus;         // ACTIVE, PAUSED, COMPLETED, ERROR
-  startedAt: Date;
-  endedAt?: Date;
-  duration?: number;             // Длительность в секундах
-  
-  // Метрики
-  totalInteractions: number;     // Общее количество взаимодействий
-  successfulRecognitions: number; // Успешные распознавания
-  averageConfidence: number;     // Средняя уверенность
-  
-  // Настройки
-  settings: VoiceSettings;
-  
-  // Метаданные
-  deviceInfo?: DeviceInfo;
-  networkQuality?: NetworkQuality;
-  createdAt: Date;
-  updatedAt: Date;
+interface SpeechRecognitionRequest {
+  audioData: string;             // Base64 encoded audio
+  format: 'wav' | 'mp3' | 'ogg' | 'webm';
+  language?: string;             // Язык (th-TH, en-US, ru-RU, etc.)
+  enhanceAudio?: boolean;        // Улучшение качества аудио
+  enablePunctuation?: boolean;   // Включить пунктуацию
 }
 ```
 
-#### VoiceInteraction (Голосовое взаимодействие)
+#### SpeechRecognitionResponse (Результат распознавания речи)
 ```typescript
-interface VoiceInteraction {
-  id: string;
-  sessionId: string;
-  
-  // Аудио данные
-  audioUrl?: string;             // URL аудио файла
-  audioFormat: AudioFormat;      // WAV, MP3, OGG, WEBM
-  duration: number;              // Длительность в секундах
-  sampleRate: number;            // Частота дискретизации
-  
-  // Распознавание речи
-  recognizedText?: string;       // Распознанный текст
+interface SpeechRecognitionResponse {
+  text: string;                  // Распознанный текст
   confidence: number;            // Уверенность (0-1)
   language: string;              // Определенный язык
-  
-  // Обработка
-  intent?: string;               // Определенное намерение
-  entities?: Record<string, any>; // Извлеченные сущности
-  
-  // Ответ
-  responseText?: string;         // Текст ответа
-  responseAudioUrl?: string;     // URL аудио ответа
-  
-  // Метрики
+  alternatives?: Array<{
+    text: string;
+    confidence: number;
+  }>;
   processingTime: number;        // Время обработки (мс)
-  
-  // Качество
-  noiseLevel: number;            // Уровень шума (0-1)
-  speechClarity: number;         // Четкость речи (0-1)
-  
-  // Временные метки
-  createdAt: Date;
-  processedAt?: Date;
 }
 ```
 
-#### VoiceCommand (Голосовая команда)
+#### VoiceCommandRequest (Запрос голосовой команды)
 ```typescript
-interface VoiceCommand {
-  id: string;
-  
-  // Команда
-  command: string;               // Текст команды
-  aliases: string[];             // Альтернативные варианты
-  language: string;              // Язык команды
-  
-  // Действие
-  action: CommandAction;         // SEARCH, NAVIGATE, BOOK, CALL, etc.
-  parameters: Record<string, any>; // Параметры команды
-  
-  // Ответ
-  responseTemplate: string;      // Шаблон ответа
-  confirmationRequired: boolean; // Требуется ли подтверждение
-  
-  // Статистика
-  usageCount: number;            // Количество использований
-  successRate: number;           // Процент успешных выполнений
-  
-  // Метаданные
-  category: CommandCategory;     // PROPERTY, BOOKING, NAVIGATION, HELP
-  priority: number;              // Приоритет (1-10)
-  enabled: boolean;
-  
-  createdAt: Date;
-  updatedAt: Date;
+interface VoiceCommandRequest {
+  audioData: string;             // Base64 encoded audio
+  userId?: string;               // ID пользователя
+  sessionId?: string;            // ID сессии
+  context?: {
+    currentPage?: string;
+    location?: string;
+    preferences?: Record<string, any>;
+  };
 }
 ```
 
-#### VoiceProfile (Голосовой профиль)
+#### VoiceCommandResponse (Результат обработки команды)
 ```typescript
-interface VoiceProfile {
-  id: string;
-  userId: string;
-  
-  // Голосовые характеристики
-  voiceprint?: string;           // Отпечаток голоса
-  preferredLanguage: string;     // Предпочитаемый язык
-  accent?: string;               // Акцент
-  
-  // Настройки
-  speechRate: number;            // Скорость речи (0.5-2.0)
-  pitch: number;                 // Высота тона (0.5-2.0)
-  volume: number;                // Громкость (0.0-1.0)
-  
-  // Предпочтения
-  preferredVoice: string;        // Предпочитаемый голос для TTS
-  enableWakeWord: boolean;       // Включить слово пробуждения
-  wakeWord?: string;             // Кастомное слово пробуждения
-  
-  // Адаптация
-  adaptationData?: AdaptationData; // Данные для адаптации
-  
-  // Статистика
-  totalInteractions: number;
-  averageSessionDuration: number;
-  preferredCommands: string[];
-  
-  createdAt: Date;
-  updatedAt: Date;
+interface VoiceCommandResponse {
+  recognizedText: string;        // Распознанный текст
+  intent: string;                // Определенное намерение
+  entities: Record<string, any>; // Извлеченные сущности
+  command?: {
+    action: string;
+    parameters: Record<string, any>;
+  };
+  result?: any;                  // Результат выполнения команды
+  response: {
+    text: string;                // Текстовый ответ
+    audioUrl?: string;           // URL аудио ответа
+  };
+  confidence: number;            // Уверенность
+  processingTime: number;        // Время обработки
+}
+```
+
+#### SupportedLanguage (Поддерживаемые языки)
+```typescript
+interface SupportedLanguage {
+  code: string;                  // Код языка (th-TH, en-US)
+  name: string;                  // Название языка
+  nativeName: string;            // Название на родном языке
+  speechToText: boolean;         // Поддержка STT
+  textToSpeech: boolean;         // Поддержка TTS
+  voiceCommands: boolean;        // Поддержка голосовых команд
 }
 ```
 
@@ -740,19 +670,25 @@ const cleanupOldAudioFiles = async () => {
 
 ## 🧪 Тестирование
 
-### Покрытие тестами (2 теста)
+### Покрытие тестами (56 тестов в 2 файлах)
 
-1. **speech-recognition.test.ts** - Распознавание речи
+1. **SpeechToTextService.test.ts** (24 теста) - Распознавание речи
    - Точность распознавания
-   - Многоязычная поддержка
-   - Обработка шума
-   - Потоковое распознавание
+   - Многоязычная поддержка (тайский, английский, русский)
+   - Обработка различных аудио форматов
+   - Обработка ошибок и валидация
+   - Интеграция с Google Cloud Speech
+   - Интеграция с Azure Cognitive Services
+   - Производительность и лимиты
 
-2. **text-to-speech.test.ts** - Синтез речи
-   - Качество синтеза
-   - Поддержка SSML
-   - Различные голоса
-   - Производительность
+2. **VoiceCommandService.test.ts** (32 теста) - Голосовые команды
+   - Обработка голосовых команд
+   - Определение намерений (поиск, бронирование, навигация)
+   - Извлечение сущностей из речи
+   - Многоязычная поддержка команд
+   - Контекстная обработка
+   - Генерация ответов
+   - Интеграция с другими сервисами
 
 ### Тестирование качества
 ```typescript
@@ -814,11 +750,8 @@ bun test:audio-quality
 PORT=3007
 NODE_ENV=production
 
-# База данных
-DATABASE_URL=postgresql://user:password@localhost:5432/voice_service_db
-
-# Redis
-REDIS_URL=redis://localhost:6379
+# Кеширование (опционально)
+# REDIS_URL=redis://localhost:6379
 
 # Аудио обработка
 FFMPEG_PATH=/usr/bin/ffmpeg
