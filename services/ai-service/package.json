@@ -1,5 +1,5 @@
 {
-  "name": "ai-service",
+  "name": "@thailand-marketplace/ai-service",
   "version": "1.0.0",
   "description": "AI recommendation engine and machine learning service for Thailand Marketplace",
   "main": "dist/index.js",

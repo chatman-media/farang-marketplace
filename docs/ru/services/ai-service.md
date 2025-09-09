@@ -8,8 +8,8 @@ AI Service - это сервис искусственного интеллект
 
 - **Порт разработки**: 3006
 - **Framework**: Fastify 5.x (мигрировано с Express.js)
-- **База данных**: PostgreSQL (ai_service_db) + Vector DB (Pinecone/Weaviate)
-- **ORM**: Drizzle ORM
+- **Хранение данных**: In-memory кеширование + внешние API
+- **Vector DB**: Планируется интеграция с Pinecone/Weaviate
 - **ML Framework**: TensorFlow.js, PyTorch (Python микросервисы)
 - **Очереди**: Redis + Bull Queue
 - **Тестирование**: Vitest (75 тестов)
@@ -54,12 +54,13 @@ services/ai-service/
 │   ├── models/         # Типы и интерфейсы
 │   │   └── index.ts    # Общие типы
 │   ├── test/           # Vitest тесты (75 тестов)
-│   │   ├── InsightsController.test.ts
-│   │   ├── ContentAnalysisController.test.ts
-│   │   ├── RecommendationController.test.ts
-│   │   └── integration/
-│   ├── db/             # Drizzle ORM
-│   └── types/          # TypeScript типы
+│   │   ├── AIProviderService.test.ts
+│   │   ├── ContentAnalysis.test.ts
+│   │   ├── RecommendationEngine.test.ts
+│   │   ├── UserBehaviorService.test.ts
+│   │   ├── MarketplaceIntegrationService.test.ts
+│   │   └── setup.ts
+│   └── utils/          # Утилиты
 ├── python/             # Python микросервисы
 │   ├── image_processing/
 │   ├── text_analysis/
@@ -67,120 +68,85 @@ services/ai-service/
 └── package.json
 ```
 
-### Модель данных
+### Основные интерфейсы
 
-#### AIModel (AI Модель)
+#### RecommendationRequest (Запрос рекомендаций)
 ```typescript
-interface AIModel {
-  id: string;                    // UUID
-  name: string;                  // Название модели
-  type: ModelType;               // NLP, VISION, RECOMMENDATION, PRICING
-  version: string;               // Версия модели
-  
-  // Конфигурация
-  framework: MLFramework;        // TENSORFLOW, PYTORCH, SCIKIT_LEARN
-  modelPath: string;             // Путь к файлу модели
-  configPath: string;            // Путь к конфигурации
-  
-  // Метрики производительности
-  accuracy?: number;             // Точность
-  precision?: number;            // Точность (precision)
-  recall?: number;               // Полнота (recall)
-  f1Score?: number;              // F1-мера
-  
-  // Статус
-  status: ModelStatus;           // TRAINING, READY, DEPLOYED, DEPRECATED
-  deployed: boolean;             // Развернута ли в продакшене
-  
-  // Использование
-  totalPredictions: number;      // Общее количество предсказаний
-  avgResponseTime: number;       // Среднее время ответа (мс)
-  
-  // Метаданные
-  description?: string;
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  trainedAt?: Date;
-  deployedAt?: Date;
-}
-```
-
-#### Prediction (Предсказание)
-```typescript
-interface Prediction {
-  id: string;
-  modelId: string;
-  
-  // Входные данные
-  inputData: Record<string, any>;
-  inputHash: string;             // Хеш входных данных для кеширования
-  
-  // Результат
-  prediction: any;               // Результат предсказания
-  confidence: number;            // Уверенность модели (0-1)
-  
-  // Метрики
-  processingTime: number;        // Время обработки (мс)
-  
-  // Контекст
-  userId?: string;
-  sessionId?: string;
-  requestId: string;
-  
-  // Обратная связь
-  feedback?: PredictionFeedback;
-  
-  // Временные метки
-  createdAt: Date;
-  feedbackAt?: Date;
-}
-```
-
-#### UserEmbedding (Эмбеддинг пользователя)
-```typescript
-interface UserEmbedding {
-  id: string;
+interface RecommendationRequest {
   userId: string;
-  
-  // Векторное представление
-  embedding: number[];           // Вектор предпочтений пользователя
-  dimension: number;             // Размерность вектора
-  
-  // Источники данных
-  basedOn: EmbeddingSource[];    // SEARCHES, BOOKINGS, VIEWS, RATINGS
-  
-  // Метаданные
-  version: string;               // Версия алгоритма эмбеддинга
-  lastUpdated: Date;
-  createdAt: Date;
+  context?: {
+    location?: string;
+    priceRange?: [number, number];
+    propertyType?: string;
+    amenities?: string[];
+  };
+  limit?: number;
+  excludeIds?: string[];
 }
 ```
 
-#### PropertyEmbedding (Эмбеддинг недвижимости)
+#### RecommendationResponse (Ответ с рекомендациями)
 ```typescript
-interface PropertyEmbedding {
-  id: string;
-  listingId: string;
-  
-  // Векторные представления
-  textEmbedding: number[];       // Эмбеддинг описания
-  imageEmbedding: number[];      // Эмбеддинг изображений
-  featureEmbedding: number[];    // Эмбеддинг характеристик
-  
-  // Извлеченные признаки
-  extractedFeatures: {
-    amenities: string[];
-    style: string;
-    condition: string;
-    neighborhood: string;
-    priceCategory: string;
+interface RecommendationResponse {
+  recommendations: Array<{
+    listingId: string;
+    score: number;
+    reasons: string[];
+    confidence: number;
+  }>;
+  totalCount: number;
+  processingTime: number;
+  modelVersion: string;
+}
+```
+
+#### ContentAnalysisRequest (Запрос анализа контента)
+```typescript
+interface ContentAnalysisRequest {
+  text: string;
+  language?: string;
+  analysisType: ('sentiment' | 'keywords' | 'quality' | 'amenities')[];
+}
+```
+
+#### ContentAnalysisResponse (Результат анализа контента)
+```typescript
+interface ContentAnalysisResponse {
+  sentiment?: {
+    score: number;
+    label: 'positive' | 'negative' | 'neutral';
   };
-  
-  // Метаданные
-  version: string;
+  keywords?: string[];
+  extractedAmenities?: string[];
+  qualityScore?: number;
+  suggestions?: string[];
+  detectedLanguage?: string;
+}
+```
+
+#### UserBehaviorProfile (Профиль поведения пользователя)
+```typescript
+interface UserBehaviorProfile {
+  userId: string;
+  preferences: {
+    propertyTypes: string[];
+    priceRange: [number, number];
+    locations: string[];
+    amenities: string[];
+  };
+  searchPatterns: {
+    frequency: number;
+    timeOfDay: string[];
+    seasonality: Record<string, number>;
+  };
+  interactionHistory: {
+    views: number;
+    bookings: number;
+    favorites: number;
+    lastActivity: Date;
+  };
+  score: number;
   lastUpdated: Date;
-  createdAt: Date;
 }
 ```
 
@@ -656,37 +622,42 @@ const processNewImages = async () => {
 
 ## 🧪 Тестирование
 
-### Покрытие тестами (5 тестов)
+### Покрытие тестами (75 тестов в 5 файлах)
 
-1. **nlp.test.ts** - Обработка естественного языка
-   - Анализ тональности
-   - Извлечение сущностей
-   - Генерация текста
-   - Перевод
+1. **AIProviderService.test.ts** (23 теста) - Провайдеры ИИ
+   - Интеграция с OpenAI
+   - Обработка API запросов
+   - Кеширование результатов
+   - Обработка ошибок
+   - Лимиты и квоты
 
-2. **vision.test.ts** - Компьютерное зрение
-   - Классификация изображений
-   - Детекция объектов
-   - Анализ качества
-   - Извлечение признаков
+2. **ContentAnalysis.test.ts** (12 тестов) - Анализ контента
+   - Анализ тональности текста
+   - Извлечение ключевых слов
+   - Классификация контента
+   - Языковая детекция
+   - Качество контента
 
-3. **recommendations.test.ts** - Рекомендательная система
+3. **RecommendationEngine.test.ts** (13 тестов) - Рекомендательная система
    - Генерация рекомендаций
    - Расчет схожести
-   - Обновление эмбеддингов
-   - A/B тестирование
+   - Персонализация
+   - Фильтрация результатов
+   - Метрики качества
 
-4. **pricing.test.ts** - Динамическое ценообразование
-   - Предсказание цен
-   - Анализ рынка
-   - Факторный анализ
-   - Валидация моделей
+4. **UserBehaviorService.test.ts** (17 тестов) - Анализ поведения пользователей
+   - Отслеживание активности
+   - Построение профилей
+   - Предсказание предпочтений
+   - Сегментация пользователей
+   - Аналитика поведения
 
-5. **fraud.test.ts** - Детекция мошенничества
-   - Анализ рисков
-   - Детекция аномалий
-   - Классификация угроз
-   - Мониторинг активности
+5. **MarketplaceIntegrationService.test.ts** (10 тестов) - Интеграция с маркетплейсом
+   - Синхронизация данных
+   - Обработка событий
+   - Интеграция с другими сервисами
+   - Обновление рекомендаций
+   - Мониторинг производительности
 
 ### Тестирование моделей
 ```typescript
@@ -753,13 +724,13 @@ bun test:load
 PORT=3006
 NODE_ENV=production
 
-# База данных
-DATABASE_URL=postgresql://user:password@localhost:5432/ai_service_db
+# Кеширование
+REDIS_URL=redis://localhost:6379
 
-# Vector Database
-PINECONE_API_KEY=your-pinecone-api-key
-PINECONE_ENVIRONMENT=us-west1-gcp
-PINECONE_INDEX_NAME=thailand-marketplace
+# Vector Database (планируется)
+# PINECONE_API_KEY=your-pinecone-api-key
+# PINECONE_ENVIRONMENT=us-west1-gcp
+# PINECONE_INDEX_NAME=thailand-marketplace
 
 # Redis
 REDIS_URL=redis://localhost:6379
