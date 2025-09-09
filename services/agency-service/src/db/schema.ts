@@ -2,18 +2,17 @@ import { pgTable, uuid, varchar, text, decimal, boolean, timestamp, jsonb, index
 
 // Enums
 export const serviceCategory = pgEnum("service_category", [
-  "delivery",
-  "emergency",
-  "maintenance",
-  "insurance",
-  "cleaning",
-  "security",
-  "transportation",
-  "legal",
-  "financial",
-  "marketing",
-  "consulting",
-  "other",
+  "vehicles", // Транспорт (скутеры, мотоциклы, машины, велосипеды)
+  "watercraft", // Водный транспорт (лодки, катеры, яхты)
+  "equipment", // Оборудование (строительное, спортивное, профессиональное)
+  "property", // Недвижимость (квартиры, дома, офисы)
+  "electronics", // Электроника (камеры, ноутбуки, техника)
+  "tools", // Инструменты (строительные, садовые, ремонтные)
+  "furniture", // Мебель (для мероприятий, офиса, дома)
+  "events", // Мероприятия (свадьбы, конференции, праздники)
+  "recreation", // Отдых (спорт, туризм, развлечения)
+  "household", // Бытовые товары
+  "other", // Прочее
 ])
 
 export const agencyStatus = pgEnum("agency_status", ["pending", "active", "suspended", "inactive", "rejected"])

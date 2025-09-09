@@ -149,7 +149,7 @@ API Gateway
 | Listing Service | 4 | 90%+ | ✅ Мигрирован |
 | Booking Service | 37 | 90%+ | ✅ Мигрирован |
 | Payment Service | 4 | 95%+ | ✅ Мигрирован |
-| Agency Service | 3 | 85%+ | ✅ Мигрирован |
+| Agency Service | 50 | 85%+ | ✅ Мигрирован |
 | AI Service | 75 | 90%+ | ✅ Мигрирован |
 | Voice Service | 2 | 80%+ | ✅ Мигрирован |
 | CRM Service | 6 | 90%+ | ✅ Мигрирован |

@@ -156,12 +156,8 @@
           "name": "disputes_payment_id_payments_id_fk",
           "tableFrom": "disputes",
           "tableTo": "payments",
-          "columnsFrom": [
-            "payment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["payment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -777,12 +773,8 @@
           "name": "refunds_payment_id_payments_id_fk",
           "tableFrom": "refunds",
           "tableTo": "payments",
-          "columnsFrom": [
-            "payment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["payment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -965,12 +957,8 @@
           "name": "transactions_payment_id_payments_id_fk",
           "tableFrom": "transactions",
           "tableTo": "payments",
-          "columnsFrom": [
-            "payment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["payment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -986,63 +974,27 @@
     "public.dispute_status": {
       "name": "dispute_status",
       "schema": "public",
-      "values": [
-        "open",
-        "investigating",
-        "resolved",
-        "closed",
-        "escalated"
-      ]
+      "values": ["open", "investigating", "resolved", "closed", "escalated"]
     },
     "public.payment_method": {
       "name": "payment_method",
       "schema": "public",
-      "values": [
-        "ton_wallet",
-        "ton_connect",
-        "jetton_usdt",
-        "jetton_usdc",
-        "stripe_card",
-        "promptpay"
-      ]
+      "values": ["ton_wallet", "ton_connect", "jetton_usdt", "jetton_usdc", "stripe_card", "promptpay"]
     },
     "public.payment_status": {
       "name": "payment_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "processing",
-        "confirmed",
-        "completed",
-        "failed",
-        "cancelled",
-        "refunded",
-        "disputed"
-      ]
+      "values": ["pending", "processing", "confirmed", "completed", "failed", "cancelled", "refunded", "disputed"]
     },
     "public.refund_status": {
       "name": "refund_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "processing",
-        "completed",
-        "failed",
-        "cancelled"
-      ]
+      "values": ["pending", "processing", "completed", "failed", "cancelled"]
     },
     "public.transaction_type": {
       "name": "transaction_type",
       "schema": "public",
-      "values": [
-        "payment",
-        "refund",
-        "fee",
-        "commission",
-        "withdrawal",
-        "deposit",
-        "confirmation"
-      ]
+      "values": ["payment", "refund", "fee", "commission", "withdrawal", "deposit", "confirmation"]
     }
   },
   "schemas": {},

@@ -2,7 +2,7 @@
 
 ## 📋 Обзор
 
-Agency Service - это сервис управления агентствами недвижимости и их агентами на платформе Thailand Marketplace. Он обеспечивает регистрацию агентств, управление агентами, комиссионную систему, аналитику и интеграцию с другими сервисами платформы.
+Agency Service - это сервис управления агентствами аренды на платформе Thailand Marketplace. Он обеспечивает регистрацию и управление агентствами, предоставляющими услуги аренды транспорта (скутеры, мотоциклы, автомобили), оборудования и недвижимости, управление назначениями услуг и интеграцию с системой бронирований.
 
 ## 🔧 Технические характеристики
 
@@ -10,7 +10,7 @@ Agency Service - это сервис управления агентствами
 - **База данных**: PostgreSQL (agency_service_db)
 - **ORM**: Drizzle ORM
 - **Очереди**: Redis + Bull Queue
-- **Тестирование**: Vitest (3 теста)
+- **Тестирование**: Vitest (50 тестов в 3 файлах)
 - **Покрытие тестами**: 85%+
 
 ## 🏗️ Архитектура
@@ -20,198 +20,203 @@ Agency Service - это сервис управления агентствами
 services/agency-service/
 ├── src/
 │   ├── controllers/     # Контроллеры API
+│   │   ├── AgencyController.ts
+│   │   ├── AgencyServiceController.ts
+│   │   ├── BookingIntegrationController.ts
+│   │   └── ServiceAssignmentController.ts
 │   ├── middleware/      # Промежуточное ПО
-│   ├── models/         # Модели данных
+│   │   └── auth.ts
 │   ├── routes/         # Маршруты API
+│   │   ├── agencies.ts
+│   │   ├── agency-services.ts
+│   │   ├── assignments.ts
+│   │   └── booking-integration.ts
 │   ├── services/       # Бизнес-логика
-│   │   ├── commission/ # Комиссионная система
-│   │   ├── analytics/  # Аналитика агентств
-│   │   ├── verification/ # Верификация
-│   │   └── reporting/  # Отчетность
-│   ├── utils/          # Утилиты
-│   ├── db/             # Конфигурация БД
-│   ├── jobs/           # Фоновые задачи
+│   │   ├── AgencyService.ts
+│   │   ├── AgencyServiceService.ts
+│   │   ├── BookingIntegrationService.ts
+│   │   └── ServiceAssignmentService.ts
+│   ├── db/             # База данных
+│   │   ├── connection.ts
+│   │   └── schema.ts
+│   ├── test/           # Тесты (50 тестов)
+│   │   ├── AgencyAPI.test.ts
+│   │   ├── AgencyService.test.ts
+│   │   ├── BookingIntegration.test.ts
+│   │   └── setup.ts
 │   └── types/          # TypeScript типы
-├── tests/              # Тесты
 └── package.json
 ```
 
 ### Модель данных
 
-#### Agency (Агентство)
+#### Agency (Агентство аренды)
 ```typescript
 interface Agency {
   id: string;                    // UUID
+  userId: string;                // ID владельца агентства
+
+  // Основная информация
   name: string;                  // Название агентства
-  legalName: string;             // Юридическое название
-  registrationNumber: string;    // Регистрационный номер
-  taxId: string;                 // Налоговый номер
-  
+  description: string;           // Описание агентства
+  businessRegistrationNumber?: string; // Регистрационный номер
+  taxId?: string;                // Налоговый номер
+
   // Контактная информация
   email: string;
   phone: string;
   website?: string;
-  
-  // Адрес
-  address: Address;
-  
+
+  // Локация и зоны покрытия
+  primaryLocation: Location;     // Основное местоположение
+  coverageAreas: Location[];     // Зоны обслуживания
+
+  // Бизнес-настройки
+  commissionRate: number;        // Комиссия агентства (по умолчанию 15%)
+  minimumOrderValue: number;     // Минимальная сумма заказа
+  currency: string;              // Валюта (THB)
+
   // Статус и верификация
-  status: AgencyStatus;          // PENDING, ACTIVE, SUSPENDED, BANNED
-  verified: boolean;             // Верифицировано ли
-  verificationLevel: VerificationLevel; // BASIC, PREMIUM, ENTERPRISE
-  
-  // Лицензии и сертификаты
-  licenses: License[];
-  certifications: Certification[];
-  
-  // Настройки комиссий
-  commissionSettings: CommissionSettings;
-  
-  // Финансовая информация
-  bankAccount: BankAccount;
-  paymentTerms: PaymentTerms;
-  
-  // Брендинг
-  logo?: string;                 // URL логотипа
-  description?: string;          // Описание агентства
-  specializations: PropertyType[]; // Специализации
-  
-  // Метрики
-  totalListings: number;         // Общее количество объявлений
-  activeListings: number;        // Активные объявления
-  totalBookings: number;         // Общее количество бронирований
-  rating: number;                // Рейтинг (1-5)
-  reviewCount: number;           // Количество отзывов
-  
+  status: AgencyStatus;          // pending, active, suspended, inactive, rejected
+  verificationStatus: VerificationStatus; // pending, verified, rejected, expired
+  isVerified: boolean;           // Верифицировано ли
+
+  // Метрики производительности
+  rating: number;                // Рейтинг (0-5)
+  totalReviews: number;          // Количество отзывов
+  totalOrders: number;           // Общее количество заказов
+  completedOrders: number;       // Завершенные заказы
+
+  // Документы и верификация
+  documents: Record<string, any>; // Документы для верификации
+  verificationNotes?: string;    // Заметки по верификации
+
+  // Настройки
+  settings: Record<string, any>; // Настройки агентства
+
   // Временные метки
   createdAt: Date;
   updatedAt: Date;
   verifiedAt?: Date;
-  lastActiveAt: Date;
 }
 ```
 
-#### Agent (Агент)
+#### AgencyService (Услуга агентства)
 ```typescript
-interface Agent {
+interface AgencyService {
   id: string;                    // UUID
   agencyId: string;              // ID агентства
-  userId: string;                // ID пользователя
-  
-  // Персональная информация
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  
-  // Профессиональная информация
-  position: AgentPosition;       // AGENT, SENIOR_AGENT, MANAGER, DIRECTOR
-  licenseNumber?: string;        // Номер лицензии агента
-  specializations: PropertyType[];
-  languages: Language[];
-  
-  // Статус
-  status: AgentStatus;           // ACTIVE, INACTIVE, SUSPENDED
-  verified: boolean;
-  
-  // Права доступа
-  permissions: AgentPermission[];
-  
-  // Комиссионные настройки
-  commissionRate: number;        // Процент комиссии агента
-  commissionType: CommissionType; // PERCENTAGE, FIXED, TIERED
-  
-  // Метрики производительности
-  totalSales: number;            // Общие продажи
-  totalCommission: number;       // Общая комиссия
-  activeListings: number;        // Активные объявления
-  completedBookings: number;     // Завершенные бронирования
-  rating: number;                // Рейтинг агента
-  
-  // Контактные предпочтения
-  preferredContactMethod: ContactMethod;
-  workingHours: WorkingHours;
-  timezone: string;
-  
+
+  // Детали услуги
+  name: string;                  // Название услуги
+  description: string;           // Описание услуги
+  category: ServiceCategory;     // Категория (vehicles, equipment, property, etc.)
+
+  // Ценообразование
+  basePrice: number;             // Базовая цена
+  currency: string;              // Валюта (THB)
+  pricingModel: string;          // Модель ценообразования (fixed, hourly, per_item)
+
+  // Конфигурация услуги
+  isActive: boolean;             // Активна ли услуга
+  requiresApproval: boolean;     // Требует ли одобрения
+  estimatedDuration?: string;    // Примерная продолжительность
+
+  // Требования и возможности
+  requirements: string[];        // Требования к клиенту
+  capabilities: string[];        // Возможности услуги
+
+  // Метаданные
+  metadata: Record<string, any>; // Дополнительные данные
+
   // Временные метки
   createdAt: Date;
   updatedAt: Date;
-  lastLoginAt?: Date;
-  joinedAgencyAt: Date;
 }
 ```
 
-#### Commission (Комиссия)
+#### ServiceCategory (Категории услуг)
 ```typescript
-interface Commission {
-  id: string;
-  agencyId: string;
-  agentId?: string;              // Может быть null для агентских комиссий
-  bookingId: string;
-  listingId: string;
-  
-  // Финансовые данные
-  bookingAmount: number;         // Сумма бронирования
-  commissionRate: number;        // Процент комиссии
+enum ServiceCategory {
+  VEHICLES = 'vehicles',         // Транспорт (скутеры, мотоциклы, машины, велосипеды)
+  WATERCRAFT = 'watercraft',     // Водный транспорт (лодки, катеры, яхты)
+  EQUIPMENT = 'equipment',       // Оборудование (строительное, спортивное, профессиональное)
+  PROPERTY = 'property',         // Недвижимость (квартиры, дома, офисы)
+  ELECTRONICS = 'electronics',   // Электроника (камеры, ноутбуки, техника)
+  TOOLS = 'tools',              // Инструменты (строительные, садовые, ремонтные)
+  FURNITURE = 'furniture',       // Мебель (для мероприятий, офиса, дома)
+  EVENTS = 'events',            // Мероприятия (свадьбы, конференции, праздники)
+  RECREATION = 'recreation',     // Отдых (спорт, туризм, развлечения)
+  HOUSEHOLD = 'household',       // Бытовые товары
+  OTHER = 'other'               // Прочее
+}
+```
+
+#### ServiceAssignment (Назначение услуги)
+```typescript
+interface ServiceAssignment {
+  id: string;                    // UUID
+  agencyId: string;              // ID агентства
+  agencyServiceId: string;       // ID услуги агентства
+
+  // Связанные сущности
+  listingId: string;             // ID объявления в listing-service
+  bookingId?: string;            // ID бронирования в booking-service (опционально)
+
+  // Ценообразование и комиссия
+  servicePrice: number;          // Цена услуги
   commissionAmount: number;      // Сумма комиссии
-  currency: Currency;
-  
-  // Распределение комиссии
-  agencyCommission: number;      // Комиссия агентства
-  agentCommission: number;       // Комиссия агента
-  platformCommission: number;    // Комиссия платформы
-  
-  // Статус
-  status: CommissionStatus;      // PENDING, CALCULATED, PAID, DISPUTED
-  
-  // Детали расчета
-  calculationDetails: CommissionCalculation;
-  
-  // Выплата
-  payoutId?: string;             // ID выплаты
-  paidAt?: Date;
-  
+  commissionRate: number;        // Процент комиссии
+  currency: string;              // Валюта (THB)
+
+  // Статус и отслеживание
+  status: ServiceAssignmentStatus; // active, paused, completed, cancelled
+  assignedAt: Date;              // Время назначения
+  startedAt?: Date;              // Время начала выполнения
+  completedAt?: Date;            // Время завершения
+
+  // Отслеживание производительности
+  customerRating?: number;       // Оценка клиента (1-5)
+  customerFeedback?: string;     // Отзыв клиента
+  agencyNotes?: string;          // Заметки агентства
+
+  // Метаданные
+  metadata: Record<string, any>; // Дополнительные данные
+
   // Временные метки
   createdAt: Date;
   updatedAt: Date;
-  calculatedAt?: Date;
 }
 ```
 
-#### AgencyListing (Объявление агентства)
+#### ServiceAssignmentStatus (Статусы назначения услуг)
 ```typescript
-interface AgencyListing {
-  id: string;
-  agencyId: string;
-  agentId: string;               // Ответственный агент
-  listingId: string;             // ID в Listing Service
-  
-  // Статус управления
-  managementType: ManagementType; // EXCLUSIVE, NON_EXCLUSIVE, REFERRAL
-  contractStartDate: Date;
-  contractEndDate: Date;
-  
-  // Комиссионные условия
-  commissionRate: number;
-  commissionType: CommissionType;
-  
-  // Маркетинговые настройки
-  featured: boolean;             // Рекомендуемое
-  priority: number;              // Приоритет показа
-  marketingBudget?: number;      // Бюджет на маркетинг
-  
-  // Статус
-  status: ListingStatus;         // ACTIVE, INACTIVE, EXPIRED
-  
-  // Метрики
-  views: number;                 // Просмотры
-  inquiries: number;             // Запросы
-  bookings: number;              // Бронирования
-  
-  // Временные метки
-  createdAt: Date;
-  updatedAt: Date;
-  lastPromotedAt?: Date;
+enum ServiceAssignmentStatus {
+  ACTIVE = 'active',             // Активное назначение
+  PAUSED = 'paused',             // Приостановлено
+  COMPLETED = 'completed',       // Завершено
+  CANCELLED = 'cancelled'        // Отменено
+}
+```
+
+#### AgencyStatus (Статусы агентства)
+```typescript
+enum AgencyStatus {
+  PENDING = 'pending',           // Ожидает рассмотрения
+  ACTIVE = 'active',             // Активное
+  SUSPENDED = 'suspended',       // Приостановлено
+  INACTIVE = 'inactive',         // Неактивное
+  REJECTED = 'rejected'          // Отклонено
+}
+```
+
+#### VerificationStatus (Статусы верификации)
+```typescript
+enum VerificationStatus {
+  PENDING = 'pending',           // Ожидает верификации
+  VERIFIED = 'verified',         // Верифицировано
+  REJECTED = 'rejected',         // Отклонено
+  EXPIRED = 'expired'            // Истекло
 }
 ```
 
@@ -559,25 +564,29 @@ interface AgentMetrics {
 
 ## 🧪 Тестирование
 
-### Покрытие тестами (3 теста)
+### Покрытие тестами (50 тестов в 3 файлах)
 
-1. **agency.test.ts** - Управление агентствами
-   - Регистрация агентства
-   - Верификация агентства
-   - Обновление информации
+1. **AgencyAPI.test.ts** (18 тестов) - API тестирование
+   - Создание агентства
+   - Получение информации об агентстве
+   - Обновление агентства
    - Управление статусами
+   - Верификация агентства
+   - API валидация
 
-2. **agent.test.ts** - Управление агентами
-   - Добавление агента
-   - Управление правами доступа
-   - Расчет комиссий агента
-   - Метрики производительности
-
-3. **commission.test.ts** - Комиссионная система
+2. **AgencyService.test.ts** (15 тестов) - Бизнес-логика
+   - Управление агентствами
+   - Управление услугами агентства
    - Расчет комиссий
-   - Распределение между агентством и агентом
-   - Выплаты комиссий
-   - Отчеты по комиссиям
+   - Метрики производительности
+   - Валидация данных
+
+3. **BookingIntegration.test.ts** (17 тестов) - Интеграция с бронированиями
+   - Назначение услуг на бронирования
+   - Отслеживание статусов
+   - Интеграция с booking-service
+   - Обработка платежей
+   - Управление жизненным циклом заказов
 
 ### Запуск тестов
 ```bash
@@ -609,7 +618,7 @@ REDIS_URL=redis://localhost:6379
 USER_SERVICE_URL=http://localhost:3001
 LISTING_SERVICE_URL=http://localhost:3002
 BOOKING_SERVICE_URL=http://localhost:3003
-PAYMENT_SERVICE_URL=http://localhost:3004
+PAYMENT_SERVICE_URL=http://localhost:3003
 CRM_SERVICE_URL=http://localhost:3008
 
 # Верификация
