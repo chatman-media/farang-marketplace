@@ -188,7 +188,7 @@ export const gracefulShutdown = async (app: FastifyInstance, signal: string) => 
     app.log.info("✅ Graceful shutdown completed")
     process.exit(0)
   } catch (error) {
-    app.log.error("❌ Error during shutdown:", error)
+    app.log.error({ error }, "❌ Error during shutdown")
     process.exit(1)
   }
 }

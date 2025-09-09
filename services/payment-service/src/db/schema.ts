@@ -90,9 +90,6 @@ export const payments = pgTable(
     externalPaymentId: varchar("external_payment_id", { length: 255 }),
     stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
     stripeChargeId: varchar("stripe_charge_id", { length: 255 }),
-    paypalOrderId: varchar("paypal_order_id", { length: 255 }),
-    wiseTransferId: varchar("wise_transfer_id", { length: 255 }),
-    revolutPaymentId: varchar("revolut_payment_id", { length: 255 }),
     webhookData: jsonb("webhook_data"),
 
     // Timestamps

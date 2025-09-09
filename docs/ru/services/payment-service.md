@@ -6,7 +6,7 @@ Payment Service - это современный сервис обработки 
 
 ## 🔧 Технические характеристики
 
-- **Порт разработки**: 3004
+- **Порт разработки**: 3003
 - **Фреймворк**: Fastify
 - **База данных**: PostgreSQL
 - **ORM**: Drizzle ORM
@@ -61,56 +61,58 @@ interface Payment {
   bookingId: string;             // ID бронирования
   payerId: string;               // ID плательщика
   payeeId: string;               // ID получателя
-  agencyId?: string;             // ID агентства
-  
+
   // Сумма и валюта
-  amount: number;                // Сумма платежа
-  currency: Currency;            // Валюта (THB, USD, EUR)
-  originalAmount?: number;       // Оригинальная сумма (до конвертации)
-  originalCurrency?: Currency;   // Оригинальная валюта
-  exchangeRate?: number;         // Курс обмена
-  
-  // Статусы
-  status: PaymentStatus;         // PENDING, PROCESSING, COMPLETED, FAILED
-  type: PaymentType;             // BOOKING, REFUND, PAYOUT, FEE
-  method: PaymentMethod;         // CARD, BANK_TRANSFER, WALLET, CRYPTO
-  
-  // Провайдер
-  provider: PaymentProvider;     // STRIPE, PROMPTPAY
-  providerTransactionId: string; // ID транзакции у провайдера
-  providerFee: number;          // Комиссия провайдера
-  
+  amount: number;                // Основная сумма платежа
+  currency: string;              // Валюта (TON, USD, THB)
+  fiatAmount?: number;           // Фиатная сумма (для крипто платежей)
+  fiatCurrency?: string;         // Фиатная валюта (USD, THB)
+
+  // Статусы и метод
+  status: PaymentStatus;         // pending, processing, confirmed, completed, failed
+  paymentMethod: PaymentMethodType; // ton_wallet, ton_connect, jetton_usdt, jetton_usdc, stripe_card, promptpay
+
+  // Blockchain детали (для TON платежей)
+  tonTransactionHash?: string;   // Хеш транзакции в TON
+  tonWalletAddress?: string;     // Адрес TON кошелька
+  tonAmount?: number;            // Сумма в TON
+  confirmationBlocks?: number;   // Количество подтверждений
+  requiredConfirmations?: number; // Требуемые подтверждения
+
+  // Комиссии
+  platformFee: number;           // Комиссия платформы
+  processingFee: number;         // Комиссия обработки
+  totalFees: number;             // Общие комиссии
+
   // Детали платежа
-  description: string;
-  metadata: Record<string, any>; // Дополнительные данные
-  
-  // Безопасность
-  fraudScore?: number;           // Оценка мошенничества (0-100)
-  riskLevel: RiskLevel;         // LOW, MEDIUM, HIGH
-  
+  description?: string;
+  metadata?: Record<string, any>; // Дополнительные данные
+
+  // Внешние интеграции
+  externalPaymentId?: string;    // ID во внешней системе
+  stripePaymentIntentId?: string; // Stripe Payment Intent ID
+  stripeChargeId?: string;       // Stripe Charge ID
+  webhookData?: Record<string, any>; // Данные webhook
+
   // Временные метки
   createdAt: Date;
   updatedAt: Date;
   processedAt?: Date;
   failedAt?: Date;
-  
-  // Связанные платежи
-  parentPaymentId?: string;      // Для возвратов
-  childPayments?: Payment[];     // Дочерние платежи
 }
 ```
 
 #### PaymentStatus (Статус платежа)
 ```typescript
 enum PaymentStatus {
-  PENDING = 'PENDING',           // Ожидает обработки
-  PROCESSING = 'PROCESSING',     // В процессе обработки
-  REQUIRES_ACTION = 'REQUIRES_ACTION', // Требует действий пользователя
-  COMPLETED = 'COMPLETED',       // Завершен успешно
-  FAILED = 'FAILED',            // Неудачный
-  CANCELLED = 'CANCELLED',       // Отменен
-  REFUNDED = 'REFUNDED',        // Возвращен
-  PARTIALLY_REFUNDED = 'PARTIALLY_REFUNDED' // Частично возвращен
+  PENDING = 'pending',           // Ожидает обработки
+  PROCESSING = 'processing',     // В процессе обработки
+  CONFIRMED = 'confirmed',       // Подтвержден (блокчейн)
+  COMPLETED = 'completed',       // Завершен успешно
+  FAILED = 'failed',            // Неудачный
+  CANCELLED = 'cancelled',       // Отменен
+  REFUNDED = 'refunded',        // Возвращен
+  DISPUTED = 'disputed'         // Спорный платеж
 }
 ```
 
@@ -170,12 +172,22 @@ interface Transaction {
 
 #### PaymentMethod (Способ платежа)
 ```typescript
+enum PaymentMethodType {
+  TON_WALLET = 'ton_wallet',       // TON кошелек
+  TON_CONNECT = 'ton_connect',     // TON Connect интеграция
+  JETTON_USDT = 'jetton_usdt',     // USDT на TON
+  JETTON_USDC = 'jetton_usdc',     // USDC на TON
+  STRIPE_CARD = 'stripe_card',     // Банковская карта через Stripe
+  PROMPTPAY = 'promptpay'          // PromptPay (Таиланд)
+}
+```
+```typescript
 interface PaymentMethod {
   id: string;
   userId: string;
   
   // Тип
-  type: PaymentMethodType;      // CARD, BANK_ACCOUNT, WALLET
+  type: PaymentMethodType;      // ton_wallet, ton_connect, jetton_usdt, jetton_usdc, stripe_card, promptpay
   provider: PaymentProvider;
   providerMethodId: string;     // ID у провайдера
   
@@ -716,7 +728,7 @@ bun test:security
 ### Переменные окружения
 ```env
 # Сервер
-PORT=3004
+PORT=3003
 NODE_ENV=production
 
 # База данных

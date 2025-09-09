@@ -44,12 +44,12 @@ const start = async () => {
 
     // Handle uncaught exceptions
     process.on("uncaughtException", (error) => {
-      app.log.error("Uncaught Exception:", error as Error)
+      app.log.error({ error }, "Uncaught Exception")
       gracefulShutdown(app, "uncaughtException")
     })
 
     process.on("unhandledRejection", (reason, promise) => {
-      app.log.error("Unhandled Rejection at:", promise as Promise<unknown>, "reason:", reason)
+      app.log.error({ promise, reason }, "Unhandled Rejection")
       gracefulShutdown(app, "unhandledRejection")
     })
   } catch (error) {

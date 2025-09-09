@@ -83,7 +83,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
         environment: env.NODE_ENV,
       }
     } catch (error) {
-      app.log.error("Health check failed:", error as Error)
+      app.log.error({ error }, "Health check failed")
       return {
         status: "error",
         timestamp: new Date().toISOString(),
