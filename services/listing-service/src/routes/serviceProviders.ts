@@ -109,6 +109,32 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
     serviceProviderController.createServiceProvider.bind(serviceProviderController),
   )
 
+  // Get all service providers
+  fastify.get(
+    "/",
+    {
+      preHandler: [optionalAuthMiddleware],
+      schema: {
+        querystring: {
+          type: "object",
+          properties: {
+            page: { type: "integer", minimum: 1, default: 1 },
+            limit: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+            sortBy: {
+              type: "string",
+              enum: ["rating", "price", "distance", "created_at"],
+              default: "rating",
+            },
+            sortOrder: { type: "string", enum: ["asc", "desc"], default: "desc" },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      return serviceProviderController.getAllServiceProviders(request as any, reply)
+    },
+  )
+
   // Get service provider by ID
   fastify.get(
     "/:id",

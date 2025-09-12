@@ -3,271 +3,23 @@ import { Vehicle, VehicleType } from "./vehicle"
 import { Product, ProductType } from "./product"
 
 export enum ListingCategory {
-  ACCOMMODATION = "accommodation",
-  REAL_ESTATE = "real_estate", // Added real estate category
   TRANSPORTATION = "transportation",
   TOURS = "tours",
-  ACTIVITIES = "activities",
-  DINING = "dining",
-  SHOPPING = "shopping",
   SERVICES = "services",
-  EVENTS = "events",
   VEHICLES = "vehicles",
   PRODUCTS = "products",
 }
 
-// Real Estate specific enums
-export enum PropertyType {
-  CONDO = "condo",
-  APARTMENT = "apartment",
-  HOUSE = "house",
-  VILLA = "villa",
-  TOWNHOUSE = "townhouse",
-  STUDIO = "studio",
-  PENTHOUSE = "penthouse",
-  DUPLEX = "duplex",
-  LOFT = "loft",
-  COMMERCIAL = "commercial",
-  OFFICE = "office",
-  RETAIL = "retail",
-  WAREHOUSE = "warehouse",
-  LAND = "land",
-  BUILDING = "building",
-}
+// Real estate enums removed - will be added later when system stabilizes
 
-export enum PropertyStatus {
-  AVAILABLE = "available",
-  RENTED = "rented",
-  SOLD = "sold",
-  RESERVED = "reserved",
-  UNDER_CONTRACT = "under_contract",
-  OFF_MARKET = "off_market",
-  MAINTENANCE = "maintenance",
-}
+// Real estate interfaces removed - will be added later when system stabilizes
 
-export enum ListingPurpose {
-  RENT = "rent",
-  SALE = "sale",
-  SHORT_TERM_RENTAL = "short_term_rental", // Airbnb style
-  LONG_TERM_RENTAL = "long_term_rental", // Traditional rental
-  BOTH = "both", // Can be rented or sold
-}
-
-export enum Furnishing {
-  UNFURNISHED = "unfurnished",
-  PARTIALLY_FURNISHED = "partially_furnished",
-  FULLY_FURNISHED = "fully_furnished",
-  LUXURY_FURNISHED = "luxury_furnished",
-}
-
-export enum BuildingType {
-  LOW_RISE = "low_rise",
-  MID_RISE = "mid_rise",
-  HIGH_RISE = "high_rise",
-  DETACHED = "detached",
-  SEMI_DETACHED = "semi_detached",
-  TERRACED = "terraced",
-  CLUSTER = "cluster",
-}
-
-export enum ViewType {
-  CITY = "city",
-  SEA = "sea",
-  MOUNTAIN = "mountain",
-  GARDEN = "garden",
-  POOL = "pool",
-  RIVER = "river",
-  PARK = "park",
-  GOLF = "golf",
-  NO_VIEW = "no_view",
-}
-
-export enum Orientation {
-  NORTH = "north",
-  SOUTH = "south",
-  EAST = "east",
-  WEST = "west",
-  NORTHEAST = "northeast",
-  NORTHWEST = "northwest",
-  SOUTHEAST = "southeast",
-  SOUTHWEST = "southwest",
-}
-
-// Real Estate interfaces
-export interface RealEstate {
-  id: string
-  listingId: string
-
-  // Property basics
-  propertyType: PropertyType
-  propertyStatus: PropertyStatus
-  listingPurpose: ListingPurpose
-
-  // Physical characteristics
-  bedrooms: number
-  bathrooms: number // Can be 2.5, etc.
-  area: number // Total area in sqm
-  livingArea?: number // Living space only
-  landArea?: number // Land plot size
-  floor?: number // Which floor (for apartments)
-  totalFloors?: number // Total floors in building
-
-  // Building details
-  buildingType?: BuildingType
-  buildingAge?: number // Years since construction
-  yearBuilt?: number
-  yearRenovated?: number
-
-  // Furnishing and condition
-  furnishing: Furnishing
-  condition: string // excellent, good, fair, needs_renovation
-
-  // Views and orientation
-  views: ViewType[]
-  orientation?: Orientation
-  balconies: number
-  terraces: number
-
-  // Pricing details
-  price: number
-  pricePerSqm?: number
-  currency: Currency
-  priceType: "fixed" | "negotiable" | "auction" | "quote_on_request"
-
-  // Rental specific pricing (Airbnb style)
-  dailyRate?: number
-  weeklyRate?: number
-  monthlyRate?: number
-  yearlyRate?: number
-
-  // Additional costs
-  maintenanceFee?: number
-  commonAreaFee?: number
-  securityDeposit?: number
-  cleaningFee?: number
-
-  // Utilities
-  electricityIncluded: boolean
-  waterIncluded: boolean
-  internetIncluded: boolean
-  cableIncluded: boolean
-  gasIncluded: boolean
-
-  // Parking
-  parkingSpaces: number
-  parkingType?: string // covered, open, garage, street
-  parkingFee?: number
-
-  // Relations
-  amenities?: PropertyAmenities
-  rules?: PropertyRules
-
-  createdAt: Date
-  updatedAt: Date
-  metadata?: Record<string, any>
-}
-
-export interface PropertyAmenities {
-  id: string
-  realEstateId: string
-
-  // Building amenities
-  hasElevator: boolean
-  hasSwimmingPool: boolean
-  hasFitnessCenter: boolean
-  hasSauna: boolean
-  hasGarden: boolean
-  hasPlayground: boolean
-  hasSecurity: boolean
-  hasCCTV: boolean
-  hasKeyCard: boolean
-  hasReception: boolean
-  hasConcierge: boolean
-  hasMailbox: boolean
-
-  // Unit amenities
-  hasAirConditioning: boolean
-  hasHeating: boolean
-  hasWashingMachine: boolean
-  hasDryer: boolean
-  hasDishwasher: boolean
-  hasMicrowave: boolean
-  hasRefrigerator: boolean
-  hasOven: boolean
-  hasBalcony: boolean
-  hasTerrace: boolean
-  hasFireplace: boolean
-  hasStorage: boolean
-
-  // Technology
-  hasWifi: boolean
-  hasCableTV: boolean
-  hasSmartTV: boolean
-  hasIntercom: boolean
-  hasSmartHome: boolean
-
-  // Accessibility
-  isWheelchairAccessible: boolean
-  hasHandicapParking: boolean
-
-  // Pet policy
-  petsAllowed: boolean
-  catsAllowed: boolean
-  dogsAllowed: boolean
-  petDeposit?: number
-
-  // Additional amenities
-  customAmenities: string[]
-
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface PropertyRules {
-  id: string
-  realEstateId: string
-
-  // Check-in/out rules (for short-term rentals)
-  checkInTime?: string // "15:00"
-  checkOutTime?: string // "11:00"
-  selfCheckIn: boolean
-  keypadEntry: boolean
-
-  // Guest rules
-  maxGuests?: number
-  infantsAllowed: boolean
-  childrenAllowed: boolean
-  eventsAllowed: boolean
-  partiesAllowed: boolean
-  smokingAllowed: boolean
-
-  // Noise and behavior
-  quietHoursStart?: string // "22:00"
-  quietHoursEnd?: string // "08:00"
-
-  // Cancellation policy
-  cancellationPolicy: "flexible" | "moderate" | "strict"
-
-  // House rules
-  houseRules?: string
-  additionalRules: string[]
-
-  // Safety features
-  hasSmokeDetektor: boolean
-  hasCarbonMonoxideDetector: boolean
-  hasFireExtinguisher: boolean
-  hasFirstAidKit: boolean
-  hasSecurityCamera: boolean
-
-  createdAt: Date
-  updatedAt: Date
-}
+// Property amenities and rules interfaces removed - will be added later when system stabilizes
 
 export enum ServiceType {
   VISA_ASSISTANCE = "visa_assistance",
   TRANSLATION = "translation",
   LEGAL_CONSULTATION = "legal_consultation",
-  REAL_ESTATE = "real_estate",
   BUSINESS_SETUP = "business_setup",
   INSURANCE = "insurance",
   BANKING = "banking",
@@ -293,9 +45,8 @@ export enum ServiceDuration {
 }
 
 export enum ListingType {
-  RENT = "rent",
-  SALE = "sale",
-  BOTH = "both",
+  RENTAL = "rental",
+  SERVICE = "service",
 }
 
 export enum ListingStatus {
@@ -396,7 +147,6 @@ export interface ProductListing extends Omit<Listing, "amenities" | "availabilit
   shippingOptions?: {
     localDelivery: boolean
     nationalShipping: boolean
-    internationalShipping: boolean
     pickupAvailable: boolean
     shippingCost?: number
     freeShippingThreshold?: number
@@ -622,135 +372,4 @@ export interface ListingResponse extends Listing {
   }
 }
 
-// Real Estate specific request/response types
-export interface CreateRealEstateRequest {
-  title: string
-  description: string
-  category: ListingCategory.REAL_ESTATE
-
-  // Property details
-  propertyType: PropertyType
-  listingPurpose: ListingPurpose
-  bedrooms: number
-  bathrooms: number
-  area: number
-  livingArea?: number
-  landArea?: number
-  floor?: number
-  totalFloors?: number
-
-  // Building details
-  buildingType?: BuildingType
-  buildingAge?: number
-  yearBuilt?: number
-  yearRenovated?: number
-
-  // Condition and furnishing
-  furnishing: Furnishing
-  condition: string
-  views: ViewType[]
-  orientation?: Orientation
-  balconies?: number
-  terraces?: number
-
-  // Pricing
-  price: number
-  pricePerSqm?: number
-  currency: Currency
-  priceType: "fixed" | "negotiable" | "auction" | "quote_on_request"
-
-  // Rental pricing (if applicable)
-  dailyRate?: number
-  weeklyRate?: number
-  monthlyRate?: number
-  yearlyRate?: number
-
-  // Additional costs
-  maintenanceFee?: number
-  commonAreaFee?: number
-  securityDeposit?: number
-  cleaningFee?: number
-
-  // Utilities
-  electricityIncluded?: boolean
-  waterIncluded?: boolean
-  internetIncluded?: boolean
-  cableIncluded?: boolean
-  gasIncluded?: boolean
-
-  // Parking
-  parkingSpaces?: number
-  parkingType?: string
-  parkingFee?: number
-
-  // Location
-  location: Location
-
-  // Media
-  images: string[]
-  videos?: string[]
-  virtualTour?: string
-
-  // Amenities
-  amenities?: Partial<Omit<PropertyAmenities, "id" | "realEstateId" | "createdAt" | "updatedAt">>
-
-  // Rules (for short-term rentals)
-  rules?: Partial<Omit<PropertyRules, "id" | "realEstateId" | "createdAt" | "updatedAt">>
-}
-
-export interface UpdateRealEstateRequest extends Partial<CreateRealEstateRequest> {
-  id: string
-}
-
-export interface RealEstateSearchFilters {
-  propertyType?: PropertyType[]
-  listingPurpose?: ListingPurpose[]
-  minPrice?: number
-  maxPrice?: number
-  currency?: Currency
-  minBedrooms?: number
-  maxBedrooms?: number
-  minBathrooms?: number
-  maxBathrooms?: number
-  minArea?: number
-  maxArea?: number
-  furnishing?: Furnishing[]
-  buildingType?: BuildingType[]
-  views?: ViewType[]
-
-  // Location filters
-  city?: string
-  district?: string
-  region?: string
-  country?: string
-
-  // Amenities filters
-  hasSwimmingPool?: boolean
-  hasFitnessCenter?: boolean
-  hasParking?: boolean
-  hasElevator?: boolean
-  hasAirConditioning?: boolean
-  hasWifi?: boolean
-  petsAllowed?: boolean
-
-  // Rental specific filters
-  availableFrom?: string
-  availableTo?: string
-  maxGuests?: number
-
-  // General filters
-  page?: number
-  limit?: number
-  sortBy?: "price" | "area" | "bedrooms" | "created_at" | "updated_at"
-  sortOrder?: "asc" | "desc"
-}
-
-export interface RealEstateListing extends Listing {
-  realEstate: RealEstate
-}
-
-export interface RealEstateResponse {
-  listing: RealEstateListing
-  success: boolean
-  message?: string
-}
+// Real Estate functionality temporarily removed - will be added when system stabilizes

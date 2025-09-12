@@ -51,7 +51,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
       features: [
         "Listing management",
         "Service provider management",
-        "AI-powered search",
+        "AI service integration",
         "Image upload",
         "Redis caching",
       ],
@@ -71,7 +71,8 @@ export const createApp = async (): Promise<FastifyInstance> => {
 
   // Register routes
   await app.register(import("./routes/listings"), { prefix: "/api/listings" })
-  await app.register(import("./routes/realEstate"), { prefix: "/api" })
+  await app.register(import("./routes/categories"), { prefix: "/api" })
+  await app.register(import("./routes/ai"), { prefix: "/api/ai" })
 
   // Import controllers for Fastify routes
   const { ServiceProviderController } = await import("./controllers/ServiceProviderController")

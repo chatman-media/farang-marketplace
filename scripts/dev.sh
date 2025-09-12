@@ -38,10 +38,43 @@ echo "  - PostgreSQL: localhost:5432"
 echo "  - Redis: localhost:6379"
 echo "  - MinIO: localhost:9000 (console: localhost:9001)"
 echo ""
-echo "To start development servers, run:"
-echo "  bun run dev"
+echo "🚀 Starting core development servers..."
+
+# Function to start a service in background
+start_service() {
+    local service_name=$1
+    local service_path=$2
+    local port=$3
+
+    echo "📦 Starting $service_name on port $port..."
+    cd "$service_path"
+    bun run dev > "../logs/${service_name}.log" 2>&1 &
+    local pid=$!
+    echo "$pid" > "../logs/${service_name}.pid"
+    cd - > /dev/null
+    echo "✅ $service_name started (PID: $pid)"
+}
+
+# Create logs directory
+mkdir -p logs
+
+# Start core services
+start_service "api-gateway" "services/api-gateway" "3000"
+sleep 2
+start_service "listing-service" "services/listing-service" "3003"
+sleep 2
+start_service "web-app" "apps/web" "3001"
+
 echo ""
-echo "Individual apps:"
-echo "  - Web: bun run --filter @marketplace/web dev"
-echo "  - TON App: bun run --filter @marketplace/ton-app dev"
-echo "  - Admin: bun run --filter @marketplace/admin dev"
+echo "🎉 Core services started!"
+echo ""
+echo "Available endpoints:"
+echo "  - Web App: http://localhost:3001"
+echo "  - API Gateway: http://localhost:3000"
+echo "  - Listings API: http://localhost:3000/api/listings"
+echo "  - Service Providers API: http://localhost:3000/api/service-providers"
+echo ""
+echo "📊 Service status: http://localhost:3000/services"
+echo "📝 Logs are in ./logs/ directory"
+echo ""
+echo "To stop all services, run: ./scripts/stop-dev.sh"

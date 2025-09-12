@@ -1,12 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest"
-import { ServiceProviderService } from "../services/ServiceProviderService"
+import { describe, it, expect } from "vitest"
 
 describe("ServiceProviderService", () => {
-  let serviceProviderService: ServiceProviderService
-
-  beforeEach(() => {
-    serviceProviderService = new ServiceProviderService()
-  })
 
   describe("Data Validation", () => {
     describe("Service Provider Creation", () => {
@@ -242,8 +236,8 @@ describe("ServiceProviderService", () => {
           expect(slot.end).toMatch(/^\d{2}:\d{2}$/)
 
           // Convert to minutes for comparison
-          const startMinutes = parseInt(slot.start.split(":")[0]) * 60 + parseInt(slot.start.split(":")[1])
-          const endMinutes = parseInt(slot.end.split(":")[0]) * 60 + parseInt(slot.end.split(":")[1])
+          const startMinutes = Number.parseInt(slot.start.split(":")[0]) * 60 + Number.parseInt(slot.start.split(":")[1])
+          const endMinutes = Number.parseInt(slot.end.split(":")[0]) * 60 + Number.parseInt(slot.end.split(":")[1])
 
           expect(endMinutes).toBeGreaterThan(startMinutes)
         })

@@ -13,7 +13,11 @@ export const ServiceConfigSchema = z.object({
       threshold: z.number().default(5),
       timeout: z.number().default(60000),
     })
-    .default({}),
+    .default({
+      enabled: true,
+      threshold: 5,
+      timeout: 60000,
+    }),
 })
 
 export type ServiceConfig = z.infer<typeof ServiceConfigSchema>
@@ -34,7 +38,7 @@ export const servicesConfig: Record<string, ServiceConfig> = {
   },
   "listing-service": {
     name: "Listing Service",
-    url: process.env.LISTING_SERVICE_URL || "http://localhost:3002",
+    url: process.env.LISTING_SERVICE_URL || "http://localhost:3003",
     healthCheck: "/health",
     timeout: 30000,
     retries: 3,
@@ -46,7 +50,7 @@ export const servicesConfig: Record<string, ServiceConfig> = {
   },
   "payment-service": {
     name: "Payment Service",
-    url: process.env.PAYMENT_SERVICE_URL || "http://localhost:3003",
+    url: process.env.PAYMENT_SERVICE_URL || "http://localhost:3004",
     healthCheck: "/health",
     timeout: 30000,
     retries: 3,
@@ -58,7 +62,7 @@ export const servicesConfig: Record<string, ServiceConfig> = {
   },
   "booking-service": {
     name: "Booking Service",
-    url: process.env.BOOKING_SERVICE_URL || "http://localhost:3004",
+    url: process.env.BOOKING_SERVICE_URL || "http://localhost:3005",
     healthCheck: "/health",
     timeout: 30000,
     retries: 3,
@@ -70,7 +74,7 @@ export const servicesConfig: Record<string, ServiceConfig> = {
   },
   "agency-service": {
     name: "Agency Service",
-    url: process.env.AGENCY_SERVICE_URL || "http://localhost:3005",
+    url: process.env.AGENCY_SERVICE_URL || "http://localhost:3006",
     healthCheck: "/health",
     timeout: 30000,
     retries: 3,
@@ -82,7 +86,7 @@ export const servicesConfig: Record<string, ServiceConfig> = {
   },
   "ai-service": {
     name: "AI Service",
-    url: process.env.AI_SERVICE_URL || "http://localhost:3006",
+    url: process.env.AI_SERVICE_URL || "http://localhost:3007",
     healthCheck: "/health",
     timeout: 30000,
     retries: 3,
@@ -94,7 +98,7 @@ export const servicesConfig: Record<string, ServiceConfig> = {
   },
   "voice-service": {
     name: "Voice Service",
-    url: process.env.VOICE_SERVICE_URL || "http://localhost:3007",
+    url: process.env.VOICE_SERVICE_URL || "http://localhost:3008",
     healthCheck: "/health",
     timeout: 30000,
     retries: 3,
@@ -106,7 +110,7 @@ export const servicesConfig: Record<string, ServiceConfig> = {
   },
   "crm-service": {
     name: "CRM Service",
-    url: process.env.CRM_SERVICE_URL || "http://localhost:3008",
+    url: process.env.CRM_SERVICE_URL || "http://localhost:3009",
     healthCheck: "/health",
     timeout: 30000,
     retries: 3,

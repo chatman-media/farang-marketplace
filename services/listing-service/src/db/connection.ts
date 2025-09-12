@@ -6,15 +6,13 @@ import * as schema from "./schema"
 const connectionString = process.env.DATABASE_URL || "postgresql://localhost:5432/thailand_marketplace"
 
 // Create postgres client
-const client = postgres(connectionString, {
-  max: 20,
-  idle_timeout: 20,
-  connect_timeout: 10,
-})
+const client = postgres(connectionString)
 
-// Create drizzle instance
+// Create drizzle instance with local schema
 export const db = drizzle(client, { schema })
 
 // Export types
 export type Database = typeof db
+
+// Re-export local schema
 export * from "./schema"

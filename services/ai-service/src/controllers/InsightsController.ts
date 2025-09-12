@@ -166,9 +166,9 @@ export class InsightsController {
         rating: (Math.random() * 2 + 3).toFixed(1),
         timeframe: query.timeframe,
         trends: {
-          viewsChange: (Math.random() * 40 - 20).toFixed(1) + "%",
-          clicksChange: (Math.random() * 40 - 20).toFixed(1) + "%",
-          bookingsChange: (Math.random() * 40 - 20).toFixed(1) + "%",
+          viewsChange: `${(Math.random() * 40 - 20).toFixed(1)}%`,
+          clicksChange: `${(Math.random() * 40 - 20).toFixed(1)}%`,
+          bookingsChange: `${(Math.random() * 40 - 20).toFixed(1)}%`,
         },
       }
 
@@ -257,8 +257,8 @@ export class InsightsController {
         revenue: Math.floor(Math.random() * 100000) + 10000,
         topCategories: ["Electronics", "Real Estate", "Services", "Vehicles"],
         topLocations: ["Bangkok", "Phuket", "Chiang Mai", "Pattaya"],
-        userGrowth: (Math.random() * 20 + 5).toFixed(1) + "%",
-        revenueGrowth: (Math.random() * 30 + 10).toFixed(1) + "%",
+        userGrowth: `${(Math.random() * 20 + 5).toFixed(1)}%`,
+        revenueGrowth: `${(Math.random() * 30 + 10).toFixed(1)}%`,
       }
 
       return {
@@ -308,7 +308,7 @@ export class InsightsController {
       const patterns = {
         mostActiveHours: ["10:00", "14:00", "19:00"],
         preferredCategories: ["electronics", "real-estate", "services"],
-        averageSessionDuration: Math.floor(Math.random() * 30 + 5) + " minutes",
+        averageSessionDuration: `${Math.floor(Math.random() * 30 + 5)} minutes`,
         devicePreference: Math.random() > 0.5 ? "mobile" : "desktop",
         behaviorScore: (Math.random() * 100).toFixed(1),
         totalActions: behaviors.length,

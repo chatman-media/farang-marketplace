@@ -8,7 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "vitest",
+    "test": "vitest run",
     "test:watch": "vitest --watch",
     "lint": "biome check src/",
     "lint:fix": "biome check --write src/",
@@ -31,7 +31,7 @@
     "microsoft-cognitiveservices-speech-sdk": "^1.45.0",
     "multer": "2.0.2",
     "natural": "8.1.0",
-    "openai": "5.19.1",
+    "openai": "5.20.0",
     "sentiment": "^5.0.2",
     "stopword": "3.1.5",
     "wav": "^1.0.2",
@@ -47,8 +47,8 @@
     "tsx": "^4.20.5",
     "vitest": "3.2.4",
     "eslint": "9.35.0",
-    "@typescript-eslint/eslint-plugin": "8.42.0",
-    "@typescript-eslint/parser": "8.42.0",
+    "@typescript-eslint/eslint-plugin": "8.43.0",
+    "@typescript-eslint/parser": "8.43.0",
     "@biomejs/biome": "2.2.3"
   },
   "keywords": [

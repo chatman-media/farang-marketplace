@@ -329,8 +329,9 @@ export const mockUserStats = {
  */
 export async function setupTestDatabase(): Promise<void> {
   try {
-    // Run database migrations
-    await runMigrations()
+    // Skip migrations since we're using centralized schema
+    // The database schema is already set up via @marketplace/database-schema
+    console.log("Using centralized database schema, skipping local migrations")
 
     // Clear any existing test data
     await cleanupTestDatabase()

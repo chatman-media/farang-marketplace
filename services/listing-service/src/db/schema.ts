@@ -1,34 +1,16 @@
-import {
-  pgTable,
-  uuid,
-  varchar,
-  text,
-  integer,
-  decimal,
-  boolean,
-  timestamp,
-  jsonb,
-  json,
-  pgEnum,
-} from "drizzle-orm/pg-core"
+import { pgTable, uuid, varchar, text, integer, decimal, boolean, timestamp, jsonb, pgEnum } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
 
 // Enums
 export const listingCategoryEnum = pgEnum("listing_category", [
-  "accommodation",
-  "real_estate",
   "transportation",
   "tours",
-  "activities",
-  "dining",
-  "shopping",
   "services",
-  "events",
   "vehicles",
   "products",
 ])
 
-export const listingTypeEnum = pgEnum("listing_type", ["accommodation", "service", "vehicle", "product"])
+export const listingTypeEnum = pgEnum("listing_type", ["rental", "service", "vehicle", "product"])
 
 export const listingStatusEnum = pgEnum("listing_status", [
   "draft",
@@ -94,7 +76,7 @@ export const productTypeEnum = pgEnum("product_type", [
   "toys",
   "health_beauty",
   "food_beverage",
-  "real_estate",
+
   "services",
   "other",
 ])
@@ -112,7 +94,6 @@ export const productConditionEnum = pgEnum("product_condition", [
 export const productStatusEnum = pgEnum("product_status", [
   "active",
   "inactive",
-  "sold",
   "rented",
   "reserved",
   "maintenance",
@@ -121,86 +102,11 @@ export const productStatusEnum = pgEnum("product_status", [
   "rejected",
 ])
 
-export const productListingTypeEnum = pgEnum("product_listing_type", ["sale", "rent", "both", "service"])
+export const productListingTypeEnum = pgEnum("product_listing_type", ["rental", "service"])
 
 export const priceTypeEnum = pgEnum("price_type", ["fixed", "negotiable", "auction", "quote_on_request"])
 
-// Real Estate specific enums
-export const propertyTypeEnum = pgEnum("property_type", [
-  "condo",
-  "apartment",
-  "house",
-  "villa",
-  "townhouse",
-  "studio",
-  "penthouse",
-  "duplex",
-  "loft",
-  "commercial",
-  "office",
-  "retail",
-  "warehouse",
-  "land",
-  "building",
-])
-
-export const propertyStatusEnum = pgEnum("property_status", [
-  "available",
-  "rented",
-  "sold",
-  "reserved",
-  "under_contract",
-  "off_market",
-  "maintenance",
-])
-
-export const listingPurposeEnum = pgEnum("listing_purpose", [
-  "rent",
-  "sale",
-  "short_term_rental", // Airbnb style
-  "long_term_rental", // Traditional rental
-  "both", // Can be rented or sold
-])
-
-export const furnishingEnum = pgEnum("furnishing", [
-  "unfurnished",
-  "partially_furnished",
-  "fully_furnished",
-  "luxury_furnished",
-])
-
-export const buildingTypeEnum = pgEnum("building_type", [
-  "low_rise",
-  "mid_rise",
-  "high_rise",
-  "detached",
-  "semi_detached",
-  "terraced",
-  "cluster",
-])
-
-export const viewTypeEnum = pgEnum("view_type", [
-  "city",
-  "sea",
-  "mountain",
-  "garden",
-  "pool",
-  "river",
-  "park",
-  "golf",
-  "no_view",
-])
-
-export const orientationEnum = pgEnum("orientation", [
-  "north",
-  "south",
-  "east",
-  "west",
-  "northeast",
-  "northwest",
-  "southeast",
-  "southwest",
-])
+// Real estate enums removed - will be added later when system stabilizes
 
 // Main listings table
 export const listings = pgTable("listings", {
@@ -325,6 +231,7 @@ export const vehicles = pgTable("vehicles", {
     precision: 10,
     scale: 2,
   }).notNull(),
+  deposit: decimal("deposit", { precision: 10, scale: 2 }),
   insurancePerDay: decimal("insurance_per_day", { precision: 8, scale: 2 }),
   deliveryFee: decimal("delivery_fee", { precision: 8, scale: 2 }),
   pickupFee: decimal("pickup_fee", { precision: 8, scale: 2 }),
@@ -396,6 +303,7 @@ export const products = pgTable("products", {
   // Specifications
   brand: varchar("brand", { length: 50 }),
   model: varchar("model", { length: 100 }),
+  sku: varchar("sku", { length: 100 }),
   serialNumber: varchar("serial_number", { length: 100 }),
   manufacturingYear: integer("manufacturing_year"),
   countryOfOrigin: varchar("country_of_origin", { length: 50 }),
@@ -520,182 +428,9 @@ export const products = pgTable("products", {
   customFields: jsonb("custom_fields").$type<Record<string, any>>().default({}),
 })
 
-// Real Estate specific data (Airbnb + Avito style)
-export const realEstate = pgTable("real_estate", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  listingId: uuid("listing_id")
-    .notNull()
-    .references(() => listings.id, { onDelete: "cascade" }),
+// Real estate tables removed - will be added later when system stabilizes
 
-  // Property basics
-  propertyType: propertyTypeEnum("property_type").notNull(),
-  propertyStatus: propertyStatusEnum("property_status").notNull().default("available"),
-  listingPurpose: listingPurposeEnum("listing_purpose").notNull(),
-
-  // Physical characteristics
-  bedrooms: integer("bedrooms").notNull(),
-  bathrooms: decimal("bathrooms", { precision: 3, scale: 1 }).notNull(), // 2.5 bathrooms
-  area: decimal("area", { precision: 8, scale: 2 }).notNull(), // Total area in sqm
-  livingArea: decimal("living_area", { precision: 8, scale: 2 }), // Living space only
-  landArea: decimal("land_area", { precision: 10, scale: 2 }), // Land plot size
-  floor: integer("floor"), // Which floor (for apartments)
-  totalFloors: integer("total_floors"), // Total floors in building
-
-  // Building details
-  buildingType: buildingTypeEnum("building_type"),
-  buildingAge: integer("building_age"), // Years since construction
-  yearBuilt: integer("year_built"),
-  yearRenovated: integer("year_renovated"),
-
-  // Furnishing and condition
-  furnishing: furnishingEnum("furnishing").notNull().default("unfurnished"),
-  condition: varchar("condition", { length: 20 }).notNull().default("good"), // excellent, good, fair, needs_renovation
-
-  // Views and orientation
-  views: jsonb("views").$type<string[]>().default([]), // Array of view types
-  orientation: orientationEnum("orientation"),
-  balconies: integer("balconies").default(0),
-  terraces: integer("terraces").default(0),
-
-  // Pricing details
-  price: decimal("price", { precision: 12, scale: 2 }).notNull(),
-  pricePerSqm: decimal("price_per_sqm", { precision: 8, scale: 2 }),
-  currency: varchar("currency", { length: 3 }).notNull().default("THB"),
-  priceType: priceTypeEnum("price_type").notNull().default("fixed"),
-
-  // Rental specific pricing (Airbnb style)
-  dailyRate: decimal("daily_rate", { precision: 8, scale: 2 }),
-  weeklyRate: decimal("weekly_rate", { precision: 8, scale: 2 }),
-  monthlyRate: decimal("monthly_rate", { precision: 8, scale: 2 }),
-  yearlyRate: decimal("yearly_rate", { precision: 10, scale: 2 }),
-
-  // Additional costs
-  maintenanceFee: decimal("maintenance_fee", { precision: 8, scale: 2 }),
-  commonAreaFee: decimal("common_area_fee", { precision: 8, scale: 2 }),
-  securityDeposit: decimal("security_deposit", { precision: 10, scale: 2 }),
-  cleaningFee: decimal("cleaning_fee", { precision: 6, scale: 2 }),
-
-  // Utilities
-  electricityIncluded: boolean("electricity_included").default(false),
-  waterIncluded: boolean("water_included").default(false),
-  internetIncluded: boolean("internet_included").default(false),
-  cableIncluded: boolean("cable_included").default(false),
-  gasIncluded: boolean("gas_included").default(false),
-
-  // Parking
-  parkingSpaces: integer("parking_spaces").default(0),
-  parkingType: varchar("parking_type", { length: 20 }), // covered, open, garage, street
-  parkingFee: decimal("parking_fee", { precision: 6, scale: 2 }),
-
-  // Timestamps
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-
-  // Additional data
-  metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
-})
-
-// Property amenities and features
-export const propertyAmenities = pgTable("property_amenities", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  realEstateId: uuid("real_estate_id")
-    .notNull()
-    .references(() => realEstate.id, { onDelete: "cascade" }),
-
-  // Building amenities
-  hasElevator: boolean("has_elevator").default(false),
-  hasSwimmingPool: boolean("has_swimming_pool").default(false),
-  hasFitnessCenter: boolean("has_fitness_center").default(false),
-  hasSauna: boolean("has_sauna").default(false),
-  hasGarden: boolean("has_garden").default(false),
-  hasPlayground: boolean("has_playground").default(false),
-  hasSecurity: boolean("has_security").default(false),
-  hasCCTV: boolean("has_cctv").default(false),
-  hasKeyCard: boolean("has_key_card").default(false),
-  hasReception: boolean("has_reception").default(false),
-  hasConcierge: boolean("has_concierge").default(false),
-  hasMailbox: boolean("has_mailbox").default(false),
-
-  // Unit amenities
-  hasAirConditioning: boolean("has_air_conditioning").default(false),
-  hasHeating: boolean("has_heating").default(false),
-  hasWashingMachine: boolean("has_washing_machine").default(false),
-  hasDryer: boolean("has_dryer").default(false),
-  hasDishwasher: boolean("has_dishwasher").default(false),
-  hasMicrowave: boolean("has_microwave").default(false),
-  hasRefrigerator: boolean("has_refrigerator").default(false),
-  hasOven: boolean("has_oven").default(false),
-  hasBalcony: boolean("has_balcony").default(false),
-  hasTerrace: boolean("has_terrace").default(false),
-  hasFireplace: boolean("has_fireplace").default(false),
-  hasStorage: boolean("has_storage").default(false),
-
-  // Technology
-  hasWifi: boolean("has_wifi").default(false),
-  hasCableTV: boolean("has_cable_tv").default(false),
-  hasSmartTV: boolean("has_smart_tv").default(false),
-  hasIntercom: boolean("has_intercom").default(false),
-  hasSmartHome: boolean("has_smart_home").default(false),
-
-  // Accessibility
-  isWheelchairAccessible: boolean("is_wheelchair_accessible").default(false),
-  hasHandicapParking: boolean("has_handicap_parking").default(false),
-
-  // Pet policy
-  petsAllowed: boolean("pets_allowed").default(false),
-  catsAllowed: boolean("cats_allowed").default(false),
-  dogsAllowed: boolean("dogs_allowed").default(false),
-  petDeposit: decimal("pet_deposit", { precision: 8, scale: 2 }),
-
-  // Additional amenities (flexible)
-  customAmenities: jsonb("custom_amenities").$type<string[]>().default([]),
-
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-})
-
-// Property rules and policies (Airbnb style)
-export const propertyRules = pgTable("property_rules", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  realEstateId: uuid("real_estate_id")
-    .notNull()
-    .references(() => realEstate.id, { onDelete: "cascade" }),
-
-  // Check-in/out rules (for short-term rentals)
-  checkInTime: varchar("check_in_time", { length: 10 }), // "15:00"
-  checkOutTime: varchar("check_out_time", { length: 10 }), // "11:00"
-  selfCheckIn: boolean("self_check_in").default(false),
-  keypadEntry: boolean("keypad_entry").default(false),
-
-  // Guest rules
-  maxGuests: integer("max_guests"),
-  infantsAllowed: boolean("infants_allowed").default(true),
-  childrenAllowed: boolean("children_allowed").default(true),
-  eventsAllowed: boolean("events_allowed").default(false),
-  partiesAllowed: boolean("parties_allowed").default(false),
-  smokingAllowed: boolean("smoking_allowed").default(false),
-
-  // Noise and behavior
-  quietHoursStart: varchar("quiet_hours_start", { length: 10 }), // "22:00"
-  quietHoursEnd: varchar("quiet_hours_end", { length: 10 }), // "08:00"
-
-  // Cancellation policy
-  cancellationPolicy: varchar("cancellation_policy", { length: 20 }).default("moderate"), // flexible, moderate, strict
-
-  // House rules (free text)
-  houseRules: text("house_rules"),
-  additionalRules: jsonb("additional_rules").$type<string[]>().default([]),
-
-  // Safety features
-  hasSmokeDetektor: boolean("has_smoke_detector").default(false),
-  hasCarbonMonoxideDetector: boolean("has_carbon_monoxide_detector").default(false),
-  hasFireExtinguisher: boolean("has_fire_extinguisher").default(false),
-  hasFirstAidKit: boolean("has_first_aid_kit").default(false),
-  hasSecurityCamera: boolean("has_security_camera").default(false),
-
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-})
+// Property amenities and rules tables removed - will be added later when system stabilizes
 
 // Listing availability table for complex scheduling
 export const listingAvailability = pgTable("listing_availability", {
@@ -907,35 +642,7 @@ export const serviceProviders = pgTable("service_providers", {
   verifiedAt: timestamp("verified_at"),
 })
 
-// Real Estate Relations
-export const realEstateRelations = relations(realEstate, ({ one, many }) => ({
-  listing: one(listings, {
-    fields: [realEstate.listingId],
-    references: [listings.id],
-  }),
-  amenities: one(propertyAmenities, {
-    fields: [realEstate.id],
-    references: [propertyAmenities.realEstateId],
-  }),
-  rules: one(propertyRules, {
-    fields: [realEstate.id],
-    references: [propertyRules.realEstateId],
-  }),
-}))
-
-export const propertyAmenitiesRelations = relations(propertyAmenities, ({ one }) => ({
-  realEstate: one(realEstate, {
-    fields: [propertyAmenities.realEstateId],
-    references: [realEstate.id],
-  }),
-}))
-
-export const propertyRulesRelations = relations(propertyRules, ({ one }) => ({
-  realEstate: one(realEstate, {
-    fields: [propertyRules.realEstateId],
-    references: [realEstate.id],
-  }),
-}))
+// Real estate relations removed - will be added later when system stabilizes
 
 // Service Provider Relations
 export const serviceProvidersRelations = relations(serviceProviders, ({ many }) => ({

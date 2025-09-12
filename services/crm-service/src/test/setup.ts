@@ -1,8 +1,8 @@
 import dotenv from "dotenv"
 import { vi, beforeEach, afterEach } from "vitest"
 
-// Load test environment variables
-dotenv.config({ path: ".env.test" })
+// Load test environment variables (suppress dotenv tips)
+dotenv.config({ path: ".env.test", debug: false })
 
 // Mock environment variables with correct values
 process.env.DB_HOST = "localhost"

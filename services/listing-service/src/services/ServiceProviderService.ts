@@ -1,7 +1,9 @@
-import { eq, and, sql, desc } from "drizzle-orm"
+import { eq, and, sql, desc, asc, type SQL } from "drizzle-orm"
 import { db } from "../db/connection"
 import { serviceProviders } from "../db/schema"
 import type { ServiceProviderFilters, ServiceProviderProfile } from "@marketplace/shared-types"
+import { BusinessRegistrationStatus } from "@marketplace/shared-types"
+import { logger } from "@marketplace/logger"
 
 // Custom interfaces for our API
 interface CreateServiceProviderRequest {
@@ -119,7 +121,7 @@ export class ServiceProviderService {
 
       return this.mapToServiceProviderProfile(serviceProvider)
     } catch (error) {
-      console.error("Error creating service provider:", error)
+      logger.error("Error creating service provider:", error)
       throw new Error("Failed to create service provider")
     }
   }
@@ -135,8 +137,68 @@ export class ServiceProviderService {
 
       return this.mapToServiceProviderProfile(serviceProvider)
     } catch (error) {
-      console.error("Error fetching service provider:", error)
+      logger.error("Error fetching service provider:", error)
       throw new Error("Failed to fetch service provider")
+    }
+  }
+
+  // Get all service providers with pagination and sorting
+  async getAllServiceProviders(
+    page = 1,
+    limit = 20,
+    sortBy: "rating" | "price" | "distance" | "created_at" = "rating",
+    sortOrder: "asc" | "desc" = "desc",
+  ) {
+    try {
+      const offset = (page - 1) * limit
+
+      // Build order by clause based on sortBy parameter
+      let orderByClause: SQL
+      switch (sortBy) {
+        case "rating":
+          orderByClause =
+            sortOrder === "asc" ? asc(serviceProviders.averageRating) : desc(serviceProviders.averageRating)
+          break
+        case "created_at":
+          orderByClause = sortOrder === "asc" ? asc(serviceProviders.createdAt) : desc(serviceProviders.createdAt)
+          break
+        case "price":
+          // For price sorting, we'll use a simple approach since pricing is in JSON
+          orderByClause = sortOrder === "asc" ? asc(serviceProviders.createdAt) : desc(serviceProviders.createdAt)
+          break
+        case "distance":
+          // For distance sorting, we'll use creation date as fallback since we don't have user location
+          orderByClause = sortOrder === "asc" ? asc(serviceProviders.createdAt) : desc(serviceProviders.createdAt)
+          break
+        default:
+          orderByClause = desc(serviceProviders.averageRating)
+      }
+
+      const results = await db
+        .select()
+        .from(serviceProviders)
+        .limit(limit)
+        .offset(offset)
+        .orderBy(orderByClause, desc(serviceProviders.createdAt))
+
+      const serviceProviderProfiles = results.map((sp) => this.mapToServiceProviderProfile(sp))
+
+      // Get total count
+      const totalQuery = await db.select({ count: sql<number>`count(*)` }).from(serviceProviders)
+
+      const total = totalQuery[0]?.count || 0
+
+      return {
+        providers: serviceProviderProfiles,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasMore: page * limit < total,
+      }
+    } catch (error) {
+      logger.error("Error getting all service providers:", error)
+      throw new Error("Failed to get service providers")
     }
   }
 
@@ -211,7 +273,7 @@ export class ServiceProviderService {
         hasMore: page * limit < total,
       }
     } catch (error) {
-      console.error("Error searching service providers:", error)
+      logger.error("Error searching service providers:", error)
       throw new Error("Failed to search service providers")
     }
   }
@@ -272,7 +334,7 @@ export class ServiceProviderService {
 
       return this.mapToServiceProviderProfile(updated)
     } catch (error) {
-      console.error("Error updating service provider:", error)
+      logger.error("Error updating service provider:", error)
       throw new Error("Failed to update service provider")
     }
   }
@@ -287,7 +349,7 @@ export class ServiceProviderService {
 
       return result.length > 0
     } catch (error) {
-      console.error("Error deleting service provider:", error)
+      logger.error("Error deleting service provider:", error)
       throw new Error("Failed to delete service provider")
     }
   }
@@ -310,7 +372,7 @@ export class ServiceProviderService {
       primaryLocation: record.primaryLocation,
       serviceAreas: record.serviceAreas || [],
       businessRegistration: {
-        status: "pending" as any,
+        status: BusinessRegistrationStatus.PENDING,
         licenses: record.businessLicenses || [],
       },
       languages: record.languages || [],
@@ -330,7 +392,7 @@ export class ServiceProviderService {
         totalJobs: record.totalBookings || 0,
         completedJobs: record.completedBookings || 0,
         cancelledJobs: 0,
-        averageRating: parseFloat(record.averageRating) || 0,
+        averageRating: Number.parseFloat(record.averageRating) || 0,
         totalReviews: record.totalReviews || 0,
         responseRate: 100,
         onTimeDelivery: 100,

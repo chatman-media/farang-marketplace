@@ -2,11 +2,20 @@
 
 ## Overview
 
-Маркетплейс представляет собой комплексную систему, построенную на
-микросервисной архитектуре с единым API Gateway и множественными клиентскими
-приложениями. Система использует RSPack для сборки фронтенд приложений,
-интегрируется с TON blockchain для платежей и включает ИИ-агента для
-автоматизации поддержки клиентов.
+Thailand Marketplace представляет собой комплексную систему аренды, построенную
+на микросервисной архитектуре с централизованной схемой базы данных и единым API
+Gateway. Система поддерживает множественные категории аренды (транспорт, туры,
+услуги, товары), использует Vite для сборки фронтенд приложений, интегрируется с
+TON blockchain для платежей и включает централизованный ИИ-сервис для
+автоматизации и рекомендаций.
+
+### Категории аренды:
+
+- **Транспорт**: Скутеры, мотоциклы, автомобили, велосипеды, лодки, квадроциклы
+- **Туры**: Экскурсии, активности, гиды
+- **Услуги**: Индивидуальные, корпоративные, агентские, фриланс
+- **Товары**: Электроника, одежда, спорт, дом и сад
+- **Недвижимость**: Квартиры, дома, коммерческая недвижимость (планируется)
 
 ## Architecture
 
@@ -32,14 +41,21 @@ graph TB
         BOOKING[Booking Service]
         PAYMENT[Payment Service]
         AGENCY[Agency Service]
-        AI[AI Agent Service]
-        NOTIFICATION[Notification Service]
+        AI[AI Service]
+        VOICE[Voice Service]
+        CRM[CRM Service]
     end
 
     subgraph "Data Layer"
+        SCHEMA[Database Schema Package]
         POSTGRES[(PostgreSQL)]
         REDIS[(Redis Cache)]
         S3[(File Storage)]
+    end
+
+    subgraph "Shared Packages"
+        TYPES[Shared Types]
+        SCHEMA_PKG[@marketplace/database-schema]
     end
 
     subgraph "External Services"
@@ -79,25 +95,27 @@ graph TB
 
 **Frontend:**
 
-- RSPack для сборки всех клиентских приложений
+- Vite для сборки всех клиентских приложений
 - React 18 с TypeScript
 - Tailwind CSS для стилизации
-- Zustand для управления состоянием
+- XState для управления состоянием (если потребуется)
 - React Query для работы с API
 
 **Backend:**
 
-- Node.js с Express/Fastify
-- TypeScript
-- PostgreSQL для основных данных
-- Redis для кэширования и сессий
-- AWS S3/MinIO для файлов
+- Node.js с Bun runtime и Express
+- TypeScript с строгим режимом
+- Централизованная схема `@marketplace/database-schema` с Drizzle ORM
+- PostgreSQL для основных данных (единая база для всех сервисов)
+- Redis для кэширования и сессий (отдельные БД для изоляции сервисов)
+- Централизованный AI сервис с поддержкой множественных провайдеров
 
 **Infrastructure:**
 
-- Docker для контейнеризации
-- Nginx как reverse proxy
-- PM2 для управления процессами Node.js
+- Docker Compose для контейнеризации (PostgreSQL + Redis)
+- Turbo для монорепо управления
+- Vitest для тестирования (627+ тестов, 99.4% успешность)
+- Централизованная архитектура данных
 
 ## Components and Interfaces
 
@@ -186,10 +204,21 @@ enum UserRole {
 
 **Responsibilities:**
 
-- Управление объявлениями
-- Категории и фильтрация
-- Модерация контента
-- Поиск и индексация
+- Управление объявлениями для всех категорий аренды
+- Централизованная схема с поддержкой транспорта, туров, услуг, товаров
+- Специализированные таблицы для транспорта и товаров
+- Интеграция с централизованным AI сервисом для рекомендаций
+- Система обслуживания транспорта и история аренды
+- Модерация контента и поиск
+
+**Категории аренды:**
+
+- **Transportation**: Скутеры, мотоциклы, автомобили, велосипеды, лодки,
+  квадроциклы
+- **Tours**: Экскурсии, активности, гиды
+- **Services**: Индивидуальные, корпоративные, агентские, фриланс услуги
+- **Vehicles**: Полное управление транспортом с отслеживанием обслуживания
+- **Products**: Электроника, одежда, спорт, дом и сад
 
 **Data Models:**
 
@@ -212,15 +241,28 @@ interface Listing {
 }
 
 enum ListingCategory {
-  BIKES = "bikes",
-  CARS = "cars",
-  EQUIPMENT = "equipment",
+  TRANSPORTATION = "transportation",
+  TOURS = "tours",
+  SERVICES = "services",
+  VEHICLES = "vehicles",
+  PRODUCTS = "products",
+}
+
+enum VehicleType {
+  SCOOTER = "scooter",
+  MOTORCYCLE = "motorcycle",
+  CAR = "car",
+  BICYCLE = "bicycle",
+  BOAT = "boat",
+  ATV = "atv",
+  TRUCK = "truck",
+  VAN = "van",
+  BUS = "bus",
 }
 
 enum ListingType {
-  RENT = "rent",
-  SALE = "sale",
-  BOTH = "both",
+  RENTAL = "rental",
+  SERVICE = "service",
 }
 
 interface Price {
@@ -308,12 +350,16 @@ enum ServiceCategory {
 }
 ```
 
-### 6. AI Agent Service
+### 6. AI Service (Централизованный)
 
 **Responsibilities:**
 
-- Обработка чатов с клиентами
-- Интеграция с внешними AI API
+- Централизованный AI сервис для всех микросервисов
+- Поддержка множественных AI провайдеров (OpenAI, DeepSeek, Claude)
+- Интеллектуальные рекомендации для всех категорий аренды
+- Анализ пользовательского поведения и предпочтений
+- AI-enhanced поиск и автоматическая категоризация контента
+- Интеграция с marketplace операциями и booking intelligence
 - Система промптов и контекста
 - Логирование для менеджеров
 
@@ -355,9 +401,26 @@ interface ConversationContext {
 
 ## Data Models
 
-### Database Schema
+### Централизованная Database Schema
 
-**Users Table:**
+Вся схема базы данных централизована в пакете `@marketplace/database-schema` с
+использованием Drizzle ORM.
+
+**Основные таблицы:**
+
+- **users** - Пользователи с ролями и профилями
+- **listings** - Объявления для всех категорий аренды
+- **vehicles** - Специализированная таблица для транспорта
+- **products** - Специализированная таблица для товаров
+- **serviceProviders** - Поставщики услуг
+- **listingBookings** - Бронирования
+- **vehicleMaintenance** - Обслуживание транспорта
+- **vehicleRentals** - История аренды транспорта
+- **customers, leads, communicationHistory** - CRM система
+- **campaigns, messageTemplates** - Маркетинг
+- **chatHistory, aiPromptTemplates** - AI интеграция
+
+**Users Table (централизованная):**
 
 ```sql
 CREATE TABLE users (
@@ -415,6 +478,42 @@ CREATE TABLE bookings (
 );
 ```
 
+## Централизованная Архитектура
+
+### Database Schema Package
+
+Пакет `@marketplace/database-schema` содержит:
+
+- **23 таблицы** с полной схемой для всех категорий аренды
+- **34 enum типа** для валидации данных
+- **Drizzle ORM** конфигурация и миграции
+- **TypeScript типы** для всех таблиц
+- **21 тест** с 100% покрытием
+
+### Docker Integration
+
+- **PostgreSQL**: Единая база данных для всех сервисов
+- **Redis**: Отдельные базы данных для изоляции сервисов
+  - DB 1: API Gateway (rate limiting)
+  - DB 2: Payment Service (job queues)
+  - DB 3: Booking Service (caching)
+  - DB 4: User Service (sessions)
+  - DB 5: CRM Service (caching)
+
+### AI Service Centralization
+
+- **Единый AI сервис** вместо локальных провайдеров
+- **Множественные провайдеры**: OpenAI, DeepSeek, Claude
+- **Централизованное управление** API ключами и конфигурацией
+- **Переиспользование логики** между сервисами
+
+### Testing Architecture
+
+- **627+ тестов** с 99.4% успешностью
+- **Единообразное тестирование** через Vitest
+- **Изолированные тестовые базы данных**
+- **Централизованные фикстуры** и утилиты
+
 ## Error Handling
 
 ### Error Response Format
@@ -451,19 +550,27 @@ interface ErrorResponse {
 
 ## Testing Strategy
 
+### Current Testing Status
+
+- **627+ тестов** с 99.4% успешностью
+- **Все сервисы покрыты** комплексными тестами
+- **Централизованная схема** протестирована (21 тест)
+- **Redis интеграция** протестирована для всех сервисов
+
 ### Unit Testing
 
-- Jest для всех JavaScript/TypeScript компонентов
-- Покрытие кода не менее 80%
-- Моки для внешних зависимостей
-- Тестирование бизнес-логики сервисов
+- **Vitest** для всех TypeScript компонентов
+- **Покрытие 99.4%** успешных тестов
+- **Централизованные моки** для внешних зависимостей
+- **Бизнес-логика** всех rental категорий протестирована
 
 ### Integration Testing
 
-- Тестирование API endpoints
-- Тестирование взаимодействия с базой данных
-- Тестирование интеграций с внешними сервисами
-- Docker Compose для тестовой среды
+- **API endpoints** всех сервисов протестированы
+- **Централизованная база данных** интеграция
+- **Redis интеграция** с отдельными БД для сервисов
+- **AI сервис интеграция** с множественными провайдерами
+- **Docker Compose** для изолированной тестовой среды
 
 ### End-to-End Testing
 

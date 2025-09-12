@@ -4,12 +4,12 @@ import { query } from "./connection"
 
 async function runMigrations() {
   try {
-    // Create migrations table if it doesn't exist
+    // Create migrations table if it doesn't exist (compatible with centralized schema)
     await query(`
       CREATE TABLE IF NOT EXISTS migrations (
-        id SERIAL PRIMARY KEY,
-        filename VARCHAR(255) NOT NULL UNIQUE,
-        executed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name VARCHAR(255) NOT NULL UNIQUE,
+        applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
     `)
 
@@ -21,8 +21,8 @@ async function runMigrations() {
       .sort()
 
     // Get already executed migrations
-    const { rows: executedMigrations } = await query("SELECT filename FROM migrations ORDER BY id")
-    const executedFilenames = executedMigrations.map((row) => row.filename)
+    const { rows: executedMigrations } = await query("SELECT name FROM migrations ORDER BY applied_at")
+    const executedFilenames = executedMigrations.map((row) => row.name)
 
     // Run pending migrations
     for (const filename of migrationFiles) {
@@ -33,7 +33,7 @@ async function runMigrations() {
         const migrationSQL = fs.readFileSync(migrationPath, "utf8")
 
         await query(migrationSQL)
-        await query("INSERT INTO migrations (filename) VALUES ($1)", [filename])
+        await query("INSERT INTO migrations (name) VALUES ($1)", [filename])
 
         console.log(`✅ Migration ${filename} completed`)
       } else {

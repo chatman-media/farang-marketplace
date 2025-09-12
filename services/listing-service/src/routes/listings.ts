@@ -138,6 +138,8 @@ const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   )
 
   // General listing routes
+  fastify.get("/", listingController.getAllListings)
+
   fastify.get("/search", listingController.searchListings)
 
   fastify.get("/featured", listingController.getFeaturedListings)

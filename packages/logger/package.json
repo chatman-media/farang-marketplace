@@ -1,0 +1,24 @@
+{
+  "name": "@marketplace/logger",
+  "version": "1.0.0",
+  "description": "Centralized logging package for marketplace platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.1",
+    "@types/winston": "^2.4.4",
+    "typescript": "^5.9.2"
+  },
+  "files": [
+    "dist"
+  ]
+}

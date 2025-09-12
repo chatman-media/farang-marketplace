@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
+
 import { AgencyService } from "../services/AgencyService"
 
 export class FastifyAgencyController {

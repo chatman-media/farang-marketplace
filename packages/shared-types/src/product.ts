@@ -13,7 +13,6 @@ export enum ProductType {
   TOYS = "toys",
   HEALTH_BEAUTY = "health_beauty",
   FOOD_BEVERAGE = "food_beverage",
-  REAL_ESTATE = "real_estate",
   SERVICES = "services",
   OTHER = "other",
 }
@@ -31,7 +30,6 @@ export enum ProductCondition {
 export enum ProductStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",
-  SOLD = "sold",
   RENTED = "rented",
   RESERVED = "reserved",
   MAINTENANCE = "maintenance",
@@ -41,9 +39,7 @@ export enum ProductStatus {
 }
 
 export enum ProductListingType {
-  SALE = "sale",
-  RENT = "rent",
-  BOTH = "both",
+  RENTAL = "rental",
   SERVICE = "service",
 }
 
@@ -66,6 +62,7 @@ export interface ProductSpecifications {
   // Basic Info
   brand?: string
   model?: string
+  sku?: string
   serialNumber?: string
   manufacturingYear?: number
   countryOfOrigin?: string

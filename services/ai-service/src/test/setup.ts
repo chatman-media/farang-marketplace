@@ -1,8 +1,8 @@
 import { beforeAll, afterAll, beforeEach } from "vitest"
 import dotenv from "dotenv"
 
-// Load test environment variables
-dotenv.config({ path: ".env.test" })
+// Load test environment variables (suppress dotenv tips)
+dotenv.config({ path: ".env.test", debug: false })
 
 // Global test setup
 beforeAll(async () => {

@@ -186,7 +186,6 @@ interface ProductListing extends Listing {
   shippingOptions?: {
     localDelivery: boolean
     nationalShipping: boolean
-    internationalShipping: boolean
     pickupAvailable: boolean
     shippingCost?: number
     freeShippingThreshold?: number

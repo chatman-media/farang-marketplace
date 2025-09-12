@@ -170,6 +170,7 @@ describe("User Preferences Integration Tests", () => {
     })
 
     it("should support international phone numbers", async () => {
+      const timestamp = Date.now()
       const testCases = [
         "+1234567890", // US
         "+66123456789", // Thailand
@@ -178,9 +179,14 @@ describe("User Preferences Integration Tests", () => {
         "+966123456789", // Saudi Arabia
       ]
 
-      for (const phone of testCases) {
+      for (let i = 0; i < testCases.length; i++) {
+        const basePhone = testCases[i]
+        // Make phone unique by replacing last 3 digits with unique number
+        // Ensure it stays within 6-14 digits after country code
+        const uniqueDigits = (timestamp + i).toString().slice(-3)
+        const phone = basePhone.slice(0, -3) + uniqueDigits
         const userData = {
-          email: `test-${phone.replace(/\+/g, "")}-${Date.now()}@example.com`,
+          email: `test-${phone.replace(/\+/g, "")}-${timestamp}-${i}@example.com`,
           password: "password123",
           phone,
           profile: {

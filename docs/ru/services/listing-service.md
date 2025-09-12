@@ -33,17 +33,18 @@ services/listing-service/
 │   │   ├── ListingController.ts      # Общие листинги
 │   │   ├── RealEstateController.ts   # Недвижимость
 │   │   ├── ServiceProviderController.ts # Поставщики услуг
-│   │   └── AISearchController.ts     # ИИ поиск
+│   │   └── AIIntegrationController.ts # Интеграция с AI сервисом
 │   ├── middleware/      # Промежуточное ПО
 │   ├── routes/         # Маршруты API
 │   │   ├── listings.ts      # Общие маршруты
 │   │   ├── realEstate.ts    # Маршруты недвижимости
-│   │   └── serviceProviders.ts # Маршруты поставщиков
+│   │   ├── serviceProviders.ts # Маршруты поставщиков
+│   │   └── ai.ts           # AI интеграция
 │   ├── services/       # Бизнес-логика
 │   │   ├── ListingService.ts     # Общие листинги
 │   │   ├── RealEstateService.ts  # Недвижимость
-│   │   └── ServiceProviderService.ts # Поставщики
-│   ├── ai/             # ИИ сервисы
+│   │   ├── ServiceProviderService.ts # Поставщики
+│   │   └── AIClient.ts       # HTTP клиент для AI сервиса
 │   ├── db/             # База данных
 │   │   ├── schema.ts        # Схема БД
 │   │   ├── connection.ts    # Подключение
@@ -59,15 +60,9 @@ services/listing-service/
 
 ```typescript
 enum ListingCategory {
-  ACCOMMODATION = "accommodation", // Размещение
-  REAL_ESTATE = "real_estate", // Недвижимость
   TRANSPORTATION = "transportation", // Транспорт
   TOURS = "tours", // Туры
-  ACTIVITIES = "activities", // Активности
-  DINING = "dining", // Рестораны
-  SHOPPING = "shopping", // Шоппинг
   SERVICES = "services", // Услуги
-  EVENTS = "events", // События
   VEHICLES = "vehicles", // Автомобили
   PRODUCTS = "products", // Товары
 }
@@ -368,106 +363,8 @@ interface ListingImage {
 
 ### Недвижимость (Real Estate)
 
-#### POST /api/real-estate
-
-Создание объявления недвижимости
-
-**Запрос:**
-
-```json
-{
-  "title": "Современная квартира в центре Бангкока",
-  "description": "Просторная 2-комнатная квартира с видом на город...",
-  "propertyType": "condo",
-  "listingPurpose": "rent",
-  "bedrooms": 2,
-  "bathrooms": 2,
-  "area": 65,
-  "floor": 15,
-  "totalFloors": 30,
-  "furnishing": "fully_furnished",
-  "condition": "excellent",
-  "views": ["city", "pool"],
-  "orientation": "south",
-  "price": 25000,
-  "currency": "THB",
-  "priceType": "fixed",
-  "monthlyRate": 25000,
-  "securityDeposit": 50000,
-  "electricityIncluded": false,
-  "waterIncluded": true,
-  "internetIncluded": true,
-  "parkingSpaces": 1,
-  "location": {
-    "address": "123 Sukhumvit Road",
-    "city": "Bangkok",
-    "region": "Bangkok",
-    "country": "Thailand",
-    "latitude": 13.7563,
-    "longitude": 100.5018
-  },
-  "images": [
-    "https://example.com/image1.jpg",
-    "https://example.com/image2.jpg"
-  ],
-  "amenities": {
-    "hasSwimmingPool": true,
-    "hasFitnessCenter": true,
-    "hasElevator": true,
-    "hasSecurity": true,
-    "hasAirConditioning": true,
-    "hasWifi": true,
-    "petsAllowed": false
-  },
-  "rules": {
-    "maxGuests": 4,
-    "checkInTime": "15:00",
-    "checkOutTime": "11:00",
-    "smokingAllowed": false,
-    "partiesAllowed": false,
-    "cancellationPolicy": "moderate"
-  }
-}
-```
-
-#### GET /api/real-estate/:id
-
-Получение объявления недвижимости по ID
-
-#### PUT /api/real-estate/:id
-
-Обновление объявления недвижимости
-
-#### DELETE /api/real-estate/:id
-
-Удаление объявления недвижимости
-
-#### GET /api/real-estate
-
-Поиск недвижимости с фильтрами
-
-**Параметры запроса:**
-
-```
-?propertyType=condo,apartment
-&listingPurpose=rent,short_term_rental
-&minPrice=20000
-&maxPrice=50000
-&minBedrooms=2
-&maxBedrooms=3
-&minArea=50
-&maxArea=100
-&furnishing=fully_furnished
-&city=Bangkok
-&hasSwimmingPool=true
-&hasFitnessCenter=true
-&hasElevator=true
-&petsAllowed=false
-&page=1
-&limit=20
-&sortBy=price
-&sortOrder=asc
-```
+Real estate functionality has been temporarily removed and will be added later
+when the system stabilizes.
 
 ### Поиск и фильтрация
 

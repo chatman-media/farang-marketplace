@@ -219,6 +219,36 @@ export class ServiceProviderController {
     }
   }
 
+  // Get all service providers
+  getAllServiceProviders = async (
+    request: FastifyRequest<{
+      Querystring: {
+        page?: number
+        limit?: number
+        sortBy?: "rating" | "price" | "distance" | "created_at"
+        sortOrder?: "asc" | "desc"
+      }
+    }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    try {
+      const { page = 1, limit = 20, sortBy = "rating", sortOrder = "desc" } = request.query || {}
+
+      const result = await this.serviceProviderService.getAllServiceProviders(page, limit, sortBy, sortOrder)
+
+      reply.send({
+        success: true,
+        data: result,
+      })
+    } catch (error) {
+      console.error("Error getting service providers:", error)
+      reply.status(500).send({
+        success: false,
+        error: "Failed to get service providers",
+      })
+    }
+  }
+
   // Search service providers
   searchServiceProviders = async (
     request: FastifyRequest<{ Querystring: any }>,
@@ -253,7 +283,7 @@ export class ServiceProviderController {
           page: validatedQuery.page,
           limit: validatedQuery.limit,
           total: result.total,
-          totalPages: Math.ceil(result.total / validatedQuery.limit),
+          totalPages: Math.ceil(Number(result.total) / validatedQuery.limit),
         },
         message: "Service providers retrieved successfully",
       })

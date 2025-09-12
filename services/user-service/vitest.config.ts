@@ -2,8 +2,8 @@ import { defineConfig } from "vitest/config"
 import path from "path"
 import dotenv from "dotenv"
 
-// Load test environment variables
-dotenv.config({ path: path.join(__dirname, ".env.test") })
+// Load test environment variables (suppress dotenv tips)
+dotenv.config({ path: path.join(__dirname, ".env.test"), debug: false })
 
 export default defineConfig({
   test: {

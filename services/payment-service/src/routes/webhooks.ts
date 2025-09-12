@@ -93,7 +93,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
       preHandler: async (request, reply) => {
         // Verify Stripe webhook signature
         const signature = request.headers["stripe-signature"] as string
-        const payload = request.body as string
+        const payload = JSON.stringify(request.body)
 
         if (!signature || !payload) {
           return reply.code(400).send({ error: "Missing signature or payload" })
@@ -165,7 +165,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           status: z.enum(["pending", "processing", "confirmed", "completed", "failed", "cancelled"]),
           transaction_id: z.string().optional(),
           reason: z.string().optional(),
-          metadata: z.record(z.any()).optional(),
+          metadata: z.record(z.string(), z.any()).optional(),
         }),
       },
     },

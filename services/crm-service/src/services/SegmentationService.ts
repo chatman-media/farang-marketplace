@@ -37,8 +37,13 @@ export class SegmentationService {
 
     const segment = new Segment(result.rows[0])
 
-    // Calculate initial customer count
-    await this.recalculateSegmentMembership(segment.id)
+    // Calculate initial customer count (with error handling)
+    try {
+      await this.recalculateSegmentMembership(segment.id)
+    } catch (error) {
+      // If recalculation fails, log but don't fail the creation
+      console.warn(`Failed to recalculate membership for segment ${segment.id}:`, error)
+    }
 
     return segment
   }
@@ -56,8 +61,8 @@ export class SegmentationService {
   async getSegments(
     filters: { isActive?: boolean; createdBy?: string; search?: string; limit?: number; offset?: number } = {},
   ): Promise<{ segments: Segment[]; total: number }> {
-    let whereConditions: string[] = []
-    let queryParams: any[] = []
+    const whereConditions: string[] = []
+    const queryParams: any[] = []
     let paramIndex = 1
 
     if (filters.isActive !== undefined) {
@@ -82,7 +87,7 @@ export class SegmentationService {
 
     // Get total count
     const countResult = await query(`SELECT COUNT(*) as total FROM customer_segments ${whereClause}`, queryParams)
-    const total = parseInt(countResult.rows[0].total)
+    const total = countResult.rows && countResult.rows.length > 0 ? Number.parseInt(countResult.rows[0].total) : 0
 
     // Get segments with pagination
     const limit = filters.limit || 50
@@ -256,7 +261,7 @@ export class SegmentationService {
        WHERE csm.segment_id = $1`,
       [segmentId],
     )
-    const total = parseInt(countResult.rows[0].total)
+    const total = Number.parseInt(countResult.rows[0].total)
 
     // Get customers
     const result = await query(
@@ -295,9 +300,9 @@ export class SegmentationService {
   }
 
   private buildCriterionCondition(criterion: SegmentCriteria, startParamIndex: number): { sql: string; params: any[] } {
-    const { field, operator, value, dataType } = criterion
+    const { field, operator, value } = criterion
     const params: any[] = []
-    let paramIndex = startParamIndex
+    const paramIndex = startParamIndex
 
     // Map field names to database column names
     const fieldMap: Record<string, string> = {
@@ -432,10 +437,10 @@ export class SegmentationService {
     )
 
     return {
-      totalSegments: parseInt(totalResult.rows[0].total),
-      activeSegments: parseInt(activeResult.rows[0].total),
-      totalMemberships: parseInt(membershipsResult.rows[0].total),
-      averageSegmentSize: Math.round(parseFloat(avgSizeResult.rows[0].avg_size) || 0),
+      totalSegments: Number.parseInt(totalResult.rows[0].total),
+      activeSegments: Number.parseInt(activeResult.rows[0].total),
+      totalMemberships: Number.parseInt(membershipsResult.rows[0].total),
+      averageSegmentSize: Math.round(Number.parseFloat(avgSizeResult.rows[0].avg_size) || 0),
       largestSegment:
         largestResult.rows.length > 0
           ? {

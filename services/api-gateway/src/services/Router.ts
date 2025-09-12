@@ -155,7 +155,8 @@ export class Router {
   private matchesRoute(path: string, pattern: string): boolean {
     if (pattern.endsWith("*")) {
       const prefix = pattern.slice(0, -1)
-      return path.startsWith(prefix)
+      // Match exact prefix or prefix with additional path segments
+      return path === prefix.slice(0, -1) || path.startsWith(prefix)
     }
     return path === pattern
   }
