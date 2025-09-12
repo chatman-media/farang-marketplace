@@ -1,8 +1,8 @@
 import type { UserBehavior } from "../models/index"
 import { AIProviderService } from "./AIProviderService"
+import { ContentAnalysisService } from "./ContentAnalysisService"
 import { RecommendationEngine } from "./RecommendationEngine"
 import { UserBehaviorService } from "./UserBehaviorService"
-import { ContentAnalysisService } from "./ContentAnalysisService"
 
 export interface BookingIntelligence {
   bookingId: string

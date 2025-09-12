@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { CommunicationChannel, CustomerStatus } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it } from "vitest"
 import { Customer } from "../models/Customer"
-import { CustomerStatus, CommunicationChannel } from "@marketplace/shared-types"
 
 describe("Customer Model", () => {
   const mockCustomerData = {

@@ -3,10 +3,10 @@ import { FastifyPluginAsync } from "fastify"
 import { agencyController } from "../controllers/AgencyController"
 import {
   authenticateToken,
-  requireAdmin,
-  requireAgencyStaff,
-  requireAgencyOwnership,
   optionalAuth,
+  requireAdmin,
+  requireAgencyOwnership,
+  requireAgencyStaff,
 } from "../middleware/auth"
 
 const agenciesRoutes: FastifyPluginAsync = async (fastify) => {

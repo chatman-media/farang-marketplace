@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
+
 import { BookingIntegrationService } from "../services/BookingIntegrationService"
 
 export class BookingIntegrationController {

@@ -1,17 +1,5 @@
-import {
-  pgTable,
-  uuid,
-  varchar,
-  text,
-  timestamp,
-  decimal,
-  integer,
-  boolean,
-  jsonb,
-  pgEnum,
-  index,
-} from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
+import { decimal, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core"
 
 // Enums
 export const bookingTypeEnum = pgEnum("booking_type", [
@@ -24,18 +12,8 @@ export const bookingTypeEnum = pgEnum("booking_type", [
   "service",
 ])
 
-export const bookingStatusEnum = pgEnum("booking_status", [
-  "pending",
-  "confirmed",
-  "checked_in",
-  "checked_out",
-  "active",
-  "completed",
-  "cancelled",
-  "no_show",
-  "expired",
-  "disputed",
-])
+// BookingStatus enum is imported from @marketplace/shared-types
+// Using varchar field to match shared-types enum values
 
 export const serviceBookingTypeEnum = pgEnum("service_booking_type", [
   "consultation",
@@ -45,14 +23,7 @@ export const serviceBookingTypeEnum = pgEnum("service_booking_type", [
   "subscription",
 ])
 
-export const paymentStatusEnum = pgEnum("payment_status", [
-  "pending",
-  "processing",
-  "completed",
-  "failed",
-  "refunded",
-  "partially_refunded",
-])
+// PaymentStatus enum removed - using shared-types instead
 
 export const cancellationReasonEnum = pgEnum("cancellation_reason", [
   "user_request",
@@ -63,14 +34,14 @@ export const cancellationReasonEnum = pgEnum("cancellation_reason", [
   "system_error",
 ])
 
-export const disputeStatusEnum = pgEnum("dispute_status", ["open", "investigating", "resolved", "closed"])
+// DisputeStatus enum removed - using shared-types instead
 
 // Type exports for TypeScript
-export type BookingStatus = (typeof bookingStatusEnum.enumValues)[number]
+// BookingStatus type is imported from @marketplace/shared-types
 export type BookingType = (typeof bookingTypeEnum.enumValues)[number]
-export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number]
 export type ServiceBookingType = (typeof serviceBookingTypeEnum.enumValues)[number]
-export type DisputeStatus = (typeof disputeStatusEnum.enumValues)[number]
+// PaymentStatus type is imported from @marketplace/shared-types
+// DisputeStatus is defined locally as varchar field
 
 // Main Bookings Table
 export const bookings = pgTable(
@@ -82,7 +53,7 @@ export const bookings = pgTable(
     hostId: uuid("host_id").notNull(),
     agencyId: uuid("agency_id"),
     type: bookingTypeEnum("type").notNull(),
-    status: bookingStatusEnum("status").notNull().default("pending"),
+    status: varchar("status", { length: 20 }).notNull().default("pending"),
 
     // Booking Details
     checkIn: timestamp("check_in", { withTimezone: true }).notNull(),
@@ -103,7 +74,7 @@ export const bookings = pgTable(
     currency: varchar("currency", { length: 3 }).notNull().default("THB"),
 
     // Payment
-    paymentStatus: paymentStatusEnum("payment_status").notNull().default("pending"),
+    paymentStatus: varchar("payment_status", { length: 20 }).notNull().default("pending"),
     paymentId: varchar("payment_id", { length: 255 }),
     paymentMethod: varchar("payment_method", { length: 50 }),
 
@@ -226,8 +197,8 @@ export const bookingStatusHistory = pgTable(
     bookingId: uuid("booking_id")
       .references(() => bookings.id, { onDelete: "cascade" })
       .notNull(),
-    fromStatus: bookingStatusEnum("from_status"),
-    toStatus: bookingStatusEnum("to_status").notNull(),
+    fromStatus: varchar("from_status", { length: 20 }),
+    toStatus: varchar("to_status", { length: 20 }).notNull(),
     reason: text("reason"),
     changedBy: uuid("changed_by").notNull(), // user ID who made the change
     changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
@@ -275,7 +246,7 @@ export const disputes = pgTable(
       .notNull(),
     initiatedBy: uuid("initiated_by").notNull(), // guest or host ID
     disputeType: varchar("dispute_type", { length: 50 }).notNull(), // 'refund', 'damage', 'service_quality', 'cancellation'
-    status: disputeStatusEnum("status").notNull().default("open"),
+    status: varchar("status", { length: 20 }).notNull().default("open"),
 
     // Dispute Details
     title: varchar("title", { length: 255 }).notNull(),

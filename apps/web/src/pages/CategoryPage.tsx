@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react"
+import { type ListingFilters as BaseListingFilters, ListingCategory } from "@marketplace/shared-types"
+import React, { useEffect, useState } from "react"
 import { useParams, useSearchParams } from "react-router-dom"
 import { ListingsGrid } from "../components/listings"
-import { AISearchBox, AdvancedFilters } from "../components/search"
+import { AdvancedFilters, AISearchBox } from "../components/search"
 import { useListings } from "../lib/query"
-import { ListingCategory, type ListingFilters as BaseListingFilters } from "@marketplace/shared-types"
 
 // Extended filters for the frontend
 interface ExtendedListingFilters {

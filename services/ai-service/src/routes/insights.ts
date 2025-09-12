@@ -1,12 +1,12 @@
 import { FastifyInstance } from "fastify"
 import {
-  InsightsController,
-  trackBehaviorSchema,
-  getUserInsightsParamsSchema,
-  getUserInsightsQuerySchema,
   getListingInsightsParamsSchema,
   getListingInsightsQuerySchema,
   getMarketInsightsQuerySchema,
+  getUserInsightsParamsSchema,
+  getUserInsightsQuerySchema,
+  InsightsController,
+  trackBehaviorSchema,
 } from "../controllers/InsightsController"
 
 interface RouteOptions {

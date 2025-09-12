@@ -1,5 +1,6 @@
-import { FastifyRequest, FastifyReply } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+
 import { AvailabilityService } from "../services/AvailabilityService"
 // Types are extended in fastify module declaration
 

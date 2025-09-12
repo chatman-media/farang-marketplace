@@ -1,11 +1,11 @@
-import { Telegraf, Context } from "telegraf"
-import { query } from "../db/connection"
 import {
   CommunicationChannel,
+  CommunicationHistory,
   SendMessageRequest,
   SendMessageResponse,
-  CommunicationHistory,
 } from "@marketplace/shared-types"
+import { Context, Telegraf } from "telegraf"
+import { query } from "../db/connection"
 
 export interface TelegramConfig {
   botToken: string

@@ -1,11 +1,11 @@
-import { FastifyRequest, FastifyReply } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
-import { MarketplaceIntegrationService } from "../services/MarketplaceIntegrationService"
+import type { AuthenticatedUser } from "../middleware/auth"
 import { AIProviderService } from "../services/AIProviderService"
+import { ContentAnalysisService } from "../services/ContentAnalysisService"
+import { MarketplaceIntegrationService } from "../services/MarketplaceIntegrationService"
 import { RecommendationEngine } from "../services/RecommendationEngine"
 import { UserBehaviorService } from "../services/UserBehaviorService"
-import { ContentAnalysisService } from "../services/ContentAnalysisService"
-import type { AuthenticatedUser } from "../middleware/auth"
 
 // Zod schemas for validation
 export const bookingIntelligenceSchema = z.object({

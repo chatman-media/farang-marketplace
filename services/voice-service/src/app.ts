@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"
@@ -90,14 +91,14 @@ export const createApp = async (): Promise<FastifyInstance> => {
 }
 
 export const gracefulShutdown = async (app: FastifyInstance, signal: string) => {
-  console.log(`🛑 ${signal} received, shutting down gracefully`)
+  logger.info(`🛑 ${signal} received, shutting down gracefully`)
 
   try {
     await app.close()
-    console.log("✅ Server closed successfully")
+    logger.info("✅ Server closed successfully")
     process.exit(0)
   } catch (error) {
-    console.error("❌ Error during shutdown:", error)
+    logger.error("❌ Error during shutdown:", error)
     process.exit(1)
   }
 }

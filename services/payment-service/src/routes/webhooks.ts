@@ -1,8 +1,8 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify"
-import { z } from "zod"
-import { PaymentService } from "../services/PaymentService"
-import { ModernTonService } from "../services/ModernTonService"
 import crypto from "crypto"
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
+import { z } from "zod"
+import { ModernTonService } from "../services/ModernTonService"
+import { PaymentService } from "../services/PaymentService"
 
 const paymentService = new PaymentService()
 const tonService = new ModernTonService()

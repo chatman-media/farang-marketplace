@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest"
-import { SegmentationService } from "../services/SegmentationService"
-import { Segment, SegmentOperator, SegmentDataType } from "../models/Segment"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { query } from "../db/connection"
+import { Segment, SegmentDataType, SegmentOperator } from "../models/Segment"
+import { SegmentationService } from "../services/SegmentationService"
 
 describe("SegmentationService", () => {
   let segmentationService: SegmentationService

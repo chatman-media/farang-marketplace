@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest"
-import { RecommendationEngine } from "../services/RecommendationEngine"
+import { beforeEach, describe, expect, it } from "vitest"
 import { AIProviderService } from "../services/AIProviderService"
+import { RecommendationEngine } from "../services/RecommendationEngine"
 
 describe("Recommendation Engine Tests", () => {
   let recommendationEngine: RecommendationEngine

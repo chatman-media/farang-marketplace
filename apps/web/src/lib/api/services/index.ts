@@ -1,4 +1,4 @@
 export { authService } from "./auth"
-export { listingsService, serviceListingsService } from "./listings"
+export type { BookingFilters, BookingResponse, BookingsPageResponse } from "./bookings"
 export { bookingsService } from "./bookings"
-export type { BookingResponse, BookingsPageResponse, BookingFilters } from "./bookings"
+export { listingsService, serviceListingsService } from "./listings"

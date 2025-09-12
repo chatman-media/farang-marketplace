@@ -1,7 +1,7 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { ContentAnalysisService } from "../services/ContentAnalysisService"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
 import type { ContentAnalysisRequest } from "../models/index"
+import { ContentAnalysisService } from "../services/ContentAnalysisService"
 
 // Zod schemas for validation
 export const analyzeContentSchema = {

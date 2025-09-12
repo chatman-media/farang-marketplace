@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest"
-import { createApp } from "../index"
-import { FastifyInstance } from "fastify"
 import { CommunicationChannel } from "@marketplace/shared-types"
+import { FastifyInstance } from "fastify"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { createApp } from "../index"
 
 // Mock the database connection
 vi.mock("../db/connection", () => ({

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 
 // API Endpoint Validation Tests
 // These tests validate request/response structures and business logic

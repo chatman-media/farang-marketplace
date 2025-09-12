@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest"
-import { Template } from "../models/Template"
 import { CommunicationChannel } from "@marketplace/shared-types"
+import { describe, expect, it } from "vitest"
+import { Template } from "../models/Template"
 
 describe("Template Model", () => {
   const mockTemplateData = {

@@ -1,81 +1,93 @@
-import { eq, and, desc, sql, ilike, inArray } from "drizzle-orm"
-import { db, listings, vehicles, products } from "../db/connection"
 import type {
-  VehicleListing,
-  ProductListing,
-  ListingCategory,
-  VehicleSearchFilters,
-  ProductSearchFilters,
-  CreateVehicleRequest,
   CreateProductRequest,
+  CreateVehicleRequest,
+  ListingCategory,
+  ListingType,
+  ProductListing,
+  ProductSearchFilters,
+  VehicleListing,
+  VehicleSearchFilters,
 } from "@marketplace/shared-types"
+import { and, desc, eq, ilike, inArray, sql } from "drizzle-orm"
+import type { PgTransaction } from "drizzle-orm/pg-core"
 import { v4 as uuidv4 } from "uuid"
+import { db } from "../db/connection.js"
+import { listings, products, vehicles } from "../db/schema.js"
+
+// Типы для инференции из схемы
+type ListingSelect = typeof listings.$inferSelect
+type ListingInsert = typeof listings.$inferInsert
+type VehicleSelect = typeof vehicles.$inferSelect
+type VehicleInsert = typeof vehicles.$inferInsert
+type ProductSelect = typeof products.$inferSelect
+type ProductInsert = typeof products.$inferInsert
 
 export class ListingService {
   // Create vehicle listing
-  async createVehicleListing(ownerId: string, vehicleData: CreateVehicleRequest): Promise<VehicleListing> {
+  async createVehicleListing(
+    ownerId: string,
+    vehicleData: CreateVehicleRequest,
+    _tx?: PgTransaction<any, any, any>,
+  ): Promise<VehicleListing> {
     const listingId = uuidv4()
 
     try {
-      // Start transaction
-      const result = await db.transaction(async (tx) => {
+      const result = await db.transaction(async (trx) => {
         // Create main listing
-        const [listing] = await tx
-          .insert(listings)
-          .values({
-            ownerId,
-            title: `${vehicleData.specifications.make} ${vehicleData.specifications.model} ${vehicleData.specifications.year}`,
-            description:
-              vehicleData.notes || `${vehicleData.specifications.make} ${vehicleData.specifications.model} for rent`,
-            category: "vehicles",
-            type: "rental",
-            status: "draft",
-            basePrice: vehicleData.pricing.basePrice.toString(),
-            currency: vehicleData.pricing.currency,
-            locationAddress: vehicleData.location.currentLocation,
-            locationCity: vehicleData.location.currentLocation.split(",")[0] || "Bangkok",
-            locationRegion: vehicleData.location.currentLocation.split(",")[1] || "Bangkok",
-            locationCountry: "Thailand",
-            locationLatitude: vehicleData.location.coordinates?.latitude?.toString(),
-            locationLongitude: vehicleData.location.coordinates?.longitude?.toString(),
-            images: vehicleData.images,
-            tags: [vehicleData.type, vehicleData.category, vehicleData.specifications.make.toLowerCase()],
-          })
-          .returning()
+        const listingInsert: ListingInsert = {
+          id: listingId,
+          ownerId,
+          title: `${vehicleData.specifications.make} ${vehicleData.specifications.model} ${vehicleData.specifications.year}`,
+          description:
+            vehicleData.notes || `${vehicleData.specifications.make} ${vehicleData.specifications.model} for rent`,
+          category: "vehicles" as const,
+          type: "rental" as const,
+          status: "draft" as const,
+          basePrice: vehicleData.pricing.basePrice.toString(),
+          currency: vehicleData.pricing.currency,
+          locationAddress: vehicleData.location.currentLocation,
+          locationCity: vehicleData.location.currentLocation.split(",")[0] || "Bangkok",
+          locationRegion: vehicleData.location.currentLocation.split(",")[1] || "Bangkok",
+          locationCountry: "Thailand",
+          locationLatitude: vehicleData.location.coordinates?.latitude?.toString(),
+          locationLongitude: vehicleData.location.coordinates?.longitude?.toString(),
+          images: vehicleData.images,
+          tags: [vehicleData.type, vehicleData.category, vehicleData.specifications.make.toLowerCase()],
+        }
+
+        const [listing] = await trx.insert(listings).values(listingInsert).returning()
 
         // Create vehicle-specific data
-        const vehicleResult = await tx
-          .insert(vehicles)
-          .values({
-            listingId,
-            vehicleType: vehicleData.type,
-            category: vehicleData.category,
-            condition: vehicleData.condition,
-            status: "available",
-            make: vehicleData.specifications.make,
-            model: vehicleData.specifications.model,
-            year: vehicleData.specifications.year,
-            color: vehicleData.specifications.color,
-            engineSize: vehicleData.specifications.engineSize,
-            fuelType: vehicleData.specifications.fuelType,
-            transmission: vehicleData.specifications.transmission,
-            registrationNumber: vehicleData.documents.registrationNumber || null,
-            seatingCapacity: vehicleData.specifications.seatingCapacity || 1,
-            licensePlate: vehicleData.documents.licensePlate || "",
-            securityDeposit: vehicleData.pricing.securityDeposit,
-            currentLocation: vehicleData.location?.currentLocation || "Unknown",
-            dailyRate: vehicleData.pricing.dailyRate?.toString(),
-            weeklyRate: vehicleData.pricing.weeklyRate?.toString(),
-            monthlyRate: vehicleData.pricing.monthlyRate?.toString(),
-            deposit: vehicleData.pricing.securityDeposit,
-          } as any)
-          .returning()
+        const vehicleInsert: VehicleInsert = {
+          listingId,
+          vehicleType: vehicleData.type,
+          category: vehicleData.category,
+          condition: vehicleData.condition,
+          status: "available" as const,
+          make: vehicleData.specifications.make,
+          model: vehicleData.specifications.model,
+          year: vehicleData.specifications.year,
+          color: vehicleData.specifications.color,
+          engineSize: vehicleData.specifications.engineSize || null,
+          fuelType: vehicleData.specifications.fuelType,
+          transmission: vehicleData.specifications.transmission,
+          registrationNumber: vehicleData.documents.registrationNumber || null,
+          seatingCapacity: vehicleData.specifications.seatingCapacity || 1,
+          licensePlate: vehicleData.documents.licensePlate || "",
+          securityDeposit: vehicleData.pricing.securityDeposit.toString(),
+          currentLocation: vehicleData.location?.currentLocation || "Unknown",
+          dailyRate: vehicleData.pricing.dailyRate?.toString(),
+          weeklyRate: vehicleData.pricing.weeklyRate?.toString(),
+          monthlyRate: vehicleData.pricing.monthlyRate?.toString(),
+          deposit: vehicleData.pricing.securityDeposit.toString(),
+        }
+
+        const vehicleResult = await trx.insert(vehicles).values(vehicleInsert).returning()
 
         const vehicle = vehicleResult[0]
         return { listing, vehicle }
       })
 
-      // Convert to VehicleListing format
       return this.mapToVehicleListing(result.listing, result.vehicle)
     } catch (error) {
       console.error("Error creating vehicle listing:", error)
@@ -84,58 +96,60 @@ export class ListingService {
   }
 
   // Create product listing
-  async createProductListing(ownerId: string, productData: CreateProductRequest): Promise<ProductListing> {
+  async createProductListing(
+    ownerId: string,
+    productData: CreateProductRequest,
+    tx?: PgTransaction<any, any, unknown>,
+  ): Promise<ProductListing> {
     const listingId = uuidv4()
-    const productId = uuidv4()
 
     try {
-      const result = await db.transaction(async (tx) => {
+      const result = await db.transaction(async (trx) => {
         // Create main listing
-        const [listing] = await tx
-          .insert(listings)
-          .values({
-            ownerId,
-            title: productData.title,
-            description: productData.description,
-            category: "products",
-            type: "rental",
-            status: "draft",
-            basePrice: productData.pricing.price.toString(),
-            currency: productData.pricing.currency,
-            locationAddress: productData.location.address,
-            locationCity: productData.location.city,
-            locationRegion: productData.location.region,
-            locationCountry: productData.location.country,
-            locationZipCode: productData.location.zipCode,
-            locationLatitude: productData.location.coordinates?.latitude?.toString(),
-            locationLongitude: productData.location.coordinates?.longitude?.toString(),
-            images: productData.images,
-            tags: productData.tags,
-          })
-          .returning()
+        const listingInsert: ListingInsert = {
+          id: listingId,
+          ownerId,
+          title: productData.title,
+          description: productData.description,
+          category: "products" as const,
+          type: "rental" as const,
+          status: "draft" as const,
+          basePrice: productData.pricing.price.toString(),
+          currency: productData.pricing.currency,
+          locationAddress: productData.location.address,
+          locationCity: productData.location.city,
+          locationRegion: productData.location.region,
+          locationCountry: productData.location.country,
+          locationZipCode: productData.location.zipCode,
+          locationLatitude: productData.location.coordinates?.latitude?.toString(),
+          locationLongitude: productData.location.coordinates?.longitude?.toString(),
+          images: productData.images,
+          tags: productData.tags,
+        }
+
+        const [listing] = await trx.insert(listings).values(listingInsert).returning()
 
         // Create product-specific data
-        const productResult = await tx
-          .insert(products)
-          .values({
-            listingId,
-            productType: productData.type,
-            condition: productData.condition,
-            status: "active",
-            listingType: productData.listingType,
-            brand: productData.specifications.brand,
-            model: productData.specifications.model,
-            sku: productData.specifications.sku,
-            weight: productData.specifications.dimensions?.weight,
-            material: productData.specifications.material,
-            quantity: productData.availability.quantity,
-            price: productData.pricing.price,
-            priceType: productData.pricing.priceType || "fixed",
-            sellerId: ownerId,
-            sellerType: "individual",
-            sellerName: "Unknown",
-          } as any)
-          .returning()
+        const productInsert: ProductInsert = {
+          listingId,
+          productType: productData.type,
+          condition: productData.condition,
+          status: "active" as const,
+          listingType: productData.listingType,
+          brand: productData.specifications.brand,
+          model: productData.specifications.model,
+          sku: productData.specifications.sku,
+          weight: productData.specifications.dimensions?.weight,
+          material: productData.specifications.material,
+          quantity: productData.availability.quantity,
+          price: productData.pricing.price,
+          priceType: productData.pricing.priceType || ("fixed" as const),
+          sellerId: ownerId,
+          sellerType: "individual" as const,
+          sellerName: "Unknown",
+        }
+
+        const productResult = await trx.insert(products).values(productInsert).returning()
 
         const product = productResult[0]
         return { listing, product }
@@ -155,7 +169,7 @@ export class ListingService {
         .select()
         .from(listings)
         .leftJoin(vehicles, eq(listings.id, vehicles.listingId))
-        .where(and(eq(listings.id, id), eq(listings.type, "rental")))
+        .where(and(eq(listings.id, id), eq(listings.category, "vehicles")))
         .limit(1)
 
       if (!result[0] || !result[0].vehicles) {
@@ -176,7 +190,7 @@ export class ListingService {
         .select()
         .from(listings)
         .leftJoin(products, eq(listings.id, products.listingId))
-        .where(and(eq(listings.id, id), eq(listings.type, "rental")))
+        .where(and(eq(listings.id, id), eq(listings.category, "products")))
         .limit(1)
 
       if (!result[0] || !result[0].products) {
@@ -190,16 +204,22 @@ export class ListingService {
     }
   }
 
+  // Helper method to safely parse decimal
+  private parseDecimal(value: string | null | undefined): number {
+    if (!value) return 0
+    return Number.parseFloat(value)
+  }
+
   // Helper method to map database result to VehicleListing
-  private mapToVehicleListing(listing: any, vehicle: any): VehicleListing {
+  private mapToVehicleListing(listing: ListingSelect, vehicle: VehicleSelect): VehicleListing {
     return {
       id: listing.id,
       title: listing.title,
       description: listing.description,
       category: "vehicles" as ListingCategory.VEHICLES,
-      type: "vehicle" as any,
+      type: "rental" as ListingType.RENTAL,
       price: {
-        amount: Number.parseFloat(listing.basePrice),
+        amount: this.parseDecimal(listing.basePrice),
         currency: listing.currency,
         period: "day",
       },
@@ -208,8 +228,8 @@ export class ListingService {
         city: listing.locationCity,
         region: listing.locationRegion,
         country: listing.locationCountry,
-        latitude: listing.locationLatitude ? Number.parseFloat(listing.locationLatitude) : 0,
-        longitude: listing.locationLongitude ? Number.parseFloat(listing.locationLongitude) : 0,
+        latitude: this.parseDecimal(listing.locationLatitude),
+        longitude: this.parseDecimal(listing.locationLongitude),
       },
       images: listing.images || [],
       availability: {
@@ -217,7 +237,7 @@ export class ListingService {
         endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
       },
       ownerId: listing.ownerId,
-      rating: Number.parseFloat(listing.averageRating) || 0,
+      rating: this.parseDecimal(listing.averageRating),
       reviewCount: listing.reviewCount || 0,
       isActive: listing.status === "active",
       isVerified: listing.isVerified,
@@ -240,7 +260,7 @@ export class ListingService {
           engineSize: vehicle.engineSize,
           power: vehicle.power,
           maxSpeed: vehicle.maxSpeed,
-          fuelConsumption: vehicle.fuelConsumption ? Number.parseFloat(vehicle.fuelConsumption) : undefined,
+          fuelConsumption: vehicle.fuelConsumption ? this.parseDecimal(vehicle.fuelConsumption) : undefined,
           fuelType: vehicle.fuelType,
           transmission: vehicle.transmission,
           seatingCapacity: vehicle.seatingCapacity,
@@ -280,21 +300,21 @@ export class ListingService {
           accessories: vehicle.accessories || [],
         },
         pricing: {
-          basePrice: Number.parseFloat(listing.basePrice),
+          basePrice: this.parseDecimal(listing.basePrice),
           currency: listing.currency,
-          hourlyRate: vehicle.hourlyRate ? Number.parseFloat(vehicle.hourlyRate) : undefined,
-          dailyRate: vehicle.dailyRate ? Number.parseFloat(vehicle.dailyRate) : undefined,
-          weeklyRate: vehicle.weeklyRate ? Number.parseFloat(vehicle.weeklyRate) : undefined,
-          monthlyRate: vehicle.monthlyRate ? Number.parseFloat(vehicle.monthlyRate) : undefined,
-          yearlyRate: vehicle.yearlyRate ? Number.parseFloat(vehicle.yearlyRate) : undefined,
-          securityDeposit: Number.parseFloat(vehicle.securityDeposit),
-          insurancePerDay: vehicle.insurancePerDay ? Number.parseFloat(vehicle.insurancePerDay) : undefined,
-          deliveryFee: vehicle.deliveryFee ? Number.parseFloat(vehicle.deliveryFee) : undefined,
-          pickupFee: vehicle.pickupFee ? Number.parseFloat(vehicle.pickupFee) : undefined,
-          lateFee: vehicle.lateFee ? Number.parseFloat(vehicle.lateFee) : undefined,
-          damageFee: vehicle.damageFee ? Number.parseFloat(vehicle.damageFee) : undefined,
+          hourlyRate: vehicle.hourlyRate ? this.parseDecimal(vehicle.hourlyRate) : undefined,
+          dailyRate: vehicle.dailyRate ? this.parseDecimal(vehicle.dailyRate) : undefined,
+          weeklyRate: vehicle.weeklyRate ? this.parseDecimal(vehicle.weeklyRate) : undefined,
+          monthlyRate: vehicle.monthlyRate ? this.parseDecimal(vehicle.monthlyRate) : undefined,
+          yearlyRate: vehicle.yearlyRate ? this.parseDecimal(vehicle.yearlyRate) : undefined,
+          securityDeposit: this.parseDecimal(vehicle.securityDeposit),
+          insurancePerDay: vehicle.insurancePerDay ? this.parseDecimal(vehicle.insurancePerDay) : undefined,
+          deliveryFee: vehicle.deliveryFee ? this.parseDecimal(vehicle.deliveryFee) : undefined,
+          pickupFee: vehicle.pickupFee ? this.parseDecimal(vehicle.pickupFee) : undefined,
+          lateFee: vehicle.lateFee ? this.parseDecimal(vehicle.lateFee) : undefined,
+          damageFee: vehicle.damageFee ? this.parseDecimal(vehicle.damageFee) : undefined,
           fuelPolicy: vehicle.fuelPolicy,
-          fuelCostPerLiter: vehicle.fuelCostPerLiter ? Number.parseFloat(vehicle.fuelCostPerLiter) : undefined,
+          fuelCostPerLiter: vehicle.fuelCostPerLiter ? this.parseDecimal(vehicle.fuelCostPerLiter) : undefined,
           durationDiscounts: vehicle.durationDiscounts || {},
         },
         location: {
@@ -302,8 +322,8 @@ export class ListingService {
           coordinates:
             listing.locationLatitude && listing.locationLongitude
               ? {
-                  latitude: Number.parseFloat(listing.locationLatitude),
-                  longitude: Number.parseFloat(listing.locationLongitude),
+                  latitude: this.parseDecimal(listing.locationLatitude),
+                  longitude: this.parseDecimal(listing.locationLongitude),
                 }
               : undefined,
           pickupLocations: vehicle.pickupLocations || [],
@@ -320,10 +340,10 @@ export class ListingService {
         blackoutDates: vehicle.blackoutDates || [],
         isVerified: listing.isVerified,
         verificationDate: listing.verificationDate?.toISOString(),
-        qualityScore: listing.qualityScore ? Number.parseFloat(listing.qualityScore) : undefined,
+        qualityScore: listing.qualityScore ? this.parseDecimal(listing.qualityScore) : undefined,
         totalRentals: vehicle.totalRentals,
         totalKilometers: vehicle.totalKilometers,
-        averageRating: Number.parseFloat(listing.averageRating) || 0,
+        averageRating: this.parseDecimal(listing.averageRating),
         reviewCount: listing.reviewCount || 0,
         createdAt: vehicle.createdAt.toISOString(),
         updatedAt: vehicle.updatedAt.toISOString(),
@@ -349,7 +369,7 @@ export class ListingService {
       const offset = (page - 1) * limit
 
       // Apply filters
-      const conditions = [eq(listings.type, "vehicle"), eq(listings.status, "active")]
+      const conditions = [eq(listings.category, "vehicles"), eq(listings.status, "active")]
 
       if (filters.type?.length) {
         conditions.push(inArray(vehicles.vehicleType, filters.type))
@@ -369,10 +389,10 @@ export class ListingService {
                 ? vehicles.monthlyRate
                 : vehicles.dailyRate
 
-        if (filters.priceRange.min) {
+        if (filters.priceRange.min && priceField) {
           conditions.push(sql`${priceField}::numeric >= ${filters.priceRange.min}`)
         }
-        if (filters.priceRange.max) {
+        if (filters.priceRange.max && priceField) {
           conditions.push(sql`${priceField}::numeric <= ${filters.priceRange.max}`)
         }
       }
@@ -385,7 +405,7 @@ export class ListingService {
         conditions.push(eq(listings.isVerified, filters.verified))
       }
 
-      if (filters.rating) {
+      if (filters.rating && listings.averageRating) {
         conditions.push(sql`${listings.averageRating}::numeric >= ${filters.rating}`)
       }
 
@@ -399,8 +419,8 @@ export class ListingService {
         .orderBy(desc(listings.createdAt))
 
       const vehicleListings = results
-        .filter((r: any) => r.vehicles)
-        .map((r: any) => this.mapToVehicleListing(r.listings, r.vehicles))
+        .filter((r): r is typeof r & { vehicles: NonNullable<typeof r.vehicles> } => !!r.vehicles)
+        .map((r) => this.mapToVehicleListing(r.listings, r.vehicles))
 
       // Get total count
       const totalQuery = await db
@@ -428,13 +448,13 @@ export class ListingService {
   async searchProductListings(filters: ProductSearchFilters, page = 1, limit = 20) {
     try {
       const offset = (page - 1) * limit
-      const conditions = [eq(listings.type, "product"), eq(listings.status, "active")]
+      const conditions = [eq(listings.category, "products"), eq(listings.status, "active")]
 
       if (filters.type?.length) {
         conditions.push(inArray(products.productType, filters.type))
       }
 
-      if (filters.category?.length) {
+      if (filters.category?.length && products.subcategory) {
         conditions.push(inArray(products.subcategory, filters.category))
       }
 
@@ -463,7 +483,7 @@ export class ListingService {
         conditions.push(eq(products.isAvailable, true))
       }
 
-      if (filters.seller?.verified !== undefined) {
+      if (filters.seller?.verified !== undefined && products.isSellerVerified) {
         conditions.push(eq(products.isSellerVerified, filters.seller.verified))
       }
 
@@ -477,7 +497,7 @@ export class ListingService {
         .orderBy(desc(listings.createdAt))
 
       const productListings = results
-        .filter((r) => r.products)
+        .filter((r): r is typeof r & { products: NonNullable<typeof r.products> } => !!r.products)
         .map((r) => this.mapToProductListing(r.listings, r.products))
 
       // Get total count
@@ -513,7 +533,7 @@ export class ListingService {
       const [updated] = await db
         .update(listings)
         .set({
-          status: status as any,
+          status: status as ListingSelect["status"],
           updatedAt: new Date(),
           publishedAt: status === "active" ? new Date() : undefined,
         })
@@ -548,15 +568,15 @@ export class ListingService {
   }
 
   // Helper method to map database result to ProductListing
-  private mapToProductListing(listing: any, product: any): ProductListing {
+  private mapToProductListing(listing: ListingSelect, product: ProductSelect): ProductListing {
     return {
       id: listing.id,
       title: listing.title,
       description: listing.description,
       category: "products" as ListingCategory.PRODUCTS,
-      type: "product" as any,
+      type: "rental" as ListingType.RENTAL,
       price: {
-        amount: Number.parseFloat(listing.basePrice),
+        amount: this.parseDecimal(listing.basePrice),
         currency: listing.currency,
       },
       location: {
@@ -564,12 +584,12 @@ export class ListingService {
         city: listing.locationCity,
         region: listing.locationRegion,
         country: listing.locationCountry,
-        latitude: listing.locationLatitude ? Number.parseFloat(listing.locationLatitude) : 0,
-        longitude: listing.locationLongitude ? Number.parseFloat(listing.locationLongitude) : 0,
+        latitude: this.parseDecimal(listing.locationLatitude),
+        longitude: this.parseDecimal(listing.locationLongitude),
       },
       images: listing.images || [],
       ownerId: listing.ownerId,
-      rating: Number.parseFloat(listing.averageRating) || 0,
+      rating: this.parseDecimal(listing.averageRating),
       reviewCount: listing.reviewCount || 0,
       isActive: listing.status === "active",
       isVerified: listing.isVerified,
@@ -615,15 +635,15 @@ export class ListingService {
           manualIncluded: product.manualIncluded,
         },
         pricing: {
-          price: Number.parseFloat(product.price),
+          price: this.parseDecimal(product.price.toString()),
           currency: listing.currency,
           priceType: product.priceType,
-          originalPrice: product.originalPrice ? Number.parseFloat(product.originalPrice) : undefined,
-          msrp: product.msrp ? Number.parseFloat(product.msrp) : undefined,
+          originalPrice: product.originalPrice ? this.parseDecimal(product.originalPrice) : undefined,
+          msrp: product.msrp ? this.parseDecimal(product.msrp) : undefined,
           rentalPricing: product.rentalPricing,
-          shippingCost: product.shippingCost ? Number.parseFloat(product.shippingCost) : undefined,
-          handlingFee: product.handlingFee ? Number.parseFloat(product.handlingFee) : undefined,
-          installationFee: product.installationFee ? Number.parseFloat(product.installationFee) : undefined,
+          shippingCost: product.shippingCost ? this.parseDecimal(product.shippingCost) : undefined,
+          handlingFee: product.handlingFee ? this.parseDecimal(product.handlingFee) : undefined,
+          installationFee: product.installationFee ? this.parseDecimal(product.installationFee) : undefined,
           acceptedPayments: product.acceptedPayments || [],
           installmentAvailable: product.installmentAvailable,
           installmentOptions: product.installmentOptions || [],
@@ -647,7 +667,7 @@ export class ListingService {
           sellerId: product.sellerId,
           sellerType: product.sellerType,
           sellerName: product.sellerName,
-          sellerRating: product.sellerRating ? Number.parseFloat(product.sellerRating) : undefined,
+          sellerRating: product.sellerRating ? this.parseDecimal(product.sellerRating) : undefined,
           sellerReviews: product.sellerReviews,
           isVerified: product.isSellerVerified,
           businessLicense: product.businessLicense,
@@ -674,8 +694,8 @@ export class ListingService {
           coordinates:
             listing.locationLatitude && listing.locationLongitude
               ? {
-                  latitude: Number.parseFloat(listing.locationLatitude),
-                  longitude: Number.parseFloat(listing.locationLongitude),
+                  latitude: this.parseDecimal(listing.locationLatitude),
+                  longitude: this.parseDecimal(listing.locationLongitude),
                 }
               : undefined,
           zipCode: listing.locationZipCode,
@@ -683,12 +703,12 @@ export class ListingService {
         tags: listing.tags || [],
         isVerified: listing.isVerified,
         verificationDate: listing.verificationDate?.toISOString(),
-        qualityScore: listing.qualityScore ? Number.parseFloat(listing.qualityScore) : undefined,
-        trustScore: listing.trustScore ? Number.parseFloat(listing.trustScore) : undefined,
+        qualityScore: listing.qualityScore ? this.parseDecimal(listing.qualityScore) : undefined,
+        trustScore: listing.trustScore ? this.parseDecimal(listing.trustScore) : undefined,
         views: listing.views,
         favorites: listing.favorites,
         inquiries: listing.inquiries,
-        averageRating: Number.parseFloat(listing.averageRating) || 0,
+        averageRating: this.parseDecimal(listing.averageRating),
         reviewCount: listing.reviewCount || 0,
         moderationStatus: listing.moderationStatus,
         moderationNotes: listing.moderationNotes,
@@ -712,7 +732,7 @@ export class ListingService {
         localDelivery: product.deliveryAvailable,
         nationalShipping: (product.deliveryAreas || []).length > 1,
         pickupAvailable: (product.pickupLocations || []).length > 0,
-        shippingCost: product.shippingCost ? Number.parseFloat(product.shippingCost) : undefined,
+        shippingCost: product.shippingCost ? this.parseDecimal(product.shippingCost) : undefined,
       },
     }
   }

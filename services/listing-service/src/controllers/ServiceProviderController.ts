@@ -1,8 +1,8 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { ServiceProviderService } from "../services/ServiceProviderService"
 import type { ServiceProviderFilters } from "@marketplace/shared-types"
 import { ProviderVerificationLevel } from "@marketplace/shared-types"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+import { ServiceProviderService } from "../services/ServiceProviderService"
 
 // Zod validation schemas
 const ServiceSchema = z.object({

@@ -1,4 +1,4 @@
-import { CustomerStatus, LeadStatus, LeadPriority, LeadSource, CommunicationChannel } from "@marketplace/shared-types"
+import { CommunicationChannel, CustomerStatus, LeadPriority, LeadSource, LeadStatus } from "@marketplace/shared-types"
 
 // Customer validation schemas
 export const createCustomerSchema = {

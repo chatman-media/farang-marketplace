@@ -1,8 +1,8 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify"
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
+import { circuitBreakerConfig, env } from "../config/environment.js"
 import { routeMapping } from "../config/services.js"
-import { ServiceDiscovery } from "./ServiceDiscovery.js"
 import { CircuitBreakerManager } from "./CircuitBreaker.js"
-import { env, circuitBreakerConfig } from "../config/environment.js"
+import { ServiceDiscovery } from "./ServiceDiscovery.js"
 
 export interface ProxyOptions {
   timeout?: number

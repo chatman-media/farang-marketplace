@@ -1,6 +1,6 @@
+import { User } from "@marketplace/shared-types"
 import React, { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { User } from "@marketplace/shared-types"
 import { getNavigationItems } from "../../config/marketplace"
 
 interface HeaderProps {

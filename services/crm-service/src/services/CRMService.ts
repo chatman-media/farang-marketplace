@@ -1,17 +1,17 @@
+import {
+  CRMAnalytics,
+  CreateCustomerRequest,
+  CreateLeadRequest,
+  CustomerStatus,
+  LeadPriority,
+  LeadStatus,
+  UpdateCustomerRequest,
+  UpdateLeadRequest,
+} from "@marketplace/shared-types"
 import { query } from "../db/connection"
 import { Customer } from "../models/Customer"
 import { Lead } from "../models/Lead"
 import { AutomationService } from "./AutomationService"
-import {
-  CreateCustomerRequest,
-  UpdateCustomerRequest,
-  CreateLeadRequest,
-  UpdateLeadRequest,
-  CustomerStatus,
-  LeadStatus,
-  LeadPriority,
-  CRMAnalytics,
-} from "@marketplace/shared-types"
 
 export class CRMService {
   private automationService: AutomationService

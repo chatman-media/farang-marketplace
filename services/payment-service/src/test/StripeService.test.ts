@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 
 describe("Stripe Service Logic Tests", () => {
   // Test utility functions without requiring Stripe SDK initialization

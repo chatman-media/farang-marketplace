@@ -1,10 +1,10 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { UserService } from "../services/UserService"
-import { z } from "zod"
 import { UserRole, VerificationStatus } from "@marketplace/shared-types"
+import { FastifyReply, FastifyRequest } from "fastify"
+import fs from "fs/promises"
 import multer from "multer"
 import path from "path"
-import fs from "fs/promises"
+import { z } from "zod"
+import { UserService } from "../services/UserService"
 
 // Validation schemas
 const UpdateProfileSchema = z.object({

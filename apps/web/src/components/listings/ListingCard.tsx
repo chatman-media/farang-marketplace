@@ -1,6 +1,6 @@
 import React from "react"
 import { Link } from "react-router-dom"
-import { Card, Badge } from "../ui"
+import { Badge, Card } from "../ui"
 
 // Extended type to handle API data structure
 interface ApiListing {

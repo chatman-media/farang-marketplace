@@ -1,11 +1,11 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { OAuthService } from "../services/OAuthService"
 import {
   AuthProvider,
-  OAuthLoginRequest,
   LinkSocialAccountRequest,
+  OAuthLoginRequest,
   UnlinkSocialAccountRequest,
 } from "@marketplace/shared-types"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { OAuthService } from "../services/OAuthService"
 
 export class OAuthController {
   constructor(private oauthService: OAuthService) {}

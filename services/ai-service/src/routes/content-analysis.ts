@@ -1,14 +1,14 @@
 import { FastifyPluginAsync } from "fastify"
 import {
-  ContentAnalysisController,
   analyzeContentSchema,
   batchAnalyzeSchema,
-  sentimentAnalysisSchema,
-  keywordExtractionSchema,
+  ContentAnalysisController,
   categorizationSchema,
+  keywordExtractionSchema,
+  languageDetectionSchema,
   moderationSchema,
   qualityAssessmentSchema,
-  languageDetectionSchema,
+  sentimentAnalysisSchema,
 } from "../controllers/ContentAnalysisController"
 
 interface ContentAnalysisRouteOptions {

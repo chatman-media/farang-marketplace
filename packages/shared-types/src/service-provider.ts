@@ -1,5 +1,5 @@
 import { Location } from "./common"
-import { ServiceType, LanguageCode, CountryCode } from "./listing"
+import { CountryCode, LanguageCode, ServiceType } from "./listing"
 
 // Service Provider Profile Types
 export enum ProviderType {

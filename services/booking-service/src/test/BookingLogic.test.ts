@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 
 // Simple unit tests for booking service logic
 describe("Booking Service Logic", () => {

@@ -1,9 +1,10 @@
 // Export API client and utilities
-export { api, apiClient, TokenManager, handleApiError } from "./client"
+
 export type { ApiError } from "./client"
+export { api, apiClient, handleApiError, TokenManager } from "./client"
 
 // Export configuration
-export { getApiConfig, API_CONFIG } from "./config"
+export { API_CONFIG, getApiConfig } from "./config"
 
 // Export all services
 export * from "./services"

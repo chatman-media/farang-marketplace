@@ -1,5 +1,5 @@
-import type { Config } from "drizzle-kit"
 import { config } from "dotenv"
+import type { Config } from "drizzle-kit"
 
 // Load environment variables
 config({ path: ".env" })

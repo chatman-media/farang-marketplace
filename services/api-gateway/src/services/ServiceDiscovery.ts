@@ -1,5 +1,5 @@
 import { EventEmitter } from "events"
-import { servicesConfig, ServiceConfig } from "../config/services.js"
+import { ServiceConfig, servicesConfig } from "../config/services.js"
 
 export interface ServiceHealth {
   name: string

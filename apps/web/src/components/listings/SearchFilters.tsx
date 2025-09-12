@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Button, Input, Card } from "../ui"
+import { Button, Card, Input } from "../ui"
 
 // Extended filters for the frontend
 interface ExtendedListingFilters {

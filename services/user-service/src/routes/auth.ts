@@ -1,9 +1,9 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify"
 import { AuthController } from "../controllers/AuthController"
+import { FastifyAuthMiddleware } from "../middleware/auth"
+import { UserRepository } from "../repositories/UserRepository"
 import { AuthService } from "../services/AuthService"
 import { UserService } from "../services/UserService"
-import { UserRepository } from "../repositories/UserRepository"
-import { FastifyAuthMiddleware } from "../middleware/auth"
 
 // Initialize dependencies
 const userRepository = new UserRepository()

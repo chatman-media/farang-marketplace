@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify"
 import { OAuthController } from "../controllers/OAuthController"
-import { OAuthService } from "../services/OAuthService"
-import { UserService } from "../services/UserService"
-import { AuthService } from "../services/AuthService"
 import { FastifyAuthMiddleware } from "../middleware/auth"
 import { UserRepository } from "../repositories/UserRepository"
+import { AuthService } from "../services/AuthService"
+import { OAuthService } from "../services/OAuthService"
+import { UserService } from "../services/UserService"
 
 // Инициализируем сервисы и контроллер
 const userRepository = new UserRepository()

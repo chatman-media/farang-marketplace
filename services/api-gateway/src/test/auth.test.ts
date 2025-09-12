@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
 import jwt from "jsonwebtoken"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 // Import auth functions dynamically to avoid environment loading issues
 let authMiddleware: any

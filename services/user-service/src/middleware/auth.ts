@@ -1,6 +1,6 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { AuthService, TokenPayload } from "../services/AuthService"
 import { UserRole } from "@marketplace/shared-types"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { AuthService, TokenPayload } from "../services/AuthService"
 
 // Extend Fastify Request interface to include user data
 declare module "fastify" {

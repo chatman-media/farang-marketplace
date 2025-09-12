@@ -1,14 +1,14 @@
-import React from "react"
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom"
 import { QueryClientProvider } from "@tanstack/react-query"
+import React from "react"
+import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom"
 import { Layout } from "./components/layout"
-import { Button, Card, Badge } from "./components/ui"
-import { LoginPage, RegisterPage, ProfilePage, ListingsPage } from "./pages"
-import { CategoryPage } from "./pages/CategoryPage"
-import ReactQueryTest from "./test/ReactQueryTest"
-import DebugAPI from "./test/DebugAPI"
+import { Badge, Button, Card } from "./components/ui"
+import { FEATURES_CONFIG, getEnabledCategories, HERO_CONFIG } from "./config/marketplace"
 import { queryClient } from "./lib/query"
-import { getEnabledCategories, HERO_CONFIG, FEATURES_CONFIG } from "./config/marketplace"
+import { ListingsPage, LoginPage, ProfilePage, RegisterPage } from "./pages"
+import { CategoryPage } from "./pages/CategoryPage"
+import DebugAPI from "./test/DebugAPI"
+import ReactQueryTest from "./test/ReactQueryTest"
 
 // React Query Devtools wrapper
 const DevtoolsWrapper: React.FC = () => {

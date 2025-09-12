@@ -1,6 +1,6 @@
-import OpenAI from "openai"
 import axios from "axios"
-import type { AIProviderConfig, AIRequest, AIResponse, AIError } from "../models/index"
+import OpenAI from "openai"
+import type { AIError, AIProviderConfig, AIRequest, AIResponse } from "../models/index"
 
 export class AIProviderService {
   private providers: Map<string, AIProviderConfig> = new Map()

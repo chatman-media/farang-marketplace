@@ -1,6 +1,6 @@
-import { beforeAll } from "vitest"
 import { config } from "dotenv"
 import path from "path"
+import { beforeAll } from "vitest"
 
 // Load test environment variables (suppress dotenv tips)
 config({ path: path.resolve(__dirname, "../../.env.test"), debug: false })

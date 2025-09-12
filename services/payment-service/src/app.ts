@@ -1,5 +1,5 @@
-import Fastify, { FastifyInstance } from "fastify"
 import { config } from "dotenv"
+import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"
 
 // Load environment variables

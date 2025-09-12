@@ -1,7 +1,15 @@
-import { UserRepository } from "../repositories/UserRepository"
-import { UserEntity } from "../models/User"
-import { UserRole, UserProfile, User, VerificationStatus, Location, UserPreferences } from "@marketplace/shared-types"
+import {
+  AuthProvider,
+  Location,
+  SocialProfile,
+  User,
+  UserProfile,
+  UserRole,
+  VerificationStatus,
+} from "@marketplace/shared-types"
 import { z } from "zod"
+import { UserEntity } from "../models/User"
+import { UserRepository } from "../repositories/UserRepository"
 
 const UpdateUserSchema = z.object({
   email: z.email().optional(),
@@ -26,8 +34,17 @@ const UpdateUserSchema = z.object({
       rating: z.number().min(0).max(5).optional(),
       reviewsCount: z.number().min(0).optional(),
       verificationStatus: z.enum(VerificationStatus).optional(),
-      socialProfiles: z.array(z.any()).optional(),
-      primaryAuthProvider: z.any().optional(),
+      socialProfiles: z
+        .array(
+          z.object({
+            provider: z.string(),
+            providerId: z.string(),
+            username: z.string().optional(),
+            profileUrl: z.string().url().optional(),
+          }),
+        )
+        .optional(),
+      primaryAuthProvider: z.nativeEnum(AuthProvider).optional(),
       preferences: z
         .object({
           language: z.enum(["en", "ru", "th", "cn", "ar"]).optional(),
@@ -63,8 +80,8 @@ export interface CreateUserData {
     firstName: string
     lastName: string
     location?: Location
-    socialProfiles?: any[]
-    primaryAuthProvider?: any
+    socialProfiles?: SocialProfile[]
+    primaryAuthProvider?: AuthProvider
   }
 }
 
@@ -90,7 +107,7 @@ export class UserService {
         reviewsCount: 0,
         verificationStatus: VerificationStatus.UNVERIFIED,
         socialProfiles: [],
-        primaryAuthProvider: "email" as any,
+        primaryAuthProvider: AuthProvider.EMAIL,
       },
     })
 

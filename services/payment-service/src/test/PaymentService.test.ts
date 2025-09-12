@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 
 // Payment Service Logic Tests
 // These tests validate payment processing logic and business rules

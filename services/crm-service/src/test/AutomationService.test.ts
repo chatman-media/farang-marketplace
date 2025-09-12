@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
+import { Automation, AutomationAction, AutomationCondition, AutomationTrigger } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { AutomationService } from "../services/AutomationService"
-import { Automation, AutomationTrigger, AutomationCondition, AutomationAction } from "@marketplace/shared-types"
 
 // Mock the database connection
 vi.mock("../db/connection", () => ({
@@ -8,6 +8,7 @@ vi.mock("../db/connection", () => ({
 }))
 
 import { query } from "../db/connection"
+
 const mockQuery = vi.mocked(query)
 
 describe("AutomationService", () => {

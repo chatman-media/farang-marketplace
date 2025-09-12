@@ -1,17 +1,18 @@
-import { randomBytes, createHash, createHmac } from "crypto"
-import { UserService } from "./UserService"
-import { AuthService } from "./AuthService"
+import logger from "@marketplace/logger"
 import {
   AuthProvider,
-  SocialProfile,
-  OAuthLoginRequest,
-  LinkSocialAccountRequest,
-  UnlinkSocialAccountRequest,
-  SocialAccountsResponse,
   AuthResponse,
+  LinkSocialAccountRequest,
+  OAuthLoginRequest,
+  SocialAccountsResponse,
+  SocialProfile,
+  UnlinkSocialAccountRequest,
   User,
   UserRole,
 } from "@marketplace/shared-types"
+import { createHash, createHmac, randomBytes } from "crypto"
+import { AuthService } from "./AuthService"
+import { UserService } from "./UserService"
 
 export interface OAuthProvider {
   getAuthorizationUrl(state: string): string

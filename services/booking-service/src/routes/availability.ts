@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify"
+
 import { AvailabilityController } from "../controllers/AvailabilityController"
 
 interface RouteOptions {

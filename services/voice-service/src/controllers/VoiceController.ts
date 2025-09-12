@@ -1,4 +1,7 @@
+import logger from "@marketplace/logger"
+
 import type { FastifyReply, FastifyRequest } from "fastify"
+
 import type { VoiceCommandResponse, VoiceRequest } from "../models/index"
 import { SpeechToTextService } from "../services/SpeechToTextService"
 import { VoiceCommandService } from "../services/VoiceCommandService"
@@ -73,7 +76,7 @@ export class VoiceController {
 
       return result
     } catch (error) {
-      console.error("Transcription error:", error)
+      logger.error("Transcription error:", error)
       reply.code(500)
       return {
         success: false,
@@ -116,7 +119,7 @@ export class VoiceController {
 
       return result
     } catch (error) {
-      console.error("Command processing error:", error)
+      logger.error("Command processing error:", error)
       reply.code(500)
       return {
         success: false,
@@ -136,7 +139,7 @@ export class VoiceController {
         languages,
       }
     } catch (error) {
-      console.error("Error getting supported languages:", error)
+      logger.error("Error getting supported languages:", error)
       reply.code(500)
       return {
         success: false,
@@ -159,7 +162,7 @@ export class VoiceController {
         health,
       }
     } catch (error) {
-      console.error("Error getting provider stats:", error)
+      logger.error("Error getting provider stats:", error)
       reply.code(500)
       return {
         success: false,
@@ -198,7 +201,7 @@ export class VoiceController {
         session,
       }
     } catch (error) {
-      console.error("Error getting session:", error)
+      logger.error("Error getting session:", error)
       reply.code(500)
       return {
         success: false,
@@ -225,7 +228,7 @@ export class VoiceController {
         },
       }
     } catch (error) {
-      console.error("Error getting stats:", error)
+      logger.error("Error getting stats:", error)
       reply.code(500)
       return {
         success: false,
@@ -249,7 +252,7 @@ export class VoiceController {
         timestamp: new Date().toISOString(),
       }
     } catch (error) {
-      console.error("Health check error:", error)
+      logger.error("Health check error:", error)
       reply.code(503)
       return {
         success: false,
@@ -289,7 +292,7 @@ export class VoiceController {
 
       return result
     } catch (error) {
-      console.error("Audio upload error:", error)
+      logger.error("Audio upload error:", error)
       reply.code(500)
       return {
         success: false,
@@ -310,7 +313,7 @@ export class VoiceController {
         message: "Sessions cleaned up successfully",
       }
     } catch (error) {
-      console.error("Session cleanup error:", error)
+      logger.error("Session cleanup error:", error)
       reply.code(500)
       return {
         success: false,

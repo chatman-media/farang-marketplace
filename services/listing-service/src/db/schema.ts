@@ -1,5 +1,5 @@
-import { pgTable, uuid, varchar, text, integer, decimal, boolean, timestamp, jsonb, pgEnum } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
+import { boolean, decimal, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core"
 
 // Enums
 export const listingCategoryEnum = pgEnum("listing_category", [

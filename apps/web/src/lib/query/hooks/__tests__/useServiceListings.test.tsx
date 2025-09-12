@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
-import { renderHook, waitFor } from "@testing-library/react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { useServiceListings } from "../useListings"
-import { serviceListingsService } from "../../../api"
-import { ReactNode } from "react"
 import {
   ListingCategory,
   ListingType,
-  ServiceType,
   ServiceDeliveryMethod,
   ServiceDuration,
+  ServiceType,
 } from "@marketplace/shared-types"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { renderHook, waitFor } from "@testing-library/react"
+import { ReactNode } from "react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { serviceListingsService } from "../../../api"
+import { useServiceListings } from "../useListings"
 
 // Mock the API service
 vi.mock("../../../api", () => ({

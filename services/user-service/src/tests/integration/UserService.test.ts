@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
-import { UserService } from "../../services/UserService"
-import { UserEntity } from "../../models/User"
 import { UserRole, VerificationStatus } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { UserEntity } from "../../models/User"
+import { UserService } from "../../services/UserService"
 import { testUserData } from "../setup"
 
 // Skip mocking for now - use real repository in integration tests

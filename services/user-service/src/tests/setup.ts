@@ -1,6 +1,6 @@
-import { vi, beforeEach } from "vitest"
 import dotenv from "dotenv"
 import path from "path"
+import { beforeEach, vi } from "vitest"
 
 // Load test environment variables
 dotenv.config({ path: path.join(__dirname, "../../../.env.test") })
@@ -28,16 +28,16 @@ export const mockDatabase = {
 
 // Re-export fixtures for easy access in tests
 export {
-  userFixtures,
   createUserEntities,
-  databaseRowFixtures,
   createUserTestData,
-  updateUserTestData,
+  databaseRowFixtures,
   mockUserStats,
+  updateUserTestData,
+  userFixtures,
 } from "./fixtures/database"
 
 // Import fixtures for legacy test data
-import { userFixtures, createUserTestData, updateUserTestData } from "./fixtures/database"
+import { createUserTestData, updateUserTestData, userFixtures } from "./fixtures/database"
 
 // Legacy test data for backward compatibility
 export const testUserData = {

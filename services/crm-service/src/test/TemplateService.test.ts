@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
-import { TemplateService } from "../services/TemplateService"
-import { Template } from "../models/Template"
 import { CommunicationChannel } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { Template } from "../models/Template"
+import { TemplateService } from "../services/TemplateService"
 
 // Mock the database connection
 vi.mock("../db/connection", () => ({
@@ -9,6 +9,7 @@ vi.mock("../db/connection", () => ({
 }))
 
 import { query } from "../db/connection"
+
 const mockQuery = vi.mocked(query)
 
 describe("TemplateService", () => {

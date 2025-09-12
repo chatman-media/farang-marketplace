@@ -1,9 +1,9 @@
 import {
-  tonMonitoringQueue,
-  paymentLifecycleQueue,
-  webhookQueue,
-  reconciliationQueue,
   maintenanceQueue,
+  paymentLifecycleQueue,
+  reconciliationQueue,
+  tonMonitoringQueue,
+  webhookQueue,
 } from "../index"
 
 // Schedule recurring jobs

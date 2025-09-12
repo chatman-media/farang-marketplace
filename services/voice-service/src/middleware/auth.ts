@@ -1,3 +1,5 @@
+import { logger } from "@marketplace/logger"
+
 import type { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
 
@@ -103,6 +105,7 @@ export default async function authPlugin(fastify: any) {
         role: decoded.role,
       }
     } catch (error) {
+      logger.error("Token verification error:", error)
       // Continue without authentication if token is invalid
       return
     }
@@ -300,7 +303,7 @@ export default async function authPlugin(fastify: any) {
  * Error handling middleware
  */
 export const errorHandler = (error: Error, _req: FastifyRequest, reply: FastifyReply): void => {
-  console.error("Voice service error:", error)
+  logger.error("Voice service error:", error)
 
   // Handle specific error types
   if (error.name === "JsonWebTokenError") {

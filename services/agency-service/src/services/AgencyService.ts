@@ -1,15 +1,17 @@
-import { eq, and, desc, asc, sql, ilike } from "drizzle-orm"
+import logger from "@marketplace/logger"
+import { and, asc, desc, eq, ilike, sql } from "drizzle-orm"
+
 import { db } from "../db/connection"
 import {
+  type Agency,
+  type AgencyStatusType,
   agencies,
   agencyServices,
-  serviceAssignments,
   commissionPayments,
-  type Agency,
   type NewAgency,
-  type AgencyStatusType,
-  type VerificationStatusType,
   type ServiceCategoryType,
+  serviceAssignments,
+  type VerificationStatusType,
 } from "../db/schema"
 
 export interface AgencyFilters {
@@ -61,7 +63,7 @@ export class AgencyService {
 
       return agency
     } catch (error) {
-      console.error("Error creating agency:", error)
+      logger.error("Error creating agency:", error)
       throw new Error("Failed to create agency")
     }
   }
@@ -75,7 +77,7 @@ export class AgencyService {
 
       return agency || null
     } catch (error) {
-      console.error("Error getting agency by ID:", error)
+      logger.error("Error getting agency by ID:", error)
       throw new Error("Failed to get agency")
     }
   }
@@ -89,7 +91,7 @@ export class AgencyService {
 
       return agency || null
     } catch (error) {
-      console.error("Error getting agency by user ID:", error)
+      logger.error("Error getting agency by user ID:", error)
       throw new Error("Failed to get agency")
     }
   }
@@ -110,7 +112,7 @@ export class AgencyService {
 
       return agency || null
     } catch (error) {
-      console.error("Error updating agency:", error)
+      logger.error("Error updating agency:", error)
       throw new Error("Failed to update agency")
     }
   }
@@ -124,7 +126,7 @@ export class AgencyService {
 
       return result.length > 0
     } catch (error) {
-      console.error("Error deleting agency:", error)
+      logger.error("Error deleting agency:", error)
       throw new Error("Failed to delete agency")
     }
   }
@@ -185,7 +187,7 @@ export class AgencyService {
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
       // Build sort clause
-      let orderClause
+      let orderClause: any
       switch (sortBy) {
         case "name":
           orderClause = sortOrder === "asc" ? asc(agencies.name) : desc(agencies.name)
@@ -223,7 +225,7 @@ export class AgencyService {
         hasMore,
       }
     } catch (error) {
-      console.error("Error searching agencies:", error)
+      logger.error("Error searching agencies:", error)
       throw new Error("Failed to search agencies")
     }
   }
@@ -247,7 +249,7 @@ export class AgencyService {
 
       return agency || null
     } catch (error) {
-      console.error("Error verifying agency:", error)
+      logger.error("Error verifying agency:", error)
       throw new Error("Failed to verify agency")
     }
   }
@@ -270,7 +272,7 @@ export class AgencyService {
 
       return agency || null
     } catch (error) {
-      console.error("Error rejecting agency verification:", error)
+      logger.error("Error rejecting agency verification:", error)
       throw new Error("Failed to reject agency verification")
     }
   }
@@ -291,7 +293,7 @@ export class AgencyService {
 
       return agency || null
     } catch (error) {
-      console.error("Error updating agency status:", error)
+      logger.error("Error updating agency status:", error)
       throw new Error("Failed to update agency status")
     }
   }
@@ -342,7 +344,7 @@ export class AgencyService {
         averageRating,
       }
     } catch (error) {
-      console.error("Error getting agency stats:", error)
+      logger.error("Error getting agency stats:", error)
       throw new Error("Failed to get agency statistics")
     }
   }

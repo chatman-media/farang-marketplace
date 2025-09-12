@@ -1,7 +1,7 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { TemplateService } from "../services/TemplateService"
-import { Template, CreateTemplateRequest, UpdateTemplateRequest } from "../models/Template"
 import { CommunicationChannel } from "@marketplace/shared-types"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { CreateTemplateRequest, Template, UpdateTemplateRequest } from "../models/Template"
+import { TemplateService } from "../services/TemplateService"
 
 export class TemplateController {
   private templateService: TemplateService

@@ -1,16 +1,16 @@
+import type {
+  AuthResponse,
+  LinkSocialAccountRequest,
+  LoginRequest,
+  OAuthLoginRequest,
+  RefreshRequest,
+  RegisterRequest,
+  SocialAccountsResponse,
+  UnlinkSocialAccountRequest,
+  User,
+} from "@marketplace/shared-types"
 import { api, TokenManager } from "../client"
 import { getApiConfig } from "../config"
-import type {
-  LoginRequest,
-  RegisterRequest,
-  AuthResponse,
-  RefreshRequest,
-  User,
-  OAuthLoginRequest,
-  LinkSocialAccountRequest,
-  UnlinkSocialAccountRequest,
-  SocialAccountsResponse,
-} from "@marketplace/shared-types"
 
 const config = getApiConfig()
 

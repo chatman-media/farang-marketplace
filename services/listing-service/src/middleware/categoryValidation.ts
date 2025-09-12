@@ -1,6 +1,6 @@
-import { FastifyRequest, FastifyReply } from "fastify"
 import { ListingCategory } from "@marketplace/shared-types"
-import { isCategoryEnabled, getCategoryConfig } from "../config/categories"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { getCategoryConfig, isCategoryEnabled } from "../config/categories"
 
 export interface CategoryValidationRequest extends FastifyRequest {
   body: {

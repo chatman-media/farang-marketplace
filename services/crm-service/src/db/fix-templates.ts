@@ -1,5 +1,5 @@
-import { query } from "./connection"
 import dotenv from "dotenv"
+import { query } from "./connection"
 
 // Load environment variables
 dotenv.config()

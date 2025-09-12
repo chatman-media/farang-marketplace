@@ -1,16 +1,16 @@
-import { describe, it, expect } from "vitest"
-import type { CreateVehicleRequest, CreateProductRequest } from "@marketplace/shared-types"
+import type { CreateProductRequest, CreateVehicleRequest } from "@marketplace/shared-types"
 import {
-  VehicleType,
-  VehicleCategory,
-  VehicleCondition,
   FuelType,
-  TransmissionType,
-  ProductType,
+  PriceType,
   ProductCondition,
   ProductListingType,
-  PriceType,
+  ProductType,
+  TransmissionType,
+  VehicleCategory,
+  VehicleCondition,
+  VehicleType,
 } from "@marketplace/shared-types"
+import { describe, expect, it } from "vitest"
 
 describe("ListingService Data Validation", () => {
   describe("Vehicle Listings", () => {

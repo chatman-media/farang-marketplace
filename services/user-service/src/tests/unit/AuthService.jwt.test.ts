@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest"
-import * as jwt from "jsonwebtoken"
-import { AuthService } from "../../services/AuthService"
-import { UserEntity } from "../../models/User"
 import { UserRole } from "@marketplace/shared-types"
+import * as jwt from "jsonwebtoken"
+import { beforeEach, describe, expect, it } from "vitest"
+import { UserEntity } from "../../models/User"
+import { AuthService } from "../../services/AuthService"
 
 // Mock UserService for testing JWT functionality
 class MockUserService {

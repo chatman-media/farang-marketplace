@@ -1,17 +1,17 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest"
+import { eq } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import {
+  aiPromptTemplates,
+  chatHistory,
+  listings,
   users,
-  vehicles,
+  vehicleCalendarPricing,
   vehicleMaintenance,
   vehicleRentals,
-  chatHistory,
-  aiPromptTemplates,
-  vehicleCalendarPricing,
-  listings,
+  vehicles,
 } from "../schema"
-import { eq } from "drizzle-orm"
 
 // Test database connection
 const testDbUrl =

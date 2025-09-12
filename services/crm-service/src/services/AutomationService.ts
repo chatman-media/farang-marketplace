@@ -1,15 +1,15 @@
-import { query } from "../db/connection"
 import {
   Automation,
-  AutomationTrigger,
-  AutomationCondition,
   AutomationAction,
+  AutomationCondition,
+  AutomationTrigger,
   CommunicationChannel,
-  LeadStatus,
   LeadPriority,
+  LeadStatus,
 } from "@marketplace/shared-types"
-import { TemplateService } from "./TemplateService"
+import { query } from "../db/connection"
 import { CommunicationService } from "./CommunicationService"
+import { TemplateService } from "./TemplateService"
 
 export interface WorkflowTriggerData {
   leadId?: string

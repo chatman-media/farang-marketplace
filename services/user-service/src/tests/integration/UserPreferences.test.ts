@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest"
-import { UserService } from "../../services/UserService"
-import { UserRepository } from "../../repositories/UserRepository"
 import { UserRole, VerificationStatus } from "@marketplace/shared-types"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { UserRepository } from "../../repositories/UserRepository"
+import { UserService } from "../../services/UserService"
 
 describe("User Preferences Integration Tests", () => {
   let userService: UserService

@@ -1,9 +1,9 @@
 import {
+  CreateLeadRequest,
   Lead as ILead,
-  LeadStatus,
   LeadPriority,
   LeadSource,
-  CreateLeadRequest,
+  LeadStatus,
   UpdateLeadRequest,
 } from "@marketplace/shared-types"
 

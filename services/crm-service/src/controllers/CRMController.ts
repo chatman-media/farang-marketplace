@@ -1,16 +1,16 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { CRMService } from "../services/CRMService"
-import { AutomationService } from "../services/AutomationService"
 import {
-  CreateCustomerRequest,
-  UpdateCustomerRequest,
-  CreateLeadRequest,
-  UpdateLeadRequest,
-  CustomerStatus,
-  LeadStatus,
-  LeadPriority,
   Automation,
+  CreateCustomerRequest,
+  CreateLeadRequest,
+  CustomerStatus,
+  LeadPriority,
+  LeadStatus,
+  UpdateCustomerRequest,
+  UpdateLeadRequest,
 } from "@marketplace/shared-types"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { AutomationService } from "../services/AutomationService"
+import { CRMService } from "../services/CRMService"
 
 // Extend Fastify Request interface to include user property
 interface AuthenticatedRequest extends FastifyRequest {

@@ -1,9 +1,9 @@
-import { eq, and, sql, desc, asc, type SQL } from "drizzle-orm"
-import { db } from "../db/connection"
-import { serviceProviders } from "../db/schema"
+import { logger } from "@marketplace/logger"
 import type { ServiceProviderFilters, ServiceProviderProfile } from "@marketplace/shared-types"
 import { BusinessRegistrationStatus } from "@marketplace/shared-types"
-import { logger } from "@marketplace/logger"
+import { and, asc, desc, eq, type SQL, sql } from "drizzle-orm"
+import { db } from "../db/connection"
+import { serviceProviders } from "../db/schema"
 
 // Custom interfaces for our API
 interface CreateServiceProviderRequest {

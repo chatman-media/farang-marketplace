@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
-import { EmailService } from "../services/EmailService"
 import { CommunicationChannel } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { EmailService } from "../services/EmailService"
 
 // Mock nodemailer
 vi.mock("nodemailer", () => ({

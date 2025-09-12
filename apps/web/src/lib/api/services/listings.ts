@@ -1,18 +1,18 @@
-import { api } from "../client"
-import { getApiConfig } from "../config"
 import type {
+  CreateListingRequest,
+  CreateServiceListingRequest,
   Listing,
+  ListingFilters,
   ListingResponse,
   ListingsPageResponse,
-  CreateListingRequest,
-  UpdateListingRequest,
-  ListingFilters,
+  ServiceListingFilters,
   ServiceListingResponse,
   ServiceListingsPageResponse,
-  CreateServiceListingRequest,
+  UpdateListingRequest,
   UpdateServiceListingRequest,
-  ServiceListingFilters,
 } from "@marketplace/shared-types"
+import { api } from "../client"
+import { getApiConfig } from "../config"
 
 const config = getApiConfig()
 

@@ -1,8 +1,8 @@
 import { Matrix } from "ml-matrix"
 import type {
   RecommendationRequest,
-  RecommendationResult,
   RecommendationResponse,
+  RecommendationResult,
   UserBehavior,
   UserPreferences,
 } from "../models/index"

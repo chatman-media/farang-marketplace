@@ -1,5 +1,6 @@
-import { beforeAll, afterAll, beforeEach } from "vitest"
+/* eslint-disable no-console */
 import { config } from "dotenv"
+import { afterAll, beforeAll, beforeEach } from "vitest"
 
 // Load test environment variables
 config({ path: ".env.test" })

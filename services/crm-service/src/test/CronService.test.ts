@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest"
-import { CronService, CronJob } from "../services/CronService"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { CronJob, CronService } from "../services/CronService"
 
 // Mock the database connection
 vi.mock("../db/connection", () => ({

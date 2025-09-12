@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from "fastify"
+
 import { BookingIntegrationController } from "../controllers/BookingIntegrationController"
 import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 

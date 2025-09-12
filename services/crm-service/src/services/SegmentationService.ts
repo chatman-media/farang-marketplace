@@ -1,12 +1,12 @@
 import { query } from "../db/connection"
+import { Customer } from "../models/Customer"
 import {
-  Segment,
   CreateSegmentRequest,
-  UpdateSegmentRequest,
+  Segment,
   SegmentCriteria,
   SegmentOperator,
+  UpdateSegmentRequest,
 } from "../models/Segment"
-import { Customer } from "../models/Customer"
 
 export class SegmentationService {
   // CRUD operations for segments

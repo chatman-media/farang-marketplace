@@ -1,5 +1,5 @@
-import Fastify from "fastify"
 import { config } from "dotenv"
+import Fastify from "fastify"
 import { z } from "zod"
 import { CronService } from "./services/CronService"
 

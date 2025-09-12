@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
-import { CommunicationService, UnifiedSendRequest } from "../services/CommunicationService"
 import { CommunicationChannel } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { CommunicationService, UnifiedSendRequest } from "../services/CommunicationService"
 
 // Mock all communication services
 vi.mock("../services/EmailService", () => ({
@@ -37,11 +37,11 @@ vi.mock("../db/connection", () => ({
   query: vi.fn(),
 }))
 
+import { query } from "../db/connection"
 import { EmailService } from "../services/EmailService"
+import { LineService } from "../services/LineService"
 import { TelegramService } from "../services/TelegramService"
 import { WhatsAppService } from "../services/WhatsAppService"
-import { LineService } from "../services/LineService"
-import { query } from "../db/connection"
 
 describe("CommunicationService", () => {
   let communicationService: CommunicationService

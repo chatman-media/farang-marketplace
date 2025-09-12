@@ -1,6 +1,6 @@
 import { Location } from "./common"
-import { Vehicle, VehicleType } from "./vehicle"
 import { Product, ProductType } from "./product"
+import { Vehicle, VehicleType } from "./vehicle"
 
 export enum ListingCategory {
   TRANSPORTATION = "transportation",

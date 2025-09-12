@@ -1,8 +1,8 @@
-import multer from "multer"
-import sharp from "sharp"
-import path from "path"
+import { FastifyReply, FastifyRequest } from "fastify"
 import fs from "fs/promises"
-import { FastifyRequest, FastifyReply } from "fastify"
+import multer from "multer"
+import path from "path"
+import sharp from "sharp"
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage()

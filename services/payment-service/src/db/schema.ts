@@ -1,29 +1,22 @@
+import type { PaymentStatus } from "@marketplace/shared-types"
+import { relations } from "drizzle-orm"
 import {
-  pgTable,
-  uuid,
-  varchar,
+  boolean,
   decimal,
-  timestamp,
-  text,
+  index,
+  integer,
   jsonb,
   pgEnum,
-  index,
-  boolean,
-  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core"
-import { relations } from "drizzle-orm"
 
 // Enums
-export const paymentStatusEnum = pgEnum("payment_status", [
-  "pending",
-  "processing",
-  "confirmed",
-  "completed",
-  "failed",
-  "cancelled",
-  "refunded",
-  "disputed",
-])
+// PaymentStatus enum is imported from @marketplace/shared-types
+// Using varchar field to match shared-types enum values
 
 export const paymentMethodEnum = pgEnum("payment_method", [
   "ton_wallet",
@@ -46,7 +39,8 @@ export const transactionTypeEnum = pgEnum("transaction_type", [
 
 export const refundStatusEnum = pgEnum("refund_status", ["pending", "processing", "completed", "failed", "cancelled"])
 
-export const disputeStatusEnum = pgEnum("dispute_status", ["open", "investigating", "resolved", "closed", "escalated"])
+// DisputeStatus enum is imported from @marketplace/shared-types
+// Using varchar field to match shared-types enum values
 
 // Main Tables
 export const payments = pgTable(
@@ -65,7 +59,7 @@ export const payments = pgTable(
 
     // Payment Method & Status
     paymentMethod: paymentMethodEnum("payment_method").notNull(),
-    status: paymentStatusEnum("status").notNull().default("pending"),
+    status: varchar("status", { length: 20 }).notNull().default("pending"),
 
     // Blockchain Details
     tonTransactionHash: varchar("ton_transaction_hash", { length: 64 }),
@@ -201,7 +195,7 @@ export const disputes = pgTable(
     evidence: jsonb("evidence"),
 
     // Status and Resolution
-    status: disputeStatusEnum("status").notNull().default("open"),
+    status: varchar("status", { length: 20 }).notNull().default("open"),
     assignedTo: uuid("assigned_to"),
     resolution: text("resolution"),
     resolutionAmount: decimal("resolution_amount", { precision: 12, scale: 2 }),
@@ -305,8 +299,8 @@ export type PaymentMethod = typeof paymentMethods.$inferSelect
 export type NewPaymentMethod = typeof paymentMethods.$inferInsert
 
 // Export enum types
-export type PaymentStatus = (typeof paymentStatusEnum.enumValues)[number]
+// PaymentStatus type is imported from @marketplace/shared-types
 export type PaymentMethodType = (typeof paymentMethodEnum.enumValues)[number]
 export type TransactionType = (typeof transactionTypeEnum.enumValues)[number]
 export type RefundStatus = (typeof refundStatusEnum.enumValues)[number]
-export type DisputeStatus = (typeof disputeStatusEnum.enumValues)[number]
+// DisputeStatus is defined locally as varchar field

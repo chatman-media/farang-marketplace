@@ -1,7 +1,8 @@
-import { FastifyRequest, FastifyReply } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
-import { PricingService } from "../services/PricingService"
+
 import type { BookingPriceRequest, ServicePriceRequest } from "../services/PricingService"
+import { PricingService } from "../services/PricingService"
 
 // Validation schemas
 export const bookingPriceBodySchema = z.object({

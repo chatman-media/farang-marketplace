@@ -1,7 +1,7 @@
-import { FastifyRequest, FastifyReply } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
-import { UserBehaviorService } from "../services/UserBehaviorService"
 import type { AuthenticatedUser } from "../middleware/auth"
+import { UserBehaviorService } from "../services/UserBehaviorService"
 
 // Zod schemas for validation
 export const trackBehaviorSchema = z.object({

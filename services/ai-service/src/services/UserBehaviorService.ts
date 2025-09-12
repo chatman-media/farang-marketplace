@@ -1,4 +1,4 @@
-import type { UserBehavior, UserPreferences, UserInsight, MarketInsight } from "../models/index"
+import type { MarketInsight, UserBehavior, UserInsight, UserPreferences } from "../models/index"
 import { AIProviderService } from "./AIProviderService"
 
 export class UserBehaviorService {

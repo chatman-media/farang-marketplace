@@ -1,6 +1,6 @@
+import { UserProfile, UserRole } from "@marketplace/shared-types"
 import { query } from "../database/connection"
 import { UserEntity } from "../models/User"
-import { UserRole, UserProfile } from "@marketplace/shared-types"
 
 export interface UserFilters {
   role?: UserRole

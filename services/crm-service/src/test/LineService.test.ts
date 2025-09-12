@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
-import { LineService } from "../services/LineService"
 import { CommunicationChannel } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { LineService } from "../services/LineService"
 
 // Mock @line/bot-sdk
 vi.mock("@line/bot-sdk", () => ({

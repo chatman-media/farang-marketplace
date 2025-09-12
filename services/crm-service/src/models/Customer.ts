@@ -1,9 +1,9 @@
 import {
-  Customer as ICustomer,
-  CustomerStatus,
   CommunicationChannel,
-  LeadSource,
   CreateCustomerRequest,
+  CustomerStatus,
+  Customer as ICustomer,
+  LeadSource,
   UpdateCustomerRequest,
 } from "@marketplace/shared-types"
 

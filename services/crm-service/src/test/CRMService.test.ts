@@ -1,24 +1,24 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 // Mock the database connection first
 vi.mock("../db/connection", () => ({
   query: vi.fn(),
 }))
 
-import { CRMService } from "../services/CRMService"
-import { Customer } from "../models/Customer"
-import { Lead } from "../models/Lead"
 import {
   CreateCustomerRequest,
-  UpdateCustomerRequest,
   CreateLeadRequest,
-  UpdateLeadRequest,
   CustomerStatus,
-  LeadStatus,
   LeadPriority,
   LeadSource,
+  LeadStatus,
+  UpdateCustomerRequest,
+  UpdateLeadRequest,
 } from "@marketplace/shared-types"
 import { query } from "../db/connection"
+import { Customer } from "../models/Customer"
+import { Lead } from "../models/Lead"
+import { CRMService } from "../services/CRMService"
 
 describe("CRMService", () => {
   let crmService: CRMService

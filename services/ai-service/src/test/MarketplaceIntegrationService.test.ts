@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest"
-import { MarketplaceIntegrationService } from "../services/MarketplaceIntegrationService"
+import { beforeEach, describe, expect, it } from "vitest"
 import { AIProviderService } from "../services/AIProviderService"
+import { ContentAnalysisService } from "../services/ContentAnalysisService"
+import { MarketplaceIntegrationService } from "../services/MarketplaceIntegrationService"
 import { RecommendationEngine } from "../services/RecommendationEngine"
 import { UserBehaviorService } from "../services/UserBehaviorService"
-import { ContentAnalysisService } from "../services/ContentAnalysisService"
 
 describe("MarketplaceIntegrationService", () => {
   let marketplaceService: MarketplaceIntegrationService

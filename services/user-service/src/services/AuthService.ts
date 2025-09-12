@@ -1,7 +1,7 @@
+import { Location, User, UserRole } from "@marketplace/shared-types"
 import * as jwt from "jsonwebtoken"
-import { UserService } from "./UserService"
 import { UserEntity } from "../models/User"
-import { User, UserRole } from "@marketplace/shared-types"
+import { UserService } from "./UserService"
 
 export interface LoginRequest {
   email: string
@@ -16,7 +16,7 @@ export interface RegisterRequest {
   profile: {
     firstName: string
     lastName: string
-    location?: any
+    location?: Location
   }
 }
 

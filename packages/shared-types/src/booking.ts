@@ -19,14 +19,10 @@ export enum ServiceBookingType {
 export enum BookingStatus {
   PENDING = "pending",
   CONFIRMED = "confirmed",
-  CHECKED_IN = "checked_in",
-  CHECKED_OUT = "checked_out",
-  ACTIVE = "active",
+  IN_PROGRESS = "in_progress",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
   NO_SHOW = "no_show",
-  EXPIRED = "expired",
-  DISPUTED = "disputed",
 }
 
 export interface AgencyService {

@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
+import { z } from "zod"
 import { AuthController } from "../../controllers/AuthController"
 import { AuthService } from "../../services/AuthService"
-import { z } from "zod"
 
 // Mock request and response objects
 const createMockRequest = (body: any = {}, headers: any = {}) => ({

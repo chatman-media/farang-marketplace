@@ -2,6 +2,7 @@ import js from "@eslint/js"
 import typescript from "@typescript-eslint/eslint-plugin"
 import typescriptParser from "@typescript-eslint/parser"
 import prettier from "eslint-config-prettier"
+import importPlugin from "eslint-plugin-import"
 
 export default [
   js.configs.recommended,
@@ -34,14 +35,30 @@ export default [
     },
     plugins: {
       "@typescript-eslint": typescript,
+      import: importPlugin,
     },
     rules: {
       // TypeScript specific rules
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-var-requires": "error",
+
+      // Import sorting rules
+      "import/order": [
+        "error",
+        {
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
+          "newlines-between": "always",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        },
+      ],
+      "import/newline-after-import": "error",
+      "import/no-duplicates": "error",
 
       // General rules
       "no-console": "warn",

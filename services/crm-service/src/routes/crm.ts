@@ -3,11 +3,11 @@ import { CRMController } from "../controllers/CRMController"
 import { authenticateToken, requireRole } from "../middleware/auth"
 import {
   createCustomerSchema,
-  updateCustomerSchema,
   createLeadSchema,
-  updateLeadSchema,
   customerQuerySchema,
   leadQuerySchema,
+  updateCustomerSchema,
+  updateLeadSchema,
   uuidParamSchema,
 } from "../middleware/validation"
 

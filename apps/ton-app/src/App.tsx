@@ -1,5 +1,5 @@
-import React from "react"
 import { TonConnectUIProvider } from "@tonconnect/ui-react"
+import React from "react"
 
 function App() {
   const Provider = TonConnectUIProvider as any

@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify"
 import { ProfileController } from "../controllers/ProfileController"
-import { UserService } from "../services/UserService"
-import { UserRepository } from "../repositories/UserRepository"
 import { FastifyAuthMiddleware } from "../middleware/auth"
+import { UserRepository } from "../repositories/UserRepository"
+import { UserService } from "../services/UserService"
 import { authService } from "./auth"
 
 // Initialize dependencies

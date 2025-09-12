@@ -1,11 +1,11 @@
 import { FastifyInstance } from "fastify"
-import { MarketplaceIntegrationController } from "../controllers/MarketplaceIntegrationController"
 import {
+  analyticsQuerySchema,
   bookingIntelligenceSchema,
+  fraudDetectionSchema,
+  MarketplaceIntegrationController,
   priceSuggestionsSchema,
   smartNotificationSchema,
-  fraudDetectionSchema,
-  analyticsQuerySchema,
 } from "../controllers/MarketplaceIntegrationController"
 
 interface RouteOptions {

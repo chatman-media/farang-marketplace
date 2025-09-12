@@ -1,16 +1,16 @@
 import { relations } from "drizzle-orm"
 import {
+  boolean,
+  decimal,
+  integer,
+  json,
+  jsonb,
+  pgEnum,
   pgTable,
+  text,
+  timestamp,
   uuid,
   varchar,
-  text,
-  integer,
-  decimal,
-  boolean,
-  timestamp,
-  jsonb,
-  json,
-  pgEnum,
 } from "drizzle-orm/pg-core"
 
 // ============================================================================
@@ -99,15 +99,41 @@ export const transmissionTypeEnum = pgEnum("transmission_type", ["manual", "auto
 
 // Product related enums
 export const productTypeEnum = pgEnum("product_type", [
-  "electronics",
-  "clothing",
-  "home_garden",
-  "sports_outdoors",
-  "books_media",
-  "toys_games",
-  "health_beauty",
-  "automotive",
-  "food_beverages",
+  // Home & Kitchen Appliances
+  "home_appliances", // холодильники, стиральные машины, микроволновки
+  "kitchen_appliances", // блендеры, кофемашины, мультиварки
+  "cleaning_equipment", // пылесосы, пароочистители, моющие аппараты
+
+  // Audio & Video Equipment
+  "audio_equipment", // колонки, наушники, микрофоны, усилители
+  "video_equipment", // проекторы, камеры, телевизоры
+  "gaming_consoles", // PlayStation, Xbox, Nintendo
+
+  // Computing & Electronics
+  "computers_laptops", // ноутбуки, ПК, планшеты
+  "mobile_devices", // телефоны, смарт-часы
+  "networking_equipment", // роутеры, модемы, точки доступа
+
+  // Tools & Equipment
+  "power_tools", // дрели, пилы, шлифмашины
+  "hand_tools", // инструменты, измерительные приборы
+  "garden_tools", // газонокосилки, триммеры, садовый инвентарь
+
+  // Sports & Recreation
+  "sports_equipment", // велосипеды, скейтборды, спортинвентарь
+  "outdoor_gear", // палатки, рюкзаки, туристическое снаряжение
+  "water_sports", // доски для серфинга, каяки, снаряжение для дайвинга
+
+  // Photography & Creative
+  "photography_equipment", // фотоаппараты, объективы, штативы
+  "musical_instruments", // гитары, клавишные, барабаны
+  "art_supplies", // мольберты, краски, профессиональные материалы
+
+  // Event & Party
+  "event_equipment", // звуковое оборудование, освещение
+  "party_supplies", // декорации, мебель для мероприятий
+
+  // Other
   "other",
 ])
 
@@ -117,31 +143,7 @@ export const productStatusEnum = pgEnum("product_status", ["available", "rented"
 
 export const productListingTypeEnum = pgEnum("product_listing_type", ["rental", "service"])
 
-// Real Estate related enums
-export const propertyTypeEnum = pgEnum("property_type", [
-  "apartment",
-  "house",
-  "condo",
-  "villa",
-  "townhouse",
-  "studio",
-  "room",
-  "office",
-  "retail",
-  "warehouse",
-  "land",
-  "commercial",
-])
-
-export const propertyStatusEnum = pgEnum("property_status", [
-  "available",
-  "rented",
-  "reserved",
-  "maintenance",
-  "inactive",
-])
-
-export const listingPurposeEnum = pgEnum("listing_purpose", ["rent", "sale", "short_term_rental"])
+// Property enums removed - focusing on products and vehicles only
 
 export const priceTypeEnum = pgEnum("price_type", [
   "fixed",

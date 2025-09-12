@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
+import { AuthProvider, UserRole, VerificationStatus } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { UserEntity } from "../../models/User"
-import { UserRole, VerificationStatus, AuthProvider } from "@marketplace/shared-types"
 import { testUserData } from "../setup"
 
 // bcrypt is used directly for real password hashing in tests

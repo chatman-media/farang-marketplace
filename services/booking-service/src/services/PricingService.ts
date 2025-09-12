@@ -1,3 +1,24 @@
+import { logger } from "@marketplace/logger"
+import { and, count, eq, gte, lte, sql } from "drizzle-orm"
+
+import { ListingServiceClient } from "../clients/ListingServiceClient"
+import { db } from "../db/connection"
+import { bookings } from "../db/schema"
+
+// Cache interface for pricing data
+interface CacheEntry<T> {
+  data: T
+  timestamp: number
+  ttl: number
+}
+
+interface PricingCache {
+  demandMultipliers: Map<string, CacheEntry<number>>
+  seasonalMultipliers: Map<string, CacheEntry<number>>
+  listingPrices: Map<string, CacheEntry<any>>
+  servicePrices: Map<string, CacheEntry<any>>
+}
+
 export interface PricingCalculation {
   basePrice: number
   serviceFees: number
@@ -63,6 +84,98 @@ export class PricingService {
   private readonly PAYMENT_PROCESSING_FEE_PERCENTAGE = 0.029 // 2.9%
   private readonly VAT_PERCENTAGE = 0.07 // 7% VAT in Thailand
   private readonly DEFAULT_CURRENCY = "THB"
+  private readonly listingClient: ListingServiceClient
+
+  // Cache configuration
+  private readonly CACHE_TTL = {
+    DEMAND_MULTIPLIER: 15 * 60 * 1000, // 15 minutes
+    SEASONAL_MULTIPLIER: 24 * 60 * 60 * 1000, // 24 hours
+    LISTING_PRICE: 30 * 60 * 1000, // 30 minutes
+    SERVICE_PRICE: 30 * 60 * 1000, // 30 minutes
+  }
+
+  // In-memory cache
+  private cache: PricingCache = {
+    demandMultipliers: new Map(),
+    seasonalMultipliers: new Map(),
+    listingPrices: new Map(),
+    servicePrices: new Map(),
+  }
+
+  constructor() {
+    this.listingClient = new ListingServiceClient()
+
+    // Clean up expired cache entries every 5 minutes
+    setInterval(
+      () => {
+        this.cleanupExpiredCache()
+      },
+      5 * 60 * 1000,
+    )
+  }
+
+  /**
+   * Clean up expired cache entries
+   */
+  private cleanupExpiredCache(): void {
+    const now = Date.now()
+
+    // Clean demand multipliers cache
+    for (const [key, entry] of this.cache.demandMultipliers.entries()) {
+      if (now > entry.timestamp + entry.ttl) {
+        this.cache.demandMultipliers.delete(key)
+      }
+    }
+
+    // Clean seasonal multipliers cache
+    for (const [key, entry] of this.cache.seasonalMultipliers.entries()) {
+      if (now > entry.timestamp + entry.ttl) {
+        this.cache.seasonalMultipliers.delete(key)
+      }
+    }
+
+    // Clean listing prices cache
+    for (const [key, entry] of this.cache.listingPrices.entries()) {
+      if (now > entry.timestamp + entry.ttl) {
+        this.cache.listingPrices.delete(key)
+      }
+    }
+
+    // Clean service prices cache
+    for (const [key, entry] of this.cache.servicePrices.entries()) {
+      if (now > entry.timestamp + entry.ttl) {
+        this.cache.servicePrices.delete(key)
+      }
+    }
+  }
+
+  /**
+   * Get cached data or execute function and cache result
+   */
+  private async getCachedData<T>(
+    cache: Map<string, CacheEntry<T>>,
+    key: string,
+    ttl: number,
+    fetchFn: () => Promise<T>,
+  ): Promise<T> {
+    const now = Date.now()
+    const cached = cache.get(key)
+
+    // Return cached data if valid
+    if (cached && now <= cached.timestamp + cached.ttl) {
+      return cached.data
+    }
+
+    // Fetch new data and cache it
+    const data = await fetchFn()
+    cache.set(key, {
+      data,
+      timestamp: now,
+      ttl,
+    })
+
+    return data
+  }
 
   // Calculate pricing for accommodation bookings
   async calculateBookingPrice(request: BookingPriceRequest): Promise<PricingCalculation> {
@@ -126,14 +239,17 @@ export class PricingService {
         basePrice = servicePrice.hourlyRate * durationInHours
         break
       case "fixed":
-        basePrice = servicePrice.fixedPrice || 0
+        basePrice = servicePrice.fixedPrice || servicePrice.basePrice || 0
         break
       case "daily":
         const days = Math.ceil(durationInHours / 8) // 8 hours per day
-        basePrice = (servicePrice.dailyRate || 0) * days
+        basePrice = (servicePrice.dailyRate || servicePrice.basePrice || 0) * days
+        break
+      case "project":
+        basePrice = servicePrice.basePrice || 0
         break
       default:
-        basePrice = servicePrice.fixedPrice || servicePrice.hourlyRate * durationInHours
+        basePrice = servicePrice.basePrice || servicePrice.fixedPrice || servicePrice.hourlyRate * durationInHours
     }
 
     // 4. Apply delivery method surcharge
@@ -184,16 +300,15 @@ export class PricingService {
         maxPrice: Math.round(basePrice * 1.15), // +15% for fees and taxes
         currency: this.DEFAULT_CURRENCY,
       }
-    } else {
-      const servicePrice = await this.getServicePrice(listingId, "consultation")
-      const hours = duration || 1
-      const basePrice = servicePrice.hourlyRate * hours
+    }
+    const servicePrice = await this.getServicePrice(listingId, "consultation")
+    const hours = duration || 1
+    const basePrice = servicePrice.hourlyRate * hours
 
-      return {
-        minPrice: Math.round(basePrice * 1.1),
-        maxPrice: Math.round(basePrice * 1.15),
-        currency: this.DEFAULT_CURRENCY,
-      }
+    return {
+      minPrice: Math.round(basePrice * 1.1),
+      maxPrice: Math.round(basePrice * 1.15),
+      currency: this.DEFAULT_CURRENCY,
     }
   }
 
@@ -202,15 +317,15 @@ export class PricingService {
     let adjustedPrice = basePrice
 
     // 1. Seasonal pricing
-    const seasonalMultiplier = this.getSeasonalMultiplier(checkIn)
+    const seasonalMultiplier = await this.getSeasonalMultiplier(checkIn)
     adjustedPrice *= seasonalMultiplier
 
     // 2. Day of week pricing
     const dayOfWeekMultiplier = this.getDayOfWeekMultiplier(checkIn, checkOut)
     adjustedPrice *= dayOfWeekMultiplier
 
-    // 3. Demand-based pricing (mock implementation)
-    const demandMultiplier = await this.getDemandMultiplier(listingId, checkIn)
+    // 3. Demand-based pricing (cached implementation)
+    const demandMultiplier = await this.getDemandMultiplierCached(listingId, checkIn)
     adjustedPrice *= demandMultiplier
 
     return Math.round(adjustedPrice)
@@ -222,30 +337,73 @@ export class PricingService {
     cleaningFee?: number
     securityDeposit?: number
   }> {
-    // Mock implementation - would fetch from listing service
-    return {
-      nightlyRate: 1500, // THB per night
-      cleaningFee: 300,
-      securityDeposit: 2000,
-    }
+    const cacheKey = `listing_price_${listingId}`
+
+    return this.getCachedData(this.cache.listingPrices, cacheKey, this.CACHE_TTL.LISTING_PRICE, async () => {
+      try {
+        const priceData = await this.listingClient.getListingPrice(listingId)
+
+        return {
+          nightlyRate: priceData.nightlyRate,
+          cleaningFee: priceData.cleaningFee,
+          securityDeposit: priceData.securityDeposit,
+        }
+      } catch (error) {
+        logger.error("Failed to get listing price, using fallback", {
+          listingId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+
+        // Fallback to default pricing
+        return {
+          nightlyRate: 1500, // THB per night
+          cleaningFee: 300,
+          securityDeposit: 2000,
+        }
+      }
+    })
   }
 
   private async getServicePrice(
     listingId: string,
     serviceType: string,
   ): Promise<{
-    priceType: "hourly" | "fixed" | "daily"
+    priceType: "hourly" | "fixed" | "daily" | "project"
     hourlyRate: number
     fixedPrice?: number
     dailyRate?: number
+    basePrice?: number
   }> {
-    // Mock implementation - would fetch from service provider data
-    return {
-      priceType: "hourly",
-      hourlyRate: 800, // THB per hour
-      fixedPrice: 2000,
-      dailyRate: 5000,
-    }
+    const cacheKey = `service_price_${listingId}_${serviceType}`
+
+    return this.getCachedData(this.cache.servicePrices, cacheKey, this.CACHE_TTL.SERVICE_PRICE, async () => {
+      try {
+        const priceData = await this.listingClient.getServicePrice(listingId, serviceType)
+
+        return {
+          priceType: priceData.priceType,
+          hourlyRate: priceData.hourlyRate || priceData.basePrice || 800,
+          fixedPrice: priceData.fixedPrice || priceData.basePrice,
+          dailyRate: priceData.dailyRate || priceData.basePrice,
+          basePrice: priceData.basePrice,
+        }
+      } catch (error) {
+        logger.error("Failed to get service price, using fallback", {
+          listingId,
+          serviceType,
+          error: error instanceof Error ? error.message : String(error),
+        })
+
+        // Fallback to default pricing
+        return {
+          priceType: "hourly",
+          hourlyRate: 800, // THB per hour
+          fixedPrice: 2000,
+          dailyRate: 5000,
+          basePrice: 800,
+        }
+      }
+    })
   }
 
   private calculateNights(checkIn: string, checkOut?: string): number {
@@ -332,16 +490,25 @@ export class PricingService {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   }
 
-  private getSeasonalMultiplier(date: Date): number {
-    const month = date.getMonth() + 1 // 1-12
+  private async getSeasonalMultiplier(date: Date): Promise<number> {
+    const cacheKey = `seasonal_${date.getMonth()}_${date.getFullYear()}`
 
-    // High season in Thailand (Nov-Mar)
-    if (month >= 11 || month <= 3) {
-      return 1.3 // 30% increase
-    }
+    return this.getCachedData(
+      this.cache.seasonalMultipliers,
+      cacheKey,
+      this.CACHE_TTL.SEASONAL_MULTIPLIER,
+      async () => {
+        const month = date.getMonth() + 1 // 1-12
 
-    // Low season (Apr-Oct)
-    return 0.9 // 10% decrease
+        // High season in Thailand (Nov-Mar)
+        if (month >= 11 || month <= 3) {
+          return 1.3 // 30% increase
+        }
+
+        // Low season (Apr-Oct)
+        return 0.9 // 10% decrease
+      },
+    )
   }
 
   private getDayOfWeekMultiplier(checkIn: Date, checkOut?: Date): number {
@@ -355,9 +522,194 @@ export class PricingService {
     return 1.0
   }
 
-  private async getDemandMultiplier(listingId: string, checkIn: Date): Promise<number> {
-    // Mock implementation - would analyze booking patterns, search volume, etc.
-    // For now, return a random multiplier between 0.9 and 1.3
-    return 0.9 + Math.random() * 0.4
+  private async getDemandMultiplierCached(listingId: string, checkIn: Date): Promise<number> {
+    const cacheKey = `demand_${listingId}_${checkIn.toISOString().split("T")[0]}`
+
+    return this.getCachedData(this.cache.demandMultipliers, cacheKey, this.CACHE_TTL.DEMAND_MULTIPLIER, () =>
+      this.calculateDemandMultiplier(listingId, checkIn),
+    )
+  }
+
+  private async calculateDemandMultiplier(listingId: string, checkIn: Date): Promise<number> {
+    try {
+      const now = new Date()
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+      const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000)
+      const checkInMonth = checkIn.getMonth()
+      const checkInYear = checkIn.getFullYear()
+
+      // Calculate recent booking activity (last 30 days)
+      const [recentBookings] = await db
+        .select({ count: count() })
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.listingId, listingId),
+            gte(bookings.createdAt, thirtyDaysAgo),
+            eq(bookings.status, "confirmed"),
+          ),
+        )
+
+      // Calculate historical booking activity (30-60 days ago)
+      const [historicalBookings] = await db
+        .select({ count: count() })
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.listingId, listingId),
+            gte(bookings.createdAt, sixtyDaysAgo),
+            lte(bookings.createdAt, thirtyDaysAgo),
+            eq(bookings.status, "confirmed"),
+          ),
+        )
+
+      // Calculate occupancy rate for the target month
+      const monthStart = new Date(checkInYear, checkInMonth, 1)
+      const monthEnd = new Date(checkInYear, checkInMonth + 1, 0)
+
+      const [monthlyBookings] = await db
+        .select({ count: count() })
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.listingId, listingId),
+            gte(bookings.checkIn, monthStart),
+            lte(bookings.checkIn, monthEnd),
+            eq(bookings.status, "confirmed"),
+          ),
+        )
+
+      // Calculate demand factors
+      const recentActivity = recentBookings.count || 0
+      const historicalActivity = historicalBookings.count || 0
+      const monthlyActivity = monthlyBookings.count || 0
+
+      // Base multiplier
+      let demandMultiplier = 1.0
+
+      // Recent activity trend (compare last 30 days to previous 30 days)
+      if (historicalActivity > 0) {
+        const activityRatio = recentActivity / historicalActivity
+        if (activityRatio > 1.5) {
+          demandMultiplier += 0.15 // High demand increase
+        } else if (activityRatio > 1.2) {
+          demandMultiplier += 0.1 // Moderate demand increase
+        } else if (activityRatio < 0.5) {
+          demandMultiplier -= 0.1 // Low demand decrease
+        }
+      } else if (recentActivity > 2) {
+        demandMultiplier += 0.1 // New listing with good activity
+      }
+
+      // Monthly occupancy factor
+      const daysInMonth = monthEnd.getDate()
+      const occupancyRate = monthlyActivity / daysInMonth
+
+      if (occupancyRate > 0.8) {
+        demandMultiplier += 0.2 // Very high occupancy
+      } else if (occupancyRate > 0.6) {
+        demandMultiplier += 0.1 // High occupancy
+      } else if (occupancyRate < 0.2) {
+        demandMultiplier -= 0.1 // Low occupancy
+      }
+
+      // Seasonal demand adjustments for Thailand
+      const isHighSeason = checkInMonth >= 10 && checkInMonth <= 2 // Nov-Feb
+      const isShoulderSeason = (checkInMonth >= 3 && checkInMonth <= 4) || (checkInMonth >= 8 && checkInMonth <= 9) // Mar-Apr, Aug-Sep
+
+      if (isHighSeason) {
+        demandMultiplier += 0.15 // High season premium
+      } else if (isShoulderSeason) {
+        demandMultiplier += 0.05 // Shoulder season slight premium
+      } else {
+        demandMultiplier -= 0.05 // Low season discount
+      }
+
+      // Advance booking factor
+      const daysUntilCheckIn = Math.ceil((checkIn.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+
+      if (daysUntilCheckIn < 7) {
+        demandMultiplier += 0.1 // Last-minute booking premium
+      } else if (daysUntilCheckIn > 90) {
+        demandMultiplier -= 0.05 // Early booking slight discount
+      }
+
+      // Ensure multiplier stays within reasonable bounds
+      demandMultiplier = Math.max(0.7, Math.min(1.5, demandMultiplier))
+
+      logger.info("Demand multiplier calculated", {
+        listingId,
+        checkIn: checkIn.toISOString(),
+        recentActivity,
+        historicalActivity,
+        monthlyActivity,
+        occupancyRate,
+        demandMultiplier,
+        isHighSeason,
+        daysUntilCheckIn,
+      })
+
+      return demandMultiplier
+    } catch (error) {
+      logger.error("Failed to calculate demand multiplier", { error, listingId })
+      return 1.0 // Default to no adjustment on error
+    }
+  }
+
+  /**
+   * Clear all cached data
+   */
+  public clearCache(): void {
+    this.cache.demandMultipliers.clear()
+    this.cache.seasonalMultipliers.clear()
+    this.cache.listingPrices.clear()
+    this.cache.servicePrices.clear()
+
+    logger.info("Pricing cache cleared")
+  }
+
+  /**
+   * Clear specific cache type
+   */
+  public clearCacheType(type: "demand" | "seasonal" | "listing" | "service"): void {
+    switch (type) {
+      case "demand":
+        this.cache.demandMultipliers.clear()
+        break
+      case "seasonal":
+        this.cache.seasonalMultipliers.clear()
+        break
+      case "listing":
+        this.cache.listingPrices.clear()
+        break
+      case "service":
+        this.cache.servicePrices.clear()
+        break
+    }
+
+    logger.info(`Pricing cache cleared for type: ${type}`)
+  }
+
+  /**
+   * Get cache statistics
+   */
+  public getCacheStats(): {
+    demandMultipliers: number
+    seasonalMultipliers: number
+    listingPrices: number
+    servicePrices: number
+    totalEntries: number
+  } {
+    const stats = {
+      demandMultipliers: this.cache.demandMultipliers.size,
+      seasonalMultipliers: this.cache.seasonalMultipliers.size,
+      listingPrices: this.cache.listingPrices.size,
+      servicePrices: this.cache.servicePrices.size,
+      totalEntries: 0,
+    }
+
+    stats.totalEntries = stats.demandMultipliers + stats.seasonalMultipliers + stats.listingPrices + stats.servicePrices
+
+    return stats
   }
 }

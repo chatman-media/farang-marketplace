@@ -1,6 +1,6 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { AuthService, LoginRequest, RegisterRequest, RefreshRequest } from "../services/AuthService"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+import { AuthService, LoginRequest, RefreshRequest, RegisterRequest } from "../services/AuthService"
 
 // Validation schemas for request bodies
 const LoginSchema = z.object({

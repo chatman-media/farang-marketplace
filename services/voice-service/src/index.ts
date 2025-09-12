@@ -1,9 +1,11 @@
+import logger from "@marketplace/logger"
+
 import { createApp, env, gracefulShutdown } from "./app"
 
 // Start the modern application
 const start = async () => {
   try {
-    console.log("🚀 Starting Voice Service v2.0...")
+    logger.info("🚀 Starting Voice Service v2.0...")
 
     // Create and start Fastify app
     const app = await createApp()
@@ -13,15 +15,15 @@ const start = async () => {
       host: "0.0.0.0",
     })
 
-    console.log(`🎤 Voice Service v2.0 running on port ${env.PORT}`)
-    console.log(`📊 Environment: ${env.NODE_ENV}`)
-    console.log(`🔗 Health check: http://localhost:${env.PORT}/health`)
-    console.log("🎵 Modern Voice Service initialized with:")
-    console.log("   - Fastify 5.x for high performance")
-    console.log("   - Large file upload support (50MB)")
-    console.log("   - Multi-language speech processing")
-    console.log("   - Real-time audio analysis")
-    console.log("   - TypeScript 5.x")
+    logger.info(`🎤 Voice Service v2.0 running on port ${env.PORT}`)
+    logger.info(`📊 Environment: ${env.NODE_ENV}`)
+    logger.info(`🔗 Health check: http://localhost:${env.PORT}/health`)
+    logger.info("🎵 Modern Voice Service initialized with:")
+    logger.info("   - Fastify 5.x for high performance")
+    logger.info("   - Large file upload support (50MB)")
+    logger.info("   - Multi-language speech processing")
+    logger.info("   - Real-time audio analysis")
+    logger.info("   - TypeScript 5.x")
 
     // Setup graceful shutdown
     const signals = ["SIGTERM", "SIGINT", "SIGUSR2"]
@@ -40,7 +42,7 @@ const start = async () => {
       gracefulShutdown(app, "unhandledRejection")
     })
   } catch (error) {
-    console.error("❌ Error starting server:", error)
+    logger.error("❌ Error starting server:", error)
     process.exit(1)
   }
 }

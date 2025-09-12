@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { LeadPriority, LeadSource, LeadStatus } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it } from "vitest"
 import { Lead } from "../models/Lead"
-import { LeadStatus, LeadPriority, LeadSource } from "@marketplace/shared-types"
 
 describe("Lead Model", () => {
   const mockLeadData = {

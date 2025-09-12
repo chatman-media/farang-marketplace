@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from "fastify"
+import { FastifyReply, FastifyRequest } from "fastify"
 import { RecommendationEngine } from "../services/RecommendationEngine"
 
 interface AuthenticatedRequest extends FastifyRequest {

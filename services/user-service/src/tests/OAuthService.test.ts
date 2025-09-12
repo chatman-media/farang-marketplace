@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest"
-import { OAuthService, GoogleOAuthProvider, TelegramOAuthProvider } from "../services/OAuthService"
 import { AuthProvider, UserRole } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { GoogleOAuthProvider, OAuthService, TelegramOAuthProvider } from "../services/OAuthService"
 
 describe.skip("OAuthService", () => {
   // Temporarily skip these tests due to mocking issues in Bun

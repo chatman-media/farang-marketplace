@@ -1,4 +1,4 @@
-import { createApp, gracefulShutdown, env } from "./app"
+import { createApp, env, gracefulShutdown } from "./app"
 import { checkDatabaseConnection } from "./db/connection"
 
 // Initialize modern job system

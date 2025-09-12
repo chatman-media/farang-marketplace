@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react"
-import { Input, Button } from "../ui"
+import React, { useEffect, useRef, useState } from "react"
 import { useDebounce } from "../../hooks/useDebounce"
+import { Button, Input } from "../ui"
 
 interface SearchSuggestion {
   id: string

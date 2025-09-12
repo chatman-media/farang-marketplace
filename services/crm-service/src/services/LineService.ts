@@ -1,11 +1,11 @@
-import { Client, ClientConfig, WebhookEvent, MessageEvent, TextMessage } from "@line/bot-sdk"
-import { query } from "../db/connection"
+import { Client, ClientConfig, MessageEvent, TextMessage, WebhookEvent } from "@line/bot-sdk"
 import {
   CommunicationChannel,
+  CommunicationHistory,
   SendMessageRequest,
   SendMessageResponse,
-  CommunicationHistory,
 } from "@marketplace/shared-types"
+import { query } from "../db/connection"
 
 export interface LineConfig {
   channelAccessToken: string

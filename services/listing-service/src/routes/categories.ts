@@ -1,6 +1,6 @@
-import { FastifyInstance } from "fastify"
-import { getAvailableCategories, getEnabledCategories, getCategoryConfig } from "../config/categories"
 import { ListingCategory } from "@marketplace/shared-types"
+import { FastifyInstance } from "fastify"
+import { getAvailableCategories, getCategoryConfig, getEnabledCategories } from "../config/categories"
 
 export default async function categoriesRoutes(fastify: FastifyInstance) {
   // Get all available categories (enabled and disabled)

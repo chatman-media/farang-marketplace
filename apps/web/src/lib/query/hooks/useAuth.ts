@@ -1,16 +1,16 @@
+import type {
+  AuthResponse,
+  LinkSocialAccountRequest,
+  LoginRequest,
+  OAuthLoginRequest,
+  RegisterRequest,
+  SocialAccountsResponse,
+  UnlinkSocialAccountRequest,
+  User,
+} from "@marketplace/shared-types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { authService } from "../../api"
 import { queryKeys } from "../client"
-import type {
-  LoginRequest,
-  RegisterRequest,
-  AuthResponse,
-  User,
-  OAuthLoginRequest,
-  LinkSocialAccountRequest,
-  UnlinkSocialAccountRequest,
-  SocialAccountsResponse,
-} from "@marketplace/shared-types"
 
 // Get current user
 export const useUser = () => {

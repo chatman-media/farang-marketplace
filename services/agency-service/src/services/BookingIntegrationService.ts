@@ -1,6 +1,6 @@
-import { ServiceAssignmentService } from "./ServiceAssignmentService"
-import { AgencyServiceService } from "./AgencyServiceService"
 import { AgencyService } from "./AgencyService"
+import { AgencyServiceService } from "./AgencyServiceService"
+import { ServiceAssignmentService } from "./ServiceAssignmentService"
 
 export interface BookingServiceRequest {
   bookingId: string

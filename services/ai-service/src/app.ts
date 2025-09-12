@@ -1,5 +1,5 @@
-import Fastify, { FastifyInstance } from "fastify"
 import { config } from "dotenv"
+import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"
 
 // Load environment variables
@@ -18,22 +18,20 @@ const envSchema = z.object({
 
 export const env = envSchema.parse(process.env)
 
-// Import services
-import { AIProviderService } from "./services/AIProviderService"
-import { RecommendationEngine } from "./services/RecommendationEngine"
-import { ContentAnalysisService } from "./services/ContentAnalysisService"
-import { UserBehaviorService } from "./services/UserBehaviorService"
-
-// Import controllers
-import { RecommendationController } from "./controllers/RecommendationController"
 import { ContentAnalysisController } from "./controllers/ContentAnalysisController"
 import { InsightsController } from "./controllers/InsightsController"
 import { MarketplaceIntegrationController } from "./controllers/MarketplaceIntegrationController"
-
+// Import controllers
+import { RecommendationController } from "./controllers/RecommendationController"
 // Import routes
 import contentAnalysisRoutes from "./routes/content-analysis"
 import insightsRoutes from "./routes/insights"
 import marketplaceIntegrationRoutes from "./routes/marketplace-integration"
+// Import services
+import { AIProviderService } from "./services/AIProviderService"
+import { ContentAnalysisService } from "./services/ContentAnalysisService"
+import { RecommendationEngine } from "./services/RecommendationEngine"
+import { UserBehaviorService } from "./services/UserBehaviorService"
 // import aiProviderRoutes from './routes/ai-providers'
 // import modelManagementRoutes from './routes/model-management'
 // import usageAnalyticsRoutes from './routes/usage-analytics'

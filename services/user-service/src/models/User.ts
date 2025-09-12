@@ -1,14 +1,14 @@
+import {
+  AuthProvider,
+  SocialProfile,
+  User,
+  UserPreferences,
+  UserProfile,
+  UserRole,
+  VerificationStatus,
+} from "@marketplace/shared-types"
 import * as bcrypt from "bcryptjs"
 import { z } from "zod"
-import {
-  User,
-  UserRole,
-  UserProfile,
-  VerificationStatus,
-  SocialProfile,
-  AuthProvider,
-  UserPreferences,
-} from "@marketplace/shared-types"
 
 // Validation schemas
 export const UserPreferencesSchema = z.object({

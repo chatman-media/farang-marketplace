@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "vitest"
-import { ContentAnalysisService } from "../services/ContentAnalysisService"
+import { beforeEach, describe, expect, it } from "vitest"
 import { AIProviderService } from "../services/AIProviderService"
+import { ContentAnalysisService } from "../services/ContentAnalysisService"
 
 describe("Content Analysis Service Tests", () => {
   let contentAnalysisService: ContentAnalysisService

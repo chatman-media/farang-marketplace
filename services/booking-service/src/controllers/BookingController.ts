@@ -1,12 +1,13 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { z } from "zod"
-import { BookingService } from "../services/BookingService"
 import type {
+  BookingFilters,
   CreateBookingRequest,
   CreateServiceBookingRequest,
   UpdateStatusRequest,
-  BookingFilters,
 } from "@marketplace/shared-types"
+import { FastifyReply, FastifyRequest } from "fastify"
+import { z } from "zod"
+
+import { BookingService } from "../services/BookingService"
 
 // Zod schemas for validation
 export const createBookingSchema = {

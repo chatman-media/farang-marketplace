@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest"
 import { FastifyInstance } from "fastify"
-import { createApp } from "../index"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { query } from "../db/connection"
-import { SegmentOperator, SegmentDataType } from "../models/Segment"
+import { createApp } from "../index"
+import { SegmentDataType, SegmentOperator } from "../models/Segment"
 
 describe("SegmentController", () => {
   let app: FastifyInstance

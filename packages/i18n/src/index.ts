@@ -1,14 +1,13 @@
 import i18n from "i18next"
-import { initReactI18next } from "react-i18next"
 import LanguageDetector from "i18next-browser-languagedetector"
 import Backend from "i18next-http-backend"
-
+import { initReactI18next } from "react-i18next"
+import arTranslations from "./locales/ar.js"
+import cnTranslations from "./locales/cn.js"
 // Import translation resources
 import enTranslations from "./locales/en.js"
 import ruTranslations from "./locales/ru.js"
 import thTranslations from "./locales/th.js"
-import cnTranslations from "./locales/cn.js"
-import arTranslations from "./locales/ar.js"
 
 // Supported languages
 export const SUPPORTED_LANGUAGES = {
@@ -65,7 +64,7 @@ i18n
 export default i18n
 
 // Export hooks and utilities
-export { useTranslation, Trans } from "react-i18next"
+export { Trans, useTranslation } from "react-i18next"
 
 // Language utilities
 export const getCurrentLanguage = (): SupportedLanguage => {

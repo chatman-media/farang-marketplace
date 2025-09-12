@@ -1,8 +1,8 @@
 import Fastify, { FastifyInstance } from "fastify"
-import { env, corsConfig, rateLimitConfig, loggerConfig } from "./config/environment.js"
-import { ServiceDiscovery } from "./services/ServiceDiscovery.js"
-import { Router } from "./services/Router.js"
+import { corsConfig, env, loggerConfig, rateLimitConfig } from "./config/environment.js"
 import { authMiddleware } from "./middleware/auth.js"
+import { Router } from "./services/Router.js"
+import { ServiceDiscovery } from "./services/ServiceDiscovery.js"
 
 export const createApp = async (): Promise<FastifyInstance> => {
   // Create Fastify app

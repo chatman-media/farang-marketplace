@@ -1,5 +1,5 @@
 import dotenv from "dotenv"
-import { vi, beforeEach, afterEach } from "vitest"
+import { afterEach, beforeEach, vi } from "vitest"
 
 // Load test environment variables (suppress dotenv tips)
 dotenv.config({ path: ".env.test", debug: false })

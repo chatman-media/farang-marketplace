@@ -1,4 +1,4 @@
-import { CustomerStatus, CommunicationChannel } from "@marketplace/shared-types"
+import { CommunicationChannel, CustomerStatus } from "@marketplace/shared-types"
 
 export interface ISegment {
   id: string

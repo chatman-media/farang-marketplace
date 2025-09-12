@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 
 // Payment API Tests
 // These tests validate API endpoint structure and request/response handling

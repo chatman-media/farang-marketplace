@@ -1,4 +1,4 @@
-import { createApp, gracefulShutdown, env } from "./app"
+import { createApp, env, gracefulShutdown } from "./app"
 import { runMigrations } from "./database/migrate"
 
 // Start the modern application
@@ -48,6 +48,6 @@ if (process.argv[1] && process.argv[1].endsWith("index")) {
 export { createApp, env }
 export { UserEntity } from "./models/User"
 export { UserRepository } from "./repositories/UserRepository"
-export { UserService } from "./services/UserService"
 export { AuthService } from "./services/AuthService"
 export { OAuthService } from "./services/OAuthService"
+export { UserService } from "./services/UserService"

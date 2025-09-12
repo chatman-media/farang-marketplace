@@ -1,19 +1,41 @@
 // Universal Product Types for Thailand Marketplace
 
 export enum ProductType {
-  VEHICLE = "vehicle",
-  ELECTRONICS = "electronics",
-  FURNITURE = "furniture",
-  CLOTHING = "clothing",
-  SPORTS = "sports",
-  TOOLS = "tools",
-  BOOKS = "books",
-  HOME_GARDEN = "home_garden",
-  JEWELRY = "jewelry",
-  TOYS = "toys",
-  HEALTH_BEAUTY = "health_beauty",
-  FOOD_BEVERAGE = "food_beverage",
-  SERVICES = "services",
+  // Home & Kitchen Appliances
+  HOME_APPLIANCES = "home_appliances", // холодильники, стиральные машины, микроволновки
+  KITCHEN_APPLIANCES = "kitchen_appliances", // блендеры, кофемашины, мультиварки
+  CLEANING_EQUIPMENT = "cleaning_equipment", // пылесосы, пароочистители, моющие аппараты
+
+  // Audio & Video Equipment
+  AUDIO_EQUIPMENT = "audio_equipment", // колонки, наушники, микрофоны, усилители
+  VIDEO_EQUIPMENT = "video_equipment", // проекторы, камеры, телевизоры
+  GAMING_CONSOLES = "gaming_consoles", // PlayStation, Xbox, Nintendo
+
+  // Computing & Electronics
+  COMPUTERS_LAPTOPS = "computers_laptops", // ноутбуки, ПК, планшеты
+  MOBILE_DEVICES = "mobile_devices", // телефоны, смарт-часы
+  NETWORKING_EQUIPMENT = "networking_equipment", // роутеры, модемы, точки доступа
+
+  // Tools & Equipment
+  POWER_TOOLS = "power_tools", // дрели, пилы, шлифмашины
+  HAND_TOOLS = "hand_tools", // инструменты, измерительные приборы
+  GARDEN_TOOLS = "garden_tools", // газонокосилки, триммеры, садовый инвентарь
+
+  // Sports & Recreation
+  SPORTS_EQUIPMENT = "sports_equipment", // велосипеды, скейтборды, спортинвентарь
+  OUTDOOR_GEAR = "outdoor_gear", // палатки, рюкзаки, туристическое снаряжение
+  WATER_SPORTS = "water_sports", // доски для серфинга, каяки, снаряжение для дайвинга
+
+  // Creative & Professional
+  PHOTOGRAPHY_EQUIPMENT = "photography_equipment", // фотоаппараты, объективы, штативы
+  MUSICAL_INSTRUMENTS = "musical_instruments", // гитары, клавишные, барабаны
+  ART_SUPPLIES = "art_supplies", // мольберты, краски, профессиональные материалы
+
+  // Events & Entertainment
+  EVENT_EQUIPMENT = "event_equipment", // звуковое оборудование, освещение
+  PARTY_SUPPLIES = "party_supplies", // декорации, мебель для мероприятий
+
+  // Other
   OTHER = "other",
 }
 

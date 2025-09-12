@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, decimal, boolean, timestamp, jsonb, index, pgEnum } from "drizzle-orm/pg-core"
+import { boolean, decimal, index, jsonb, pgEnum, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core"
 
 // Enums
 export const serviceCategory = pgEnum("service_category", [

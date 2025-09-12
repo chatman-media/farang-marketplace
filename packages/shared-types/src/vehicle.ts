@@ -15,13 +15,10 @@ export enum VehicleType {
 }
 
 export enum VehicleCategory {
-  ECONOMY = "economy",
-  STANDARD = "standard",
-  PREMIUM = "premium",
-  LUXURY = "luxury",
-  SPORT = "sport",
-  ELECTRIC = "electric",
-  CLASSIC = "classic",
+  RENTAL = "rental",
+  LEASE = "lease",
+  RIDE_SHARING = "ride_sharing",
+  DELIVERY = "delivery",
 }
 
 export enum FuelType {

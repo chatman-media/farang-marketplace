@@ -1,7 +1,7 @@
-import { UserRole, VerificationStatus, AuthProvider } from "@marketplace/shared-types"
-import { UserEntity } from "../../models/User"
+import { AuthProvider, UserRole, VerificationStatus } from "@marketplace/shared-types"
 import { pool, query } from "../../database/connection"
 import { runMigrations } from "../../database/migrate"
+import { UserEntity } from "../../models/User"
 
 /**
  * Database fixtures for testing

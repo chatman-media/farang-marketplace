@@ -1,11 +1,11 @@
-import Fastify from "fastify"
 import cors from "@fastify/cors"
 import helmet from "@fastify/helmet"
 import rateLimit from "@fastify/rate-limit"
+import Fastify from "fastify"
 import { RecommendationController } from "./controllers/RecommendationController"
-import { RecommendationEngine } from "./services/RecommendationEngine"
-import { AIProviderService } from "./services/AIProviderService"
 import recommendationRoutes from "./routes/recommendations"
+import { AIProviderService } from "./services/AIProviderService"
+import { RecommendationEngine } from "./services/RecommendationEngine"
 
 const createMinimalApp = async () => {
   const app = Fastify({

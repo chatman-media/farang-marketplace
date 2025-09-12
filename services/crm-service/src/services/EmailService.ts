@@ -1,12 +1,12 @@
-import * as nodemailer from "nodemailer"
-import { query } from "../db/connection"
 import {
   CommunicationChannel,
-  MessageTemplate,
   CommunicationHistory,
+  MessageTemplate,
   SendMessageRequest,
   SendMessageResponse,
 } from "@marketplace/shared-types"
+import * as nodemailer from "nodemailer"
+import { query } from "../db/connection"
 
 export interface EmailConfig {
   host: string

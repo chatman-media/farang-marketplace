@@ -1,6 +1,6 @@
-import { Queue, Worker, QueueEvents } from "bullmq"
-import { Redis } from "ioredis"
+import { Queue, QueueEvents, Worker } from "bullmq"
 import { config } from "dotenv"
+import { Redis } from "ioredis"
 
 // Load environment variables
 config()

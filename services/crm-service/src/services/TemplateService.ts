@@ -1,6 +1,6 @@
-import { query } from "../db/connection"
-import { Template, CreateTemplateRequest, UpdateTemplateRequest } from "../models/Template"
 import { CommunicationChannel } from "@marketplace/shared-types"
+import { query } from "../db/connection"
+import { CreateTemplateRequest, Template, UpdateTemplateRequest } from "../models/Template"
 
 export interface TemplateRenderContext {
   customer?: any

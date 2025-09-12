@@ -1,6 +1,6 @@
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { SUPPORTED_LANGUAGES, SupportedLanguage, changeLanguage, getCurrentLanguage } from "../index"
+import { changeLanguage, getCurrentLanguage, SUPPORTED_LANGUAGES, SupportedLanguage } from "../index"
 
 interface LanguageSwitcherProps {
   className?: string

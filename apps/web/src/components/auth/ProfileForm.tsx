@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react"
-import { Button, Input, Card } from "../ui"
+import type { AuthProvider, User, VerificationStatus } from "@marketplace/shared-types"
+import React, { useEffect, useState } from "react"
 import { useProfile, useUpdateProfile } from "../../lib/query"
-import type { User, VerificationStatus, AuthProvider } from "@marketplace/shared-types"
+import { Button, Card, Input } from "../ui"
 
 interface ProfileFormProps {
   onSuccess?: () => void

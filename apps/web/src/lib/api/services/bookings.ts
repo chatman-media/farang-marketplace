@@ -1,6 +1,6 @@
+import type { Booking, BookingStatus, CreateBookingRequest, UpdateBookingRequest } from "@marketplace/shared-types"
 import { api } from "../client"
 import { getApiConfig } from "../config"
-import type { Booking, CreateBookingRequest, UpdateBookingRequest, BookingStatus } from "@marketplace/shared-types"
 
 const config = getApiConfig()
 

@@ -1,7 +1,7 @@
+import compromise from "compromise"
 import natural from "natural"
 import sentiment from "sentiment"
-import { removeStopwords, eng, tha } from "stopword"
-import compromise from "compromise"
+import { eng, removeStopwords, tha } from "stopword"
 import type { ContentAnalysisRequest, ContentAnalysisResult } from "../models/index"
 import { AIProviderService } from "./AIProviderService"
 

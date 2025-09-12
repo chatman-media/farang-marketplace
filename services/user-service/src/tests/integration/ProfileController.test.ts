@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from "vitest"
-import { createApp } from "../../app"
-import { FastifyInstance } from "fastify"
-import { awaitableTestRequest as testRequest } from "../helpers/fastify-test-utils"
-import { setupTestDatabase, cleanupTestDatabase } from "../fixtures/database"
-import { UserRepository } from "../../repositories/UserRepository"
-import { UserEntity } from "../../models/User"
 import { UserRole, VerificationStatus } from "@marketplace/shared-types"
+import { FastifyInstance } from "fastify"
 import fs from "fs/promises"
 import path from "path"
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { createApp } from "../../app"
+import { UserEntity } from "../../models/User"
+import { UserRepository } from "../../repositories/UserRepository"
+import { cleanupTestDatabase, setupTestDatabase } from "../fixtures/database"
+import { awaitableTestRequest as testRequest } from "../helpers/fastify-test-utils"
 
 describe("ProfileController Integration Tests", () => {
   let userRepository: UserRepository

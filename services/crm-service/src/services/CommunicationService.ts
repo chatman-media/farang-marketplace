@@ -1,15 +1,15 @@
-import { EmailService } from "./EmailService"
-import { TelegramService } from "./TelegramService"
-import { WhatsAppService } from "./WhatsAppService"
-import { LineService } from "./LineService"
-import { CRMService } from "./CRMService"
-import { query } from "../db/connection"
 import {
   CommunicationChannel,
-  type SendMessageResponse,
   type CommunicationHistory,
   type Customer,
+  type SendMessageResponse,
 } from "@marketplace/shared-types"
+import { query } from "../db/connection"
+import { CRMService } from "./CRMService"
+import { EmailService } from "./EmailService"
+import { LineService } from "./LineService"
+import { TelegramService } from "./TelegramService"
+import { WhatsAppService } from "./WhatsAppService"
 
 export interface UnifiedSendRequest {
   customerId: string
