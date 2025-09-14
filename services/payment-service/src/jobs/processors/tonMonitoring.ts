@@ -66,7 +66,7 @@ async function checkPendingTransactions(job: Job) {
 }
 
 // Process TON exchange rate updates
-async function updateExchangeRates(job: Job) {
+async function updateExchangeRates(_job: Job) {
   try {
     logger.info("💱 Updating TON exchange rates...")
 
@@ -128,7 +128,7 @@ async function syncJettonBalances(job: Job) {
 }
 
 // Process blockchain network health check
-async function healthCheckTonNetwork(job: Job) {
+async function healthCheckTonNetwork(_job: Job) {
   try {
     logger.info("🏥 Checking TON network health...")
 

@@ -1,8 +1,6 @@
-import { createDatabaseConnection } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
-import { createApp, env } from "./app"
 
-const db = createDatabaseConnection(process.env.DATABASE_URL!)
+import { createApp, env } from "./app"
 
 const start = async () => {
   try {

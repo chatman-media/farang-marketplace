@@ -1,5 +1,6 @@
 import { AuthProvider, UserRole, VerificationStatus } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import { UserEntity } from "../../models/User"
 import { testUserData } from "../setup"
 

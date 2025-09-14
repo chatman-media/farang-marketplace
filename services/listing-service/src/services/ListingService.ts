@@ -216,7 +216,7 @@ export class ListingService {
   private parseDecimal(value: string | null): number | undefined {
     if (!value) return undefined
     const parsed = Number.parseFloat(value)
-    return isNaN(parsed) ? undefined : parsed
+    return Number.isNaN(parsed) ? undefined : parsed
   }
 
   private mapToVehicleListing(listing: ListingSelect, vehicle: VehicleSelect): VehicleListing {

@@ -1,5 +1,6 @@
 import { and, count, createDatabaseConnection, eq, gte, ilike, ne, users } from "@marketplace/database-schema"
 import { UserProfile, UserRole } from "@marketplace/shared-types"
+
 import { UserEntity } from "../models/User"
 
 // Database connection

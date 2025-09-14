@@ -41,28 +41,3 @@ beforeEach(() => {
     text: async () => "Mock response",
   } as Response
 }
-
-// Mock console methods in tests to reduce noise
-const originalConsoleError = logger.error
-const originalConsoleWarn = logger.warn
-
-beforeEach(() => {
-  logger.error = (message: string, ...args: any[]) => {
-    // Only log errors that aren't expected test errors
-    if (!message.includes("Expected test error")) {
-      originalConsoleError(message, ...args)
-    }
-  }
-
-  logger.warn = (message: string, ...args: any[]) => {
-    // Only log warnings that aren't expected test warnings
-    if (!message.includes("Expected test warning")) {
-      originalConsoleWarn(message, ...args)
-    }
-  }
-})
-
-afterAll(() => {
-  logger.error = originalConsoleError
-  logger.warn = originalConsoleWarn
-})

@@ -346,7 +346,7 @@ export class BookingService {
     })
   }
 
-  private async handleStatusChange(booking: any, fromStatus: string, toStatus: string): Promise<void> {
+  private async handleStatusChange(booking: any, _fromStatus: string, toStatus: string): Promise<void> {
     // Handle status-specific business logic
     switch (toStatus) {
       case BookingStatus.CANCELLED:

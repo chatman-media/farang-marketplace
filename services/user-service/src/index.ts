@@ -1,4 +1,5 @@
 import logger from "@marketplace/logger"
+
 import { createApp, env, gracefulShutdown } from "./app"
 import { connectRedis, disconnectRedis } from "./config/redis"
 

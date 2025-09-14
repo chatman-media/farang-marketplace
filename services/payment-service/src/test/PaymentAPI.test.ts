@@ -267,8 +267,8 @@ describe("Payment API Tests", () => {
       }
 
       // Validate pagination
-      const page = Number.parseInt(mockRequest.query.page)
-      const limit = Number.parseInt(mockRequest.query.limit)
+      const page = Number.parseInt(mockRequest.query.page, 10)
+      const limit = Number.parseInt(mockRequest.query.limit, 10)
       expect(page).toBeGreaterThan(0)
       expect(limit).toBeGreaterThan(0)
       expect(limit).toBeLessThanOrEqual(100)
@@ -434,7 +434,7 @@ describe("Payment API Tests", () => {
       expect(tx.hash.length).toBe(64)
       expect(tx.from.length).toBe(48)
       expect(tx.to.length).toBe(48)
-      expect(Number.parseInt(tx.amount)).toBeGreaterThan(0)
+      expect(Number.parseInt(tx.amount, 10)).toBeGreaterThan(0)
       expect(typeof tx.confirmed).toBe("boolean")
 
       // Validate signature header

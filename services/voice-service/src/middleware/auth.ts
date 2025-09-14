@@ -1,5 +1,4 @@
 import { logger } from "@marketplace/logger"
-
 import type { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
 

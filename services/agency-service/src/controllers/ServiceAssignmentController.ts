@@ -215,8 +215,8 @@ export class ServiceAssignmentController {
         status,
         agencyId,
         listingId,
-        page: Number.parseInt(page),
-        limit: Number.parseInt(limit),
+        page: Number.parseInt(page, 10),
+        limit: Number.parseInt(limit, 10),
       }
 
       const assignments = await this.serviceAssignmentService.searchAssignments(searchParams)

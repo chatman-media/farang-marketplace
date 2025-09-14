@@ -1,5 +1,7 @@
 import { createDatabaseConnection, sql, users } from "@marketplace/database-schema"
+import logger from "@marketplace/logger"
 import { AuthProvider, UserRole, VerificationStatus } from "@marketplace/shared-types"
+
 import { UserEntity } from "../../models/User"
 
 /**
@@ -332,9 +334,9 @@ export const mockUserStats = {
 export async function setupTestDatabase(): Promise<void> {
   try {
     // Database setup is handled by the database-schema package
-    console.log("Test database setup completed")
+    logger.info("Test database setup completed")
   } catch (error) {
-    console.error("Failed to setup test database:", error)
+    logger.error("Failed to setup test database:", error)
     throw error
   }
 }
@@ -352,7 +354,7 @@ export async function cleanupTestDatabase(): Promise<void> {
     await db.execute(sql`DELETE FROM users WHERE email LIKE '%@example.com'`)
     await db.execute(sql`DELETE FROM users WHERE email LIKE 'test%@%'`)
   } catch (error) {
-    console.error("Failed to cleanup test database:", error)
+    logger.error("Failed to cleanup test database:", error)
     // Don't throw error during cleanup to avoid masking test failures
   }
 }

@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/useLiteralKeys: temp */
 import logger from "@marketplace/logger"
 import { Matrix } from "ml-matrix"
 
@@ -622,7 +623,9 @@ Provide a score from 0 to 1 and brief reasoning. Format: "Score: 0.X - Reason"
 
       if (hasNewCategory || Math.random() > diversityFactor) {
         diverseResults.push(result)
-        item.categories.forEach((cat) => usedCategories.add(cat))
+        item.categories.forEach((cat) => {
+          usedCategories.add(cat)
+        })
       }
     }
 

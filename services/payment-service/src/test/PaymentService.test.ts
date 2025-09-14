@@ -1,4 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import crypto from "crypto"
+
+import { describe, expect, it } from "vitest"
 
 // Payment Service Logic Tests
 // These tests validate payment processing logic and business rules
@@ -278,7 +280,6 @@ describe("Payment Service Logic Tests", () => {
       const secret = "webhook-secret-key"
 
       // Simulate HMAC signature creation
-      const crypto = require("crypto")
       const expectedSignature = crypto.createHmac("sha256", secret).update(payload).digest("hex")
 
       expect(expectedSignature).toBeDefined()

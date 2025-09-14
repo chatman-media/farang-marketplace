@@ -1,5 +1,7 @@
-import { PaymentStatus, RefundStatus } from "@marketplace/shared-types"
+// biome-ignore assist/source/organizeImports: fix
 import crypto from "crypto"
+
+import { PaymentStatus, RefundStatus } from "@marketplace/shared-types"
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
 
@@ -49,7 +51,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest<{ Body: z.infer<typeof tonWebhookSchema> }>, reply: FastifyReply) => {
       try {
-        const { transaction_hash, from_address, to_address, amount, comment, confirmed } = request.body
+        const { transaction_hash, comment, confirmed } = request.body
 
         fastify.log.info({ transaction_hash }, "Received TON webhook")
 
@@ -112,7 +114,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(providedSignature))) {
             return reply.code(400).send({ error: "Invalid signature" })
           }
-        } catch (error) {
+        } catch {
           return reply.code(400).send({ error: "Signature verification failed" })
         }
       },
@@ -127,20 +129,23 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
         fastify.log.info({ type }, "Received Stripe webhook")
 
         switch (type) {
-          case "payment_intent.succeeded":
+          case "payment_intent.succeeded": {
             const paymentIntent = data.object
             await paymentService.handleStripePaymentSuccess(paymentIntent.id)
             break
+          }
 
-          case "payment_intent.payment_failed":
+          case "payment_intent.payment_failed": {
             const failedPayment = data.object
             await paymentService.handleStripePaymentFailure(failedPayment.id)
             break
+          }
 
-          case "charge.dispute.created":
+          case "charge.dispute.created": {
             const dispute = data.object
             await paymentService.handleStripeDispute(dispute.charge)
             break
+          }
 
           default:
             fastify.log.info({ type }, "Unhandled Stripe webhook type")
@@ -184,7 +189,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
       reply: FastifyReply,
     ) => {
       try {
-        const { payment_id, status, transaction_id, reason, metadata } = request.body
+        const { payment_id, status, transaction_id, reason } = request.body
 
         fastify.log.info({ payment_id, status }, "Received payment webhook")
 
@@ -215,7 +220,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest<{ Body: z.infer<typeof refundWebhookSchema> }>, reply: FastifyReply) => {
       try {
-        const { refund_id, payment_id, amount, status, reason } = request.body
+        const { refund_id, payment_id, status, reason } = request.body
 
         fastify.log.info({ refund_id, payment_id, status }, "Received refund webhook")
 
@@ -237,7 +242,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
   )
 
   // Webhook health check
-  fastify.get("/webhooks/health", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get("/webhooks/health", async (_request: FastifyRequest, reply: FastifyReply) => {
     return reply.send({
       success: true,
       status: "healthy",

@@ -182,8 +182,8 @@ export class AgencyServiceController {
         category,
         minPrice: minPrice ? Number.parseFloat(minPrice) : undefined,
         maxPrice: maxPrice ? Number.parseFloat(maxPrice) : undefined,
-        page: Number.parseInt(page),
-        limit: Number.parseInt(limit),
+        page: Number.parseInt(page, 10),
+        limit: Number.parseInt(limit, 10),
       }
       const services = await this.agencyServiceService.searchServices(searchParams)
 

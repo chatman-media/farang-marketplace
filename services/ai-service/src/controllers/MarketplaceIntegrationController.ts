@@ -275,7 +275,7 @@ export class MarketplaceIntegrationController {
   /**
    * Get marketplace analytics
    */
-  async getMarketplaceAnalytics(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
+  async getMarketplaceAnalytics(_request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
       // Simplified analytics response since the service doesn't have this method
       reply.send({
@@ -296,7 +296,7 @@ export class MarketplaceIntegrationController {
   /**
    * Health check
    */
-  async healthCheck(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
+  async healthCheck(_request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
       reply.send({
         success: true,

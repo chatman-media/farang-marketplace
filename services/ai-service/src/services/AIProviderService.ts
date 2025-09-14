@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/useLiteralKeys: temp */
 import axios from "axios"
 import OpenAI from "openai"
 
@@ -17,19 +18,19 @@ export class AIProviderService {
    */
   private initializeProviders(): void {
     // OpenAI Configuration
-    if (process.env.OPENAI_API_KEY) {
+    if (process.env["OPENAI_API_KEY"]) {
       const openaiConfig: AIProviderConfig = {
         name: "openai",
         type: "openai",
-        apiKey: process.env.OPENAI_API_KEY,
-        model: process.env.OPENAI_MODEL || "gpt-4-turbo-preview",
-        maxTokens: Number.parseInt(process.env.OPENAI_MAX_TOKENS || "4000"),
+        apiKey: process.env["OPENAI_API_KEY"],
+        model: process.env["OPENAI_MODEL"] || "gpt-4-turbo-preview",
+        maxTokens: Number.parseInt(process.env["OPENAI_MAX_TOKENS"] || "4000", 10),
         temperature: 0.7,
         enabled: true,
         priority: 1,
         rateLimit: {
-          requests: Number.parseInt(process.env.AI_RATE_LIMIT_REQUESTS || "100"),
-          window: Number.parseInt(process.env.AI_RATE_LIMIT_WINDOW || "3600"),
+          requests: Number.parseInt(process.env["AI_RATE_LIMIT_REQUESTS"] || "100", 10),
+          window: Number.parseInt(process.env["AI_RATE_LIMIT_WINDOW"] || "3600", 10),
         },
         cost: {
           inputTokens: 0.01, // $0.01 per 1k tokens
@@ -47,20 +48,20 @@ export class AIProviderService {
     }
 
     // DeepSeek Configuration
-    if (process.env.DEEPSEEK_API_KEY) {
+    if (process.env["DEEPSEEK_API_KEY"]) {
       const deepseekConfig: AIProviderConfig = {
         name: "deepseek",
         type: "deepseek",
-        apiKey: process.env.DEEPSEEK_API_KEY,
-        baseUrl: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1",
-        model: process.env.DEEPSEEK_MODEL || "deepseek-chat",
+        apiKey: process.env["DEEPSEEK_API_KEY"],
+        baseUrl: process.env["DEEPSEEK_BASE_URL"] || "https://api.deepseek.com/v1",
+        model: process.env["DEEPSEEK_MODEL"] || "deepseek-chat",
         maxTokens: 4000,
         temperature: 0.7,
         enabled: true,
         priority: 2,
         rateLimit: {
-          requests: Number.parseInt(process.env.AI_RATE_LIMIT_REQUESTS || "100"),
-          window: Number.parseInt(process.env.AI_RATE_LIMIT_WINDOW || "3600"),
+          requests: Number.parseInt(process.env["AI_RATE_LIMIT_REQUESTS"] || "100", 10),
+          window: Number.parseInt(process.env["AI_RATE_LIMIT_WINDOW"] || "3600", 10),
         },
         cost: {
           inputTokens: 0.0014, // $0.0014 per 1k tokens
@@ -79,19 +80,19 @@ export class AIProviderService {
     }
 
     // Claude Configuration
-    if (process.env.CLAUDE_API_KEY) {
+    if (process.env["CLAUDE_API_KEY"]) {
       const claudeConfig: AIProviderConfig = {
         name: "claude",
         type: "claude",
-        apiKey: process.env.CLAUDE_API_KEY,
-        model: process.env.CLAUDE_MODEL || "claude-3-sonnet-20240229",
+        apiKey: process.env["CLAUDE_API_KEY"],
+        model: process.env["CLAUDE_MODEL"] || "claude-3-sonnet-20240229",
         maxTokens: 4000,
         temperature: 0.7,
         enabled: true,
         priority: 3,
         rateLimit: {
-          requests: Number.parseInt(process.env.AI_RATE_LIMIT_REQUESTS || "100"),
-          window: Number.parseInt(process.env.AI_RATE_LIMIT_WINDOW || "3600"),
+          requests: Number.parseInt(process.env["AI_RATE_LIMIT_REQUESTS"] || "100", 10),
+          window: Number.parseInt(process.env["AI_RATE_LIMIT_WINDOW"] || "3600", 10),
         },
         cost: {
           inputTokens: 0.003, // $0.003 per 1k tokens
@@ -103,7 +104,7 @@ export class AIProviderService {
     }
 
     // Mock provider for testing
-    if (process.env.NODE_ENV === "test" || process.env.AI_PROVIDER === "mock") {
+    if (process.env["NODE_ENV"] === "test" || process.env["AI_PROVIDER"] === "mock") {
       const mockConfig: AIProviderConfig = {
         name: "mock",
         type: "custom",

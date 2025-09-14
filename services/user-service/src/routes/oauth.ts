@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify"
+
 import { OAuthController } from "../controllers/OAuthController"
 import { FastifyAuthMiddleware } from "../middleware/auth"
 import { UserRepository } from "../repositories/UserRepository"

@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/useLiteralKeys: fix */
 import logger from "@marketplace/logger"
 
 import type { UserBehavior } from "../models/index"
@@ -150,7 +151,7 @@ export class MarketplaceIntegrationService {
       const priceOptimization = await this.generatePriceOptimization(listingId, bookingData)
 
       const intelligence: BookingIntelligence = {
-        bookingId: bookingData.bookingId || `temp_${Date.now()}`,
+        bookingId: bookingData["bookingId"] || `temp_${Date.now()}`,
         userId,
         listingId,
         intelligenceType: "matching",
@@ -295,7 +296,7 @@ export class MarketplaceIntegrationService {
 
       const result: FraudDetectionResult = {
         userId,
-        bookingId: transactionData?.bookingId,
+        bookingId: transactionData?.["bookingId"],
         listingId: listingId || "unknown",
         riskScore,
         riskLevel,
@@ -401,7 +402,7 @@ Provide JSON response with recommendations array containing action, confidence, 
    * Analyze market data for pricing
    */
   private async analyzeMarketData(
-    listingId: string,
+    _listingId: string,
     context?: Record<string, any>,
   ): Promise<PricingSuggestion["marketData"]> {
     try {
@@ -685,7 +686,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
    * Calculate optimal timing for notifications
    */
   private async calculateOptimalTiming(
-    userId: string,
+    _userId: string,
     type: SmartNotification["type"],
     userBehaviors: UserBehavior[],
   ): Promise<SmartNotification["timing"]> {
@@ -918,24 +919,24 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     const preferences: Record<string, any> = {}
 
     // Extract preferences from user behaviors
-    const categories = userBehaviors.map((b) => b.metadata?.category).filter(Boolean)
+    const categories = userBehaviors.map((b) => b.metadata?.["category"]).filter(Boolean)
 
-    const locations = userBehaviors.map((b) => b.metadata?.location).filter(Boolean)
+    const locations = userBehaviors.map((b) => b.metadata?.["location"]).filter(Boolean)
 
-    const priceRanges = userBehaviors.map((b) => b.metadata?.priceRange).filter(Boolean)
+    const priceRanges = userBehaviors.map((b) => b.metadata?.["priceRange"]).filter(Boolean)
 
     if (categories.length > 0) {
-      preferences.preferredCategories = [...new Set(categories)]
+      preferences["preferredCategories"] = [...new Set(categories)]
     }
 
     if (locations.length > 0) {
-      preferences.preferredLocations = [...new Set(locations.map((l: any) => l.city))]
+      preferences["preferredLocations"] = [...new Set(locations.map((l: any) => l.city))]
     }
 
     if (priceRanges.length > 0) {
       const avgMin = priceRanges.reduce((sum: number, range: any) => sum + (range.min || 0), 0) / priceRanges.length
       const avgMax = priceRanges.reduce((sum: number, range: any) => sum + (range.max || 0), 0) / priceRanges.length
-      preferences.priceRange = { min: avgMin, max: avgMax }
+      preferences["priceRange"] = { min: avgMin, max: avgMax }
     }
 
     return preferences
@@ -947,9 +948,9 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   ): SmartNotification["priority"] {
     switch (type) {
       case "booking_reminder":
-        return context.urgency === "high" ? "urgent" : "high"
+        return context["urgency"] === "high" ? "urgent" : "high"
       case "price_alert":
-        return context.priceChange > 0.2 ? "high" : "medium"
+        return context["priceChange"] > 0.2 ? "high" : "medium"
       case "recommendation":
         return "medium"
       case "engagement":
@@ -960,7 +961,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   }
 
   private async selectOptimalChannel(
-    userId: string,
+    _userId: string,
     type: SmartNotification["type"],
   ): Promise<SmartNotification["channel"]> {
     // In a real implementation, this would analyze user preferences and engagement rates
@@ -976,7 +977,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   }
 
   private async predictEngagement(
-    userId: string,
+    _userId: string,
     type: SmartNotification["type"],
     _content: SmartNotification["content"],
   ): Promise<number> {

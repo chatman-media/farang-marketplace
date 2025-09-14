@@ -155,7 +155,7 @@ export class BookingIntegrationController {
   /**
    * Get available service categories
    */
-  async getServiceCategories(req: FastifyRequest, reply: FastifyReply): Promise<any> {
+  async getServiceCategories(_req: FastifyRequest, reply: FastifyReply): Promise<any> {
     try {
       const categories = [
         { id: "delivery", name: "Delivery Services", description: "Package and food delivery" },

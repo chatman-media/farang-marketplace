@@ -101,7 +101,7 @@ export const CategoryPage: React.FC = () => {
     // Parse URL parameters
     searchParams.forEach((value, key) => {
       if (key === "minPrice" || key === "maxPrice") {
-        initialFilters[key] = Number.parseInt(value) || undefined
+        initialFilters[key] = Number.parseInt(value, 10) || undefined
       } else if (key === "featured") {
         initialFilters[key] = value === "true"
       } else {

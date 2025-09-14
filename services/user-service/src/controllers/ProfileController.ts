@@ -1,9 +1,12 @@
+// biome-ignore assist/source/organizeImports: temp
+import fs from "fs/promises"
+import path from "path"
+
 import { UserRole, VerificationStatus } from "@marketplace/shared-types"
 import { FastifyReply } from "fastify"
-import fs from "fs/promises"
 import multer from "multer"
-import path from "path"
 import { z } from "zod"
+
 import { AuthenticatedRequest } from "../middleware/auth"
 import { UserService } from "../services/UserService"
 
@@ -59,7 +62,7 @@ const storage = multer.diskStorage({
   },
 })
 
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   // Accept only image files
   if (file.mimetype.startsWith("image/")) {
     cb(null, true)
@@ -204,7 +207,7 @@ export class ProfileController {
       let data: any | null = null
       try {
         data = await req.file()
-      } catch (error) {
+      } catch {
         // No file uploaded
         return reply.status(400).send({
           error: {

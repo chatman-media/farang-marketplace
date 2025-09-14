@@ -9,6 +9,7 @@ import {
   UpdateLeadRequest,
 } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
+
 import { AutomationService } from "../services/AutomationService"
 import { CRMService } from "../services/CRMService"
 
@@ -32,7 +33,7 @@ export class CRMController {
   }
 
   // Health check endpoint
-  healthCheck = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  healthCheck = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     return reply.send({
       status: "healthy",
       timestamp: new Date().toISOString(),
@@ -65,7 +66,7 @@ export class CRMController {
   getCustomers = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
       const query = request.query as any
-      const { page = 1, limit = 10, status, search, sortBy = "createdAt", sortOrder = "desc" } = query
+      const { page = 1, limit = 10, status, search } = query
 
       const customers = await this.crmService.getCustomers(
         {
@@ -73,8 +74,8 @@ export class CRMController {
           search,
         },
         {
-          page: Number.parseInt(page),
-          limit: Number.parseInt(limit),
+          page: Number.parseInt(page, 10),
+          limit: Number.parseInt(limit, 10),
         },
       )
 
@@ -200,9 +201,9 @@ export class CRMController {
         status,
         priority,
         customerId,
-        search,
-        sortBy = "createdAt",
-        sortOrder = "desc",
+        // search,
+        // sortBy = "createdAt",
+        // sortOrder = "desc",
       } = query
 
       const leads = await this.crmService.getLeads(
@@ -212,8 +213,8 @@ export class CRMController {
           customerId,
         },
         {
-          page: Number.parseInt(page),
-          limit: Number.parseInt(limit),
+          page: Number.parseInt(page, 10),
+          limit: Number.parseInt(limit, 10),
         },
       )
 
@@ -313,8 +314,8 @@ export class CRMController {
   // Analytics endpoint
   getAnalytics = async (request: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const query = request.query as any
-      const { startDate, endDate, groupBy = "day" } = query
+      // const query = request.query as any
+      // const { startDate, endDate, groupBy = "day" } = query
 
       const analytics = await this.crmService.getCRMAnalytics()
 

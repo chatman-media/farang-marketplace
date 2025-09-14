@@ -49,7 +49,7 @@ async function expireOldPayments(job: Job) {
 
 // Retry failed payments
 async function retryFailedPayments(job: Job) {
-  const { batchSize = 50, maxRetries = 3 } = job.data
+  const { batchSize = 50 } = job.data
 
   try {
     logger.info("🔄 Retrying failed payments...")
@@ -170,7 +170,7 @@ async function autoCompletePayments(job: Job) {
 }
 
 // Create worker for payment lifecycle jobs
-const paymentLifecycleWorker = new Worker(
+export const paymentLifecycleWorker = new Worker(
   "payment-lifecycle-v2",
   async (job: Job) => {
     const { type } = job.data

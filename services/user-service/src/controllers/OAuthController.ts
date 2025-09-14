@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import {
   AuthProvider,
   LinkSocialAccountRequest,
@@ -5,6 +6,7 @@ import {
   UnlinkSocialAccountRequest,
 } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
+
 import { OAuthStateManager } from "../config/redis"
 import { AuthenticatedRequest } from "../middleware/auth"
 import { OAuthService } from "../services/OAuthService"
@@ -38,7 +40,7 @@ export class OAuthController {
 
       reply.send({ authUrl })
     } catch (error) {
-      console.error("OAuth initiation error:", error)
+      logger.error("OAuth initiation error:", error)
       reply.code(500).send({ error: "Failed to initiate OAuth flow" })
     }
   }
@@ -91,7 +93,7 @@ export class OAuthController {
 
       reply.send(authResponse)
     } catch (error) {
-      console.error("OAuth callback error:", error)
+      logger.error("OAuth callback error:", error)
       reply.code(500).send({
         error: error instanceof Error ? error.message : "OAuth authentication failed",
       })
@@ -125,7 +127,7 @@ export class OAuthController {
 
       reply.send({ message: "Social account linked successfully" })
     } catch (error) {
-      console.error("Link social account error:", error)
+      logger.error("Link social account error:", error)
       reply.code(500).send({
         error: error instanceof Error ? error.message : "Failed to link social account",
       })
@@ -156,7 +158,7 @@ export class OAuthController {
 
       reply.send({ message: "Social account unlinked successfully" })
     } catch (error) {
-      console.error("Unlink social account error:", error)
+      logger.error("Unlink social account error:", error)
       reply.code(500).send({
         error: error instanceof Error ? error.message : "Failed to unlink social account",
       })
@@ -176,7 +178,7 @@ export class OAuthController {
 
       reply.send(socialAccounts)
     } catch (error) {
-      console.error("Get social accounts error:", error)
+      logger.error("Get social accounts error:", error)
       reply.code(500).send({
         error: error instanceof Error ? error.message : "Failed to retrieve social accounts",
       })
@@ -194,7 +196,7 @@ export class OAuthController {
 
       reply.send({ providers })
     } catch (error) {
-      console.error("Get providers error:", error)
+      logger.error("Get providers error:", error)
       reply.code(500).send({ error: "Failed to retrieve available providers" })
     }
   }
