@@ -11,7 +11,6 @@ import {
   type InferInsertModel,
   type InferSelectModel,
   ilike,
-  productTypeEnum,
   serviceAssignments,
   sql,
 } from "@marketplace/database-schema"
@@ -23,7 +22,6 @@ const db = createDatabaseConnection(process.env.DATABASE_URL!)
 type Agency = InferSelectModel<typeof agencies>
 type NewAgency = InferInsertModel<typeof agencies>
 type AgencyStatusType = (typeof agencyStatusEnum.enumValues)[number]
-type ServiceCategoryType = (typeof productTypeEnum.enumValues)[number]
 
 export interface AgencyFilters {
   status?: AgencyStatusType
@@ -217,7 +215,7 @@ export class AgencyService {
   /**
    * Verify agency
    */
-  async verifyAgency(id: string, verificationNotes?: string): Promise<Agency | null> {
+  async verifyAgency(id: string, _verificationNotes?: string): Promise<Agency | null> {
     try {
       const [agency] = await db
         .update(agencies)
@@ -238,7 +236,7 @@ export class AgencyService {
   /**
    * Reject agency verification
    */
-  async rejectAgencyVerification(id: string, reason: string): Promise<Agency | null> {
+  async rejectAgencyVerification(id: string, _reason: string): Promise<Agency | null> {
     try {
       const [agency] = await db
         .update(agencies)

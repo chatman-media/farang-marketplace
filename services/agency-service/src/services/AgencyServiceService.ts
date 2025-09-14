@@ -67,7 +67,7 @@ export class AgencyServiceService {
 
       return service
     } catch (error) {
-      console.error("Error creating agency service:", error)
+      logger.error("Error creating agency service:", error)
       throw new Error("Failed to create agency service")
     }
   }
@@ -81,7 +81,7 @@ export class AgencyServiceService {
 
       return service || null
     } catch (error) {
-      console.error("Error getting service by ID:", error)
+      logger.error("Error getting service by ID:", error)
       throw new Error("Failed to get service")
     }
   }
@@ -99,7 +99,7 @@ export class AgencyServiceService {
 
       return services
     } catch (error) {
-      console.error("Error getting services by agency ID:", error)
+      logger.error("Error getting services by agency ID:", error)
       throw new Error("Failed to get services")
     }
   }
@@ -123,7 +123,7 @@ export class AgencyServiceService {
 
       return service || null
     } catch (error) {
-      console.error("Error updating service:", error)
+      logger.error("Error updating service:", error)
       throw new Error("Failed to update service")
     }
   }
@@ -137,7 +137,7 @@ export class AgencyServiceService {
 
       return result.length > 0
     } catch (error) {
-      console.error("Error deleting service:", error)
+      logger.error("Error deleting service:", error)
       throw new Error("Failed to delete service")
     }
   }
@@ -236,7 +236,7 @@ export class AgencyServiceService {
         hasMore,
       }
     } catch (error) {
-      console.error("Error searching services:", error)
+      logger.error("Error searching services:", error)
       throw new Error("Failed to search services")
     }
   }
@@ -254,7 +254,7 @@ export class AgencyServiceService {
 
       return services
     } catch (error) {
-      console.error("Error getting services by category:", error)
+      logger.error("Error getting services by category:", error)
       throw new Error("Failed to get services by category")
     }
   }
@@ -282,7 +282,7 @@ export class AgencyServiceService {
 
       return updatedService || null
     } catch (error) {
-      console.error("Error toggling service status:", error)
+      logger.error("Error toggling service status:", error)
       throw new Error("Failed to toggle service status")
     }
   }
@@ -311,7 +311,7 @@ export class AgencyServiceService {
   /**
    * Bulk update service prices
    */
-  async bulkUpdatePrices(agencyId: string, priceMultiplier: number): Promise<{ updated: number }> {
+  async bulkUpdatePrices(agencyId: string, _priceMultiplier: number): Promise<{ updated: number }> {
     try {
       const result = await db
         .update(agencyServices)
@@ -323,7 +323,7 @@ export class AgencyServiceService {
 
       return { updated: result.length }
     } catch (error) {
-      console.error("Error bulk updating prices:", error)
+      logger.error("Error bulk updating prices:", error)
       throw new Error("Failed to bulk update prices")
     }
   }

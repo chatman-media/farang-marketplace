@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 
 import { ServiceAssignmentService } from "../services/ServiceAssignmentService"
@@ -23,7 +24,7 @@ export class ServiceAssignmentController {
         data: assignment,
       })
     } catch (error) {
-      console.error("Error creating assignment:", error)
+      logger.error("Error creating assignment:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to create assignment",
@@ -58,7 +59,7 @@ export class ServiceAssignmentController {
         data: assignment,
       })
     } catch (error) {
-      console.error("Error getting assignment:", error)
+      logger.error("Error getting assignment:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignment",
@@ -88,7 +89,7 @@ export class ServiceAssignmentController {
         data: assignments,
       })
     } catch (error) {
-      console.error("Error getting assignments by agency:", error)
+      logger.error("Error getting assignments by agency:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignments",
@@ -116,7 +117,7 @@ export class ServiceAssignmentController {
         data: assignments,
       })
     } catch (error) {
-      console.error("Error getting assignments by listing:", error)
+      logger.error("Error getting assignments by listing:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignments",
@@ -157,7 +158,7 @@ export class ServiceAssignmentController {
         data: assignment,
       })
     } catch (error) {
-      console.error("Error updating assignment status:", error)
+      logger.error("Error updating assignment status:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update assignment status",
@@ -195,7 +196,7 @@ export class ServiceAssignmentController {
         data: assignment,
       })
     } catch (error) {
-      console.error("Error adding customer feedback:", error)
+      logger.error("Error adding customer feedback:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to add customer feedback",
@@ -225,7 +226,7 @@ export class ServiceAssignmentController {
         data: assignments,
       })
     } catch (error) {
-      console.error("Error searching assignments:", error)
+      logger.error("Error searching assignments:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to search assignments",
@@ -253,7 +254,7 @@ export class ServiceAssignmentController {
         data: stats,
       })
     } catch (error) {
-      console.error("Error getting assignment stats:", error)
+      logger.error("Error getting assignment stats:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignment stats",

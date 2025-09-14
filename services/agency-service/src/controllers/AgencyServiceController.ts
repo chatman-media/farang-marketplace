@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 
 import { AgencyServiceService } from "../services/AgencyServiceService"
@@ -26,7 +27,7 @@ export class AgencyServiceController {
         data: service,
       })
     } catch (error) {
-      console.error("Error creating service:", error)
+      logger.error("Error creating service:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to create service",
@@ -61,7 +62,7 @@ export class AgencyServiceController {
         data: service,
       })
     } catch (error) {
-      console.error("Error getting service:", error)
+      logger.error("Error getting service:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get service",
@@ -89,7 +90,7 @@ export class AgencyServiceController {
         data: services,
       })
     } catch (error) {
-      console.error("Error getting services by agency:", error)
+      logger.error("Error getting services by agency:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get services",
@@ -126,7 +127,7 @@ export class AgencyServiceController {
         data: service,
       })
     } catch (error) {
-      console.error("Error updating service:", error)
+      logger.error("Error updating service:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update service",
@@ -161,7 +162,7 @@ export class AgencyServiceController {
         message: "Service deleted successfully",
       })
     } catch (error) {
-      console.error("Error deleting service:", error)
+      logger.error("Error deleting service:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to delete service",
@@ -191,7 +192,7 @@ export class AgencyServiceController {
         data: services,
       })
     } catch (error) {
-      console.error("Error searching services:", error)
+      logger.error("Error searching services:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to search services",
@@ -227,7 +228,7 @@ export class AgencyServiceController {
         data: service,
       })
     } catch (error) {
-      console.error("Error toggling service status:", error)
+      logger.error("Error toggling service status:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to toggle service status",
@@ -258,7 +259,7 @@ export class AgencyServiceController {
         data: updatedServices,
       })
     } catch (error) {
-      console.error("Error bulk updating prices:", error)
+      logger.error("Error bulk updating prices:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update prices",

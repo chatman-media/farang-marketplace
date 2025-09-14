@@ -3,7 +3,9 @@ import compromise from "compromise"
 import natural from "natural"
 import sentiment from "sentiment"
 import { eng, removeStopwords, tha } from "stopword"
+
 import type { ContentAnalysisRequest, ContentAnalysisResult } from "../models/index"
+
 import { AIProviderService } from "./AIProviderService"
 
 export class ContentAnalysisService {
@@ -111,7 +113,7 @@ export class ContentAnalysisService {
             score = (score + aiSentiment.score) / 2
             confidence = Math.max(confidence, aiSentiment.confidence)
           }
-        } catch (error) {
+        } catch {
           logger.warn("AI sentiment analysis failed, using basic analysis")
         }
       }
@@ -192,7 +194,7 @@ Respond with only a JSON object: {"score": 0.X, "confidence": 0.X}
   /**
    * Extract keywords from text
    */
-  private async extractKeywords(
+  async extractKeywords(
     text: string,
     language?: string,
   ): Promise<
@@ -303,7 +305,7 @@ Respond with only a JSON object: {"score": 0.X, "confidence": 0.X}
             // Merge AI keywords with statistical keywords
             keywords.push(...aiKeywords)
           }
-        } catch (error) {
+        } catch {
           logger.warn("AI keyword extraction failed, using statistical analysis")
         }
       }
@@ -654,7 +656,7 @@ Only include categories with confidence > 0.3.
       let aiModeration = null
       try {
         aiModeration = await this.getAIModeration(text)
-      } catch (error) {
+      } catch {
         logger.warn("AI moderation failed, using keyword-based moderation")
       }
 
@@ -804,7 +806,7 @@ Respond with JSON: {"flagged": boolean, "categories": ["category"], "scores": {"
           issues.push(...aiQuality.issues)
           suggestions.push(...aiQuality.suggestions)
         }
-      } catch (error) {
+      } catch {
         logger.warn("AI quality assessment failed")
       }
 

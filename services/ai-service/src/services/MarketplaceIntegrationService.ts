@@ -1,4 +1,7 @@
+import logger from "@marketplace/logger"
+
 import type { UserBehavior } from "../models/index"
+
 import { AIProviderService } from "./AIProviderService"
 import { ContentAnalysisService } from "./ContentAnalysisService"
 import { RecommendationEngine } from "./RecommendationEngine"
@@ -147,7 +150,7 @@ export class MarketplaceIntegrationService {
       const priceOptimization = await this.generatePriceOptimization(listingId, bookingData)
 
       const intelligence: BookingIntelligence = {
-        bookingId: bookingData["bookingId"] || `temp_${Date.now()}`,
+        bookingId: bookingData.bookingId || `temp_${Date.now()}`,
         userId,
         listingId,
         intelligenceType: "matching",
@@ -170,7 +173,7 @@ export class MarketplaceIntegrationService {
 
       return intelligence
     } catch (error) {
-      console.error("Error generating booking intelligence:", error)
+      logger.error("Error generating booking intelligence:", error)
       throw new Error("Failed to generate booking intelligence")
     }
   }
@@ -215,7 +218,7 @@ export class MarketplaceIntegrationService {
 
       return suggestion
     } catch (error) {
-      console.error("Error generating price suggestions:", error)
+      logger.error("Error generating price suggestions:", error)
       throw new Error("Failed to generate price suggestions")
     }
   }
@@ -253,7 +256,7 @@ export class MarketplaceIntegrationService {
 
       return notification
     } catch (error) {
-      console.error("Error creating smart notification:", error)
+      logger.error("Error creating smart notification:", error)
       throw new Error("Failed to create smart notification")
     }
   }
@@ -292,7 +295,7 @@ export class MarketplaceIntegrationService {
 
       const result: FraudDetectionResult = {
         userId,
-        bookingId: transactionData?.["bookingId"],
+        bookingId: transactionData?.bookingId,
         listingId: listingId || "unknown",
         riskScore,
         riskLevel,
@@ -311,7 +314,7 @@ export class MarketplaceIntegrationService {
 
       return result
     } catch (error) {
-      console.error("Error detecting fraud:", error)
+      logger.error("Error detecting fraud:", error)
       throw new Error("Failed to detect fraud")
     }
   }
@@ -360,7 +363,7 @@ Provide JSON response with recommendations array containing action, confidence, 
 
       return aiRecommendations
     } catch (error) {
-      console.error("Error generating AI recommendations:", error)
+      logger.error("Error generating AI recommendations:", error)
       return [
         {
           action: "review_booking",
@@ -389,7 +392,7 @@ Provide JSON response with recommendations array containing action, confidence, 
         confidence: pricingSuggestion.confidence,
       }
     } catch (error) {
-      console.error("Error generating price optimization:", error)
+      logger.error("Error generating price optimization:", error)
       return undefined
     }
   }
@@ -413,7 +416,7 @@ Provide JSON response with recommendations array containing action, confidence, 
         seasonality: seasonalityFactor,
       }
     } catch (error) {
-      console.error("Error analyzing market data:", error)
+      logger.error("Error analyzing market data:", error)
       return {
         averagePrice: 1000,
         competitorPrices: [900, 1050, 1150, 950, 1200],
@@ -471,7 +474,7 @@ Provide JSON response with: suggestedPrice, priceRange (min/max), confidence (0-
 
       return aiSuggestion
     } catch (error) {
-      console.error("Error generating AI pricing suggestion:", error)
+      logger.error("Error generating AI pricing suggestion:", error)
       const fallbackPrice = currentPrice || marketData.averagePrice
       return {
         price: fallbackPrice,
@@ -533,7 +536,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
 
       return analysis
     } catch (error) {
-      console.error("Error performing AI fraud analysis:", error)
+      logger.error("Error performing AI fraud analysis:", error)
       return {
         flags: [],
         reasoning: "AI analysis failed, using fallback detection",
@@ -904,7 +907,9 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     if (hours.length === 0) return null
 
     const hourCounts = new Array(24).fill(0)
-    hours.forEach((hour) => hourCounts[hour]++)
+    hours.forEach((hour) => {
+      hourCounts[hour]++
+    })
 
     return hourCounts.indexOf(Math.max(...hourCounts))
   }
@@ -913,24 +918,24 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     const preferences: Record<string, any> = {}
 
     // Extract preferences from user behaviors
-    const categories = userBehaviors.map((b) => b.metadata?.["category"]).filter(Boolean)
+    const categories = userBehaviors.map((b) => b.metadata?.category).filter(Boolean)
 
-    const locations = userBehaviors.map((b) => b.metadata?.["location"]).filter(Boolean)
+    const locations = userBehaviors.map((b) => b.metadata?.location).filter(Boolean)
 
-    const priceRanges = userBehaviors.map((b) => b.metadata?.["priceRange"]).filter(Boolean)
+    const priceRanges = userBehaviors.map((b) => b.metadata?.priceRange).filter(Boolean)
 
     if (categories.length > 0) {
-      preferences["preferredCategories"] = [...new Set(categories)]
+      preferences.preferredCategories = [...new Set(categories)]
     }
 
     if (locations.length > 0) {
-      preferences["preferredLocations"] = [...new Set(locations.map((l: any) => l.city))]
+      preferences.preferredLocations = [...new Set(locations.map((l: any) => l.city))]
     }
 
     if (priceRanges.length > 0) {
       const avgMin = priceRanges.reduce((sum: number, range: any) => sum + (range.min || 0), 0) / priceRanges.length
       const avgMax = priceRanges.reduce((sum: number, range: any) => sum + (range.max || 0), 0) / priceRanges.length
-      preferences["priceRange"] = { min: avgMin, max: avgMax }
+      preferences.priceRange = { min: avgMin, max: avgMax }
     }
 
     return preferences
@@ -942,9 +947,9 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   ): SmartNotification["priority"] {
     switch (type) {
       case "booking_reminder":
-        return context["urgency"] === "high" ? "urgent" : "high"
+        return context.urgency === "high" ? "urgent" : "high"
       case "price_alert":
-        return context["priceChange"] > 0.2 ? "high" : "medium"
+        return context.priceChange > 0.2 ? "high" : "medium"
       case "recommendation":
         return "medium"
       case "engagement":
@@ -973,7 +978,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
   private async predictEngagement(
     userId: string,
     type: SmartNotification["type"],
-    content: SmartNotification["content"],
+    _content: SmartNotification["content"],
   ): Promise<number> {
     // Mock engagement prediction - in real implementation, this would use ML models
     const baseEngagement = {
@@ -996,7 +1001,7 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     return 0.9 // 10% decrease during low season
   }
 
-  private calculateDemandLevel(context?: Record<string, any>): PricingSuggestion["marketData"]["demandLevel"] {
+  private calculateDemandLevel(_context?: Record<string, any>): PricingSuggestion["marketData"]["demandLevel"] {
     // Mock demand calculation - in real implementation, this would analyze booking patterns
     const currentHour = new Date().getHours()
 

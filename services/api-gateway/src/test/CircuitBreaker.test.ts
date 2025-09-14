@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
 import { CircuitBreaker, CircuitBreakerManager, CircuitState } from "../services/CircuitBreaker.js"
 
 describe("CircuitBreaker", () => {
@@ -41,7 +42,9 @@ describe("CircuitBreaker", () => {
       // Fail once
       try {
         await circuitBreaker.execute(failingOperation)
-      } catch {}
+      } catch {
+        // Expected to fail
+      }
 
       expect(circuitBreaker.getFailureCount()).toBe(1)
 
@@ -59,7 +62,9 @@ describe("CircuitBreaker", () => {
 
       try {
         await circuitBreaker.execute(operation)
-      } catch {}
+      } catch {
+        // Expected to fail
+      }
 
       expect(circuitBreaker.getFailureCount()).toBe(1)
       expect(circuitBreaker.getState()).toBe(CircuitState.CLOSED)
@@ -72,7 +77,9 @@ describe("CircuitBreaker", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(operation)
-        } catch {}
+        } catch {
+          // Expected to fail
+        }
       }
 
       expect(circuitBreaker.getState()).toBe(CircuitState.OPEN)
@@ -87,7 +94,9 @@ describe("CircuitBreaker", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(operation)
-        } catch {}
+        } catch {
+          // Expected to fail
+        }
       }
 
       // Try to execute when open
@@ -106,7 +115,9 @@ describe("CircuitBreaker", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(operation)
-        } catch {}
+        } catch {
+          // Expected to fail
+        }
       }
 
       expect(circuitBreaker.getState()).toBe(CircuitState.OPEN)
@@ -122,7 +133,9 @@ describe("CircuitBreaker", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(operation)
-        } catch {}
+        } catch {
+          // Expected to fail
+        }
       }
 
       // Wait for timeout
@@ -157,7 +170,9 @@ describe("CircuitBreaker", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(failOperation)
-        } catch {}
+        } catch {
+          // Expected to fail
+        }
       }
 
       // Wait for timeout
@@ -186,7 +201,9 @@ describe("CircuitBreaker", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(failOperation)
-        } catch {}
+        } catch {
+          // Expected to fail
+        }
       }
 
       // Wait for timeout
@@ -195,7 +212,9 @@ describe("CircuitBreaker", () => {
       // Fail in half-open state
       try {
         await circuitBreaker.execute(failOperation)
-      } catch {}
+      } catch {
+        // Expected to fail
+      }
 
       expect(circuitBreaker.getState()).toBe(CircuitState.OPEN)
     })
@@ -209,7 +228,9 @@ describe("CircuitBreaker", () => {
       for (let i = 0; i < 3; i++) {
         try {
           await circuitBreaker.execute(operation)
-        } catch {}
+        } catch {
+          // Expected to fail
+        }
       }
 
       expect(circuitBreaker.getState()).toBe(CircuitState.OPEN)
@@ -231,7 +252,9 @@ describe("CircuitBreaker", () => {
       // Fail once
       try {
         await circuitBreaker.execute(operation)
-      } catch {}
+      } catch {
+        // Expected to fail
+      }
 
       const stats = circuitBreaker.getStats()
 
@@ -256,11 +279,11 @@ describe("CircuitBreakerManager", () => {
   describe("circuit breaker management", () => {
     it("should create and manage circuit breakers", () => {
       const breaker1 = manager.getOrCreate("service1", { threshold: 5, timeout: 2000 })
-      const breaker2 = manager.getOrCreate("service2", { threshold: 3, timeout: 1000 })
+      const _breaker2 = manager.getOrCreate("service2", { threshold: 3, timeout: 1000 })
 
       expect(breaker1).toBeInstanceOf(CircuitBreaker)
-      expect(breaker2).toBeInstanceOf(CircuitBreaker)
-      expect(breaker1).not.toBe(breaker2)
+      expect(_breaker2).toBeInstanceOf(CircuitBreaker)
+      expect(breaker1).not.toBe(_breaker2)
     })
 
     it("should return existing circuit breaker", () => {
@@ -291,7 +314,9 @@ describe("CircuitBreakerManager", () => {
       // Fail to increase failure count
       try {
         await breaker.execute(operation)
-      } catch {}
+      } catch {
+        // Expected to fail
+      }
 
       expect(breaker.getFailureCount()).toBe(1)
 
@@ -302,24 +327,28 @@ describe("CircuitBreakerManager", () => {
 
     it("should reset all circuit breakers", async () => {
       const breaker1 = manager.getOrCreate("service1", { threshold: 3, timeout: 1000 })
-      const breaker2 = manager.getOrCreate("service2", { threshold: 3, timeout: 1000 })
+      manager.getOrCreate("service2", { threshold: 3, timeout: 1000 })
       const operation = vi.fn().mockRejectedValue(new Error("fail"))
 
       // Fail both
       try {
         await breaker1.execute(operation)
-      } catch {}
+      } catch {
+        // Expected to fail
+      }
       try {
-        await breaker2.execute(operation)
-      } catch {}
+        await manager.get("service2")!.execute(operation)
+      } catch {
+        // Expected to fail
+      }
 
       expect(breaker1.getFailureCount()).toBe(1)
-      expect(breaker2.getFailureCount()).toBe(1)
+      expect(manager.get("service2")!.getFailureCount()).toBe(1)
 
       manager.resetAll()
 
       expect(breaker1.getFailureCount()).toBe(0)
-      expect(breaker2.getFailureCount()).toBe(0)
+      expect(manager.get("service2")!.getFailureCount()).toBe(0)
     })
   })
 
@@ -337,14 +366,16 @@ describe("CircuitBreakerManager", () => {
 
     it("should identify healthy and unhealthy services", async () => {
       const breaker1 = manager.getOrCreate("service1", { threshold: 3, timeout: 1000 })
-      const breaker2 = manager.getOrCreate("service2", { threshold: 3, timeout: 1000 })
+      manager.getOrCreate("service2", { threshold: 3, timeout: 1000 })
       const operation = vi.fn().mockRejectedValue(new Error("fail"))
 
       // Open one circuit breaker
       for (let i = 0; i < 3; i++) {
         try {
           await breaker1.execute(operation)
-        } catch {}
+        } catch {
+          // Expected to fail
+        }
       }
 
       const healthy = manager.getHealthyServices()

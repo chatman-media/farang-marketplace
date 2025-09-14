@@ -13,11 +13,12 @@ import { AutomationService } from "../services/AutomationService"
 import { CRMService } from "../services/CRMService"
 
 // Extend Fastify Request interface to include user property
-interface AuthenticatedRequest extends FastifyRequest {
+interface AuthenticatedRequest extends Omit<FastifyRequest, "user"> {
   user?: {
     id: string
     role: string
     email?: string
+    agencyId?: string
   }
 }
 

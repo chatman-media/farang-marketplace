@@ -23,6 +23,8 @@ export enum BookingStatus {
   COMPLETED = "completed",
   CANCELLED = "cancelled",
   NO_SHOW = "no_show",
+  EXPIRED = "expired",
+  DISPUTED = "disputed",
 }
 
 export interface AgencyService {

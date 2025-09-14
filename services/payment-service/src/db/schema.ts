@@ -304,3 +304,4 @@ export type PaymentMethodType = (typeof paymentMethodEnum.enumValues)[number]
 export type TransactionType = (typeof transactionTypeEnum.enumValues)[number]
 export type RefundStatus = (typeof refundStatusEnum.enumValues)[number]
 // DisputeStatus is defined locally as varchar field
+export type { PaymentStatus }

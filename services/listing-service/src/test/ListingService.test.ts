@@ -17,9 +17,11 @@ describe("ListingService Data Validation", () => {
     it("should validate vehicle data structure", () => {
       const vehicleData: CreateVehicleRequest = {
         type: VehicleType.SCOOTER,
-        category: VehicleCategory.ECONOMY,
+        category: VehicleCategory.RENTAL,
         condition: VehicleCondition.GOOD,
         specifications: {
+          vehicleType: VehicleType.SCOOTER,
+          category: VehicleCategory.RENTAL,
           make: "Honda",
           model: "PCX 150",
           year: 2022,
@@ -47,6 +49,10 @@ describe("ListingService Data Validation", () => {
         },
         location: {
           currentLocation: "Patong Beach, Phuket",
+          address: "123 Patong Beach Road",
+          city: "Patong",
+          province: "Phuket",
+          country: "Thailand",
           pickupLocations: ["Patong Beach"],
           deliveryAvailable: true,
           serviceAreas: ["Patong"],
@@ -64,9 +70,11 @@ describe("ListingService Data Validation", () => {
     it("should validate required fields for vehicle creation", () => {
       const vehicleData: CreateVehicleRequest = {
         type: VehicleType.SCOOTER,
-        category: VehicleCategory.ECONOMY,
+        category: VehicleCategory.RENTAL,
         condition: VehicleCondition.GOOD,
         specifications: {
+          vehicleType: VehicleType.SCOOTER,
+          category: VehicleCategory.RENTAL,
           make: "Honda",
           model: "PCX 150",
           year: 2022,
@@ -92,6 +100,10 @@ describe("ListingService Data Validation", () => {
         },
         location: {
           currentLocation: "Bangkok",
+          address: "456 Sukhumvit Road",
+          city: "Bangkok",
+          province: "Bangkok",
+          country: "Thailand",
           pickupLocations: [],
           deliveryAvailable: false,
           serviceAreas: [],
@@ -114,10 +126,11 @@ describe("ListingService Data Validation", () => {
       const productData: CreateProductRequest = {
         title: "iPhone 15 Pro Max",
         description: "Latest iPhone with advanced features",
-        type: ProductType.ELECTRONICS,
+        type: ProductType.MOBILE_DEVICES,
+        productType: ProductType.MOBILE_DEVICES,
         category: "smartphones",
         condition: ProductCondition.NEW,
-        listingType: ProductListingType.SALE,
+        listingType: ProductListingType.RENTAL,
         specifications: {
           brand: "Apple",
           model: "iPhone 15 Pro Max",
@@ -150,7 +163,7 @@ describe("ListingService Data Validation", () => {
 
       // Test that the data structure is valid
       expect(productData.title).toBe("iPhone 15 Pro Max")
-      expect(productData.type).toBe("electronics")
+      expect(productData.type).toBe("mobile_devices")
       expect(productData.pricing.price).toBe(45000)
       expect(productData.tags).toContain("apple")
     })
@@ -159,10 +172,11 @@ describe("ListingService Data Validation", () => {
       const productData: CreateProductRequest = {
         title: "Test Product",
         description: "A test product for validation",
-        type: ProductType.ELECTRONICS,
+        type: ProductType.MOBILE_DEVICES,
+        productType: ProductType.MOBILE_DEVICES,
         category: "test",
         condition: ProductCondition.NEW,
-        listingType: ProductListingType.SALE,
+        listingType: ProductListingType.RENTAL,
         specifications: {
           features: [],
         },
@@ -198,7 +212,7 @@ describe("ListingService Data Validation", () => {
     it("should handle vehicle search filters", () => {
       const filters = {
         type: [VehicleType.SCOOTER, VehicleType.MOTORCYCLE],
-        category: [VehicleCategory.ECONOMY, VehicleCategory.STANDARD],
+        category: [VehicleCategory.RENTAL, VehicleCategory.LEASE],
         priceRange: {
           min: 500,
           max: 2000,
@@ -216,7 +230,7 @@ describe("ListingService Data Validation", () => {
 
     it("should handle product search filters", () => {
       const filters = {
-        type: [ProductType.ELECTRONICS],
+        type: [ProductType.MOBILE_DEVICES],
         category: ["smartphones"],
         condition: [ProductCondition.NEW, ProductCondition.LIKE_NEW],
         priceRange: {
@@ -233,7 +247,7 @@ describe("ListingService Data Validation", () => {
         },
       }
 
-      expect(filters.type).toContain(ProductType.ELECTRONICS)
+      expect(filters.type).toContain(ProductType.MOBILE_DEVICES)
       expect(filters.priceRange.max).toBe(50000)
       expect(filters.location.city).toBe("Bangkok")
     })

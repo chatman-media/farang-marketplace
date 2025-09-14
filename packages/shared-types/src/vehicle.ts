@@ -59,6 +59,8 @@ export interface VehicleSpecifications {
   model: string
   year: number
   color: string
+  vehicleType: VehicleType
+  category: VehicleCategory
 
   // Engine & Performance
   engineSize?: string // e.g., "125cc", "1.6L"
@@ -196,20 +198,27 @@ export interface VehiclePricing {
 }
 
 export interface VehicleLocation {
-  // Current Location
+  // Current Position
   currentLocation: string
   coordinates?: {
     latitude: number
     longitude: number
   }
 
-  // Pickup/Delivery
+  // Address Details
+  address: string
+  city: string
+  province: string
+  postalCode?: string
+  country: string
+
+  // Pickup & Delivery
   pickupLocations: string[]
   deliveryAvailable: boolean
   deliveryRadius?: number // km
   deliveryFee?: number
 
-  // Service Area
+  // Service Areas
   serviceAreas: string[]
   restrictedAreas?: string[]
 }

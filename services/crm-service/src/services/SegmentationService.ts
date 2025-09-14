@@ -1,4 +1,4 @@
-import { logger } from "handlebars"
+import logger from "@marketplace/logger"
 import { query } from "../db/connection"
 import { Customer } from "../models/Customer"
 import {
@@ -25,7 +25,7 @@ export class SegmentationService {
 
     const result = await query(
       `INSERT INTO customer_segments (name, description, criteria, operator, is_active, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
       [
         data.name,
         data.description || null,
@@ -43,7 +43,7 @@ export class SegmentationService {
       await this.recalculateSegmentMembership(segment.id)
     } catch (error) {
       // If recalculation fails, log but don't fail the creation
-      logger.log(`Failed to recalculate membership for segment ${segment.id}: `, error)
+      logger.error(`Failed to recalculate membership for segment ${segment.id}`, error)
     }
 
     return segment
@@ -95,8 +95,8 @@ export class SegmentationService {
     const offset = filters.offset || 0
 
     const result = await query(
-      `SELECT * FROM customer_segments ${whereClause} 
-       ORDER BY created_at DESC 
+      `SELECT * FROM customer_segments ${whereClause}
+       ORDER BY created_at DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...queryParams, limit, offset],
     )
@@ -214,8 +214,8 @@ export class SegmentationService {
 
     // Update segment customer count and last calculated time
     await query(
-      `UPDATE customer_segments 
-       SET customer_count = $1, last_calculated_at = NOW() 
+      `UPDATE customer_segments
+       SET customer_count = $1, last_calculated_at = NOW()
        WHERE id = $2`,
       [matchingCustomerIds.length, segmentId],
     )
@@ -257,8 +257,8 @@ export class SegmentationService {
 
     // Get total count
     const countResult = await query(
-      `SELECT COUNT(*) as total 
-       FROM customer_segment_memberships csm 
+      `SELECT COUNT(*) as total
+       FROM customer_segment_memberships csm
        WHERE csm.segment_id = $1`,
       [segmentId],
     )
@@ -266,7 +266,7 @@ export class SegmentationService {
 
     // Get customers
     const result = await query(
-      `SELECT c.* 
+      `SELECT c.*
        FROM customers c
        INNER JOIN customer_segment_memberships csm ON c.id = csm.customer_id
        WHERE csm.segment_id = $1

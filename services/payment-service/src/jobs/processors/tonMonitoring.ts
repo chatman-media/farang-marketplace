@@ -1,7 +1,9 @@
 import logger from "@marketplace/logger"
+import { PaymentStatus } from "@marketplace/shared-types"
 import axios from "axios"
 import { Job, Worker } from "bullmq"
 import { and, inArray } from "drizzle-orm"
+
 import { db } from "../../db/connection"
 import { payments } from "../../db/schema"
 import { ModernTonService } from "../../services/ModernTonService"
@@ -25,7 +27,7 @@ async function checkPendingTransactions(job: Job) {
       .where(
         and(
           inArray(payments.paymentMethod, ["ton_wallet", "ton_connect", "jetton_usdt", "jetton_usdc"]),
-          inArray(payments.status, ["pending", "processing"]),
+          inArray(payments.status, [PaymentStatus.PENDING, PaymentStatus.PROCESSING]),
         ),
       )
       .limit(batchSize)
@@ -39,8 +41,12 @@ async function checkPendingTransactions(job: Job) {
           // Check transaction status
           const isConfirmed = await tonService.verifyTransaction(payment.tonTransactionHash)
 
-          if (isConfirmed && payment.status !== "confirmed") {
-            await paymentService.updatePaymentStatus(payment.id, "confirmed", "Transaction confirmed on TON blockchain")
+          if (isConfirmed && payment.status !== PaymentStatus.CONFIRMED) {
+            await paymentService.updatePaymentStatus(
+              payment.id,
+              PaymentStatus.CONFIRMED,
+              "Transaction confirmed on TON blockchain",
+            )
             confirmed++
           }
 
@@ -144,7 +150,7 @@ async function healthCheckTonNetwork(job: Job) {
 }
 
 // Create worker for TON monitoring jobs
-const tonMonitoringWorker = new Worker(
+export const tonMonitoringWorker = new Worker(
   "ton-monitoring-v2",
   async (job: Job) => {
     const { type } = job.data

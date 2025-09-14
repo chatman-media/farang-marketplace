@@ -3,6 +3,8 @@ import type { ServiceProviderFilters } from "@marketplace/shared-types"
 import { ProviderVerificationLevel } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+
+import { AuthenticatedRequest } from "../middleware/auth"
 import { ServiceProviderService } from "../services/ServiceProviderService"
 
 // Zod validation schemas
@@ -103,15 +105,6 @@ const SearchQuerySchema = z.object({
   sortBy: z.enum(["rating", "price", "distance", "created_at"]).default("rating"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
 })
-
-// Authenticated request interface
-interface AuthenticatedRequest extends FastifyRequest {
-  user?: {
-    id: string
-    email: string
-    role: string
-  }
-}
 
 export class ServiceProviderController {
   private serviceProviderService: ServiceProviderService

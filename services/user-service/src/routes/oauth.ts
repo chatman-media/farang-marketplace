@@ -34,7 +34,7 @@ const oauthRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    oauthController.linkSocialAccount,
+    oauthController.linkSocialAccount as any,
   )
 
   // DELETE /auth/unlink-social - отвязать социальный аккаунт
@@ -43,7 +43,7 @@ const oauthRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    oauthController.unlinkSocialAccount,
+    oauthController.unlinkSocialAccount as any,
   )
 
   // GET /auth/social-accounts - получить список привязанных аккаунтов
@@ -52,7 +52,7 @@ const oauthRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    oauthController.getSocialAccounts,
+    oauthController.getSocialAccounts as any,
   )
 }
 

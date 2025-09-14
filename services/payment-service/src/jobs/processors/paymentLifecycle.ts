@@ -1,6 +1,8 @@
 import logger from "@marketplace/logger"
+import { PaymentStatus } from "@marketplace/shared-types"
 import { Job, Worker } from "bullmq"
 import { and, eq, inArray, lt } from "drizzle-orm"
+
 import { db } from "../../db/connection"
 import { payments, refunds } from "../../db/schema"
 import { PaymentService } from "../../services/PaymentService"
@@ -21,14 +23,16 @@ async function expireOldPayments(job: Job) {
     const expiredPayments = await db
       .select()
       .from(payments)
-      .where(and(lt(payments.expiresAt, now), inArray(payments.status, ["pending", "processing"])))
+      .where(
+        and(lt(payments.expiresAt, now), inArray(payments.status, [PaymentStatus.PENDING, PaymentStatus.PROCESSING])),
+      )
       .limit(batchSize)
 
     let expired = 0
 
     for (const payment of expiredPayments) {
       try {
-        await paymentService.updatePaymentStatus(payment.id, "cancelled", "Payment expired")
+        await paymentService.updatePaymentStatus(payment.id, PaymentStatus.CANCELLED, "Payment expired")
         expired++
       } catch (error) {
         logger.error(`Failed to expire payment ${payment.id}:`, error)
@@ -56,7 +60,7 @@ async function retryFailedPayments(job: Job) {
       .from(payments)
       .where(
         and(
-          eq(payments.status, "failed"),
+          eq(payments.status, PaymentStatus.FAILED),
           // Note: retryCount and retryAfter fields need to be added to schema
         ),
       )
@@ -67,7 +71,7 @@ async function retryFailedPayments(job: Job) {
     for (const payment of failedPayments) {
       try {
         // Reset to pending for retry
-        await paymentService.updatePaymentStatus(payment.id, "pending", "Retry attempt")
+        await paymentService.updatePaymentStatus(payment.id, PaymentStatus.PENDING, "Retry attempt")
 
         retried++
       } catch (error) {
@@ -139,14 +143,18 @@ async function autoCompletePayments(job: Job) {
     const confirmedPayments = await db
       .select()
       .from(payments)
-      .where(and(eq(payments.status, "confirmed"), lt(payments.confirmedAt, cutoffTime)))
+      .where(and(eq(payments.status, PaymentStatus.CONFIRMED), lt(payments.confirmedAt, cutoffTime)))
       .limit(batchSize)
 
     let completed = 0
 
     for (const payment of confirmedPayments) {
       try {
-        await paymentService.updatePaymentStatus(payment.id, "completed", "Auto-completed after confirmation delay")
+        await paymentService.updatePaymentStatus(
+          payment.id,
+          PaymentStatus.COMPLETED,
+          "Auto-completed after confirmation delay",
+        )
         completed++
       } catch (error) {
         logger.error(`Failed to complete payment ${payment.id}:`, error)

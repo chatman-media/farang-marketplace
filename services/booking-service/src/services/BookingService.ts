@@ -1,25 +1,17 @@
-import type {
+import {
   Booking,
   BookingFilters,
+  BookingStatus,
   CreateBookingRequest,
   CreateServiceBookingRequest,
+  PaymentStatus,
   ServiceBooking,
-  ServiceBookingFilters,
   UpdateStatusRequest,
 } from "@marketplace/shared-types"
-import { and, asc, count, desc, eq, gte, lte, or, sql } from "drizzle-orm"
+import { and, asc, count, desc, eq, gte, lte } from "drizzle-orm"
 
 import { db } from "../db/connection"
-import {
-  availabilityConflicts,
-  type BookingStatus,
-  type BookingType,
-  bookingStatusHistory,
-  bookings,
-  disputes,
-  type PaymentStatus,
-  serviceBookings,
-} from "../db/schema"
+import { availabilityConflicts, bookingStatusHistory, bookings, disputes, serviceBookings } from "../db/schema"
 
 import { AvailabilityService } from "./AvailabilityService"
 import { PricingService } from "./PricingService"
@@ -302,7 +294,16 @@ export class BookingService {
   // Private helper methods
   private validateStatusTransition(currentStatus: string, newStatus: string): void {
     // Validate that statuses are valid enum values
-    const validStatuses: BookingStatus[] = ["pending", "confirmed", "active", "completed", "cancelled", "disputed"]
+    const validStatuses: BookingStatus[] = [
+      BookingStatus.PENDING,
+      BookingStatus.CONFIRMED,
+      BookingStatus.CANCELLED,
+      BookingStatus.COMPLETED,
+      BookingStatus.IN_PROGRESS,
+      BookingStatus.NO_SHOW,
+      BookingStatus.EXPIRED,
+      BookingStatus.DISPUTED,
+    ]
     if (
       !validStatuses.includes(currentStatus as BookingStatus) ||
       !validStatuses.includes(newStatus as BookingStatus)
@@ -311,16 +312,14 @@ export class BookingService {
     }
 
     const validTransitions: Record<BookingStatus, BookingStatus[]> = {
-      pending: ["confirmed", "cancelled", "expired"],
-      confirmed: ["checked_in", "active", "cancelled"],
-      checked_in: ["checked_out", "active", "cancelled", "no_show"],
-      checked_out: ["completed"],
-      active: ["completed", "cancelled", "disputed"],
-      completed: ["disputed"],
-      cancelled: [],
-      no_show: [],
-      expired: [],
-      disputed: ["cancelled"], // Disputed bookings can only be cancelled
+      [BookingStatus.PENDING]: [BookingStatus.CONFIRMED, BookingStatus.CANCELLED, BookingStatus.EXPIRED],
+      [BookingStatus.CONFIRMED]: [BookingStatus.IN_PROGRESS, BookingStatus.CANCELLED, BookingStatus.DISPUTED],
+      [BookingStatus.IN_PROGRESS]: [BookingStatus.COMPLETED, BookingStatus.CANCELLED, BookingStatus.DISPUTED],
+      [BookingStatus.COMPLETED]: [BookingStatus.DISPUTED],
+      [BookingStatus.CANCELLED]: [],
+      [BookingStatus.NO_SHOW]: [],
+      [BookingStatus.EXPIRED]: [],
+      [BookingStatus.DISPUTED]: [BookingStatus.COMPLETED, BookingStatus.CANCELLED],
     }
 
     const allowedStatuses = validTransitions[currentStatus as BookingStatus] || []
@@ -350,19 +349,15 @@ export class BookingService {
   private async handleStatusChange(booking: any, fromStatus: string, toStatus: string): Promise<void> {
     // Handle status-specific business logic
     switch (toStatus) {
-      case "cancelled":
+      case BookingStatus.CANCELLED:
         // Remove availability conflict when booking is cancelled
         await this.removeAvailabilityConflict(booking.id)
         break
-      case "confirmed":
+      case BookingStatus.CONFIRMED:
         // Create availability conflict when booking is confirmed
         await this.createAvailabilityConflict(booking)
         break
-      case "disputed":
-        // Create dispute record when booking is disputed
-        await this.createDispute(booking.id, fromStatus, toStatus)
-        break
-      case "completed":
+      case BookingStatus.COMPLETED:
         // Handle completion logic, reviews, etc.
         break
     }

@@ -2,8 +2,8 @@ import { Location } from "./common"
 
 export enum UserRole {
   USER = "user",
-  AGENCY = "agency",
-  MANAGER = "manager",
+  AGENCY_OWNER = "agency_owner",
+  AGENCY_MANAGER = "agency_manager",
   ADMIN = "admin",
 }
 
@@ -148,6 +148,15 @@ export interface OAuthCallbackRequest {
 }
 
 // Extended customer profile for Thailand Marketplace
+// Authenticated user type for middleware
+export interface AuthenticatedUser {
+  id: string
+  email: string
+  role: UserRole
+  verified: boolean
+  agencyId?: string
+}
+
 export interface CustomerProfile extends User {
   // Identity Documents (optional for basic functionality)
   passportNumber?: string

@@ -6,6 +6,7 @@ import {
 } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { OAuthStateManager } from "../config/redis"
+import { AuthenticatedRequest } from "../middleware/auth"
 import { OAuthService } from "../services/OAuthService"
 
 export class OAuthController {
@@ -98,9 +99,9 @@ export class OAuthController {
   }
 
   // POST /auth/link-social
-  async linkSocialAccount(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  async linkSocialAccount(req: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const userId = req.user?.userId
+      const userId = (req.user as any)?.userId
       if (!userId) {
         reply.code(401).send({ error: "Authentication required" })
         return
@@ -132,9 +133,9 @@ export class OAuthController {
   }
 
   // DELETE /auth/unlink-social
-  async unlinkSocialAccount(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  async unlinkSocialAccount(req: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const userId = req.user?.userId
+      const userId = (req.user as any)?.userId
       if (!userId) {
         reply.code(401).send({ error: "Authentication required" })
         return
@@ -163,9 +164,9 @@ export class OAuthController {
   }
 
   // GET /auth/social-accounts
-  async getSocialAccounts(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  async getSocialAccounts(req: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const userId = req.user?.userId
+      const userId = (req.user as any)?.userId
       if (!userId) {
         reply.code(401).send({ error: "Authentication required" })
         return

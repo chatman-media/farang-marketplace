@@ -1,3 +1,5 @@
+import crypto from "crypto"
+
 import { beforeEach, describe, expect, it } from "vitest"
 
 // Payment API Tests
@@ -343,7 +345,7 @@ describe("Payment API Tests", () => {
       expect(tokenParts.length).toBe(3)
 
       // Each part should be base64 encoded
-      tokenParts.forEach((part) => {
+      tokenParts.forEach((part: string) => {
         expect(part.length).toBeGreaterThan(0)
         expect(part).toMatch(/^[A-Za-z0-9_-]+$/)
       })
@@ -450,11 +452,7 @@ describe("Payment API Tests", () => {
       const providedSignature = mockRequest.headers["x-ton-signature"]
 
       // Simulate signature verification
-      const crypto = require("crypto")
       const expectedSignature = crypto.createHmac("sha256", secret).update(payload).digest("hex")
-
-      // In real implementation, this would be the actual verification
-      const isValidSignature = providedSignature === expectedSignature
 
       // For test purposes, we validate the signature format
       expect(providedSignature).toBeDefined()

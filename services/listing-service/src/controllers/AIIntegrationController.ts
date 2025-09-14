@@ -1,6 +1,7 @@
 import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+
 import { aiClient } from "../services/AIClient"
 
 // Validation schemas

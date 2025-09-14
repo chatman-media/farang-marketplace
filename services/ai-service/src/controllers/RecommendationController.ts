@@ -1,4 +1,6 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
+
 import { RecommendationEngine } from "../services/RecommendationEngine"
 
 interface AuthenticatedRequest extends FastifyRequest {
@@ -66,7 +68,7 @@ export class RecommendationController {
         data: recommendations,
       })
     } catch (error) {
-      console.error("Error getting recommendations:", error)
+      logger.error("Error getting recommendations:", error)
       return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get recommendations",
@@ -108,7 +110,7 @@ export class RecommendationController {
         message: "User behavior updated successfully",
       })
     } catch (error) {
-      console.error("Error updating user behavior:", error)
+      logger.error("Error updating user behavior:", error)
       return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update user behavior",
@@ -128,7 +130,7 @@ export class RecommendationController {
         data: stats,
       })
     } catch (error) {
-      console.error("Error getting recommendation stats:", error)
+      logger.error("Error getting recommendation stats:", error)
       return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get recommendation statistics",
@@ -175,7 +177,7 @@ export class RecommendationController {
         },
       })
     } catch (error) {
-      console.error("Error getting similar items:", error)
+      logger.error("Error getting similar items:", error)
       return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get similar items",
@@ -221,7 +223,7 @@ export class RecommendationController {
         },
       })
     } catch (error) {
-      console.error("Error getting trending items:", error)
+      logger.error("Error getting trending items:", error)
       return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get trending items",
@@ -261,7 +263,7 @@ export class RecommendationController {
         },
       })
     } catch (error) {
-      console.error("Error getting personalized categories:", error)
+      logger.error("Error getting personalized categories:", error)
       return reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get personalized categories",

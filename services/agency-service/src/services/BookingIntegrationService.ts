@@ -1,3 +1,5 @@
+import logger from "@marketplace/logger"
+
 import { AgencyService } from "./AgencyService"
 import { AgencyServiceService } from "./AgencyServiceService"
 import { ServiceAssignmentService } from "./ServiceAssignmentService"
@@ -137,7 +139,7 @@ export class BookingIntegrationService {
       // Sort by match score (highest first)
       return matches.sort((a, b) => b.matchScore - a.matchScore)
     } catch (error) {
-      console.error("Error finding matching agencies:", error)
+      logger.error("Error finding matching agencies:", error)
       throw new Error("Failed to find matching agencies")
     }
   }
@@ -167,7 +169,7 @@ export class BookingIntegrationService {
         estimatedCompletion: this.calculateEstimatedCompletion(bookingRequest.requestedDate),
       }
     } catch (error) {
-      console.error("Error assigning service to agency:", error)
+      logger.error("Error assigning service to agency:", error)
       throw new Error("Failed to assign service to agency")
     }
   }
@@ -191,7 +193,7 @@ export class BookingIntegrationService {
 
       return await this.assignServiceToAgency(request, bestMatch)
     } catch (error) {
-      console.error("Error auto-assigning best match:", error)
+      logger.error("Error auto-assigning best match:", error)
       throw new Error("Failed to auto-assign service")
     }
   }
@@ -224,7 +226,7 @@ export class BookingIntegrationService {
         platformFee,
       }
     } catch (error) {
-      console.error("Error calculating commission:", error)
+      logger.error("Error calculating commission:", error)
       throw new Error("Failed to calculate commission")
     }
   }
@@ -271,7 +273,7 @@ export class BookingIntegrationService {
         agencyNotes: assignment.notes || undefined,
       }
     } catch (error) {
-      console.error("Error getting assignment status:", error)
+      logger.error("Error getting assignment status:", error)
       throw new Error("Failed to get assignment status")
     }
   }

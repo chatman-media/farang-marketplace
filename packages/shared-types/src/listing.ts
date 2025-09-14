@@ -50,10 +50,16 @@ export enum ListingType {
 }
 
 export enum ListingStatus {
-  PENDING = "pending",
-  APPROVED = "approved",
-  REJECTED = "rejected",
+  DRAFT = "draft",
+  ACTIVE = "active",
   INACTIVE = "inactive",
+  SOLD = "sold",
+  RENTED = "rented",
+  RESERVED = "reserved",
+  MAINTENANCE = "maintenance",
+  PENDING_APPROVAL = "pending_approval",
+  REJECTED = "rejected",
+  EXPIRED = "expired",
 }
 
 export enum PricePeriod {
@@ -141,7 +147,7 @@ export interface VehicleListing extends Omit<Listing, "amenities"> {
 
 // Product-specific listing interface
 export interface ProductListing extends Omit<Listing, "amenities" | "availability"> {
-  category: ListingCategory.PRODUCTS
+  category: ListingCategory
   productType: ProductType
   product: Product
   shippingOptions?: {

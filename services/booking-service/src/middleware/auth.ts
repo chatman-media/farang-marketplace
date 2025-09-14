@@ -1,24 +1,19 @@
+import { AuthenticatedUser, UserRole } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
 
-export interface JWTPayload {
+interface JWTPayload {
   id: string
   email: string
-  role: "guest" | "host" | "admin"
+  role: UserRole
   verified: boolean
-  iat?: number
-  exp?: number
+  iat: number
+  exp: number
 }
 
-// Extend FastifyRequest to include user
 declare module "fastify" {
   interface FastifyRequest {
-    user?: {
-      id: string
-      email: string
-      role: "guest" | "host" | "admin"
-      verified: boolean
-    }
+    user?: AuthenticatedUser
   }
 }
 
@@ -147,7 +142,7 @@ export const optionalAuthMiddleware = async (request: FastifyRequest, _reply: Fa
   }
 }
 
-export const requireRole = (allowedRoles: string[]) => {
+export const requireRole = (allowedRoles: UserRole[]) => {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     if (!request.user) {
       reply.code(401).send({
@@ -190,5 +185,5 @@ export const requireVerified = async (request: FastifyRequest, reply: FastifyRep
 }
 
 // Convenience middleware
-export const adminOnly = requireRole(["admin"])
-export const hostOrAdmin = requireRole(["host", "admin"])
+export const adminOnly = requireRole([UserRole.ADMIN])
+export const managerOrAdmin = requireRole([UserRole.AGENCY_MANAGER, UserRole.ADMIN])

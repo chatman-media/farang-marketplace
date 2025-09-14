@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 
 import { BookingIntegrationService } from "../services/BookingIntegrationService"
@@ -26,7 +27,7 @@ export class BookingIntegrationController {
         },
       })
     } catch (error) {
-      console.error("Error finding matching agencies:", error)
+      logger.error("Error finding matching agencies:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to find matching agencies",
@@ -48,7 +49,7 @@ export class BookingIntegrationController {
         data: result,
       })
     } catch (error) {
-      console.error("Error assigning service to agency:", error)
+      logger.error("Error assigning service to agency:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to assign service to agency",
@@ -77,7 +78,7 @@ export class BookingIntegrationController {
         data: result,
       })
     } catch (error) {
-      console.error("Error auto-assigning service:", error)
+      logger.error("Error auto-assigning service:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to auto-assign service",
@@ -107,7 +108,7 @@ export class BookingIntegrationController {
         data: commission,
       })
     } catch (error) {
-      console.error("Error calculating commission:", error)
+      logger.error("Error calculating commission:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to calculate commission",
@@ -143,7 +144,7 @@ export class BookingIntegrationController {
         data: status,
       })
     } catch (error) {
-      console.error("Error getting assignment status:", error)
+      logger.error("Error getting assignment status:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get assignment status",
@@ -208,7 +209,7 @@ export class BookingIntegrationController {
         data: categories,
       })
     } catch (error) {
-      console.error("Error getting service categories:", error)
+      logger.error("Error getting service categories:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get service categories",

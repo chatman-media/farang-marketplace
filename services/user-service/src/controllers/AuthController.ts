@@ -1,5 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+
+import { AuthenticatedRequest } from "../middleware/auth"
 import { AuthService, LoginRequest, RefreshRequest, RegisterRequest } from "../services/AuthService"
 
 // Validation schemas for request bodies
@@ -198,7 +200,7 @@ export class AuthController {
   }
 
   // Get current user profile (requires authentication)
-  getProfile = async (req: FastifyRequest, reply: FastifyReply) => {
+  getProfile = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
         return reply.status(401).send({
@@ -213,16 +215,17 @@ export class AuthController {
 
       // Get user data (this would typically come from UserService)
       // For now, we'll return the token payload data
+      const user = req.user as any
       return reply.status(200).send({
         success: true,
         data: {
-          userId: req.user.userId,
-          email: req.user.email,
-          role: req.user.role,
+          userId: user.userId,
+          email: user.email,
+          role: user.role,
         },
         message: "Profile retrieved successfully",
       })
-    } catch (error) {
+    } catch {
       return reply.status(500).send({
         error: {
           code: "INTERNAL_SERVER_ERROR",
@@ -273,7 +276,7 @@ export class AuthController {
         },
         message: "Token is valid",
       })
-    } catch (error) {
+    } catch {
       return reply.status(401).send({
         error: {
           code: "INVALID_TOKEN",

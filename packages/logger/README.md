@@ -13,55 +13,56 @@ npm install @marketplace/logger
 ### Базовое использование
 
 ```typescript
-import { logger } from '@marketplace/logger';
+import { logger } from "@marketplace/logger"
 
 // Различные уровни логирования
-logger.error('Ошибка в приложении');
-logger.warn('Предупреждение');
-logger.info('Информационное сообщение');
-logger.http('HTTP запрос');
-logger.debug('Отладочная информация');
+logger.error("Ошибка в приложении")
+logger.warn("Предупреждение")
+logger.info("Информационное сообщение")
+logger.http("HTTP запрос")
+logger.debug("Отладочная информация")
 ```
 
 ### Структурированное логирование
 
 ```typescript
-import { logError, logInfo, logWarn, logDebug } from '@marketplace/logger';
+import { logError, logInfo, logWarn, logDebug } from "@marketplace/logger"
 
 // Логирование ошибок с дополнительной информацией
 try {
   // некоторый код
 } catch (error) {
-  logError('Ошибка при обработке запроса', error, {
-    userId: '123',
-    action: 'createListing'
-  });
+  logError("Ошибка при обработке запроса", error, {
+    userId: "123",
+    action: "createListing",
+  })
 }
 
 // Информационное логирование с метаданными
-logInfo('Пользователь создал объявление', {
-  userId: '123',
-  listingId: '456',
-  category: 'vehicles'
-});
+logInfo("Пользователь создал объявление", {
+  userId: "123",
+  listingId: "456",
+  category: "vehicles",
+})
 ```
 
 ### Использование с Express.js и Morgan
 
 ```typescript
-import express from 'express';
-import morgan from 'morgan';
-import { stream } from '@marketplace/logger';
+import express from "express"
+import morgan from "morgan"
+import { stream } from "@marketplace/logger"
 
-const app = express();
+const app = express()
 
 // Использование stream для HTTP логирования
-app.use(morgan('combined', { stream }));
+app.use(morgan("combined", { stream }))
 ```
 
 ## Конфигурация
 
-Пакет автоматически настраивается в зависимости от переменной окружения `NODE_ENV`:
+Пакет автоматически настраивается в зависимости от переменной окружения
+`NODE_ENV`:
 
 - **development**: уровень логирования `debug`
 - **production**: уровень логирования `warn`
@@ -84,16 +85,17 @@ app.use(morgan('combined', { stream }));
 
 ## TypeScript поддержка
 
-Пакет полностью поддерживает TypeScript и экспортирует интерфейс `LoggerInterface` для типизации.
+Пакет полностью поддерживает TypeScript и экспортирует интерфейс
+`LoggerInterface` для типизации.
 
 ```typescript
-import { LoggerInterface } from '@marketplace/logger';
+import { LoggerInterface } from "@marketplace/logger"
 
 class MyService {
   constructor(private logger: LoggerInterface) {}
-  
+
   doSomething() {
-    this.logger.info('Выполняется операция');
+    this.logger.info("Выполняется операция")
   }
 }
 ```

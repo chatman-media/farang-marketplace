@@ -1,4 +1,5 @@
 import logger from "@marketplace/logger"
+import { PaymentStatus as SharedPaymentStatus } from "@marketplace/shared-types"
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm"
 import { db } from "../db/connection"
 import type {
@@ -106,7 +107,7 @@ export class PaymentService {
         fiatAmount: request.fiatAmount?.toString(),
         fiatCurrency: request.fiatCurrency || "USD",
         paymentMethod: request.paymentMethod,
-        status: "pending",
+        status: SharedPaymentStatus.PENDING,
         tonAmount,
         tonWalletAddress: request.tonWalletAddress,
         platformFee: platformFee.toString(),
@@ -153,7 +154,7 @@ export class PaymentService {
       }
 
       // Update payment status to processing
-      await this.updatePaymentStatus(paymentId, "processing", "TON payment initiated")
+      await this.updatePaymentStatus(paymentId, SharedPaymentStatus.PROCESSING, "TON payment initiated")
 
       // Send TON payment
       const txResult = await this.tonService.createPayment({
@@ -193,7 +194,7 @@ export class PaymentService {
       logger.error("Failed to process TON payment:", error)
       await this.updatePaymentStatus(
         paymentId,
-        "failed",
+        SharedPaymentStatus.FAILED,
         `Payment failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
       throw error
@@ -218,7 +219,7 @@ export class PaymentService {
       const stripeAmount = this.stripeService.convertToStripeAmount(Number.parseFloat(payment.amount), payment.currency)
 
       // Update payment status to processing
-      await this.updatePaymentStatus(paymentId, "processing", "Stripe payment initiated")
+      await this.updatePaymentStatus(paymentId, SharedPaymentStatus.PROCESSING, "Stripe payment initiated")
 
       // Create Stripe payment intent
       const stripeResponse = await this.stripeService.createPaymentIntent({
@@ -267,7 +268,7 @@ export class PaymentService {
       logger.error("Failed to process Stripe payment:", error)
       await this.updatePaymentStatus(
         paymentId,
-        "failed",
+        SharedPaymentStatus.FAILED,
         `Stripe payment failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
       throw error
@@ -318,7 +319,7 @@ export class PaymentService {
       logger.error("Failed to confirm Stripe payment:", error)
       await this.updatePaymentStatus(
         paymentId,
-        "failed",
+        SharedPaymentStatus.FAILED,
         `Stripe confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
       throw error
@@ -337,20 +338,20 @@ export class PaymentService {
       const confirmed = await this.tonService.verifyTransaction(txHash)
 
       if (confirmed) {
-        await this.updatePaymentStatus(paymentId, "confirmed", "Payment confirmed on blockchain")
+        await this.updatePaymentStatus(paymentId, SharedPaymentStatus.CONFIRMED, "Payment confirmed on blockchain")
 
         // Auto-complete payment after confirmation
         setTimeout(async () => {
-          await this.updatePaymentStatus(paymentId, "completed", "Payment completed")
+          await this.updatePaymentStatus(paymentId, SharedPaymentStatus.COMPLETED, "Payment completed")
         }, 5000)
       } else {
-        await this.updatePaymentStatus(paymentId, "failed", "Payment confirmation timeout")
+        await this.updatePaymentStatus(paymentId, SharedPaymentStatus.FAILED, "Payment confirmation timeout")
       }
     } catch (error) {
       logger.error("Failed to monitor payment confirmation:", error)
       await this.updatePaymentStatus(
         paymentId,
-        "failed",
+        SharedPaymentStatus.FAILED,
         `Confirmation monitoring failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
     }
@@ -367,9 +368,9 @@ export class PaymentService {
       }
 
       // Set timestamps based on status
-      if (status === "confirmed") {
+      if (status === SharedPaymentStatus.CONFIRMED) {
         updateData.confirmedAt = new Date()
-      } else if (status === "completed") {
+      } else if (status === SharedPaymentStatus.COMPLETED) {
         updateData.completedAt = new Date()
       }
 
@@ -493,7 +494,7 @@ export class PaymentService {
       // Update payment status if full refund
       const payment = await this.getPaymentById(refundData.paymentId)
       if (payment && Number.parseFloat(refundData.amount) >= Number.parseFloat(payment.amount)) {
-        await this.updatePaymentStatus(payment.id, "refunded", "Full refund processed")
+        await this.updatePaymentStatus(payment.id, SharedPaymentStatus.REFUNDED, "Full refund processed")
       }
 
       return refund
@@ -511,7 +512,7 @@ export class PaymentService {
       const [dispute] = await db.insert(disputes).values(disputeData).returning()
 
       // Update payment status to disputed
-      await this.updatePaymentStatus(disputeData.paymentId, "disputed", "Payment disputed")
+      await this.updatePaymentStatus(disputeData.paymentId, SharedPaymentStatus.DISPUTED, "Payment disputed")
 
       return dispute
     } catch (error) {
@@ -608,7 +609,7 @@ export class PaymentService {
         .limit(1)
 
       if (payment.length > 0) {
-        await this.updatePaymentStatus(payment[0].id, "confirmed", "Stripe payment succeeded")
+        await this.updatePaymentStatus(payment[0].id, SharedPaymentStatus.CONFIRMED, "Stripe payment succeeded")
       }
     } catch (error) {
       logger.error("Failed to handle Stripe payment success:", error)
@@ -628,7 +629,7 @@ export class PaymentService {
         .limit(1)
 
       if (payment.length > 0) {
-        await this.updatePaymentStatus(payment[0].id, "failed", "Stripe payment failed")
+        await this.updatePaymentStatus(payment[0].id, SharedPaymentStatus.FAILED, "Stripe payment failed")
       }
     } catch (error) {
       logger.error("Failed to handle Stripe payment failure:", error)
@@ -644,7 +645,7 @@ export class PaymentService {
       const payment = await db.select().from(payments).where(eq(payments.stripeChargeId, chargeId)).limit(1)
 
       if (payment.length > 0) {
-        await this.updatePaymentStatus(payment[0].id, "disputed", "Stripe dispute created")
+        await this.updatePaymentStatus(payment[0].id, SharedPaymentStatus.DISPUTED, "Stripe dispute created")
       }
     } catch (error) {
       logger.error("Failed to handle Stripe dispute:", error)

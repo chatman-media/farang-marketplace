@@ -1,5 +1,7 @@
+import { PaymentStatus } from "@marketplace/shared-types"
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+
 import { ModernTonService } from "../services/ModernTonService"
 import { PaymentService } from "../services/PaymentService"
 
@@ -19,7 +21,7 @@ const createPaymentSchema = z.object({
 })
 
 const updatePaymentStatusSchema = z.object({
-  status: z.enum(["pending", "processing", "confirmed", "completed", "failed", "cancelled", "refunded", "disputed"]),
+  status: z.nativeEnum(PaymentStatus),
   reason: z.string().optional(),
 })
 
@@ -204,7 +206,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         // Type-safe search with proper casting
         const searchFilters = {
           ...filters,
-          status: filters.status as any, // Cast to proper enum type
+          status: filters.status as PaymentStatus | undefined,
           startDate: filters.startDate ? new Date(filters.startDate) : undefined,
           endDate: filters.endDate ? new Date(filters.endDate) : undefined,
         }

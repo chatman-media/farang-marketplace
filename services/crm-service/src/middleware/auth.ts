@@ -4,13 +4,13 @@ import jwt from "jsonwebtoken"
 interface AuthenticatedRequest extends FastifyRequest {
   user?: {
     id: string
-    role: string
-    email?: string
+    role: "user" | "admin" | "agency_owner" | "agency_manager"
+    email: string
   }
 }
 
 export const authenticateToken = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-  const authHeader = request.headers["authorization"]
+  const authHeader = request.headers.authorization
   const token = authHeader && authHeader.split(" ")[1]
 
   if (!token) {
@@ -24,10 +24,10 @@ export const authenticateToken = async (request: FastifyRequest, reply: FastifyR
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret") as any
     ;(request as AuthenticatedRequest).user = {
       id: decoded.id || decoded.userId,
-      role: decoded.role || "user",
+      role: (decoded.role || "user") as "user" | "admin" | "agency_owner" | "agency_manager",
       email: decoded.email,
     }
-  } catch (error) {
+  } catch {
     return reply.code(403).send({
       error: "Forbidden",
       message: "Invalid or expired token",

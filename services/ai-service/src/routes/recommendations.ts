@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from "fastify"
+
 import { RecommendationController } from "../controllers/RecommendationController"
 
 const recommendationRoutes: FastifyPluginAsync<{

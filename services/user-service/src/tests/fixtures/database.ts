@@ -45,7 +45,7 @@ export const userFixtures = {
     passwordHash: "$2a$12$hashedpassword456",
     phone: "+1987654321",
     telegramId: "agency123",
-    role: UserRole.AGENCY,
+    role: UserRole.AGENCY_OWNER,
     profile: {
       firstName: "Agency",
       lastName: "Manager",
@@ -75,7 +75,7 @@ export const userFixtures = {
     passwordHash: "$2a$12$hashedpassword789",
     phone: undefined,
     telegramId: undefined,
-    role: UserRole.MANAGER,
+    role: UserRole.AGENCY_MANAGER,
     profile: {
       firstName: "Site",
       lastName: "Manager",
@@ -241,7 +241,7 @@ export const createUserTestData = {
     password: "securepassword123",
     phone: "+1555123456",
     telegramId: "fulluser123",
-    role: UserRole.AGENCY,
+    role: UserRole.AGENCY_OWNER,
     profile: {
       firstName: "Full",
       lastName: "User",
@@ -300,7 +300,7 @@ export const updateUserTestData = {
   },
 
   roleUpdate: {
-    role: UserRole.AGENCY,
+    role: UserRole.AGENCY_OWNER,
   },
 
   statusUpdate: {
@@ -316,8 +316,8 @@ export const mockUserStats = {
   activeUsers: 85,
   usersByRole: {
     [UserRole.USER]: 80,
-    [UserRole.AGENCY]: 15,
-    [UserRole.MANAGER]: 4,
+    [UserRole.AGENCY_OWNER]: 15,
+    [UserRole.AGENCY_MANAGER]: 4,
     [UserRole.ADMIN]: 1,
   },
   verifiedUsers: 60,

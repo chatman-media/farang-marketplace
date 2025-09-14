@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
+import type { JWTPayload } from "../middleware/auth.js"
+
 // Import auth functions dynamically to avoid environment loading issues
 let authMiddleware: any
 let optionalAuthMiddleware: any
@@ -9,7 +11,6 @@ let isPublicRoute: any
 let getRequiredRoles: any
 let hasRole: any
 let hasAgencyAccess: any
-let JWTPayload: any
 
 // Mock Fastify request and reply
 const createMockRequest = (overrides = {}) => ({
@@ -43,7 +44,6 @@ describe("Auth Middleware", () => {
     getRequiredRoles = authModule.getRequiredRoles
     hasRole = authModule.hasRole
     hasAgencyAccess = authModule.hasAgencyAccess
-    JWTPayload = authModule.JWTPayload
   })
 
   describe("isPublicRoute", () => {

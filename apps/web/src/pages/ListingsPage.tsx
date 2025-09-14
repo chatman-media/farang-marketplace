@@ -1,6 +1,7 @@
 import { type ListingFilters as BaseListingFilters, ListingCategory } from "@marketplace/shared-types"
 import React, { useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom"
+
 import { ListingsGrid } from "../components/listings"
 import { AdvancedFilters, AISearchBox } from "../components/search"
 import { useListings } from "../lib/query"

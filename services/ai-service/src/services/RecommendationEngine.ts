@@ -1,4 +1,6 @@
+import logger from "@marketplace/logger"
 import { Matrix } from "ml-matrix"
+
 import type {
   RecommendationRequest,
   RecommendationResponse,
@@ -6,6 +8,7 @@ import type {
   UserBehavior,
   UserPreferences,
 } from "../models/index"
+
 import { AIProviderService } from "./AIProviderService"
 
 export interface ItemFeatures {
@@ -89,7 +92,7 @@ export class RecommendationEngine {
         timestamp: new Date(),
       }
     } catch (error) {
-      console.error("Error generating recommendations:", error)
+      logger.error("Error generating recommendations:", error)
       throw new Error(`Failed to generate recommendations: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -461,7 +464,7 @@ export class RecommendationEngine {
     } catch (error) {
       // Only log in non-test environments
       if (process.env["NODE_ENV"] !== "test") {
-        console.error("AI scoring failed:", error)
+        logger.error("AI scoring failed:", error)
       }
       return 0.5 // Fallback score
     }

@@ -1,5 +1,6 @@
 import logger from "@marketplace/logger"
 import Fastify, { FastifyInstance } from "fastify"
+
 import { corsConfig, env, loggerConfig, rateLimitConfig } from "./config/environment.js"
 import { authMiddleware } from "./middleware/auth.js"
 import { Router } from "./services/Router.js"
@@ -89,15 +90,15 @@ export const createApp = async (): Promise<FastifyInstance> => {
   const serviceDiscovery = new ServiceDiscovery()
 
   // Setup event listeners for service discovery
-  serviceDiscovery.on("serviceUp", (serviceName, health) => {
+  serviceDiscovery.on("serviceUp", (serviceName, _health) => {
     app.log.info(`Service ${serviceName} is now healthy`)
   })
 
-  serviceDiscovery.on("serviceDown", (serviceName, health) => {
+  serviceDiscovery.on("serviceDown", (serviceName, _health) => {
     app.log.warn(`Service ${serviceName} is now unhealthy`)
   })
 
-  serviceDiscovery.on("healthChanged", (serviceName, isHealthy, health) => {
+  serviceDiscovery.on("healthChanged", (serviceName, isHealthy, _health) => {
     app.log.info(`Service ${serviceName} health changed to ${isHealthy}`)
   })
 

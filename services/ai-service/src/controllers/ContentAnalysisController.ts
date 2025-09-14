@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+
 import type { ContentAnalysisRequest } from "../models/index"
 import { ContentAnalysisService } from "../services/ContentAnalysisService"
 
@@ -207,7 +208,7 @@ export class ContentAnalysisController {
    */
   async analyzeSentiment(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const { text, type, language } = request.body as z.infer<typeof sentimentAnalysisSchema.body>
+      // const { text, type, language } = request.body as z.infer<typeof sentimentAnalysisSchema.body>
 
       // TODO: Fix analyzeSentiment method signature
       const result = { sentiment: "neutral", confidence: 0.5 }
@@ -232,7 +233,7 @@ export class ContentAnalysisController {
    */
   async extractKeywords(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const { text, type, language } = request.body as z.infer<typeof keywordExtractionSchema.body>
+      // const { text, type, language } = request.body as z.infer<typeof keywordExtractionSchema.body>
 
       // TODO: Fix extractKeywords method signature
       const result = { keywords: ["sample", "keywords"] }
@@ -257,7 +258,7 @@ export class ContentAnalysisController {
    */
   async categorizeContent(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const { type, content, language } = request.body as z.infer<typeof categorizationSchema.body>
+      // const { type, content, language } = request.body as z.infer<typeof categorizationSchema.body>
 
       // TODO: Fix categorizeContent method signature
       const result = { category: "general", confidence: 0.8 }
@@ -282,7 +283,7 @@ export class ContentAnalysisController {
    */
   async moderateContent(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const { text, type, language } = request.body as z.infer<typeof moderationSchema.body>
+      // const { text, type, language } = request.body as z.infer<typeof moderationSchema.body>
 
       // TODO: Fix moderateContent method signature
       const result = { flagged: false, reasons: [] }
@@ -307,7 +308,7 @@ export class ContentAnalysisController {
    */
   async assessQuality(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const { type, content, language } = request.body as z.infer<typeof qualityAssessmentSchema.body>
+      // const { type, content, language } = request.body as z.infer<typeof qualityAssessmentSchema.body>
 
       // TODO: Fix assessQuality method signature
       const result = { score: 0.7, issues: [] }
@@ -332,7 +333,7 @@ export class ContentAnalysisController {
    */
   async detectLanguage(request: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      const { text, type } = request.body as z.infer<typeof languageDetectionSchema.body>
+      // const { text, type } = request.body as z.infer<typeof languageDetectionSchema.body>
 
       // TODO: Fix detectLanguage method signature
       const result = { language: "en", confidence: 0.9 }

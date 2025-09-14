@@ -25,7 +25,7 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    authController.getProfile,
+    authController.getProfile as any,
   )
 
   fastify.post("/validate", authController.validateToken)

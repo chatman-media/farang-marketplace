@@ -51,6 +51,7 @@ export enum ProductCondition {
 
 export enum ProductStatus {
   ACTIVE = "active",
+  AVAILABLE = "available",
   INACTIVE = "inactive",
   RENTED = "rented",
   RESERVED = "reserved",
@@ -91,6 +92,7 @@ export interface ProductSpecifications {
 
   // Physical Properties
   dimensions?: ProductDimensions
+  weight?: number // kg
   material?: string
   color?: string
   size?: string // for clothing, shoes, etc.
@@ -116,12 +118,13 @@ export interface ProductSpecifications {
 }
 
 export interface ProductPricing {
-  // Basic Pricing
+  // Base pricing
   price: number
+  basePrice?: number
   currency: string
   priceType: PriceType
 
-  // Original/Comparison Pricing
+  // Reference pricing
   originalPrice?: number
   msrp?: number // Manufacturer's Suggested Retail Price
 
@@ -282,7 +285,7 @@ export interface Product {
   reviewCount: number
 
   // Moderation
-  moderationStatus: "pending" | "approved" | "rejected" | "flagged"
+  moderationStatus?: "pending" | "approved" | "rejected" | "flagged"
   moderationNotes?: string
   flagReasons?: string[]
 
@@ -314,6 +317,7 @@ export interface CreateProductRequest {
   title: string
   description: string
   type: ProductType
+  productType: ProductType
   category: string
   subcategory?: string
   condition: ProductCondition
@@ -324,6 +328,7 @@ export interface CreateProductRequest {
   images: string[]
   location: Product["location"]
   tags: string[]
+  notes?: string
 }
 
 export interface UpdateProductRequest extends Partial<CreateProductRequest> {

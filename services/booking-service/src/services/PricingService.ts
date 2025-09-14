@@ -241,10 +241,11 @@ export class PricingService {
       case "fixed":
         basePrice = servicePrice.fixedPrice || servicePrice.basePrice || 0
         break
-      case "daily":
+      case "daily": {
         const days = Math.ceil(durationInHours / 8) // 8 hours per day
         basePrice = (servicePrice.dailyRate || servicePrice.basePrice || 0) * days
         break
+      }
       case "project":
         basePrice = servicePrice.basePrice || 0
         break
@@ -511,7 +512,7 @@ export class PricingService {
     )
   }
 
-  private getDayOfWeekMultiplier(checkIn: Date, checkOut?: Date): number {
+  private getDayOfWeekMultiplier(checkIn: Date, _checkOut?: Date): number {
     const dayOfWeek = checkIn.getDay() // 0 = Sunday
 
     // Weekend premium (Friday, Saturday)

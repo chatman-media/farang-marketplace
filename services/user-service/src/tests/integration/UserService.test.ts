@@ -423,16 +423,16 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.id,
         testUserData.validUser.email,
         "hash",
-        UserRole.AGENCY,
+        UserRole.AGENCY_OWNER,
         testUserData.validUser.profile,
       )
 
       mockUserRepository.update.mockResolvedValue(updatedUserEntity)
 
-      const result = await userService.updateUserRole(testUserData.validUser.id, UserRole.AGENCY)
+      const result = await userService.updateUserRole(testUserData.validUser.id, UserRole.AGENCY_OWNER)
 
       expect(mockUserRepository.update).toHaveBeenCalledWith(testUserData.validUser.id, {
-        role: UserRole.AGENCY,
+        role: UserRole.AGENCY_OWNER,
       })
       expect(result).toEqual(updatedUserEntity.toPublicUser())
     })

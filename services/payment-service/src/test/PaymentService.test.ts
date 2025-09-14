@@ -72,7 +72,7 @@ describe("Payment Service Logic Tests", () => {
       // Test valid transitions
       Object.entries(validStatusTransitions).forEach(([fromStatus, toStatuses]) => {
         toStatuses.forEach((toStatus) => {
-          expect(validStatusTransitions[fromStatus]).toContain(toStatus)
+          expect(validStatusTransitions[fromStatus as keyof typeof validStatusTransitions]).toContain(toStatus)
         })
       })
 

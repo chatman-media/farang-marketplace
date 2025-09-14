@@ -1,6 +1,8 @@
 /** biome-ignore-all lint/complexity/useLiteralKeys: Use old style dotenv */
 import logger from "@marketplace/logger"
+
 import type { MarketInsight, UserBehavior, UserInsight } from "../models/index"
+
 import { AIProviderService } from "./AIProviderService"
 
 export class UserBehaviorService {
@@ -810,12 +812,9 @@ Focus on actionable business insights and market opportunities.
       breakdown?: Record<string, number>
     }>
   > {
-    const allBehaviors = Array.from(this.behaviorBuffer.values()).flat()
-    let filteredBehaviors = allBehaviors
-
-    if (options.category) {
-      filteredBehaviors = allBehaviors.filter((b) => b.metadata?.["category"] === options.category)
-    }
+    // Note: Currently generating mock trend data
+    // TODO: Use actual behavior data for trend calculation
+    // const allBehaviors = Array.from(this.behaviorBuffer.values()).flat()
 
     // Mock trend data
     const trends = []

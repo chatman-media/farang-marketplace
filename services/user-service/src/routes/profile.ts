@@ -18,7 +18,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    profileController.getProfile,
+    profileController.getProfile as any,
   )
 
   fastify.put(
@@ -26,7 +26,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    profileController.updateProfile,
+    profileController.updateProfile as any,
   )
 
   fastify.post(
@@ -34,7 +34,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    profileController.uploadAvatar,
+    profileController.uploadAvatar as any,
   )
 
   // Verification routes
@@ -43,7 +43,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    profileController.requestVerification,
+    profileController.requestVerification as any,
   )
 
   // Admin/Manager routes for verification management
@@ -52,7 +52,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    profileController.approveVerification,
+    profileController.approveVerification as any,
   )
 
   fastify.post(
@@ -60,7 +60,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    profileController.rejectVerification,
+    profileController.rejectVerification as any,
   )
 
   // Get user profile by ID (for admins/managers or own profile)
@@ -69,7 +69,7 @@ const profileRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware.requireAuth()],
     },
-    profileController.getUserProfile,
+    profileController.getUserProfile as any,
   )
 }
 

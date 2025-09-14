@@ -53,12 +53,12 @@ export const comparePricingBodySchema = z.object({
     .max(10, "Options must be an array with 1-10 items"),
 })
 
-interface AuthenticatedRequest extends FastifyRequest {
+interface AuthenticatedRequest extends Omit<FastifyRequest, "user"> {
   user?: {
     id: string
     email: string
-    role: "guest" | "host" | "admin"
-    verified: boolean
+    role: string
+    agencyId?: string
   }
 }
 

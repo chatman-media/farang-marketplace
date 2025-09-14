@@ -1,6 +1,7 @@
 import logger from "@marketplace/logger"
 import { ListingCategory } from "@marketplace/shared-types"
 import { FastifyInstance } from "fastify"
+
 import { getAvailableCategories, getCategoryConfig, getEnabledCategories } from "../config/categories"
 
 export default async function categoriesRoutes(fastify: FastifyInstance) {

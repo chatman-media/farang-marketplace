@@ -1,7 +1,7 @@
 import logger from "@marketplace/logger"
 import { PaymentStatus } from "@marketplace/shared-types"
 import Stripe from "stripe"
-import { PaymentMethodType } from "@/db/schema"
+import { PaymentMethodType } from "../db/schema"
 
 export interface StripePaymentRequest {
   amount: number // in cents

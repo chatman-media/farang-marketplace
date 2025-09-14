@@ -1,6 +1,8 @@
+import { PaymentStatus, RefundStatus } from "@marketplace/shared-types"
 import crypto from "crypto"
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+
 import { ModernTonService } from "../services/ModernTonService"
 import { PaymentService } from "../services/PaymentService"
 
@@ -32,7 +34,7 @@ const refundWebhookSchema = z.object({
   refund_id: z.string().uuid(),
   payment_id: z.string().uuid(),
   amount: z.string(),
-  status: z.enum(["pending", "processing", "completed", "failed"]),
+  status: z.nativeEnum(RefundStatus),
   reason: z.string().optional(),
 })
 
@@ -62,7 +64,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
             if (isValid) {
               await paymentService.updatePaymentStatus(
                 payment.id,
-                "confirmed",
+                PaymentStatus.CONFIRMED,
                 `TON transaction confirmed: ${transaction_hash}`,
               )
 
@@ -162,7 +164,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
       schema: {
         body: z.object({
           payment_id: z.string().uuid(),
-          status: z.enum(["pending", "processing", "confirmed", "completed", "failed", "cancelled"]),
+          status: z.nativeEnum(PaymentStatus),
           transaction_id: z.string().optional(),
           reason: z.string().optional(),
           metadata: z.record(z.string(), z.any()).optional(),
@@ -173,7 +175,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
       request: FastifyRequest<{
         Body: {
           payment_id: string
-          status: string
+          status: PaymentStatus
           transaction_id?: string
           reason?: string
           metadata?: Record<string, any>
@@ -186,7 +188,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
 
         fastify.log.info({ payment_id, status }, "Received payment webhook")
 
-        await paymentService.updatePaymentStatus(payment_id, status as any, reason)
+        await paymentService.updatePaymentStatus(payment_id, status, reason)
 
         if (transaction_id) {
           await paymentService.updatePaymentTransactionId(payment_id, transaction_id)
@@ -219,8 +221,8 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
 
         await paymentService.updateRefundStatus(refund_id, status, reason)
 
-        if (status === "completed") {
-          await paymentService.updatePaymentStatus(payment_id, "refunded", "Refund completed")
+        if (status === RefundStatus.COMPLETED) {
+          await paymentService.updatePaymentStatus(payment_id, PaymentStatus.REFUNDED, "Refund completed")
         }
 
         return reply.send({ success: true, processed: true })

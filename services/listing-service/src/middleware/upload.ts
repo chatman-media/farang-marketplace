@@ -1,15 +1,16 @@
+import fs from "fs/promises"
+import path from "path"
+
 import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
-import fs from "fs/promises"
 import multer from "multer"
-import path from "path"
 import sharp from "sharp"
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage()
 
 // File filter for images
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
 
   if (allowedTypes.includes(file.mimetype)) {
@@ -161,7 +162,7 @@ export const serveImages = async (request: FastifyRequest, reply: FastifyReply) 
     // Send file
     const fileStream = await fs.readFile(imagePath)
     reply.send(fileStream)
-  } catch (error) {
+  } catch {
     reply.status(404).send({
       error: {
         code: "IMAGE_NOT_FOUND",

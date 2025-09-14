@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken"
 interface JWTPayload {
   id: string
   email: string
-  role: string
+  role: "user" | "admin" | "agency_owner" | "agency_manager"
   iat: number
   exp: number
 }
@@ -14,7 +14,8 @@ interface JWTPayload {
 interface AuthenticatedUser {
   id: string
   email: string
-  role: string
+  role: "user" | "admin" | "agency_owner" | "agency_manager"
+  agencyId?: string
 }
 
 declare module "fastify" {

@@ -1,9 +1,10 @@
 import { UserRole, VerificationStatus } from "@marketplace/shared-types"
-import { FastifyReply, FastifyRequest } from "fastify"
+import { FastifyReply } from "fastify"
 import fs from "fs/promises"
 import multer from "multer"
 import path from "path"
 import { z } from "zod"
+import { AuthenticatedRequest } from "../middleware/auth"
 import { UserService } from "../services/UserService"
 
 // Validation schemas
@@ -80,7 +81,7 @@ export class ProfileController {
   constructor(private userService: UserService) {}
 
   // Get current user's profile
-  getProfile = async (req: FastifyRequest, reply: FastifyReply) => {
+  getProfile = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
         return reply.status(401).send({
@@ -93,7 +94,7 @@ export class ProfileController {
         })
       }
 
-      const user = await this.userService.getUserById(req.user.userId)
+      const user = await this.userService.getUserById((req.user as any).userId)
       if (!user) {
         return reply.status(404).send({
           error: {
@@ -123,7 +124,7 @@ export class ProfileController {
   }
 
   // Update current user's profile
-  updateProfile = async (req: FastifyRequest, reply: FastifyReply) => {
+  updateProfile = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
         return reply.status(401).send({
@@ -140,7 +141,7 @@ export class ProfileController {
       const profileData = UpdateProfileSchema.parse(req.body)
 
       // Update user profile
-      const updatedUser = await this.userService.updateUser(req.user.userId, {
+      const updatedUser = await this.userService.updateUser((req.user as any).userId, {
         profile: profileData,
       })
 
@@ -186,7 +187,7 @@ export class ProfileController {
   }
 
   // Upload profile avatar
-  uploadAvatar = async (req: FastifyRequest, reply: FastifyReply) => {
+  uploadAvatar = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
         return reply.status(401).send({
@@ -254,7 +255,7 @@ export class ProfileController {
       // Generate filename and save file
       const timestamp = Date.now()
       const ext = path.extname(data.filename || ".jpg")
-      const filename = `${req.user.userId}-${timestamp}${ext}`
+      const filename = `${(req.user as any).userId}-${timestamp}${ext}`
       const uploadDir = "uploads/profiles/"
 
       // Ensure upload directory exists
@@ -269,7 +270,7 @@ export class ProfileController {
       const avatarUrl = `${baseUrl}/uploads/profiles/${filename}`
 
       // Update user profile with new avatar
-      const updatedUser = await this.userService.updateUser(req.user.userId, {
+      const updatedUser = await this.userService.updateUser((req.user as any).userId, {
         profile: { avatar: avatarUrl },
       })
 
@@ -308,7 +309,7 @@ export class ProfileController {
   }
 
   // Request user verification
-  requestVerification = async (req: FastifyRequest, reply: FastifyReply) => {
+  requestVerification = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
         return reply.status(401).send({
@@ -325,7 +326,7 @@ export class ProfileController {
       const verificationData = VerificationRequestSchema.parse(req.body)
 
       // Check if user exists
-      const user = await this.userService.getUserById(req.user.userId)
+      const user = await this.userService.getUserById((req.user as any).userId)
       if (!user) {
         return reply.status(404).send({
           error: {
@@ -362,7 +363,7 @@ export class ProfileController {
       }
 
       // Update user verification status and data
-      const updatedUser = await this.userService.updateUser(req.user.userId, {
+      const updatedUser = await this.userService.updateUser((req.user as any).userId, {
         profile: {
           ...user.profile,
           verificationStatus: VerificationStatus.PENDING,
@@ -378,7 +379,7 @@ export class ProfileController {
             documents: verificationData.documents,
             notes: verificationData.notes,
             submittedAt: new Date(),
-            submittedBy: req.user.userId,
+            submittedBy: (req.user as any).userId,
           },
         },
         message: "Verification request submitted successfully",
@@ -408,7 +409,7 @@ export class ProfileController {
   }
 
   // Approve user verification (Admin/Manager only)
-  approveVerification = async (req: FastifyRequest, reply: FastifyReply) => {
+  approveVerification = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
         return reply.status(401).send({
@@ -422,7 +423,7 @@ export class ProfileController {
       }
 
       // Check if user has admin or manager role
-      if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
+      if ((req.user as any).role !== UserRole.ADMIN && (req.user as any).role !== UserRole.AGENCY_MANAGER) {
         return reply.status(403).send({
           error: {
             code: "INSUFFICIENT_PERMISSIONS",
@@ -484,7 +485,7 @@ export class ProfileController {
   }
 
   // Reject user verification (Admin/Manager only)
-  rejectVerification = async (req: FastifyRequest, reply: FastifyReply) => {
+  rejectVerification = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
         return reply.status(401).send({
@@ -498,7 +499,7 @@ export class ProfileController {
       }
 
       // Check if user has admin or manager role
-      if (req.user.role !== UserRole.ADMIN && req.user.role !== UserRole.MANAGER) {
+      if ((req.user as any).role !== UserRole.ADMIN && (req.user as any).role !== UserRole.AGENCY_MANAGER) {
         return reply.status(403).send({
           error: {
             code: "INSUFFICIENT_PERMISSIONS",
@@ -548,9 +549,9 @@ export class ProfileController {
         data: {
           user: updatedUser,
           rejection: {
-            reason: reason,
+            reason,
             rejectedAt: new Date(),
-            rejectedBy: req.user.userId,
+            rejectedBy: (req.user as any).userId,
           },
         },
         message: "User verification rejected successfully",
@@ -568,7 +569,7 @@ export class ProfileController {
   }
 
   // Get user profile by ID (Admin/Manager or own profile)
-  getUserProfile = async (req: FastifyRequest, reply: FastifyReply) => {
+  getUserProfile = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
       if (!req.user) {
         return reply.status(401).send({
@@ -585,7 +586,9 @@ export class ProfileController {
 
       // Check if user can access this profile
       const canAccess =
-        req.user.userId === userId || req.user.role === UserRole.ADMIN || req.user.role === UserRole.MANAGER
+        (req.user as any).userId === userId ||
+        (req.user as any).role === UserRole.ADMIN ||
+        (req.user as any).role === UserRole.AGENCY_MANAGER
 
       if (!canAccess) {
         return reply.status(403).send({

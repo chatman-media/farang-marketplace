@@ -178,6 +178,8 @@ export const bookingStatusEnum = pgEnum("booking_status", [
   "completed",
   "cancelled",
   "no_show",
+  "expired",
+  "disputed",
 ])
 
 // CRM related enums

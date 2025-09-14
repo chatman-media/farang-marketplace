@@ -1,12 +1,7 @@
+import logger from "@marketplace/logger"
+import { AuthenticatedUser } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
-
-export interface AuthenticatedUser {
-  id: string
-  email: string
-  role: "user" | "admin" | "agency_owner" | "agency_manager"
-  agencyId?: string
-}
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -18,7 +13,7 @@ declare module "fastify" {
  * JWT Authentication Middleware
  */
 export async function authenticateToken(request: FastifyRequest, reply: FastifyReply): Promise<void> {
-  const authHeader = request.headers["authorization"]
+  const authHeader = request.headers.authorization
   const token = authHeader && authHeader.split(" ")[1] // Bearer TOKEN
 
   if (!token) {
@@ -30,7 +25,7 @@ export async function authenticateToken(request: FastifyRequest, reply: FastifyR
 
   const jwtSecret = process.env.JWT_SECRET
   if (!jwtSecret) {
-    console.error("JWT_SECRET environment variable is not set")
+    logger.error("JWT_SECRET environment variable is not set")
     return reply.code(500).send({
       success: false,
       message: "Server configuration error",
@@ -41,7 +36,7 @@ export async function authenticateToken(request: FastifyRequest, reply: FastifyR
     const decoded = jwt.verify(token, jwtSecret) as AuthenticatedUser
     request.user = decoded
   } catch (error) {
-    console.error("JWT verification failed:", error)
+    logger.error("JWT verification failed:", error)
     return reply.code(403).send({
       success: false,
       message: "Invalid or expired token",
@@ -105,7 +100,7 @@ export async function requireAgencyOwnership(request: FastifyRequest, reply: Fas
  * Optional authentication middleware (doesn't fail if no token)
  */
 export async function optionalAuth(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
-  const authHeader = request.headers["authorization"]
+  const authHeader = request.headers.authorization
   const token = authHeader && authHeader.split(" ")[1]
 
   if (!token) {
@@ -122,7 +117,7 @@ export async function optionalAuth(request: FastifyRequest, _reply: FastifyReply
     request.user = decoded
   } catch (error) {
     // Invalid token, but continue without user
-    console.warn("Invalid token in optional auth:", error)
+    logger.warn("Invalid token in optional auth:", error)
   }
 }
 

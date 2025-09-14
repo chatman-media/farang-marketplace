@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
+
 import { env } from "../config/environment.js"
 
 export interface JWTPayload {
@@ -42,7 +43,7 @@ export function isPublicRoute(path: string): boolean {
     if (route.endsWith("*")) {
       return path.startsWith(route.slice(0, -1))
     }
-    return path === route || path.startsWith(route + "/")
+    return path === route || path.startsWith(`${route}/`)
   })
 }
 
@@ -145,7 +146,7 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
 }
 
 // Optional authentication middleware - doesn't fail if no token provided
-export async function optionalAuthMiddleware(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+export async function optionalAuthMiddleware(request: FastifyRequest, _reply: FastifyReply): Promise<void> {
   try {
     const authHeader = request.headers.authorization
 
@@ -169,7 +170,7 @@ export async function optionalAuthMiddleware(request: FastifyRequest, reply: Fas
       role: decoded.role,
       ...(decoded.agencyId && { agencyId: decoded.agencyId }),
     }
-  } catch (error) {
+  } catch {
     // Continue without authentication if token is invalid
     // This allows the request to proceed but without user context
     return

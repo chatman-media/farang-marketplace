@@ -1,23 +1,25 @@
 import logger from "@marketplace/logger"
+import { AuthenticatedUser, UserRole } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
 
 interface JWTPayload {
   id: string
   email: string
-  role: string
+  role: UserRole
+  verified: boolean
   iat: number
   exp: number
 }
 
 declare module "fastify" {
   interface FastifyRequest {
-    user?: {
-      id: string
-      email: string
-      role: string
-    }
+    user?: AuthenticatedUser
   }
+}
+
+export interface AuthenticatedRequest extends FastifyRequest {
+  user?: AuthenticatedUser
 }
 
 export const authMiddleware = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
@@ -40,6 +42,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
       id: decoded.id,
       email: decoded.email,
       role: decoded.role,
+      verified: decoded.verified,
     }
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
@@ -64,7 +67,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
   }
 }
 
-export const optionalAuthMiddleware = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+export const optionalAuthMiddleware = async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
   try {
     const authHeader = request.headers.authorization
 
@@ -81,6 +84,7 @@ export const optionalAuthMiddleware = async (request: FastifyRequest, reply: Fas
       id: decoded.id,
       email: decoded.email,
       role: decoded.role,
+      verified: decoded.verified,
     }
   } catch (error) {
     logger.log("Optional auth error:", error)
@@ -96,7 +100,7 @@ export const adminMiddleware = async (request: FastifyRequest, reply: FastifyRep
     })
   }
 
-  if (request.user.role !== "admin" && request.user.role !== "manager") {
+  if (request.user.role !== "admin" && request.user.role !== "agency_manager") {
     return reply.code(403).send({
       success: false,
       message: "Admin access required",

@@ -1,6 +1,8 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
-import { circuitBreakerConfig, env } from "../config/environment.js"
+
+import { circuitBreakerConfig } from "../config/environment.js"
 import { routeMapping } from "../config/services.js"
+
 import { CircuitBreakerManager } from "./CircuitBreaker.js"
 import { ServiceDiscovery } from "./ServiceDiscovery.js"
 

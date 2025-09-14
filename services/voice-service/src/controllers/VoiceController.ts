@@ -1,5 +1,4 @@
 import logger from "@marketplace/logger"
-
 import type { FastifyReply, FastifyRequest } from "fastify"
 
 import type { VoiceCommandResponse, VoiceRequest } from "../models/index"
@@ -10,7 +9,8 @@ import { VoiceCommandService } from "../services/VoiceCommandService"
 interface AuthenticatedUser {
   id: string
   email: string
-  role: string
+  role: "user" | "admin" | "agency_owner" | "agency_manager"
+  agencyId?: string
 }
 
 interface FastifyRequestWithAuth extends FastifyRequest {

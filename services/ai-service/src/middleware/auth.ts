@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
+
 import { env } from "../app"
 
 export interface AuthenticatedUser {
@@ -91,7 +92,7 @@ export default async function authPlugin(fastify: any) {
   /**
    * Optional authentication middleware - doesn't fail if no token provided
    */
-  fastify.decorate("optionalAuth", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.decorate("optionalAuth", async (request: FastifyRequest, _reply: FastifyReply) => {
     try {
       const authHeader = request.headers.authorization
       const token = authHeader && authHeader.split(" ")[1]
@@ -113,7 +114,7 @@ export default async function authPlugin(fastify: any) {
         role: decoded.role,
         ...(decoded.agencyId && { agencyId: decoded.agencyId }),
       }
-    } catch (error) {
+    } catch {
       // Continue without authentication if token is invalid
       return
     }
@@ -225,7 +226,7 @@ export default async function authPlugin(fastify: any) {
   /**
    * Role-based rate limiting middleware
    */
-  fastify.decorate("roleBasedRateLimit", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.decorate("roleBasedRateLimit", async (_request: FastifyRequest, _reply: FastifyReply) => {
     // This is a placeholder - in a real implementation, you'd apply different
     // rate limits based on user role. For now, we'll just continue.
     return

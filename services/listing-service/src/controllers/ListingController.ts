@@ -3,7 +3,7 @@ import { FastifyReply, FastifyRequest } from "fastify"
 
 export class ListingController {
   // Create vehicle listing
-  createVehicle = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  createVehicle = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       return reply.code(201).send({
         success: true,
@@ -20,7 +20,7 @@ export class ListingController {
   }
 
   // Create product listing
-  createProduct = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  createProduct = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       return reply.code(201).send({
         success: true,
@@ -37,7 +37,7 @@ export class ListingController {
   }
 
   // Get all vehicles with filters
-  getVehicles = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  getVehicles = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       const mockVehicles = [
         {
@@ -246,7 +246,7 @@ export class ListingController {
   // Delete vehicle listing
   deleteVehicle = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const { id } = request.params as { id: string }
+      // const { id } = request.params as { id: string }
 
       return reply.send({
         success: true,
@@ -264,7 +264,7 @@ export class ListingController {
   // Delete product listing
   deleteProduct = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
-      const { id } = request.params as { id: string }
+      // const { id } = request.params as { id: string }
 
       return reply.send({
         success: true,

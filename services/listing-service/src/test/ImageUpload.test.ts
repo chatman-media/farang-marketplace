@@ -1,4 +1,5 @@
 import path from "path"
+
 import { describe, expect, it } from "vitest"
 
 describe("Image Upload Functionality", () => {
@@ -149,7 +150,7 @@ describe("Image Upload Functionality", () => {
 
         if (operation.action === "upload") {
           expect(Array.isArray(operation.images)).toBe(true)
-          expect(operation.images.length).toBeGreaterThan(0)
+          expect(operation.images?.length).toBeGreaterThan(0)
         }
 
         if (operation.action === "update") {

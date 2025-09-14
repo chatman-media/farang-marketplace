@@ -1,4 +1,5 @@
 import React from "react"
+
 import { ProfileForm } from "../components/auth"
 
 export const ProfilePage: React.FC = () => {

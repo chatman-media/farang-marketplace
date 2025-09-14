@@ -302,7 +302,7 @@ export class AutomationService {
         })
       } else {
         // For testing or when communication service is not available
-        logger.log(`Would send message: ${messageContent}`)
+        logger.info(`Would send message: ${messageContent}`)
       }
     } catch (error) {
       logger.error("Failed to send automated message:", error)

@@ -1,5 +1,7 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+
 import type { AuthenticatedUser } from "../middleware/auth"
 import { AIProviderService } from "../services/AIProviderService"
 import { ContentAnalysisService } from "../services/ContentAnalysisService"
@@ -144,7 +146,7 @@ export class MarketplaceIntegrationController {
         })
       }
 
-      console.error("Error generating booking intelligence:", error)
+      logger.error("Error generating booking intelligence:", error)
       reply.code(500).send({
         success: false,
         error: "Internal Server Error",
@@ -260,7 +262,7 @@ export class MarketplaceIntegrationController {
         })
       }
 
-      console.error("Error detecting fraud:", error)
+      logger.error("Error detecting fraud:", error)
       reply.code(500).send({
         success: false,
         error: "Internal Server Error",

@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify"
+
 import { ListingController } from "../controllers/ListingController"
 import { authMiddleware } from "../middleware/auth"
 

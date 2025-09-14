@@ -1,6 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query"
 import React from "react"
 import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom"
+
 import { Layout } from "./components/layout"
 import { Badge, Button, Card } from "./components/ui"
 import { FEATURES_CONFIG, getEnabledCategories, HERO_CONFIG } from "./config/marketplace"

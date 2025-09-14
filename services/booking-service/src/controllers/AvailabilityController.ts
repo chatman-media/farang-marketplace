@@ -51,12 +51,12 @@ export const upcomingBookingsQuerySchema = z.object({
   limit: z.number().int().min(1).max(50, "Limit must be between 1 and 50").optional(),
 })
 
-interface AuthenticatedRequest extends FastifyRequest {
+interface AuthenticatedRequest extends Omit<FastifyRequest, "user"> {
   user?: {
     id: string
     email: string
-    role: "guest" | "host" | "admin"
-    verified: boolean
+    role: string
+    agencyId?: string
   }
 }
 

@@ -1,12 +1,17 @@
-import { UserRole } from "@marketplace/shared-types"
+import { AuthenticatedUser, UserRole } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
-import { AuthService, TokenPayload } from "../services/AuthService"
 
-// Extend Fastify Request interface to include user data
-declare module "fastify" {
-  interface FastifyRequest {
-    user?: TokenPayload
-  }
+import { AuthService } from "../services/AuthService"
+
+// Define UserServiceAuthenticatedUser type for user-service with additional fields
+export interface UserServiceAuthenticatedUser extends AuthenticatedUser {
+  userId: string
+  type: "access" | "refresh"
+}
+
+// Type for requests with authenticated user
+export type AuthenticatedRequest = FastifyRequest & {
+  user: UserServiceAuthenticatedUser
 }
 
 export interface AuthMiddlewareOptions {
@@ -41,7 +46,12 @@ export class FastifyAuthMiddleware {
 
         // Validate token
         const payload = await this.authService.validateAccessToken(token)
-        request.user = payload
+        ;(request as any).user = {
+          userId: payload.userId,
+          email: payload.email,
+          role: payload.role,
+          type: payload.type,
+        } as UserServiceAuthenticatedUser
 
         // Check role requirements
         if (options.requiredRoles && options.requiredRoles.length > 0) {
@@ -105,7 +115,7 @@ export class FastifyAuthMiddleware {
   }
 
   requireManager() {
-    return this.authenticate({ requiredRoles: [UserRole.ADMIN, UserRole.MANAGER] })
+    return this.authenticate({ requiredRoles: [UserRole.ADMIN, UserRole.AGENCY_MANAGER] })
   }
 }
 

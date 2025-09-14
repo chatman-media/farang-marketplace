@@ -32,7 +32,7 @@ beforeEach(() => {
 })
 
 // Mock external API calls
-;(global as any).fetch = async (url: string, options?: any) => {
+;(global as any).fetch = async (_url: string, _options?: any) => {
   // Mock fetch for external API calls
   return {
     ok: true,
@@ -43,26 +43,26 @@ beforeEach(() => {
 }
 
 // Mock console methods in tests to reduce noise
-const originalConsoleError = console.error
-const originalConsoleWarn = console.warn
+const originalConsoleError = logger.error
+const originalConsoleWarn = logger.warn
 
 beforeEach(() => {
-  console.error = (...args: any[]) => {
+  logger.error = (message: string, ...args: any[]) => {
     // Only log errors that aren't expected test errors
-    if (!args[0]?.toString().includes("Expected test error")) {
-      originalConsoleError(...args)
+    if (!message.includes("Expected test error")) {
+      originalConsoleError(message, ...args)
     }
   }
 
-  console.warn = (...args: any[]) => {
+  logger.warn = (message: string, ...args: any[]) => {
     // Only log warnings that aren't expected test warnings
-    if (!args[0]?.toString().includes("Expected test warning")) {
-      originalConsoleWarn(...args)
+    if (!message.includes("Expected test warning")) {
+      originalConsoleWarn(message, ...args)
     }
   }
 })
 
 afterAll(() => {
-  console.error = originalConsoleError
-  console.warn = originalConsoleWarn
+  logger.error = originalConsoleError
+  logger.warn = originalConsoleWarn
 })

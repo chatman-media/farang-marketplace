@@ -1,5 +1,7 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
+
 import type { AuthenticatedUser } from "../middleware/auth"
 import { UserBehaviorService } from "../services/UserBehaviorService"
 
@@ -87,7 +89,7 @@ export class InsightsController {
         timestamp: new Date().toISOString(),
       }
     } catch (error) {
-      console.error("Error tracking behavior:", error)
+      logger.error("Error tracking behavior:", error)
       return reply.status(500).send({
         success: false,
         message: "Internal server error",
@@ -130,7 +132,7 @@ export class InsightsController {
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
-      console.error("Error getting user insights:", error)
+      logger.error("Error getting user insights:", error)
       return reply.status(500).send({
         success: false,
         message: "Internal server error",
@@ -178,7 +180,7 @@ export class InsightsController {
         timestamp: new Date().toISOString(),
       }
     } catch (error) {
-      console.error("Error getting listing insights:", error)
+      logger.error("Error getting listing insights:", error)
       return reply.status(500).send({
         success: false,
         message: "Internal server error",
@@ -216,7 +218,7 @@ export class InsightsController {
         timestamp: new Date().toISOString(),
       }
     } catch (error) {
-      console.error("Error getting market insights:", error)
+      logger.error("Error getting market insights:", error)
       return reply.status(500).send({
         success: false,
         message: "Internal server error",
@@ -267,7 +269,7 @@ export class InsightsController {
         timestamp: new Date().toISOString(),
       }
     } catch (error) {
-      console.error("Error getting analytics dashboard:", error)
+      logger.error("Error getting analytics dashboard:", error)
       return reply.status(500).send({
         success: false,
         message: "Internal server error",
@@ -320,7 +322,7 @@ export class InsightsController {
         timestamp: new Date().toISOString(),
       }
     } catch (error) {
-      console.error("Error getting user behavior patterns:", error)
+      logger.error("Error getting user behavior patterns:", error)
       return reply.status(500).send({
         success: false,
         message: "Internal server error",

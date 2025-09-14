@@ -223,6 +223,6 @@ export class AuthService {
 
   // Method to check if user has manager privileges
   static isManager(userRole: UserRole): boolean {
-    return userRole === UserRole.MANAGER || userRole === UserRole.ADMIN
+    return userRole === UserRole.AGENCY_MANAGER || userRole === UserRole.ADMIN
   }
 }

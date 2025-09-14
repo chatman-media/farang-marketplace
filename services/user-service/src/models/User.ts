@@ -163,11 +163,11 @@ export class UserEntity {
   }
 
   isManager(): boolean {
-    return this.role === UserRole.MANAGER || this.isAdmin()
+    return this.role === UserRole.AGENCY_MANAGER || this.isAdmin()
   }
 
   isAgency(): boolean {
-    return this.role === UserRole.AGENCY
+    return this.role === UserRole.AGENCY_OWNER
   }
 
   canManageUser(targetUser: UserEntity): boolean {
@@ -206,15 +206,15 @@ export class UserEntity {
 
   // Business logic methods
   canCreateListing(): boolean {
-    return this.isActive && (this.role === UserRole.USER || this.role === UserRole.AGENCY)
+    return this.isActive && (this.role === UserRole.USER || this.role === UserRole.AGENCY_OWNER)
   }
 
   canModerateContent(): boolean {
-    return this.isActive && (this.role === UserRole.MANAGER || this.role === UserRole.ADMIN)
+    return this.isActive && (this.role === UserRole.AGENCY_MANAGER || this.role === UserRole.ADMIN)
   }
 
   canAccessAdminPanel(): boolean {
-    return this.isActive && (this.role === UserRole.ADMIN || this.role === UserRole.MANAGER)
+    return this.isActive && (this.role === UserRole.ADMIN || this.role === UserRole.AGENCY_MANAGER)
   }
 
   canManageAgencies(): boolean {

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest"
+
 import { AIProviderService } from "../services/AIProviderService"
 import { ContentAnalysisService } from "../services/ContentAnalysisService"
 
@@ -54,7 +55,8 @@ describe("Content Analysis Service Tests", () => {
   describe("Content Categorization with Compromise", () => {
     it("should categorize electronics content using enhanced matching", async () => {
       const request = {
-        type: "listing",
+        id: "test-1",
+        type: "listing" as const,
         content: {
           title: "Latest Gaming Laptop",
           description: "High-performance laptop with NVIDIA graphics card, Intel processor, and RGB keyboard",
@@ -82,7 +84,8 @@ describe("Content Analysis Service Tests", () => {
 
     it("should categorize fashion content correctly", async () => {
       const request = {
-        type: "listing",
+        id: "test-2",
+        type: "listing" as const,
         content: {
           title: "Designer Dress",
           description: "Beautiful evening dress made from silk fabric with elegant design",
@@ -109,7 +112,8 @@ describe("Content Analysis Service Tests", () => {
   describe("Quality Assessment with Compromise", () => {
     it("should assess content quality using compromise grammar analysis", async () => {
       const request = {
-        type: "listing",
+        id: "test-3",
+        type: "listing" as const,
         content: {
           title: "Professional Camera Equipment",
           description:
@@ -135,7 +139,8 @@ describe("Content Analysis Service Tests", () => {
 
     it("should detect grammar issues using compromise", async () => {
       const request = {
-        type: "listing",
+        id: "test-4",
+        type: "listing" as const,
         content: {
           title: "BAD TITLE ALL CAPS",
           description:
@@ -162,7 +167,8 @@ describe("Content Analysis Service Tests", () => {
   describe("Sentiment Analysis", () => {
     it("should analyze positive sentiment", async () => {
       const request = {
-        type: "review",
+        id: "test-5",
+        type: "review" as const,
         content: {
           text: "This product is absolutely amazing! I love it so much. Excellent quality and fast delivery.",
         },
@@ -185,7 +191,8 @@ describe("Content Analysis Service Tests", () => {
 
     it("should analyze negative sentiment", async () => {
       const request = {
-        type: "review",
+        id: "test-6",
+        type: "review" as const,
         content: {
           text: "Terrible product. Poor quality and awful customer service. I hate it.",
         },
@@ -210,7 +217,8 @@ describe("Content Analysis Service Tests", () => {
   describe("Language Detection", () => {
     it("should detect English language", async () => {
       const request = {
-        type: "listing",
+        id: "test-7",
+        type: "listing" as const,
         content: {
           title: "English Product Title",
           description: "This is a description written in English language with proper grammar and vocabulary.",
@@ -235,7 +243,8 @@ describe("Content Analysis Service Tests", () => {
 
     it("should handle mixed content", async () => {
       const request = {
-        type: "listing",
+        id: "test-8",
+        type: "listing" as const,
         content: {
           title: "Mixed Language สินค้าดี",
           description: "This product is good. สินค้านี้ดีมาก. Very nice quality.",
@@ -261,7 +270,8 @@ describe("Content Analysis Service Tests", () => {
   describe("Comprehensive Analysis", () => {
     it("should perform complete content analysis", async () => {
       const request = {
-        type: "listing",
+        id: "test-9",
+        type: "listing" as const,
         content: {
           title: "Premium Wireless Headphones",
           description:

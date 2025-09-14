@@ -319,8 +319,8 @@ export class UserRepository {
     // Simple role counting
     const byRole = {
       [UserRole.USER]: 0,
-      [UserRole.AGENCY]: 0,
-      [UserRole.MANAGER]: 0,
+      [UserRole.AGENCY_OWNER]: 0,
+      [UserRole.AGENCY_MANAGER]: 0,
       [UserRole.ADMIN]: 0,
     } as Record<UserRole, number>
 
