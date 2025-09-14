@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/complexity/useLiteralKeys: Use old style dotenv */
+import logger from "@marketplace/logger"
 import dotenv from "dotenv"
 import { afterAll, beforeAll, beforeEach } from "vitest"
 
@@ -6,7 +8,7 @@ dotenv.config({ path: ".env.test", debug: false })
 
 // Global test setup
 beforeAll(async () => {
-  console.log("🧪 Setting up AI Service tests...")
+  logger.info("🧪 Setting up AI Service tests...")
 
   // Set test environment
   process.env["NODE_ENV"] = "test"
@@ -16,13 +18,13 @@ beforeAll(async () => {
   process.env["USER_SERVICE_URL"] = "http://localhost:3001"
   process.env["LISTING_SERVICE_URL"] = "http://localhost:3002"
 
-  console.log("✅ AI Service test setup complete")
+  logger.info("✅ AI Service test setup complete")
 })
 
 afterAll(async () => {
-  console.log("🧹 Cleaning up AI Service tests...")
+  logger.info("🧹 Cleaning up AI Service tests...")
   // Cleanup code here
-  console.log("✅ AI Service test cleanup complete")
+  logger.info("✅ AI Service test cleanup complete")
 })
 
 beforeEach(() => {

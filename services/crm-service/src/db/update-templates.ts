@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import dotenv from "dotenv"
 import { query } from "./connection"
 
@@ -6,35 +7,35 @@ dotenv.config()
 
 async function updateTemplatesTable() {
   try {
-    console.log("🔄 Updating message_templates table...")
+    logger.info("🔄 Updating message_templates table...")
 
     // Add missing columns
-    console.log("Adding 'type' column...")
+    logger.info("Adding 'type' column...")
     await query(`
       ALTER TABLE message_templates 
       ADD COLUMN IF NOT EXISTS type VARCHAR(50)
     `)
 
-    console.log("Adding 'category' column...")
+    logger.info("Adding 'category' column...")
     await query(`
       ALTER TABLE message_templates 
       ADD COLUMN IF NOT EXISTS category VARCHAR(100)
     `)
 
-    console.log("Adding 'conditions' column...")
+    logger.info("Adding 'conditions' column...")
     await query(`
       ALTER TABLE message_templates 
       ADD COLUMN IF NOT EXISTS conditions JSONB DEFAULT '{}'
     `)
 
-    console.log("Adding 'created_by' column...")
+    logger.info("Adding 'created_by' column...")
     await query(`
       ALTER TABLE message_templates 
       ADD COLUMN IF NOT EXISTS created_by UUID
     `)
 
     // Update existing data
-    console.log("Updating existing records...")
+    logger.info("Updating existing records...")
     await query(`
       UPDATE message_templates 
       SET 
@@ -44,14 +45,14 @@ async function updateTemplatesTable() {
     `)
 
     // Make type NOT NULL
-    console.log("Making 'type' column NOT NULL...")
+    logger.info("Making 'type' column NOT NULL...")
     await query(`
       ALTER TABLE message_templates 
       ALTER COLUMN type SET NOT NULL
     `)
 
     // Update variables column to JSONB
-    console.log("Converting variables to JSONB...")
+    logger.info("Converting variables to JSONB...")
     await query(`
       ALTER TABLE message_templates 
       ALTER COLUMN variables TYPE JSONB USING 
@@ -62,7 +63,7 @@ async function updateTemplatesTable() {
     `)
 
     // Create indexes
-    console.log("Creating indexes...")
+    logger.info("Creating indexes...")
     await query(`
       CREATE INDEX IF NOT EXISTS idx_message_templates_type ON message_templates(type)
     `)
@@ -76,7 +77,7 @@ async function updateTemplatesTable() {
     `)
 
     // Insert default templates
-    console.log("Inserting default templates...")
+    logger.info("Inserting default templates...")
 
     const defaultTemplates = [
       {
@@ -149,15 +150,15 @@ Feel free to ask any questions! I'm here to help. 😊`,
             true,
           ],
         )
-        console.log(`✅ Inserted template: ${template.name}`)
+        logger.info(`✅ Inserted template: ${template.name}`)
       } else {
-        console.log(`⏭️  Template already exists: ${template.name}`)
+        logger.info(`⏭️  Template already exists: ${template.name}`)
       }
     }
 
-    console.log("🎉 Templates table update completed successfully!")
+    logger.info("🎉 Templates table update completed successfully!")
   } catch (error) {
-    console.error("❌ Update failed:", error)
+    logger.error("❌ Update failed:", error)
     process.exit(1)
   }
 }

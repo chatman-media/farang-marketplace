@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { Job, Worker } from "bullmq"
 import { and, eq, inArray, lt } from "drizzle-orm"
 import { db } from "../../db/connection"
@@ -12,7 +13,7 @@ async function expireOldPayments(job: Job) {
   const { batchSize = 100 } = job.data
 
   try {
-    console.log("⏰ Processing expired payments...")
+    logger.info("⏰ Processing expired payments...")
 
     const now = new Date()
 
@@ -30,14 +31,14 @@ async function expireOldPayments(job: Job) {
         await paymentService.updatePaymentStatus(payment.id, "cancelled", "Payment expired")
         expired++
       } catch (error) {
-        console.error(`Failed to expire payment ${payment.id}:`, error)
+        logger.error(`Failed to expire payment ${payment.id}:`, error)
       }
     }
 
-    console.log(`⏰ Expired ${expired} payments`)
+    logger.info(`⏰ Expired ${expired} payments`)
     return { expired }
   } catch (error) {
-    console.error("Failed to process expired payments:", error)
+    logger.error("Failed to process expired payments:", error)
     throw error
   }
 }
@@ -47,7 +48,7 @@ async function retryFailedPayments(job: Job) {
   const { batchSize = 50, maxRetries = 3 } = job.data
 
   try {
-    console.log("🔄 Retrying failed payments...")
+    logger.info("🔄 Retrying failed payments...")
 
     // Find failed payments that can be retried
     const failedPayments = await db
@@ -66,18 +67,18 @@ async function retryFailedPayments(job: Job) {
     for (const payment of failedPayments) {
       try {
         // Reset to pending for retry
-        await paymentService.updatePaymentStatus(payment.id, "pending", `Retry attempt`)
+        await paymentService.updatePaymentStatus(payment.id, "pending", "Retry attempt")
 
         retried++
       } catch (error) {
-        console.error(`Failed to retry payment ${payment.id}:`, error)
+        logger.error(`Failed to retry payment ${payment.id}:`, error)
       }
     }
 
-    console.log(`🔄 Retried ${retried} failed payments`)
+    logger.info(`🔄 Retried ${retried} failed payments`)
     return { retried }
   } catch (error) {
-    console.error("Failed to retry failed payments:", error)
+    logger.error("Failed to retry failed payments:", error)
     throw error
   }
 }
@@ -87,7 +88,7 @@ async function processRefunds(job: Job) {
   const { batchSize = 50 } = job.data
 
   try {
-    console.log("💸 Processing pending refunds...")
+    logger.info("💸 Processing pending refunds...")
 
     // Find pending refunds
     const pendingRefunds = await db.select().from(refunds).where(eq(refunds.status, "pending")).limit(batchSize)
@@ -104,23 +105,23 @@ async function processRefunds(job: Job) {
 
           if (originalPayment.paymentMethod.includes("ton")) {
             // Process TON refund - would need to implement this method
-            console.log(`Processing TON refund for ${refund.id}`)
+            logger.info(`Processing TON refund for ${refund.id}`)
           } else if (originalPayment.paymentMethod.includes("stripe")) {
             // Process Stripe refund - would need to implement this method
-            console.log(`Processing Stripe refund for ${refund.id}`)
+            logger.info(`Processing Stripe refund for ${refund.id}`)
           }
 
           processed++
         }
       } catch (error) {
-        console.error(`Failed to process refund ${refund.id}:`, error)
+        logger.error(`Failed to process refund ${refund.id}:`, error)
       }
     }
 
-    console.log(`💸 Processed ${processed} refunds`)
+    logger.info(`💸 Processed ${processed} refunds`)
     return { processed }
   } catch (error) {
-    console.error("Failed to process refunds:", error)
+    logger.error("Failed to process refunds:", error)
     throw error
   }
 }
@@ -130,7 +131,7 @@ async function autoCompletePayments(job: Job) {
   const { batchSize = 100, delayMinutes = 5 } = job.data
 
   try {
-    console.log("✅ Auto-completing confirmed payments...")
+    logger.info("✅ Auto-completing confirmed payments...")
 
     const cutoffTime = new Date(Date.now() - delayMinutes * 60 * 1000)
 
@@ -148,14 +149,14 @@ async function autoCompletePayments(job: Job) {
         await paymentService.updatePaymentStatus(payment.id, "completed", "Auto-completed after confirmation delay")
         completed++
       } catch (error) {
-        console.error(`Failed to complete payment ${payment.id}:`, error)
+        logger.error(`Failed to complete payment ${payment.id}:`, error)
       }
     }
 
-    console.log(`✅ Auto-completed ${completed} payments`)
+    logger.info(`✅ Auto-completed ${completed} payments`)
     return { completed }
   } catch (error) {
-    console.error("Failed to auto-complete payments:", error)
+    logger.error("Failed to auto-complete payments:", error)
     throw error
   }
 }
@@ -182,4 +183,4 @@ const paymentLifecycleWorker = new Worker(
   { connection: redis },
 )
 
-console.log("🔄 Payment lifecycle job processors loaded")
+logger.info("🔄 Payment lifecycle job processors loaded")

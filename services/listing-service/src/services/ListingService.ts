@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import type {
   CreateProductRequest,
   CreateVehicleRequest,
@@ -90,7 +91,7 @@ export class ListingService {
 
       return this.mapToVehicleListing(result.listing, result.vehicle)
     } catch (error) {
-      console.error("Error creating vehicle listing:", error)
+      logger.error("Error creating vehicle listing:", error)
       throw new Error("Failed to create vehicle listing")
     }
   }
@@ -157,7 +158,7 @@ export class ListingService {
 
       return this.mapToProductListing(result.listing, result.product)
     } catch (error) {
-      console.error("Error creating product listing:", error)
+      logger.error("Error creating product listing:", error)
       throw new Error("Failed to create product listing")
     }
   }
@@ -178,7 +179,7 @@ export class ListingService {
 
       return this.mapToVehicleListing(result[0].listings, result[0].vehicles)
     } catch (error) {
-      console.error("Error getting vehicle listing:", error)
+      logger.error("Error getting vehicle listing:", error)
       throw new Error("Failed to get vehicle listing")
     }
   }
@@ -199,7 +200,7 @@ export class ListingService {
 
       return this.mapToProductListing(result[0].listings, result[0].products)
     } catch (error) {
-      console.error("Error getting product listing:", error)
+      logger.error("Error getting product listing:", error)
       throw new Error("Failed to get product listing")
     }
   }
@@ -439,7 +440,7 @@ export class ListingService {
         totalPages: Math.ceil(total / limit),
       }
     } catch (error) {
-      console.error("Error searching vehicle listings:", error)
+      logger.error("Error searching vehicle listings:", error)
       throw new Error("Failed to search vehicle listings")
     }
   }
@@ -517,7 +518,7 @@ export class ListingService {
         totalPages: Math.ceil(total / limit),
       }
     } catch (error) {
-      console.error("Error searching product listings:", error)
+      logger.error("Error searching product listings:", error)
       throw new Error("Failed to search product listings")
     }
   }
@@ -542,7 +543,7 @@ export class ListingService {
 
       return updated
     } catch (error) {
-      console.error("Error updating listing status:", error)
+      logger.error("Error updating listing status:", error)
       throw new Error("Failed to update listing status")
     }
   }
@@ -562,7 +563,7 @@ export class ListingService {
 
       return deleted
     } catch (error) {
-      console.error("Error deleting listing:", error)
+      logger.error("Error deleting listing:", error)
       throw new Error("Failed to delete listing")
     }
   }

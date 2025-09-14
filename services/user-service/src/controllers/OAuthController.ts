@@ -5,6 +5,7 @@ import {
   UnlinkSocialAccountRequest,
 } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
+import { OAuthStateManager } from "../config/redis"
 import { OAuthService } from "../services/OAuthService"
 
 export class OAuthController {
@@ -31,10 +32,10 @@ export class OAuthController {
       const state = this.oauthService.generateState()
       const authUrl = await this.oauthService.getAuthorizationUrl(provider as AuthProvider, state)
 
-      // TODO: Сохранить state в Redis для проверки (Fastify не имеет встроенных сессий)
-      // Пока что возвращаем state клиенту для проверки
+      // Сохраняем state в Redis для безопасной проверки
+      await OAuthStateManager.saveState(state, provider)
 
-      reply.send({ authUrl, state })
+      reply.send({ authUrl })
     } catch (error) {
       console.error("OAuth initiation error:", error)
       reply.code(500).send({ error: "Failed to initiate OAuth flow" })
@@ -54,8 +55,23 @@ export class OAuthController {
 
       // Проверяем state для защиты от CSRF (кроме Telegram)
       if (provider !== AuthProvider.TELEGRAM) {
-        // TODO: Проверить state из Redis или другого хранилища
-        // Пока что пропускаем проверку state, так как у нас нет сессий
+        if (!state) {
+          reply.code(400).send({ error: "State parameter is required" })
+          return
+        }
+
+        // Проверяем state из Redis
+        const stateData = await OAuthStateManager.validateState(state)
+        if (!stateData) {
+          reply.code(400).send({ error: "Invalid or expired state parameter" })
+          return
+        }
+
+        // Проверяем, что provider совпадает с сохраненным
+        if (stateData.provider !== provider) {
+          reply.code(400).send({ error: "State provider mismatch" })
+          return
+        }
 
         if (!code) {
           reply.code(400).send({ error: "Authorization code is required" })
@@ -167,7 +183,7 @@ export class OAuthController {
   }
 
   // GET /auth/providers
-  async getAvailableProviders(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  async getAvailableProviders(_req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const providers = Object.values(AuthProvider).map((provider) => ({
         name: provider,

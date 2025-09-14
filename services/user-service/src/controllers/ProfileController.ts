@@ -47,7 +47,7 @@ const VerificationRequestSchema = z.object({
 
 // Multer configuration for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, "uploads/profiles/")
   },
   filename: (req, file, cb) => {
@@ -200,7 +200,7 @@ export class ProfileController {
       }
 
       // Handle Fastify multipart
-      let data
+      let data: any | null = null
       try {
         data = await req.file()
       } catch (error) {

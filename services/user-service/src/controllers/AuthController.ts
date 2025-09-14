@@ -235,7 +235,7 @@ export class AuthController {
   }
 
   // Logout endpoint (for client-side token cleanup)
-  logout = async (req: FastifyRequest, reply: FastifyReply) => {
+  logout = async (_req: FastifyRequest, reply: FastifyReply) => {
     // In a stateless JWT implementation, logout is typically handled client-side
     // by removing the tokens from storage. However, we can provide this endpoint
     // for consistency and future token blacklisting if needed.

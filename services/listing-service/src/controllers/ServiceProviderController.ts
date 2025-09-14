@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import type { ServiceProviderFilters } from "@marketplace/shared-types"
 import { ProviderVerificationLevel } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
@@ -171,7 +172,7 @@ export class ServiceProviderController {
         message: "Service provider created successfully",
       })
     } catch (error) {
-      console.error("Create service provider error:", error)
+      logger.error("Create service provider error:", error)
 
       if (error instanceof z.ZodError) {
         return reply.code(400).send({
@@ -211,7 +212,7 @@ export class ServiceProviderController {
         message: "Service provider retrieved successfully",
       })
     } catch (error) {
-      console.error("Get service provider error:", error)
+      logger.error("Get service provider error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to retrieve service provider",
@@ -241,7 +242,7 @@ export class ServiceProviderController {
         data: result,
       })
     } catch (error) {
-      console.error("Error getting service providers:", error)
+      logger.error("Error getting service providers:", error)
       reply.status(500).send({
         success: false,
         error: "Failed to get service providers",
@@ -288,7 +289,7 @@ export class ServiceProviderController {
         message: "Service providers retrieved successfully",
       })
     } catch (error) {
-      console.error("Search service providers error:", error)
+      logger.error("Search service providers error:", error)
 
       if (error instanceof z.ZodError) {
         return reply.code(400).send({
@@ -369,7 +370,7 @@ export class ServiceProviderController {
         message: "Service provider updated successfully",
       })
     } catch (error) {
-      console.error("Update service provider error:", error)
+      logger.error("Update service provider error:", error)
 
       if (error instanceof z.ZodError) {
         return reply.code(400).send({
@@ -415,7 +416,7 @@ export class ServiceProviderController {
         message: "Service provider deleted successfully",
       })
     } catch (error) {
-      console.error("Delete service provider error:", error)
+      logger.error("Delete service provider error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to delete service provider",

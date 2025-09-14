@@ -22,13 +22,13 @@ export class AIProviderService {
         type: "openai",
         apiKey: process.env["OPENAI_API_KEY"],
         model: process.env["OPENAI_MODEL"] || "gpt-4-turbo-preview",
-        maxTokens: parseInt(process.env["OPENAI_MAX_TOKENS"] || "4000"),
+        maxTokens: Number.parseInt(process.env["OPENAI_MAX_TOKENS"] || "4000"),
         temperature: 0.7,
         enabled: true,
         priority: 1,
         rateLimit: {
-          requests: parseInt(process.env["AI_RATE_LIMIT_REQUESTS"] || "100"),
-          window: parseInt(process.env["AI_RATE_LIMIT_WINDOW"] || "3600"),
+          requests: Number.parseInt(process.env["AI_RATE_LIMIT_REQUESTS"] || "100"),
+          window: Number.parseInt(process.env["AI_RATE_LIMIT_WINDOW"] || "3600"),
         },
         cost: {
           inputTokens: 0.01, // $0.01 per 1k tokens
@@ -58,8 +58,8 @@ export class AIProviderService {
         enabled: true,
         priority: 2,
         rateLimit: {
-          requests: parseInt(process.env["AI_RATE_LIMIT_REQUESTS"] || "100"),
-          window: parseInt(process.env["AI_RATE_LIMIT_WINDOW"] || "3600"),
+          requests: Number.parseInt(process.env["AI_RATE_LIMIT_REQUESTS"] || "100"),
+          window: Number.parseInt(process.env["AI_RATE_LIMIT_WINDOW"] || "3600"),
         },
         cost: {
           inputTokens: 0.0014, // $0.0014 per 1k tokens
@@ -89,8 +89,8 @@ export class AIProviderService {
         enabled: true,
         priority: 3,
         rateLimit: {
-          requests: parseInt(process.env["AI_RATE_LIMIT_REQUESTS"] || "100"),
-          window: parseInt(process.env["AI_RATE_LIMIT_WINDOW"] || "3600"),
+          requests: Number.parseInt(process.env["AI_RATE_LIMIT_REQUESTS"] || "100"),
+          window: Number.parseInt(process.env["AI_RATE_LIMIT_WINDOW"] || "3600"),
         },
         cost: {
           inputTokens: 0.003, // $0.003 per 1k tokens

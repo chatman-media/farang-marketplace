@@ -243,7 +243,7 @@ export class MarketplaceIntegrationService {
         channel: await this.selectOptimalChannel(userId, type),
         timing: optimalTiming,
         content: personalizedContent,
-        aiReasoning: `Generated based on user behavior analysis and engagement optimization`,
+        aiReasoning: "Generated based on user behavior analysis and engagement optimization",
         expectedEngagement: await this.predictEngagement(userId, type, personalizedContent),
         createdAt: new Date(),
       }
@@ -852,8 +852,8 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
     const messages = {
       booking_reminder: `Your booking ${context["bookingId"] || ""} needs attention.`,
       price_alert: `Price changes detected for ${context["itemName"] || "your items"}.`,
-      recommendation: `New recommendations available based on your preferences.`,
-      engagement: `Check out the latest updates on our platform.`,
+      recommendation: "New recommendations available based on your preferences.",
+      engagement: "Check out the latest updates on our platform.",
     }
     return messages[type]
   }
@@ -1002,10 +1002,10 @@ Provide JSON response with flags array, reasoning, and confidence (0-1).`
 
     if (currentHour >= 9 && currentHour <= 17) {
       return "high" // Business hours
-    } else if (currentHour >= 18 && currentHour <= 22) {
-      return "medium" // Evening
-    } else {
-      return "low" // Night/early morning
     }
+    if (currentHour >= 18 && currentHour <= 22) {
+      return "medium" // Evening
+    }
+    return "low" // Night/early morning
   }
 }

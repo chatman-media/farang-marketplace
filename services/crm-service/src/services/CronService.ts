@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { query } from "../db/connection"
 import { SegmentationService } from "./SegmentationService"
 
@@ -39,12 +40,12 @@ export class CronService {
   // Start the cron service
   async start(): Promise<void> {
     if (this.isRunning) {
-      console.log("CronService is already running")
+      logger.info("CronService is already running")
       return
     }
 
     this.isRunning = true
-    console.log("🚀 Starting CronService...")
+    logger.info("🚀 Starting CronService...")
 
     // Start all active jobs
     for (const [jobId, job] of this.jobs) {
@@ -53,18 +54,18 @@ export class CronService {
       }
     }
 
-    console.log(`✅ CronService started with ${this.jobs.size} jobs`)
+    logger.info(`✅ CronService started with ${this.jobs.size} jobs`)
   }
 
   // Stop the cron service
   async stop(): Promise<void> {
     if (!this.isRunning) {
-      console.log("CronService is not running")
+      logger.info("CronService is not running")
       return
     }
 
     this.isRunning = false
-    console.log("🛑 Stopping CronService...")
+    logger.info("🛑 Stopping CronService...")
 
     // Stop all running intervals
     for (const [jobId, interval] of this.intervals) {
@@ -72,13 +73,13 @@ export class CronService {
       this.intervals.delete(jobId)
     }
 
-    console.log("✅ CronService stopped")
+    logger.info("✅ CronService stopped")
   }
 
   // Add a new cron job
   addJob(job: CronJob): void {
     this.jobs.set(job.id, job)
-    console.log(`📝 Added cron job: ${job.name}`)
+    logger.info(`📝 Added cron job: ${job.name}`)
 
     if (this.isRunning && job.isActive) {
       this.startJob(job.id)
@@ -98,7 +99,7 @@ export class CronService {
     }
 
     this.jobs.delete(jobId)
-    console.log(`🗑️ Removed cron job: ${job.name}`)
+    logger.info(`🗑️ Removed cron job: ${job.name}`)
   }
 
   // Start a specific job
@@ -120,13 +121,13 @@ export class CronService {
     }, intervalMs)
 
     this.intervals.set(jobId, interval)
-    console.log(`⏰ Started cron job: ${job.name} (every ${intervalMs}ms)`)
+    logger.info(`⏰ Started cron job: ${job.name} (every ${intervalMs}ms)`)
   }
 
   // Execute a job
   private async executeJob(job: CronJob): Promise<void> {
     try {
-      console.log(`🔄 Executing job: ${job.name}`)
+      logger.info(`🔄 Executing job: ${job.name}`)
 
       const startTime = Date.now()
       await job.handler()
@@ -136,9 +137,9 @@ export class CronService {
       job.lastRun = new Date()
       job.nextRun = new Date(Date.now() + this.parseScheduleToMs(job.schedule))
 
-      console.log(`✅ Job completed: ${job.name} (${duration}ms)`)
+      logger.info(`✅ Job completed: ${job.name} (${duration}ms)`)
     } catch (error) {
-      console.error(`❌ Job failed: ${job.name}`, error)
+      logger.error(`❌ Job failed: ${job.name}`, error)
     }
   }
 
@@ -160,7 +161,7 @@ export class CronService {
         return 6 * 60 * 60 * 1000
       default:
         // Default to 1 hour for unknown patterns
-        console.warn(`Unknown cron schedule: ${schedule}, defaulting to 1 hour`)
+        logger.warn(`Unknown cron schedule: ${schedule}, defaulting to 1 hour`)
         return 60 * 60 * 1000
     }
   }
@@ -228,9 +229,9 @@ export class CronService {
         await this.saveCampaignMetrics(campaign.id, metrics)
       }
 
-      console.log(`📊 Updated metrics for ${campaignsResult.rows.length} campaigns`)
+      logger.info(`📊 Updated metrics for ${campaignsResult.rows.length} campaigns`)
     } catch (error) {
-      console.error("Failed to calculate campaign metrics:", error)
+      logger.error("Failed to calculate campaign metrics:", error)
     }
   }
 
@@ -253,12 +254,12 @@ export class CronService {
     )
 
     const stats = statsResult.rows[0]
-    const totalSent = parseInt(stats.total_sent) || 0
-    const totalDelivered = parseInt(stats.total_delivered) || 0
-    const totalOpened = parseInt(stats.total_opened) || 0
-    const totalClicked = parseInt(stats.total_clicked) || 0
-    const totalBounced = parseInt(stats.total_bounced) || 0
-    const totalUnsubscribed = parseInt(stats.total_unsubscribed) || 0
+    const totalSent = Number.parseInt(stats.total_sent, 10) || 0
+    const totalDelivered = Number.parseInt(stats.total_delivered, 10) || 0
+    const totalOpened = Number.parseInt(stats.total_opened, 10) || 0
+    const totalClicked = Number.parseInt(stats.total_clicked, 10) || 0
+    const totalBounced = Number.parseInt(stats.total_bounced, 10) || 0
+    const totalUnsubscribed = Number.parseInt(stats.total_unsubscribed, 10) || 0
 
     // Calculate rates
     const openRate = totalSent > 0 ? (totalOpened / totalSent) * 100 : 0
@@ -347,9 +348,9 @@ export class CronService {
         )
       `)
 
-      console.log("📈 Updated customer metrics")
+      logger.info("📈 Updated customer metrics")
     } catch (error) {
-      console.error("Failed to update customer metrics:", error)
+      logger.error("Failed to update customer metrics:", error)
     }
   }
 
@@ -380,9 +381,9 @@ export class CronService {
         })
       }
 
-      console.log(`🎯 Triggered follow-ups for ${leadsResult.rows.length} leads`)
+      logger.info(`🎯 Triggered follow-ups for ${leadsResult.rows.length} leads`)
     } catch (error) {
-      console.error("Failed to trigger lead follow-ups:", error)
+      logger.error("Failed to trigger lead follow-ups:", error)
     }
   }
 
@@ -401,11 +402,11 @@ export class CronService {
         WHERE created_at < NOW() - INTERVAL '3 months'
       `)
 
-      console.log(
+      logger.info(
         `🧹 Cleaned up ${oldCommsResult.rowCount} old communications and ${oldExecutionsResult.rowCount} old executions`,
       )
     } catch (error) {
-      console.error("Failed to cleanup old data:", error)
+      logger.error("Failed to cleanup old data:", error)
     }
   }
 
@@ -438,7 +439,7 @@ export class CronService {
       }
     }
 
-    console.log(`${isActive ? "✅ Enabled" : "❌ Disabled"} job: ${job.name}`)
+    logger.info(`${isActive ? "✅ Enabled" : "❌ Disabled"} job: ${job.name}`)
   }
 
   // Recalculate segment memberships
@@ -447,9 +448,9 @@ export class CronService {
       const segmentationService = new SegmentationService()
       await segmentationService.recalculateAllSegmentMemberships()
 
-      console.log("🎯 Recalculated all segment memberships")
+      logger.info("🎯 Recalculated all segment memberships")
     } catch (error) {
-      console.error("❌ Failed to recalculate segment memberships:", error)
+      logger.error("❌ Failed to recalculate segment memberships:", error)
       throw error
     }
   }

@@ -459,7 +459,7 @@ export class BookingService {
       children: dbBooking.children,
       infants: dbBooking.infants,
       guests: dbBooking.guests,
-      totalPrice: parseFloat(dbBooking.totalPrice),
+      totalPrice: Number.parseFloat(dbBooking.totalPrice),
       currency: dbBooking.currency,
       paymentStatus: dbBooking.paymentStatus,
       specialRequests: dbBooking.specialRequests,

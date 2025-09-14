@@ -1,11 +1,11 @@
+import { createDatabaseConnection } from "@marketplace/database-schema"
+import logger from "@marketplace/logger"
 import { createApp, env } from "./app"
-import { checkDatabaseConnection, closeDatabaseConnection } from "./db/connection"
+
+const db = createDatabaseConnection(process.env.DATABASE_URL!)
 
 const start = async () => {
   try {
-    // Check database connection
-    await checkDatabaseConnection()
-
     const app = await createApp()
 
     await app.listen({
@@ -13,28 +13,26 @@ const start = async () => {
       host: "0.0.0.0",
     })
 
-    console.log(`🚀 Agency service running on port ${env.PORT}`)
-    console.log(`📊 Health check: http://localhost:${env.PORT}/health`)
-    console.log(`🏢 Agencies API: http://localhost:${env.PORT}/api/agencies`)
-    console.log(`🔧 Services API: http://localhost:${env.PORT}/api/services`)
-    console.log(`📋 Assignments API: http://localhost:${env.PORT}/api/assignments`)
-    console.log(`🔗 Booking Integration API: http://localhost:${env.PORT}/api/booking-integration`)
+    logger.info(`🚀 Agency service running on port ${env.PORT}`)
+    logger.info(`📊 Health check: http://localhost:${env.PORT}/health`)
+    logger.info(`🏢 Agencies API: http://localhost:${env.PORT}/api/agencies`)
+    logger.info(`🔧 Services API: http://localhost:${env.PORT}/api/services`)
+    logger.info(`📋 Assignments API: http://localhost:${env.PORT}/api/assignments`)
+    logger.info(`🔗 Booking Integration API: http://localhost:${env.PORT}/api/booking-integration`)
   } catch (error) {
-    console.error("❌ Error starting server:", error)
+    logger.error("❌ Error starting server:", error)
     process.exit(1)
   }
 }
 
 // Graceful shutdown
 process.on("SIGTERM", async () => {
-  console.log("🛑 SIGTERM received, shutting down gracefully")
-  await closeDatabaseConnection()
+  logger.info("🛑 SIGTERM received, shutting down gracefully")
   process.exit(0)
 })
 
 process.on("SIGINT", async () => {
-  console.log("🛑 SIGINT received, shutting down gracefully")
-  await closeDatabaseConnection()
+  logger.info("🛑 SIGINT received, shutting down gracefully")
   process.exit(0)
 })
 

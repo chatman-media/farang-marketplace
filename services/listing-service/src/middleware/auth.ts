@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
 
@@ -55,7 +56,7 @@ export const authMiddleware = async (request: FastifyRequest, reply: FastifyRepl
       })
     }
 
-    console.error("Auth middleware error:", error)
+    logger.error("Auth middleware error:", error)
     return reply.code(500).send({
       success: false,
       message: "Authentication failed",
@@ -82,7 +83,7 @@ export const optionalAuthMiddleware = async (request: FastifyRequest, reply: Fas
       role: decoded.role,
     }
   } catch (error) {
-    console.log("Optional auth error:", error)
+    logger.log("Optional auth error:", error)
     // If token is invalid, continue without authentication
   }
 }

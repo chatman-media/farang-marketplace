@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 
 import { AgencyService } from "../services/AgencyService"
@@ -27,7 +28,7 @@ export class FastifyAgencyController {
         data: agency,
       })
     } catch (error) {
-      console.error("Error creating agency:", error)
+      logger.error("Error creating agency:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to create agency",
@@ -55,7 +56,7 @@ export class FastifyAgencyController {
         data: agency,
       })
     } catch (error) {
-      console.error("Error getting agency:", error)
+      logger.error("Error getting agency:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get agency",
@@ -90,7 +91,7 @@ export class FastifyAgencyController {
         },
       })
     } catch (error) {
-      console.error("Error getting agencies:", error)
+      logger.error("Error getting agencies:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get agencies",
@@ -121,7 +122,7 @@ export class FastifyAgencyController {
         data: agency,
       })
     } catch (error) {
-      console.error("Error updating agency:", error)
+      logger.error("Error updating agency:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update agency",
@@ -150,7 +151,7 @@ export class FastifyAgencyController {
         message: "Agency deleted successfully",
       })
     } catch (error) {
-      console.error("Error deleting agency:", error)
+      logger.error("Error deleting agency:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to delete agency",
@@ -171,7 +172,7 @@ export class FastifyAgencyController {
         data: stats,
       })
     } catch (error) {
-      console.error("Error getting agency stats:", error)
+      logger.error("Error getting agency stats:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get agency statistics",
@@ -192,7 +193,7 @@ export class FastifyAgencyController {
         data: agency ? [agency] : [],
       })
     } catch (error) {
-      console.error("Error getting user agencies:", error)
+      logger.error("Error getting user agencies:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to get user agencies",
@@ -233,7 +234,7 @@ export class FastifyAgencyController {
         data: agency,
       })
     } catch (error) {
-      console.error("Error updating agency status:", error)
+      logger.error("Error updating agency status:", error)
       return reply.code(500).send({
         success: false,
         message: error instanceof Error ? error.message : "Failed to update agency status",

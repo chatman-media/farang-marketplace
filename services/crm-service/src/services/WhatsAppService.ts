@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import {
   CommunicationChannel,
   CommunicationHistory,
@@ -46,25 +47,25 @@ export class WhatsAppService {
 
   private setupHandlers() {
     this.client.on("qr", (qr) => {
-      console.log("WhatsApp QR Code received. Please scan with your phone.")
-      console.log("QR Code:", qr)
+      logger.info("WhatsApp QR Code received. Please scan with your phone.")
+      logger.info("QR Code:", qr)
     })
 
     this.client.on("ready", () => {
-      console.log("WhatsApp client is ready!")
+      logger.info("WhatsApp client is ready!")
       this.isReady = true
     })
 
     this.client.on("authenticated", () => {
-      console.log("WhatsApp client authenticated")
+      logger.info("WhatsApp client authenticated")
     })
 
     this.client.on("auth_failure", (msg) => {
-      console.error("WhatsApp authentication failed:", msg)
+      logger.error("WhatsApp authentication failed:", msg)
     })
 
     this.client.on("disconnected", (reason) => {
-      console.log("WhatsApp client disconnected:", reason)
+      logger.info("WhatsApp client disconnected:", reason)
       this.isReady = false
     })
 
@@ -81,7 +82,7 @@ export class WhatsAppService {
     try {
       await this.client.initialize()
     } catch (error) {
-      console.error("Failed to initialize WhatsApp client:", error)
+      logger.error("Failed to initialize WhatsApp client:", error)
       throw error
     }
   }
@@ -147,7 +148,7 @@ export class WhatsAppService {
         sentAt: new Date(),
       }
     } catch (error: any) {
-      console.error("WhatsApp message sending failed:", error)
+      logger.error("WhatsApp message sending failed:", error)
 
       // Log failed communication
       const historyId = await this.logCommunication({
@@ -228,7 +229,7 @@ export class WhatsAppService {
       // Process the message (you can add custom logic here)
       await this.processIncomingMessage(customer.id, content, message)
     } catch (error) {
-      console.error("Error handling incoming WhatsApp message:", error)
+      logger.error("Error handling incoming WhatsApp message:", error)
     }
   }
 
@@ -257,7 +258,7 @@ export class WhatsAppService {
         [status, message.id._serialized],
       )
     } catch (error) {
-      console.error("Error handling WhatsApp message acknowledgment:", error)
+      logger.error("Error handling WhatsApp message acknowledgment:", error)
     }
   }
 
@@ -282,10 +283,10 @@ export class WhatsAppService {
     // Add country code if not present (assuming Thailand +66)
     let formatted = cleaned
     if (!formatted.startsWith("66") && formatted.length === 9) {
-      formatted = "66" + formatted
+      formatted = `66${formatted}`
     }
 
-    return formatted + "@c.us"
+    return `${formatted}@c.us`
   }
 
   private async findCustomerByWhatsAppId(whatsappId: string) {
@@ -293,7 +294,7 @@ export class WhatsAppService {
       const result = await query("SELECT * FROM customers WHERE whatsapp_id = $1", [whatsappId])
       return result.rows.length > 0 ? result.rows[0] : null
     } catch (error) {
-      console.error("Error finding customer by WhatsApp ID:", error)
+      logger.error("Error finding customer by WhatsApp ID:", error)
       return null
     }
   }
@@ -315,7 +316,7 @@ export class WhatsAppService {
         variables: row.variables || [],
       }
     } catch (error) {
-      console.error("Error fetching WhatsApp template:", error)
+      logger.error("Error fetching WhatsApp template:", error)
       return null
     }
   }

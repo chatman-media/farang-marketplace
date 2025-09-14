@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
 
@@ -87,7 +88,7 @@ export class PricingController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error calculating booking price:", error)
+      logger.error("Error calculating booking price:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -116,7 +117,7 @@ export class PricingController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error calculating service price:", error)
+      logger.error("Error calculating service price:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -142,7 +143,7 @@ export class PricingController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error getting quick estimate:", error)
+      logger.error("Error getting quick estimate:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -185,7 +186,7 @@ export class PricingController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error applying dynamic pricing:", error)
+      logger.error("Error applying dynamic pricing:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -211,7 +212,7 @@ export class PricingController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error getting pricing breakdown:", error)
+      logger.error("Error getting pricing breakdown:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -245,7 +246,7 @@ export class PricingController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error comparing pricing:", error)
+      logger.error("Error comparing pricing:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",

@@ -39,23 +39,23 @@ export class RecommendationController {
           searchQuery: query?.searchQuery || "",
           category: query?.category || "",
           location: query?.location || "",
-          budget: query?.budget ? parseFloat(query.budget) : 0,
+          budget: query?.budget ? Number.parseFloat(query.budget) : 0,
         },
         filters: {
           categories: query?.categories ? query.categories.split(",") : [],
           priceRange:
             query?.minPrice && query?.maxPrice
               ? {
-                  min: parseFloat(query.minPrice),
-                  max: parseFloat(query.maxPrice),
+                  min: Number.parseFloat(query.minPrice),
+                  max: Number.parseFloat(query.maxPrice),
                 }
               : { min: 0, max: 999999 },
           location: query?.filterLocation || "",
-          rating: query?.minRating ? parseFloat(query.minRating) : 0,
+          rating: query?.minRating ? Number.parseFloat(query.minRating) : 0,
           availability: query?.availability === "true",
         },
-        limit: query?.limit ? parseInt(query.limit) : 20,
-        diversityFactor: query?.diversityFactor ? parseFloat(query.diversityFactor) : 0.3,
+        limit: query?.limit ? Number.parseInt(query.limit) : 20,
+        diversityFactor: query?.diversityFactor ? Number.parseFloat(query.diversityFactor) : 0.3,
       }
 
       const recommendations = await this.recommendationEngine.generateRecommendations(request)
@@ -145,7 +145,7 @@ export class RecommendationController {
       const query = req.query as any
       const { itemId } = params
       const userId = req.user?.id
-      const limit = query?.limit ? parseInt(query.limit) : 10
+      const limit = query?.limit ? Number.parseInt(query.limit) : 10
 
       // Create a recommendation request based on the item
       const request = {
@@ -191,7 +191,7 @@ export class RecommendationController {
       const query = req.query as any
       const category = query?.category
       const location = query?.location
-      const limit = query?.limit ? parseInt(query.limit) : 20
+      const limit = query?.limit ? Number.parseInt(query.limit) : 20
 
       // Mock trending items - in real implementation would use actual trending data
       const trendingItems = Array.from({ length: limit }, (_, i) => ({

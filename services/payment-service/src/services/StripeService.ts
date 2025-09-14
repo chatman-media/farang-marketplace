@@ -1,5 +1,7 @@
+import logger from "@marketplace/logger"
+import { PaymentStatus } from "@marketplace/shared-types"
 import Stripe from "stripe"
-import { PaymentMethodType, PaymentStatus } from "../db/schema"
+import { PaymentMethodType } from "@/db/schema"
 
 export interface StripePaymentRequest {
   amount: number // in cents
@@ -81,7 +83,7 @@ export class StripeService {
         chargeId: paymentIntent.latest_charge as string,
       }
     } catch (error) {
-      console.error("Stripe payment intent creation failed:", error)
+      logger.error("Stripe payment intent creation failed:", error)
       throw new Error(`Payment processing failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -100,7 +102,7 @@ export class StripeService {
         chargeId: paymentIntent.latest_charge as string,
       }
     } catch (error) {
-      console.error("Stripe payment confirmation failed:", error)
+      logger.error("Stripe payment confirmation failed:", error)
       throw new Error(`Payment confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -112,7 +114,7 @@ export class StripeService {
     try {
       return await this.stripe.paymentIntents.retrieve(paymentIntentId)
     } catch (error) {
-      console.error("Failed to retrieve payment intent:", error)
+      logger.error("Failed to retrieve payment intent:", error)
       throw new Error(`Failed to retrieve payment: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -135,7 +137,7 @@ export class StripeService {
         metadata: request.metadata || {},
       })
     } catch (error) {
-      console.error("Stripe refund creation failed:", error)
+      logger.error("Stripe refund creation failed:", error)
       throw new Error(`Refund processing failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -163,7 +165,7 @@ export class StripeService {
         address: customerData.address,
       })
     } catch (error) {
-      console.error("Stripe customer creation failed:", error)
+      logger.error("Stripe customer creation failed:", error)
       throw new Error(`Customer creation failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -182,7 +184,7 @@ export class StripeService {
 
       return paymentMethod
     } catch (error) {
-      console.error("Stripe payment method creation failed:", error)
+      logger.error("Stripe payment method creation failed:", error)
       throw new Error(`Payment method creation failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -194,7 +196,7 @@ export class StripeService {
     try {
       return this.stripe.webhooks.constructEvent(payload, signature, this.webhookSecret)
     } catch (error) {
-      console.error("Stripe webhook signature verification failed:", error)
+      logger.error("Stripe webhook signature verification failed:", error)
       throw new Error("Invalid webhook signature")
     }
   }
@@ -244,22 +246,24 @@ export class StripeService {
   /**
    * Map Stripe payment status to our payment status
    */
-  private mapStripeStatusToPaymentStatus(stripeStatus: string): PaymentStatus {
+  private mapStripeStatusToPaymentStatus(stripeStatus: string) {
     switch (stripeStatus) {
       case "requires_payment_method":
       case "requires_confirmation":
       case "requires_action":
-        return "pending"
+        return PaymentStatus.PENDING
       case "processing":
-        return "processing"
+        return PaymentStatus.PROCESSING
       case "succeeded":
-        return "completed"
+        return PaymentStatus.COMPLETED
       case "canceled":
-        return "cancelled"
+        return PaymentStatus.CANCELLED
       case "requires_capture":
-        return "confirmed"
+        return PaymentStatus.CONFIRMED
+      case "refunded":
+        return PaymentStatus.REFUNDED
       default:
-        return "failed"
+        return PaymentStatus.FAILED
     }
   }
 

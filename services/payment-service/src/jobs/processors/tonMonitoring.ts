@@ -1,8 +1,9 @@
+import logger from "@marketplace/logger"
 import axios from "axios"
 import { Job, Worker } from "bullmq"
-import { and, eq, inArray } from "drizzle-orm"
+import { and, inArray } from "drizzle-orm"
 import { db } from "../../db/connection"
-import { payments, transactions } from "../../db/schema"
+import { payments } from "../../db/schema"
 import { ModernTonService } from "../../services/ModernTonService"
 import { PaymentService } from "../../services/PaymentService"
 import { redis } from "../index"
@@ -15,7 +16,7 @@ async function checkPendingTransactions(job: Job) {
   const { batchSize = 50 } = job.data
 
   try {
-    console.log("🔍 Checking pending TON transactions...")
+    logger.info("🔍 Checking pending TON transactions...")
 
     // Get pending TON payments
     const pendingPayments = await db
@@ -45,15 +46,15 @@ async function checkPendingTransactions(job: Job) {
 
           processed++
         } catch (error) {
-          console.error(`Failed to check transaction ${payment.tonTransactionHash}:`, error)
+          logger.error(`Failed to check transaction ${payment.tonTransactionHash}:`, error)
         }
       }
     }
 
-    console.log(`✅ Processed ${processed} transactions, ${confirmed} confirmed`)
+    logger.info(`✅ Processed ${processed} transactions, ${confirmed} confirmed`)
     return { processed, confirmed }
   } catch (error) {
-    console.error("Failed to check pending transactions:", error)
+    logger.error("Failed to check pending transactions:", error)
     throw error
   }
 }
@@ -61,7 +62,7 @@ async function checkPendingTransactions(job: Job) {
 // Process TON exchange rate updates
 async function updateExchangeRates(job: Job) {
   try {
-    console.log("💱 Updating TON exchange rates...")
+    logger.info("💱 Updating TON exchange rates...")
 
     // Fetch current TON price from CoinGecko
     const response = await axios.get("https://api.coingecko.com/api/v3/simple/price", {
@@ -86,12 +87,12 @@ async function updateExchangeRates(job: Job) {
       }
 
       // You could store this in Redis or a dedicated table
-      console.log("💱 Exchange rates updated:", exchangeRates)
+      logger.info("💱 Exchange rates updated:", exchangeRates)
 
       return exchangeRates
     }
   } catch (error) {
-    console.error("Failed to update exchange rates:", error)
+    logger.error("Failed to update exchange rates:", error)
     throw error
   }
 }
@@ -101,7 +102,7 @@ async function syncJettonBalances(job: Job) {
   const { walletAddress } = job.data
 
   try {
-    console.log(`🪙 Syncing Jetton balances for ${walletAddress}...`)
+    logger.info(`🪙 Syncing Jetton balances for ${walletAddress}...`)
 
     // Get wallet info which includes jetton balances
     const walletInfo = await tonService.getWalletInfo(walletAddress)
@@ -112,10 +113,10 @@ async function syncJettonBalances(job: Job) {
       updated_at: new Date(),
     }
 
-    console.log("🪙 Jetton balances synced:", balances)
+    logger.info("🪙 Jetton balances synced:", balances)
     return balances
   } catch (error) {
-    console.error("Failed to sync Jetton balances:", error)
+    logger.error("Failed to sync Jetton balances:", error)
     throw error
   }
 }
@@ -123,21 +124,21 @@ async function syncJettonBalances(job: Job) {
 // Process blockchain network health check
 async function healthCheckTonNetwork(job: Job) {
   try {
-    console.log("🏥 Checking TON network health...")
+    logger.info("🏥 Checking TON network health...")
 
     // Check if we can connect to TON network
     const isHealthy = await tonService.isNetworkHealthy()
 
     if (!isHealthy) {
-      console.error("❌ TON network is unhealthy!")
+      logger.error("❌ TON network is unhealthy!")
       // Could send alerts here
     } else {
-      console.log("✅ TON network is healthy")
+      logger.info("✅ TON network is healthy")
     }
 
     return { healthy: isHealthy, timestamp: new Date() }
   } catch (error) {
-    console.error("Failed to check TON network health:", error)
+    logger.error("Failed to check TON network health:", error)
     throw error
   }
 }
@@ -164,4 +165,4 @@ const tonMonitoringWorker = new Worker(
   { connection: redis },
 )
 
-console.log("🔄 TON monitoring job processors loaded")
+logger.info("🔄 TON monitoring job processors loaded")

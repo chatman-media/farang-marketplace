@@ -1,3 +1,4 @@
+import { logger } from "@marketplace/logger"
 import dotenv from "dotenv"
 import { query } from "./connection"
 
@@ -6,17 +7,17 @@ dotenv.config()
 
 async function fixTemplatesTable() {
   try {
-    console.log("🔧 Fixing message_templates table...")
+    logger.info("🔧 Fixing message_templates table...")
 
     // Make channel nullable since we're using type instead
-    console.log("Making 'channel' column nullable...")
+    logger.info("Making 'channel' column nullable...")
     await query(`
       ALTER TABLE message_templates 
       ALTER COLUMN channel DROP NOT NULL
     `)
 
     // Insert default templates
-    console.log("Inserting default templates...")
+    logger.info("Inserting default templates...")
 
     const defaultTemplates = [
       {
@@ -129,15 +130,15 @@ Best regards,
             true,
           ],
         )
-        console.log(`✅ Inserted template: ${template.name}`)
+        logger.info(`✅ Inserted template: ${template.name}`)
       } else {
-        console.log(`⏭️  Template already exists: ${template.name}`)
+        logger.info(`⏭️  Template already exists: ${template.name}`)
       }
     }
 
-    console.log("🎉 Templates table fix completed successfully!")
+    logger.info("🎉 Templates table fix completed successfully!")
   } catch (error) {
-    console.error("❌ Fix failed:", error)
+    logger.error("❌ Fix failed:", error)
     process.exit(1)
   }
 }

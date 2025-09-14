@@ -1,5 +1,5 @@
 import { logger } from "@marketplace/logger"
-import { and, count, eq, gte, lte, sql } from "drizzle-orm"
+import { and, count, eq, gte, lte } from "drizzle-orm"
 
 import { ListingServiceClient } from "../clients/ListingServiceClient"
 import { db } from "../db/connection"

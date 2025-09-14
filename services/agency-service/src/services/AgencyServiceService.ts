@@ -1,13 +1,25 @@
-import { and, asc, desc, eq, ilike, sql } from "drizzle-orm"
-
-import { db } from "../db/connection"
 import {
-  type AgencyService,
   agencies,
   agencyServices,
-  type NewAgencyService,
-  type ServiceCategoryType,
-} from "../db/schema"
+  and,
+  asc,
+  createDatabaseConnection,
+  desc,
+  eq,
+  type InferInsertModel,
+  type InferSelectModel,
+  ilike,
+  productTypeEnum,
+  sql,
+} from "@marketplace/database-schema"
+import logger from "@marketplace/logger"
+
+const db = createDatabaseConnection(process.env.DATABASE_URL!)
+
+// Type definitions
+type AgencyService = InferSelectModel<typeof agencyServices>
+type NewAgencyService = InferInsertModel<typeof agencyServices>
+type ServiceCategoryType = (typeof productTypeEnum.enumValues)[number]
 
 export interface ServiceFilters {
   agencyId?: string
@@ -23,7 +35,7 @@ export interface ServiceFilters {
 export interface ServiceSearchOptions {
   page?: number
   limit?: number
-  sortBy?: "name" | "basePrice" | "createdAt" | "category"
+  sortBy?: "name" | "createdAt" | "category"
   sortOrder?: "asc" | "desc"
 }
 
@@ -169,25 +181,15 @@ export class AgencyServiceService {
         )
       }
 
-      if (filters.priceRange) {
-        if (filters.priceRange.min !== undefined) {
-          conditions.push(sql`${agencyServices.basePrice} >= ${filters.priceRange.min}`)
-        }
-        if (filters.priceRange.max !== undefined) {
-          conditions.push(sql`${agencyServices.basePrice} <= ${filters.priceRange.max}`)
-        }
-      }
+      // Price range filtering removed - basePrice field not available in schema
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
       // Build sort clause
-      let orderClause
+      let orderClause: any
       switch (sortBy) {
         case "name":
           orderClause = sortOrder === "asc" ? asc(agencyServices.name) : desc(agencyServices.name)
-          break
-        case "basePrice":
-          orderClause = sortOrder === "asc" ? asc(agencyServices.basePrice) : desc(agencyServices.basePrice)
           break
         case "category":
           orderClause = sortOrder === "asc" ? asc(agencyServices.category) : desc(agencyServices.category)
@@ -204,22 +206,14 @@ export class AgencyServiceService {
         .where(whereClause)
 
       // Get services with agency names
-      const serviceList = await db
+      const services = await db
         .select({
           id: agencyServices.id,
           agencyId: agencyServices.agencyId,
           name: agencyServices.name,
           description: agencyServices.description,
           category: agencyServices.category,
-          basePrice: agencyServices.basePrice,
-          currency: agencyServices.currency,
-          pricingModel: agencyServices.pricingModel,
           isActive: agencyServices.isActive,
-          requiresApproval: agencyServices.requiresApproval,
-          estimatedDuration: agencyServices.estimatedDuration,
-          requirements: agencyServices.requirements,
-          capabilities: agencyServices.capabilities,
-          metadata: agencyServices.metadata,
           createdAt: agencyServices.createdAt,
           updatedAt: agencyServices.updatedAt,
           agencyName: agencies.name,
@@ -232,10 +226,10 @@ export class AgencyServiceService {
         .offset(offset)
 
       const total = Number(countResult[0]?.count || 0)
-      const hasMore = offset + serviceList.length < total
+      const hasMore = offset + services.length < total
 
       return {
-        services: serviceList,
+        services,
         total,
         page,
         limit,
@@ -256,7 +250,7 @@ export class AgencyServiceService {
         .select()
         .from(agencyServices)
         .where(and(eq(agencyServices.category, category), eq(agencyServices.isActive, true)))
-        .orderBy(asc(agencyServices.basePrice))
+        .orderBy(asc(agencyServices.name))
 
       return services
     } catch (error) {
@@ -322,7 +316,7 @@ export class AgencyServiceService {
       const result = await db
         .update(agencyServices)
         .set({
-          basePrice: sql`${agencyServices.basePrice} * ${priceMultiplier}`,
+          // Price update removed - basePrice field not available in schema
           updatedAt: new Date(),
         })
         .where(eq(agencyServices.agencyId, agencyId))

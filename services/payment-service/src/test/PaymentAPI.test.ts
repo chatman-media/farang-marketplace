@@ -58,7 +58,7 @@ describe("Payment API Tests", () => {
 
       // Validate amount format
       expect(mockRequest.body.amount).toMatch(/^\d+\.\d{1,8}$/)
-      expect(parseFloat(mockRequest.body.amount)).toBeGreaterThan(0)
+      expect(Number.parseFloat(mockRequest.body.amount)).toBeGreaterThan(0)
 
       // Validate payment method
       const validMethods = [
@@ -258,15 +258,15 @@ describe("Payment API Tests", () => {
 
       // Validate amount range
       if (mockRequest.query.minAmount && mockRequest.query.maxAmount) {
-        const minAmount = parseFloat(mockRequest.query.minAmount)
-        const maxAmount = parseFloat(mockRequest.query.maxAmount)
+        const minAmount = Number.parseFloat(mockRequest.query.minAmount)
+        const maxAmount = Number.parseFloat(mockRequest.query.maxAmount)
         expect(maxAmount).toBeGreaterThanOrEqual(minAmount)
         expect(minAmount).toBeGreaterThan(0)
       }
 
       // Validate pagination
-      const page = parseInt(mockRequest.query.page)
-      const limit = parseInt(mockRequest.query.limit)
+      const page = Number.parseInt(mockRequest.query.page)
+      const limit = Number.parseInt(mockRequest.query.limit)
       expect(page).toBeGreaterThan(0)
       expect(limit).toBeGreaterThan(0)
       expect(limit).toBeLessThanOrEqual(100)
@@ -432,7 +432,7 @@ describe("Payment API Tests", () => {
       expect(tx.hash.length).toBe(64)
       expect(tx.from.length).toBe(48)
       expect(tx.to.length).toBe(48)
-      expect(parseInt(tx.amount)).toBeGreaterThan(0)
+      expect(Number.parseInt(tx.amount)).toBeGreaterThan(0)
       expect(typeof tx.confirmed).toBe("boolean")
 
       // Validate signature header

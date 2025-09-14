@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 import fs from "fs/promises"
 import multer from "multer"
@@ -72,7 +73,7 @@ export const processImages = async (request: FastifyRequest, reply: FastifyReply
     if (!request.body) request.body = {}
     ;(request.body as any).processedImages = processedImages
   } catch (error) {
-    console.error("Image processing error:", error)
+    logger.error("Image processing error:", error)
     reply.status(500).send({
       error: {
         code: "IMAGE_PROCESSING_ERROR",
@@ -136,11 +137,11 @@ export const cleanupImages = async (imagePaths: string[]) => {
         await fs.unlink(fullPath)
         await fs.unlink(thumbnailPath)
       } catch (error) {
-        console.warn(`Failed to delete image: ${fullPath}`, error)
+        logger.warn(`Failed to delete image: ${fullPath}`, error)
       }
     }
   } catch (error) {
-    console.error("Image cleanup error:", error)
+    logger.error("Image cleanup error:", error)
   }
 }
 

@@ -24,7 +24,7 @@ export const useUser = () => {
       return user
     },
     enabled: authService.isAuthenticated(),
-    staleTime: Infinity, // User data doesn't change often
+    staleTime: Number.POSITIVE_INFINITY, // User data doesn't change often
   })
 }
 

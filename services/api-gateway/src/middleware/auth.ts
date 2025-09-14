@@ -125,22 +125,22 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
         message: "Access token has expired",
         timestamp: new Date().toISOString(),
       })
-    } else if (error instanceof jwt.JsonWebTokenError) {
+    }
+    if (error instanceof jwt.JsonWebTokenError) {
       return reply.code(401).send({
         success: false,
         error: "INVALID_TOKEN",
         message: "Invalid access token",
         timestamp: new Date().toISOString(),
       })
-    } else {
-      request.log.error("Authentication error: %s", String(error))
-      return reply.code(500).send({
-        success: false,
-        error: "AUTH_ERROR",
-        message: "Authentication failed",
-        timestamp: new Date().toISOString(),
-      })
     }
+    request.log.error("Authentication error: %s", String(error))
+    return reply.code(500).send({
+      success: false,
+      error: "AUTH_ERROR",
+      message: "Authentication failed",
+      timestamp: new Date().toISOString(),
+    })
   }
 }
 

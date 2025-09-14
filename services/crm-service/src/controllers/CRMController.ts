@@ -72,8 +72,8 @@ export class CRMController {
           search,
         },
         {
-          page: parseInt(page),
-          limit: parseInt(limit),
+          page: Number.parseInt(page),
+          limit: Number.parseInt(limit),
         },
       )
 
@@ -211,8 +211,8 @@ export class CRMController {
           customerId,
         },
         {
-          page: parseInt(page),
-          limit: parseInt(limit),
+          page: Number.parseInt(page),
+          limit: Number.parseInt(limit),
         },
       )
 

@@ -318,8 +318,8 @@ export class BookingController {
     try {
       const query = request.query as any
       const filters: BookingFilters = query
-      const page = parseInt(query.page || "1")
-      const limit = parseInt(query.limit || "20")
+      const page = Number.parseInt(query.page || "1")
+      const limit = Number.parseInt(query.limit || "20")
       const userId = request.user?.id
 
       if (!userId) {

@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import {
   CommunicationChannel,
   CommunicationHistory,
@@ -42,7 +43,7 @@ export class EmailService {
   constructor(config?: EmailConfig) {
     this.config = config || {
       host: process.env.SMTP_HOST || "localhost",
-      port: parseInt(process.env.SMTP_PORT || "587"),
+      port: Number.parseInt(process.env.SMTP_PORT || "587", 10),
       secure: process.env.SMTP_SECURE === "true",
       auth: {
         user: process.env.SMTP_USER || "",
@@ -109,7 +110,7 @@ export class EmailService {
         sentAt: new Date(),
       }
     } catch (error: any) {
-      console.error("Email sending failed:", error)
+      logger.error("Email sending failed:", error)
 
       // Log failed communication
       const historyId = await this.logCommunication({
@@ -156,7 +157,7 @@ export class EmailService {
         variables: row.variables || [],
       }
     } catch (error) {
-      console.error("Error fetching email template:", error)
+      logger.error("Error fetching email template:", error)
       return null
     }
   }
@@ -298,7 +299,7 @@ export class EmailService {
       await this.transporter.verify()
       return true
     } catch (error) {
-      console.error("SMTP connection verification failed:", error)
+      logger.error("SMTP connection verification failed:", error)
       return false
     }
   }

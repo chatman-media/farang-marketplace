@@ -73,18 +73,18 @@ export default async function authPlugin(fastify: any) {
           success: false,
           message: "Token expired",
         })
-      } else if (error instanceof jwt.JsonWebTokenError) {
+      }
+      if (error instanceof jwt.JsonWebTokenError) {
         return reply.code(401).send({
           success: false,
           message: "Invalid token",
         })
-      } else {
-        fastify.log.error("Authentication error:", error)
-        return reply.code(500).send({
-          success: false,
-          message: "Authentication failed",
-        })
       }
+      fastify.log.error("Authentication error:", error)
+      return reply.code(500).send({
+        success: false,
+        message: "Authentication failed",
+      })
     }
   })
 

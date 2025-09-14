@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import {
   CRMAnalytics,
   CreateCustomerRequest,
@@ -250,7 +251,7 @@ export class CRMService {
 
     // Get total count
     const countResult = await query(`SELECT COUNT(*) as total FROM customers ${whereClause}`, queryParams)
-    const total = parseInt(countResult.rows[0].total)
+    const total = Number.parseInt(countResult.rows[0].total, 10)
 
     // Get customers
     queryParams.push(limit, offset)
@@ -315,7 +316,7 @@ export class CRMService {
         priority: lead.priority,
       })
     } catch (error) {
-      console.error("Failed to trigger new_lead automation:", error)
+      logger.error("Failed to trigger new_lead automation:", error)
     }
 
     return lead
@@ -395,7 +396,7 @@ export class CRMService {
             userId: data.assignedTo,
           })
         } catch (error) {
-          console.error("Failed to trigger lead_status_change automation:", error)
+          logger.error("Failed to trigger lead_status_change automation:", error)
         }
       }
 
@@ -410,7 +411,7 @@ export class CRMService {
             userId: data.assignedTo,
           })
         } catch (error) {
-          console.error("Failed to trigger stage_change automation:", error)
+          logger.error("Failed to trigger stage_change automation:", error)
         }
       }
 
@@ -465,7 +466,7 @@ export class CRMService {
 
     // Get total count
     const countResult = await query(`SELECT COUNT(*) as total FROM leads ${whereClause}`, queryParams)
-    const total = parseInt(countResult.rows[0].total)
+    const total = Number.parseInt(countResult.rows[0].total, 10)
 
     // Get leads
     queryParams.push(limit, offset)
@@ -543,8 +544,8 @@ export class CRMService {
       WHERE status = 'closed_won'
     `)
 
-    const totalLeads = parseInt(leadCountResult.rows[0].total)
-    const wonLeads = parseInt(wonLeadsResult.rows[0].won)
+    const totalLeads = Number.parseInt(leadCountResult.rows[0].total, 10)
+    const wonLeads = Number.parseInt(wonLeadsResult.rows[0].won, 10)
     const conversionRate = totalLeads > 0 ? (wonLeads / totalLeads) * 100 : 0
 
     // Get average lead score
@@ -566,7 +567,9 @@ export class CRMService {
 
     const messageStats = messageStatsResult.rows[0]
     const responseRate =
-      messageStats.sent > 0 ? (parseInt(messageStats.responded) / parseInt(messageStats.sent)) * 100 : 0
+      messageStats.sent > 0
+        ? (Number.parseInt(messageStats.responded, 10) / Number.parseInt(messageStats.sent, 10)) * 100
+        : 0
 
     // Build response object
     const customersByStatus: Record<CustomerStatus, number> = {
@@ -577,7 +580,7 @@ export class CRMService {
       [CustomerStatus.BLOCKED]: 0,
     }
     customersByStatusResult.rows.forEach((row: any) => {
-      customersByStatus[row.status as CustomerStatus] = parseInt(row.count)
+      customersByStatus[row.status as CustomerStatus] = Number.parseInt(row.count, 10)
     })
 
     const leadsByStatus: Record<LeadStatus, number> = {
@@ -590,18 +593,18 @@ export class CRMService {
       [LeadStatus.CLOSED_LOST]: 0,
     }
     leadsByStatusResult.rows.forEach((row: any) => {
-      leadsByStatus[row.status as LeadStatus] = parseInt(row.count)
+      leadsByStatus[row.status as LeadStatus] = Number.parseInt(row.count, 10)
     })
 
     return {
-      totalCustomers: parseInt(customerCountResult.rows[0].total),
+      totalCustomers: Number.parseInt(customerCountResult.rows[0].total, 10),
       totalLeads: totalLeads,
       conversionRate: Math.round(conversionRate * 100) / 100,
-      averageLeadScore: Math.round((parseFloat(avgScoreResult.rows[0].avg_score) || 0) * 100) / 100,
+      averageLeadScore: Math.round((Number.parseFloat(avgScoreResult.rows[0].avg_score) || 0) * 100) / 100,
       leadsByStatus,
       customersByStatus,
-      messagesSent: parseInt(messageStats.sent),
-      messagesDelivered: parseInt(messageStats.delivered),
+      messagesSent: Number.parseInt(messageStats.sent, 10),
+      messagesDelivered: Number.parseInt(messageStats.delivered, 10),
       responseRate: Math.round(responseRate * 100) / 100,
       topPerformingCampaigns: [], // TODO: Implement when campaigns are ready
       recentActivity: [], // TODO: Implement when communication history is ready
@@ -635,7 +638,7 @@ export class CRMService {
       [customerId],
     )
 
-    const lifetimeValue = parseFloat(lifetimeValueResult.rows[0]?.total_value || "0")
+    const lifetimeValue = Number.parseFloat(lifetimeValueResult.rows[0]?.total_value || "0")
 
     await query(
       `

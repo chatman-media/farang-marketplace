@@ -1,4 +1,5 @@
 import { Client, ClientConfig, MessageEvent, TextMessage, WebhookEvent } from "@line/bot-sdk"
+import logger from "@marketplace/logger"
 import {
   CommunicationChannel,
   CommunicationHistory,
@@ -97,7 +98,7 @@ export class LineService {
         sentAt: new Date(),
       }
     } catch (error: any) {
-      console.error("Line message sending failed:", error)
+      logger.error("Line message sending failed:", error)
 
       // Log failed communication
       const historyId = await this.logCommunication({
@@ -147,7 +148,7 @@ export class LineService {
         }
         // Add more event type handlers as needed
       } catch (error) {
-        console.error("Error handling Line webhook event:", error)
+        logger.error("Error handling Line webhook event:", error)
       }
     }
   }
@@ -188,7 +189,7 @@ export class LineService {
       // Process the message (you can add custom logic here)
       await this.processIncomingMessage(customer.id, text, event)
     } catch (error) {
-      console.error("Error handling Line text message:", error)
+      logger.error("Error handling Line text message:", error)
     }
   }
 
@@ -219,7 +220,7 @@ export class LineService {
       const result = await query("SELECT * FROM customers WHERE line_id = $1", [lineId])
       return result.rows.length > 0 ? result.rows[0] : null
     } catch (error) {
-      console.error("Error finding customer by Line ID:", error)
+      logger.error("Error finding customer by Line ID:", error)
       return null
     }
   }
@@ -241,7 +242,7 @@ export class LineService {
         variables: row.variables || [],
       }
     } catch (error) {
-      console.error("Error fetching Line template:", error)
+      logger.error("Error fetching Line template:", error)
       return null
     }
   }
@@ -331,7 +332,7 @@ export class LineService {
 
       return hash === signature
     } catch (error) {
-      console.error("Error verifying Line signature:", error)
+      logger.error("Error verifying Line signature:", error)
       return false
     }
   }

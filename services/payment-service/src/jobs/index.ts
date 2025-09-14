@@ -8,9 +8,9 @@ config()
 // Redis connection configuration
 const redisConfig = {
   host: process.env.REDIS_HOST || "localhost",
-  port: parseInt(process.env.REDIS_PORT || "6379"),
+  port: Number.parseInt(process.env.REDIS_PORT || "6379"),
   password: process.env.REDIS_PASSWORD,
-  db: parseInt(process.env.REDIS_DB || "0"),
+  db: Number.parseInt(process.env.REDIS_DB || "0"),
   maxRetriesPerRequest: 3,
   retryDelayOnFailover: 100,
   enableReadyCheck: false,
@@ -43,10 +43,11 @@ import "./processors/maintenance"
 
 // Job schedulers
 import "./schedulers/index"
+import logger from "@marketplace/logger"
 
 // Graceful shutdown
 const gracefulShutdown = async () => {
-  console.log("🔄 Shutting down job queues...")
+  logger.info("🔄 Shutting down job queues...")
 
   await Promise.all([
     tonMonitoringQueue.close(),
@@ -56,7 +57,7 @@ const gracefulShutdown = async () => {
     maintenanceQueue.close(),
   ])
 
-  console.log("✅ Job queues shut down successfully")
+  logger.info("✅ Job queues shut down successfully")
 }
 
 process.on("SIGTERM", gracefulShutdown)

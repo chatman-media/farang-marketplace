@@ -453,7 +453,7 @@ export class RecommendationEngine {
       // Parse AI response to extract score
       const scoreMatch = aiResponse.response.match(/score[:\s]*([0-9.]+)/i)
       if (scoreMatch) {
-        const score = parseFloat(scoreMatch[1]!)
+        const score = Number.parseFloat(scoreMatch[1]!)
         return Math.max(0, Math.min(score, 1))
       }
 

@@ -214,6 +214,16 @@ export const campaignStatusEnum = pgEnum("campaign_status", [
 
 export const messageStatusEnum = pgEnum("message_status", ["pending", "sent", "delivered", "read", "failed"])
 
+// Agency related enums
+export const agencyStatusEnum = pgEnum("agency_status", ["pending", "active", "suspended", "inactive", "rejected"])
+
+export const serviceAssignmentStatusEnum = pgEnum("service_assignment_status", [
+  "active",
+  "paused",
+  "completed",
+  "cancelled",
+])
+
 // ============================================================================
 // CORE TABLES
 // ============================================================================
@@ -896,6 +906,58 @@ export const chatHistory = pgTable("chat_history", {
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
 })
 
+// Agency tables
+export const agencies = pgTable("agencies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  phone: varchar("phone", { length: 20 }),
+  address: text("address"),
+  website: varchar("website", { length: 255 }),
+  logoUrl: varchar("logo_url", { length: 500 }),
+  status: agencyStatusEnum("status").notNull().default("pending"),
+  ownerId: uuid("owner_id").notNull(),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).notNull().default("10.00"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
+export const agencyServices = pgTable("agency_services", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  agencyId: uuid("agency_id").notNull(),
+  category: productTypeEnum("category").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
+export const serviceAssignments = pgTable("service_assignments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  agencyServiceId: uuid("agency_service_id").notNull(),
+  listingId: uuid("listing_id").notNull(),
+  status: serviceAssignmentStatusEnum("status").notNull().default("active"),
+  assignedAt: timestamp("assigned_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
+export const commissionPayments = pgTable("commission_payments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  agencyId: uuid("agency_id").notNull(),
+  bookingId: uuid("booking_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("pending"),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
 // DeepSeek Prompt Templates table (from your DeepSeekPromptTemplate model)
 export const aiPromptTemplates = pgTable("ai_prompt_templates", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -1108,5 +1170,45 @@ export const vehicleCalendarPricingRelations = relations(vehicleCalendarPricing,
   vehicle: one(vehicles, {
     fields: [vehicleCalendarPricing.vehicleId],
     references: [vehicles.id],
+  }),
+}))
+
+// Agency relations
+export const agenciesRelations = relations(agencies, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [agencies.ownerId],
+    references: [users.id],
+  }),
+  services: many(agencyServices),
+  commissionPayments: many(commissionPayments),
+}))
+
+export const agencyServicesRelations = relations(agencyServices, ({ one, many }) => ({
+  agency: one(agencies, {
+    fields: [agencyServices.agencyId],
+    references: [agencies.id],
+  }),
+  assignments: many(serviceAssignments),
+}))
+
+export const serviceAssignmentsRelations = relations(serviceAssignments, ({ one }) => ({
+  agencyService: one(agencyServices, {
+    fields: [serviceAssignments.agencyServiceId],
+    references: [agencyServices.id],
+  }),
+  listing: one(listings, {
+    fields: [serviceAssignments.listingId],
+    references: [listings.id],
+  }),
+}))
+
+export const commissionPaymentsRelations = relations(commissionPayments, ({ one }) => ({
+  agency: one(agencies, {
+    fields: [commissionPayments.agencyId],
+    references: [agencies.id],
+  }),
+  booking: one(listingBookings, {
+    fields: [commissionPayments.bookingId],
+    references: [listingBookings.id],
   }),
 }))

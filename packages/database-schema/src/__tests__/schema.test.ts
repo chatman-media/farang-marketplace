@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { eq } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
@@ -22,7 +23,7 @@ const db = drizzle(sql)
 describe("Database Schema Tests", () => {
   beforeAll(async () => {
     // Database should already be set up by drizzle push
-    console.log("Using test database:", testDbUrl.replace(/:[^:]*@/, ":***@"))
+    logger.info("Using test database:", testDbUrl.replace(/:[^:]*@/, ":***@"))
   })
 
   afterAll(async () => {

@@ -101,6 +101,8 @@
       "name": "@marketplace/database-schema",
       "version": "1.0.0",
       "dependencies": {
+        "@marketplace/logger": "^1.0.0",
+        "@marketplace/shared-types": "^1.0.0",
         "drizzle-orm": "^0.44.5",
         "postgres": "^3.4.7",
       },
@@ -444,13 +446,12 @@
         "dotenv": "17.2.2",
         "fastify": "^5.6.0",
         "jsonwebtoken": "^9.0.2",
-        "pg": "^8.16.3",
+        "redis": "5.8.2",
         "zod": "4.1.8",
       },
       "devDependencies": {
         "@types/bcryptjs": "3.0.0",
         "@types/jsonwebtoken": "^9.0.10",
-        "@types/pg": "^8.15.5",
         "@types/supertest": "^6.0.3",
         "supertest": "^7.1.4",
         "tsx": "^4.20.5",

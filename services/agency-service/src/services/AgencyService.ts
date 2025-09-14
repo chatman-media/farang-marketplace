@@ -1,33 +1,32 @@
-import logger from "@marketplace/logger"
-import { and, asc, desc, eq, ilike, sql } from "drizzle-orm"
-
-import { db } from "../db/connection"
 import {
-  type Agency,
-  type AgencyStatusType,
   agencies,
   agencyServices,
+  agencyStatusEnum,
+  and,
+  asc,
   commissionPayments,
-  type NewAgency,
-  type ServiceCategoryType,
+  createDatabaseConnection,
+  desc,
+  eq,
+  type InferInsertModel,
+  type InferSelectModel,
+  ilike,
+  productTypeEnum,
   serviceAssignments,
-  type VerificationStatusType,
-} from "../db/schema"
+  sql,
+} from "@marketplace/database-schema"
+import logger from "@marketplace/logger"
+
+const db = createDatabaseConnection(process.env.DATABASE_URL!)
+
+// Type definitions
+type Agency = InferSelectModel<typeof agencies>
+type NewAgency = InferInsertModel<typeof agencies>
+type AgencyStatusType = (typeof agencyStatusEnum.enumValues)[number]
+type ServiceCategoryType = (typeof productTypeEnum.enumValues)[number]
 
 export interface AgencyFilters {
   status?: AgencyStatusType
-  verificationStatus?: VerificationStatusType
-  category?: ServiceCategoryType
-  location?: {
-    city?: string
-    region?: string
-    country?: string
-    radius?: number
-  }
-  rating?: {
-    min: number
-    max: number
-  }
   commissionRate?: {
     min: number
     max: number
@@ -87,7 +86,7 @@ export class AgencyService {
    */
   async getAgencyByUserId(userId: string): Promise<Agency | null> {
     try {
-      const [agency] = await db.select().from(agencies).where(eq(agencies.userId, userId))
+      const [agency] = await db.select().from(agencies).where(eq(agencies.ownerId, userId))
 
       return agency || null
     } catch (error) {
@@ -156,23 +155,10 @@ export class AgencyService {
         conditions.push(eq(agencies.status, filters.status))
       }
 
-      if (filters.verificationStatus) {
-        conditions.push(eq(agencies.verificationStatus, filters.verificationStatus))
-      }
-
       if (filters.search) {
         conditions.push(
           sql`(${ilike(agencies.name, `%${filters.search}%`)} OR ${ilike(agencies.description, `%${filters.search}%`)})`,
         )
-      }
-
-      if (filters.rating) {
-        if (filters.rating.min !== undefined) {
-          conditions.push(sql`${agencies.rating} >= ${filters.rating.min}`)
-        }
-        if (filters.rating.max !== undefined) {
-          conditions.push(sql`${agencies.rating} <= ${filters.rating.max}`)
-        }
       }
 
       if (filters.commissionRate) {
@@ -192,9 +178,7 @@ export class AgencyService {
         case "name":
           orderClause = sortOrder === "asc" ? asc(agencies.name) : desc(agencies.name)
           break
-        case "rating":
-          orderClause = sortOrder === "asc" ? asc(agencies.rating) : desc(agencies.rating)
-          break
+
         case "commissionRate":
           orderClause = sortOrder === "asc" ? asc(agencies.commissionRate) : desc(agencies.commissionRate)
           break
@@ -238,10 +222,7 @@ export class AgencyService {
       const [agency] = await db
         .update(agencies)
         .set({
-          verificationStatus: "verified",
-          isVerified: true,
-          verifiedAt: new Date(),
-          verificationNotes,
+          status: "active",
           updatedAt: new Date(),
         })
         .where(eq(agencies.id, id))
@@ -262,9 +243,7 @@ export class AgencyService {
       const [agency] = await db
         .update(agencies)
         .set({
-          verificationStatus: "rejected",
-          isVerified: false,
-          verificationNotes: reason,
+          status: "rejected",
           updatedAt: new Date(),
         })
         .where(eq(agencies.id, id))
@@ -322,7 +301,8 @@ export class AgencyService {
           completedAssignments: sql<number>`count(*) filter (where status = 'completed')`,
         })
         .from(serviceAssignments)
-        .where(eq(serviceAssignments.agencyId, id))
+        .innerJoin(agencyServices, eq(serviceAssignments.agencyServiceId, agencyServices.id))
+        .where(eq(agencyServices.agencyId, id))
 
       // Get commission stats
       const [commissionStats] = await db
@@ -332,16 +312,12 @@ export class AgencyService {
         .from(commissionPayments)
         .where(and(eq(commissionPayments.agencyId, id), eq(commissionPayments.status, "paid")))
 
-      // Get agency rating
-      const agency = await this.getAgencyById(id)
-      const averageRating = agency ? Number(agency.rating) : 0
-
       return {
         totalServices: Number(servicesResult[0]?.totalServices || 0),
         activeAssignments: Number(assignmentStats?.activeAssignments || 0),
         completedAssignments: Number(assignmentStats?.completedAssignments || 0),
         totalCommissionEarned: Number(commissionStats?.totalCommissionEarned || 0),
-        averageRating,
+        averageRating: 0,
       }
     } catch (error) {
       logger.error("Error getting agency stats:", error)

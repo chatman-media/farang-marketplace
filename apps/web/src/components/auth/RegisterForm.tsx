@@ -56,7 +56,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, redirectT
       newErrors.confirmPassword = "Passwords do not match"
     }
 
-    if (formData.phone && !/^\+?[\d\s\-\(\)]+$/.test(formData.phone)) {
+    if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
       newErrors.phone = "Phone number is invalid"
     }
 

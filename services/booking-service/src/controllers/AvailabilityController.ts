@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
 
@@ -88,7 +89,7 @@ export class AvailabilityController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error checking availability:", error)
+      logger.error("Error checking availability:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -123,7 +124,7 @@ export class AvailabilityController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error checking service availability:", error)
+      logger.error("Error checking service availability:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -155,7 +156,7 @@ export class AvailabilityController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error getting availability calendar:", error)
+      logger.error("Error getting availability calendar:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -185,7 +186,7 @@ export class AvailabilityController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error getting service provider availability:", error)
+      logger.error("Error getting service provider availability:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -227,7 +228,7 @@ export class AvailabilityController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error blocking dates:", error)
+      logger.error("Error blocking dates:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -268,7 +269,7 @@ export class AvailabilityController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error unblocking dates:", error)
+      logger.error("Error unblocking dates:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",
@@ -305,7 +306,7 @@ export class AvailabilityController {
         timestamp: new Date().toISOString(),
       })
     } catch (error: any) {
-      console.error("Error getting upcoming bookings:", error)
+      logger.error("Error getting upcoming bookings:", error)
 
       reply.code(500).send({
         error: "Internal Server Error",

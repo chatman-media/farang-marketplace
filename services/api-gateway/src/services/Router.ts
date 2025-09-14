@@ -244,8 +244,7 @@ export class Router {
 
         if (attempt < retries) {
           // Wait before retry with exponential backoff
-          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000))
-          continue
+          await new Promise((resolve) => setTimeout(resolve, 2 ** attempt * 1000))
         }
       }
     }

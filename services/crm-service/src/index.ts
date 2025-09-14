@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify from "fastify"
 import { z } from "zod"
@@ -100,7 +101,7 @@ let appInstance: any = null
 let cronService: CronService | null = null
 
 const gracefulShutdown = async (signal: string) => {
-  console.log(`${signal} received, shutting down gracefully`)
+  logger.info(`${signal} received, shutting down gracefully`)
   try {
     // Stop cron service first
     if (cronService) {
@@ -112,10 +113,10 @@ const gracefulShutdown = async (signal: string) => {
       await appInstance.close()
     }
 
-    console.log("CRM Service shut down successfully")
+    logger.info("CRM Service shut down successfully")
     process.exit(0)
   } catch (error) {
-    console.error("Error during shutdown:", error)
+    logger.error("Error during shutdown:", error)
     process.exit(1)
   }
 }
@@ -131,22 +132,22 @@ const startApp = async () => {
     host: "0.0.0.0",
   })
 
-  console.log(`🚀 CRM Service v2.0 running on port ${env.PORT}`)
-  console.log(`📊 Environment: ${env.NODE_ENV}`)
-  console.log(`🔗 API Base URL: http://localhost:${env.PORT}/api/crm`)
-  console.log(`💚 Health check: http://localhost:${env.PORT}/health`)
+  logger.info(`🚀 CRM Service v2.0 running on port ${env.PORT}`)
+  logger.info(`📊 Environment: ${env.NODE_ENV}`)
+  logger.info(`🔗 API Base URL: http://localhost:${env.PORT}/api/crm`)
+  logger.info(`💚 Health check: http://localhost:${env.PORT}/health`)
 
   // Start cron service for background tasks
   if (env.NODE_ENV !== "test") {
     cronService = new CronService()
     await cronService.start()
-    console.log(`⏰ CronService started with ${cronService.getAllJobs().length} background jobs`)
+    logger.info(`⏰ CronService started with ${cronService.getAllJobs().length} background jobs`)
   }
 }
 
 if (require.main === module) {
   startApp().catch((error) => {
-    console.error("Failed to start CRM Service:", error)
+    logger.error("Failed to start CRM Service:", error)
     process.exit(1)
   })
 }

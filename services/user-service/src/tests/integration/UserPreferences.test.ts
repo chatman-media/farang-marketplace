@@ -1,4 +1,3 @@
-import { UserRole, VerificationStatus } from "@marketplace/shared-types"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { UserRepository } from "../../repositories/UserRepository"
 import { UserService } from "../../services/UserService"

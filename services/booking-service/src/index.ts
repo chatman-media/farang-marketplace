@@ -1,21 +1,22 @@
+import logger from "@marketplace/logger"
 import { createApp, env, gracefulShutdown } from "./app"
-import { checkDatabaseConnection, closeDatabaseConnection } from "./db/connection"
+import { checkDatabaseConnection } from "./db/connection"
 
 // Start the modern application
 const start = async () => {
   try {
-    console.log("🚀 Starting Booking Service v2.0...")
+    logger.info("🚀 Starting Booking Service v2.0...")
 
     // Check database connection (optional for demo)
     try {
       const dbHealthy = await checkDatabaseConnection()
       if (dbHealthy) {
-        console.log("✅ Database connected")
+        logger.info("✅ Database connected")
       } else {
-        console.log("⚠️ Database not connected (continuing anyway)")
+        logger.info("⚠️ Database not connected (continuing anyway)")
       }
     } catch (error) {
-      console.log("⚠️ Database connection failed (continuing anyway):", (error as Error).message)
+      logger.info("⚠️ Database connection failed (continuing anyway):", (error as Error).message)
     }
 
     // Create and start Fastify app
@@ -26,15 +27,15 @@ const start = async () => {
       host: "0.0.0.0",
     })
 
-    console.log(`🏨 Booking Service v2.0 running on port ${env.PORT}`)
-    console.log(`📊 Environment: ${env.NODE_ENV}`)
-    console.log(`🔗 Health check: http://localhost:${env.PORT}/health`)
-    console.log(`📅 Modern Booking Service initialized with:`)
-    console.log(`   - Fastify 5.x for high performance`)
-    console.log(`   - Database connection pooling`)
-    console.log(`   - Rate limiting`)
-    console.log(`   - Zod validation`)
-    console.log(`   - TypeScript 5.x`)
+    logger.info(`🏨 Booking Service v2.0 running on port ${env.PORT}`)
+    logger.info(`📊 Environment: ${env.NODE_ENV}`)
+    logger.info(`🔗 Health check: http://localhost:${env.PORT}/health`)
+    logger.info("📅 Modern Booking Service initialized with:")
+    logger.info("   - Fastify 5.x for high performance")
+    logger.info("   - Database connection pooling")
+    logger.info("   - Rate limiting")
+    logger.info("   - Zod validation")
+    logger.info("   - TypeScript 5.x")
 
     // Setup graceful shutdown
     const signals = ["SIGTERM", "SIGINT", "SIGUSR2"]
@@ -53,7 +54,7 @@ const start = async () => {
       gracefulShutdown(app, "unhandledRejection")
     })
   } catch (error) {
-    console.error("❌ Error starting server:", error)
+    logger.error("❌ Error starting server:", error)
     process.exit(1)
   }
 }

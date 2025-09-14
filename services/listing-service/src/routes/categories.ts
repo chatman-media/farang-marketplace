@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { ListingCategory } from "@marketplace/shared-types"
 import { FastifyInstance } from "fastify"
 import { getAvailableCategories, getCategoryConfig, getEnabledCategories } from "../config/categories"
@@ -60,7 +61,7 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
           },
         })
       } catch (error) {
-        console.error("Error getting categories:", error)
+        logger.error("Error getting categories:", error)
         return (reply as any).status(500).send({
           success: false,
           message: "Failed to get categories",
@@ -112,7 +113,7 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
           data: categoriesWithConfig,
         })
       } catch (error) {
-        console.error("Error getting enabled categories:", error)
+        logger.error("Error getting enabled categories:", error)
         return (reply as any).status(500).send({
           success: false,
           message: "Failed to get enabled categories",
@@ -195,7 +196,7 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
           },
         })
       } catch (error) {
-        console.error("Error getting category info:", error)
+        logger.error("Error getting category info:", error)
         return (reply as any).status(500).send({
           success: false,
           message: "Failed to get category information",

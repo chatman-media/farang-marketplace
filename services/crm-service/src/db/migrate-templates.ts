@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import dotenv from "dotenv"
 import * as fs from "fs"
 import * as path from "path"
@@ -8,7 +9,7 @@ dotenv.config()
 
 async function runTemplatesMigration() {
   try {
-    console.log("🔄 Running message templates migration...")
+    logger.info("🔄 Running message templates migration...")
 
     // Read and execute the migration file
     const migrationPath = path.join(__dirname, "migrations", "003_add_message_templates.sql")
@@ -22,15 +23,15 @@ async function runTemplatesMigration() {
 
     for (const statement of statements) {
       if (statement.trim()) {
-        console.log(`Executing: ${statement.substring(0, 50)}...`)
+        logger.info(`Executing: ${statement.substring(0, 50)}...`)
         await query(statement)
-        console.log("✅ Success")
+        logger.info("✅ Success")
       }
     }
 
-    console.log("🎉 Message templates migration completed successfully!")
+    logger.info("🎉 Message templates migration completed successfully!")
   } catch (error) {
-    console.error("❌ Migration failed:", error)
+    logger.error("❌ Migration failed:", error)
     process.exit(1)
   }
 }

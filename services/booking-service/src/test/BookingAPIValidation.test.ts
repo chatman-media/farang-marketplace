@@ -233,7 +233,7 @@ describe("Booking API Validation Tests", () => {
 
       // Validate common status codes
       Object.entries(statusCodeMappings).forEach(([code, description]) => {
-        const numCode = parseInt(code)
+        const numCode = Number.parseInt(code)
         expect(numCode).toBeGreaterThanOrEqual(200)
         expect(numCode).toBeLessThan(600)
         expect(description).toBeDefined()

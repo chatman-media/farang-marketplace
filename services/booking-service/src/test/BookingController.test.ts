@@ -190,8 +190,8 @@ describe("BookingController Logic Tests", () => {
       }
 
       // Validate pagination parameters
-      const page = parseInt(mockRequest.query.page)
-      const limit = parseInt(mockRequest.query.limit)
+      const page = Number.parseInt(mockRequest.query.page)
+      const limit = Number.parseInt(mockRequest.query.limit)
 
       expect(page).toBeGreaterThan(0)
       expect(limit).toBeGreaterThan(0)

@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { TonConnect } from "@tonconnect/sdk"
 import axios from "axios"
 import { internal, TonClient, WalletContractV4 } from "ton"
@@ -21,7 +22,7 @@ export const tonAddressSchema = z.string().refine(
 
 export const tonAmountSchema = z.string().refine(
   (amount) => {
-    const num = parseFloat(amount)
+    const num = Number.parseFloat(amount)
     return !isNaN(num) && num > 0 && num <= 1000000
   },
   { message: "Invalid TON amount" },
@@ -108,7 +109,7 @@ export class ModernTonService {
       manifestUrl: config.manifestUrl,
     })
 
-    console.log("🔗 TON Connect initialized")
+    logger.info("🔗 TON Connect initialized")
   }
 
   /**
@@ -117,7 +118,7 @@ export class ModernTonService {
   private async initializeWallet(): Promise<void> {
     try {
       if (!process.env.TON_WALLET_MNEMONIC) {
-        console.warn("⚠️ TON wallet mnemonic not provided, wallet features disabled")
+        logger.warn("⚠️ TON wallet mnemonic not provided, wallet features disabled")
         return
       }
 
@@ -129,9 +130,9 @@ export class ModernTonService {
         publicKey: this.keyPair.publicKey,
       })
 
-      console.log(`🔑 TON wallet initialized: ${this.wallet.address.toString()}`)
+      logger.info(`🔑 TON wallet initialized: ${this.wallet.address.toString()}`)
     } catch (error) {
-      console.error("❌ Failed to initialize TON wallet:", error)
+      logger.error("❌ Failed to initialize TON wallet:", error)
     }
   }
 
@@ -186,7 +187,7 @@ export class ModernTonService {
         confirmations: 0,
       }
     } catch (error) {
-      console.error("❌ Failed to create TON payment:", error)
+      logger.error("❌ Failed to create TON payment:", error)
       throw error
     }
   }
@@ -255,7 +256,7 @@ export class ModernTonService {
         },
       }
     } catch (error) {
-      console.error("❌ Failed to transfer Jetton:", error)
+      logger.error("❌ Failed to transfer Jetton:", error)
       throw error
     }
   }
@@ -269,9 +270,9 @@ export class ModernTonService {
 
       const transaction = transactions.find((tx) => tx.hash().toString("hex") === hash)
 
-      return transaction ? true : false
+      return !!transaction
     } catch (error) {
-      console.error("❌ Failed to verify transaction:", error)
+      logger.error("❌ Failed to verify transaction:", error)
       return false
     }
   }
@@ -292,7 +293,9 @@ export class ModernTonService {
 
       // You would implement actual Jetton balance checking here
       // This is a placeholder
+      // biome-ignore lint/complexity/useLiteralKeys: temporary
       jettonBalances["USDT"] = "0"
+      // biome-ignore lint/complexity/useLiteralKeys: temporary
       jettonBalances["USDC"] = "0"
 
       return {
@@ -303,7 +306,7 @@ export class ModernTonService {
         jettonBalances,
       }
     } catch (error) {
-      console.error("❌ Failed to get wallet info:", error)
+      logger.error("❌ Failed to get wallet info:", error)
       throw error
     }
   }
@@ -331,7 +334,7 @@ export class ModernTonService {
       const tonAmount = (fiatAmount / tonPrice).toFixed(6)
       return tonAmount
     } catch (error) {
-      console.error("❌ Failed to calculate TON amount:", error)
+      logger.error("❌ Failed to calculate TON amount:", error)
       throw error
     }
   }
@@ -345,7 +348,7 @@ export class ModernTonService {
       // Simple check - if we can get masterchain info, network is healthy
       return masterchainInfo.latestSeqno > 0
     } catch (error) {
-      console.error("❌ Network health check failed:", error)
+      logger.error("❌ Network health check failed:", error)
       return false
     }
   }

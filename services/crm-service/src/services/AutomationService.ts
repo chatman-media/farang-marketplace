@@ -1,12 +1,5 @@
-import {
-  Automation,
-  AutomationAction,
-  AutomationCondition,
-  AutomationTrigger,
-  CommunicationChannel,
-  LeadPriority,
-  LeadStatus,
-} from "@marketplace/shared-types"
+import logger from "@marketplace/logger"
+import { Automation, AutomationAction, AutomationCondition, CommunicationChannel } from "@marketplace/shared-types"
 import { query } from "../db/connection"
 import { CommunicationService } from "./CommunicationService"
 import { TemplateService } from "./TemplateService"
@@ -44,7 +37,7 @@ export class AutomationService {
     try {
       await this.createDefaultAutomations()
     } catch (error) {
-      console.error("Failed to initialize automation service:", error)
+      logger.error("Failed to initialize automation service:", error)
     }
   }
 
@@ -101,7 +94,7 @@ export class AutomationService {
 
       if (existing.rows.length === 0) {
         await this.createAutomation(automation)
-        console.log(`✅ Created default automation: ${automation.name}`)
+        logger.info(`✅ Created default automation: ${automation.name}`)
       }
     }
   }
@@ -118,7 +111,7 @@ export class AutomationService {
         }
       }
     } catch (error) {
-      console.error(`Failed to trigger workflow ${eventName}:`, error)
+      logger.error(`Failed to trigger workflow ${eventName}:`, error)
       throw error
     }
   }
@@ -150,7 +143,7 @@ export class AutomationService {
         updatedAt: new Date(row.updated_at),
       }))
     } catch (error) {
-      console.warn(`Failed to get automations for trigger ${eventName}:`, error)
+      logger.warn(`Failed to get automations for trigger ${eventName}:`, error)
       return []
     }
   }
@@ -204,21 +197,21 @@ export class AutomationService {
       case "not_in":
         return Array.isArray(expectedValue) && !expectedValue.includes(fieldValue)
       default:
-        console.warn(`Unknown operator: ${operator}`)
+        logger.warn(`Unknown operator: ${operator}`)
         return false
     }
   }
 
   // Execute automation actions
   private async executeAutomation(automation: Automation, data: WorkflowTriggerData): Promise<void> {
-    console.log(`Executing automation: ${automation.name}`)
+    logger.info(`Executing automation: ${automation.name}`)
 
     try {
       for (const action of automation.actions) {
         await this.executeAction(action, data)
       }
     } catch (error) {
-      console.error(`Failed to execute automation ${automation.name}:`, error)
+      logger.error(`Failed to execute automation ${automation.name}:`, error)
       throw error
     }
   }
@@ -242,7 +235,7 @@ export class AutomationService {
         await this.executeWebhookAction(action, data)
         break
       default:
-        console.warn(`Unknown action type: ${action.type}`)
+        logger.warn(`Unknown action type: ${action.type}`)
     }
   }
 
@@ -252,7 +245,7 @@ export class AutomationService {
     const targetCustomerId = customerId || data.customerId
 
     if (!targetCustomerId) {
-      console.error("No customer ID provided for send message action")
+      logger.error("No customer ID provided for send message action")
       return
     }
 
@@ -282,7 +275,7 @@ export class AutomationService {
         }
 
         // Render template
-        let renderedTemplate
+        let renderedTemplate: any | null = null
         if (templateId) {
           renderedTemplate = await this.templateService.renderTemplate(templateId, templateContext)
         } else if (templateName) {
@@ -295,8 +288,8 @@ export class AutomationService {
         }
       }
 
-      console.log(`Executing automation: ${action.parameters.name || "Unnamed Action"}`)
-      console.log(`Sending message to customer ${targetCustomerId} via ${channel || "email"}`)
+      logger.info(`Executing automation: ${action.parameters.name || "Unnamed Action"}`)
+      logger.info(`Sending message to customer ${targetCustomerId} via ${channel || "email"}`)
 
       // Send message through CommunicationService if available
       if (this.communicationService) {
@@ -309,10 +302,10 @@ export class AutomationService {
         })
       } else {
         // For testing or when communication service is not available
-        console.log(`Would send message: ${messageContent}`)
+        logger.log(`Would send message: ${messageContent}`)
       }
     } catch (error) {
-      console.error("Failed to send automated message:", error)
+      logger.error("Failed to send automated message:", error)
       throw error
     }
   }
@@ -353,7 +346,7 @@ export class AutomationService {
   // Create task action
   private async executeCreateTaskAction(action: AutomationAction, data: WorkflowTriggerData): Promise<void> {
     // TODO: Implement task creation when task system is available
-    console.log("Creating task:", action.parameters)
+    logger.log("Creating task:", action.parameters)
   }
 
   // Webhook action
@@ -374,7 +367,7 @@ export class AutomationService {
         throw new Error(`Webhook failed: ${response.status} ${response.statusText}`)
       }
     } catch (error) {
-      console.error("Webhook execution failed:", error)
+      logger.error("Webhook execution failed:", error)
       throw error
     }
   }

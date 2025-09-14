@@ -1,4 +1,6 @@
-import type { MarketInsight, UserBehavior, UserInsight, UserPreferences } from "../models/index"
+/** biome-ignore-all lint/complexity/useLiteralKeys: Use old style dotenv */
+import logger from "@marketplace/logger"
+import type { MarketInsight, UserBehavior, UserInsight } from "../models/index"
 import { AIProviderService } from "./AIProviderService"
 
 export class UserBehaviorService {
@@ -77,7 +79,7 @@ export class UserBehaviorService {
 
       return insights
     } catch (error) {
-      console.error("User behavior analysis failed:", error)
+      logger.error("User behavior analysis failed:", error)
       return []
     }
   }
@@ -189,7 +191,7 @@ export class UserBehaviorService {
 
       return this.parseAIInsights(userId, response.response)
     } catch (error) {
-      console.error("AI insight generation failed:", error)
+      logger.error("AI insight generation failed:", error)
       return []
     }
   }
@@ -250,7 +252,7 @@ Focus on actionable insights that can improve user experience or business outcom
         createdAt: new Date(),
       }))
     } catch (error) {
-      console.error("Failed to parse AI insights:", error)
+      logger.error("Failed to parse AI insights:", error)
       return []
     }
   }
@@ -346,7 +348,7 @@ Focus on actionable insights that can improve user experience or business outcom
       this.marketInsights = insights
       return insights
     } catch (error) {
-      console.error("Market insight generation failed:", error)
+      logger.error("Market insight generation failed:", error)
       return []
     }
   }
@@ -433,7 +435,7 @@ Focus on actionable business insights and market opportunities.
 
       return this.parseMarketInsights(response.response)
     } catch (error) {
-      console.error("AI market insight generation failed:", error)
+      logger.error("AI market insight generation failed:", error)
       return []
     }
   }
@@ -462,7 +464,7 @@ Focus on actionable business insights and market opportunities.
         createdAt: new Date(),
       }))
     } catch (error) {
-      console.error("Failed to parse market insights:", error)
+      logger.error("Failed to parse market insights:", error)
       return []
     }
   }
@@ -513,7 +515,7 @@ Focus on actionable business insights and market opportunities.
    * Start periodic behavior flushing
    */
   private startBehaviorFlushing(): void {
-    const flushInterval = parseInt(process.env["BEHAVIOR_FLUSH_INTERVAL"] || "300000") // 5 minutes
+    const flushInterval = Number.parseInt(process.env["BEHAVIOR_FLUSH_INTERVAL"] || "300000", 10) // 5 minutes
 
     this.flushInterval = setInterval(async () => {
       await this.flushBehaviors()
@@ -526,7 +528,7 @@ Focus on actionable business insights and market opportunities.
   private async flushBehaviors(): Promise<void> {
     try {
       // In a real implementation, this would save to database
-      console.log(`Flushing ${this.behaviorBuffer.size} user behavior buffers`)
+      logger.info(`Flushing ${this.behaviorBuffer.size} user behavior buffers`)
 
       // Generate insights for active users
       for (const userId of this.behaviorBuffer.keys()) {
@@ -546,7 +548,7 @@ Focus on actionable business insights and market opportunities.
         }
       }
     } catch (error) {
-      console.error("Behavior flushing failed:", error)
+      logger.error("Behavior flushing failed:", error)
     }
   }
 
@@ -617,7 +619,7 @@ Focus on actionable business insights and market opportunities.
           confidence: 0.7,
           evidence: [`Frequently ${topAction}s items`],
           actionable: options.actionable,
-          recommendations: [`Optimize ${topAction} flow`, `Recommend similar items`],
+          recommendations: [`Optimize ${topAction} flow`, "Recommend similar items"],
           createdAt: new Date(),
         })
       }

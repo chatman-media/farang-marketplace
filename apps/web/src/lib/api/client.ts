@@ -118,18 +118,18 @@ export const handleApiError = (error: AxiosError): ApiError => {
       status,
       details: data,
     }
-  } else if (error.request) {
+  }
+  if (error.request) {
     // Request was made but no response received
     return {
       message: "Network error. Please check your connection.",
       code: "NETWORK_ERROR",
     }
-  } else {
-    // Something else happened
-    return {
-      message: error.message || "An unexpected error occurred",
-      code: "UNKNOWN_ERROR",
-    }
+  }
+  // Something else happened
+  return {
+    message: error.message || "An unexpected error occurred",
+    code: "UNKNOWN_ERROR",
   }
 }
 

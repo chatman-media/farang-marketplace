@@ -1,10 +1,11 @@
+import logger from "@marketplace/logger"
 import { readFileSync } from "fs"
 import { join } from "path"
 import { query } from "./connection"
 
 async function runMigration(migrationFile: string) {
   try {
-    console.log(`Running migration: ${migrationFile}`)
+    logger.info(`Running migration: ${migrationFile}`)
 
     const migrationPath = join(__dirname, "migrations", migrationFile)
     const sql = readFileSync(migrationPath, "utf8")
@@ -24,17 +25,17 @@ async function runMigration(migrationFile: string) {
       if (statement.trim()) {
         try {
           await query(statement)
-          console.log("✅ Executed statement")
+          logger.info("✅ Executed statement")
         } catch (error) {
-          console.error("❌ Failed to execute statement:", statement.substring(0, 100) + "...")
+          logger.error("❌ Failed to execute statement:", statement.substring(0, 100) + "...")
           throw error
         }
       }
     }
 
-    console.log(`✅ Migration ${migrationFile} completed successfully`)
+    logger.info(`✅ Migration ${migrationFile} completed successfully`)
   } catch (error) {
-    console.error(`❌ Migration ${migrationFile} failed:`, error)
+    logger.error(`❌ Migration ${migrationFile} failed:`, error)
     throw error
   }
 }
@@ -43,16 +44,16 @@ async function main() {
   const migrationFile = process.argv[2]
 
   if (!migrationFile) {
-    console.error("Usage: npx tsx src/db/run-migration.ts <migration-file>")
+    logger.error("Usage: npx tsx src/db/run-migration.ts <migration-file>")
     process.exit(1)
   }
 
   try {
     await runMigration(migrationFile)
-    console.log("🎉 All migrations completed successfully")
+    logger.info("🎉 All migrations completed successfully")
     process.exit(0)
   } catch (error) {
-    console.error("💥 Migration failed:", error)
+    logger.error("💥 Migration failed:", error)
     process.exit(1)
   }
 }

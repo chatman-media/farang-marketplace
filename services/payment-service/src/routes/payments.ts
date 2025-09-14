@@ -90,7 +90,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           })
 
           // Generate QR code (placeholder)
-          qrCode = `data:image/png;base64,placeholder-qr-code`
+          qrCode = "data:image/png;base64,placeholder-qr-code"
         }
 
         return reply.code(201).send({

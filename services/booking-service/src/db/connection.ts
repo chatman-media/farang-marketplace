@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { config } from "dotenv"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
@@ -32,7 +33,7 @@ export async function checkDatabaseConnection(): Promise<boolean> {
     await client`SELECT 1`
     return true
   } catch (error) {
-    console.error("Database connection failed:", error)
+    logger.error("Database connection failed:", error)
     return false
   }
 }
@@ -41,8 +42,8 @@ export async function checkDatabaseConnection(): Promise<boolean> {
 export async function closeDatabaseConnection(): Promise<void> {
   try {
     await client.end()
-    console.log("Database connection closed")
+    logger.info("Database connection closed")
   } catch (error) {
-    console.error("Error closing database connection:", error)
+    logger.error("Error closing database connection:", error)
   }
 }

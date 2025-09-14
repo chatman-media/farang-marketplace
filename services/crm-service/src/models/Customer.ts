@@ -142,7 +142,7 @@ export class Customer implements ICustomer {
       errors.push("Last name is required")
     }
 
-    if (data.phone && !/^\+?[\d\s\-\(\)]+$/.test(data.phone)) {
+    if (data.phone && !/^\+?[\d\s\-()]+$/.test(data.phone)) {
       errors.push("Invalid phone number format")
     }
 
@@ -168,7 +168,7 @@ export class Customer implements ICustomer {
       errors.push("Last name cannot be empty")
     }
 
-    if (data.phone && !/^\+?[\d\s\-\(\)]+$/.test(data.phone)) {
+    if (data.phone && !/^\+?[\d\s\-()]+$/.test(data.phone)) {
       errors.push("Invalid phone number format")
     }
 

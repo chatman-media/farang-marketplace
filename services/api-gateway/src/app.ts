@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import Fastify, { FastifyInstance } from "fastify"
 import { corsConfig, env, loggerConfig, rateLimitConfig } from "./config/environment.js"
 import { authMiddleware } from "./middleware/auth.js"
@@ -156,11 +157,11 @@ export const createApp = async (): Promise<FastifyInstance> => {
 
 // Error handling
 process.on("uncaughtException", (error) => {
-  console.error("Uncaught Exception:", error)
+  logger.error("Uncaught Exception:", error)
   process.exit(1)
 })
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason)
+  logger.error("Unhandled Rejection at:", promise, "reason:", reason)
   process.exit(1)
 })

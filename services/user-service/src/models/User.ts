@@ -1,12 +1,4 @@
-import {
-  AuthProvider,
-  SocialProfile,
-  User,
-  UserPreferences,
-  UserProfile,
-  UserRole,
-  VerificationStatus,
-} from "@marketplace/shared-types"
+import { AuthProvider, SocialProfile, User, UserProfile, UserRole, VerificationStatus } from "@marketplace/shared-types"
 import * as bcrypt from "bcryptjs"
 import { z } from "zod"
 
@@ -95,16 +87,16 @@ export class UserEntity {
     return new UserEntity(
       row.id,
       row.email,
-      row.password_hash,
+      row.passwordHash || row.password_hash,
       row.role,
       row.profile,
-      row.social_profiles || [],
-      row.primary_auth_provider || AuthProvider.EMAIL,
+      row.socialProfiles || row.social_profiles || [],
+      row.primaryAuthProvider || row.primary_auth_provider || AuthProvider.EMAIL,
       row.phone,
-      row.telegram_id,
-      row.is_active,
-      row.created_at,
-      row.updated_at,
+      row.telegramId || row.telegram_id,
+      row.isActive !== undefined ? row.isActive : row.is_active,
+      row.createdAt || row.created_at,
+      row.updatedAt || row.updated_at,
     )
   }
 

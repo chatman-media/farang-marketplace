@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
 import { aiClient } from "../services/AIClient"
@@ -79,7 +80,7 @@ export class AIIntegrationController {
         })
       }
 
-      console.error("Enhanced search error:", error)
+      logger.error("Enhanced search error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to perform enhanced search",
@@ -109,7 +110,7 @@ export class AIIntegrationController {
         })
       }
 
-      console.error("Query analysis error:", error)
+      logger.error("Query analysis error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to analyze query",
@@ -145,7 +146,7 @@ export class AIIntegrationController {
         })
       }
 
-      console.error("Get recommendations error:", error)
+      logger.error("Get recommendations error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to get recommendations",
@@ -181,7 +182,7 @@ export class AIIntegrationController {
         })
       }
 
-      console.error("Get price suggestions error:", error)
+      logger.error("Get price suggestions error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to get price suggestions",
@@ -214,7 +215,7 @@ export class AIIntegrationController {
         })
       }
 
-      console.error("Get suggestions error:", error)
+      logger.error("Get suggestions error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to get suggestions",
@@ -238,7 +239,7 @@ export class AIIntegrationController {
         },
       })
     } catch (error) {
-      console.error("Get AI status error:", error)
+      logger.error("Get AI status error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to get AI status",

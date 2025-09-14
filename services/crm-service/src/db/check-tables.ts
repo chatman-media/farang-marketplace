@@ -1,3 +1,4 @@
+import { logger } from "@marketplace/logger"
 import dotenv from "dotenv"
 import { query } from "./connection"
 
@@ -6,7 +7,7 @@ dotenv.config()
 
 async function checkTables() {
   try {
-    console.log("🔍 Checking database tables...")
+    logger.info("🔍 Checking database tables...")
 
     // Check if message_templates table exists
     const tableCheck = await query(`
@@ -17,12 +18,12 @@ async function checkTables() {
     `)
 
     if (tableCheck.rows.length > 0) {
-      console.log("📋 Current message_templates table structure:")
+      logger.info("📋 Current message_templates table structure:")
       tableCheck.rows.forEach((row: any) => {
-        console.log(`  - ${row.column_name}: ${row.data_type} (${row.is_nullable === "YES" ? "nullable" : "not null"})`)
+        logger.info(`  - ${row.column_name}: ${row.data_type} (${row.is_nullable === "YES" ? "nullable" : "not null"})`)
       })
     } else {
-      console.log("❌ message_templates table does not exist")
+      logger.info("❌ message_templates table does not exist")
     }
 
     // Check all tables
@@ -33,12 +34,12 @@ async function checkTables() {
       ORDER BY table_name
     `)
 
-    console.log("\n📊 All tables in database:")
+    logger.info("\n📊 All tables in database:")
     allTables.rows.forEach((row: any) => {
-      console.log(`  - ${row.table_name}`)
+      logger.info(`  - ${row.table_name}`)
     })
   } catch (error) {
-    console.error("❌ Check failed:", error)
+    logger.error("❌ Check failed:", error)
     process.exit(1)
   }
 }

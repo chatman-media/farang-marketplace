@@ -1,3 +1,4 @@
+import { logger } from "handlebars"
 import { query } from "../db/connection"
 import { Customer } from "../models/Customer"
 import {
@@ -42,7 +43,7 @@ export class SegmentationService {
       await this.recalculateSegmentMembership(segment.id)
     } catch (error) {
       // If recalculation fails, log but don't fail the creation
-      console.warn(`Failed to recalculate membership for segment ${segment.id}:`, error)
+      logger.log(`Failed to recalculate membership for segment ${segment.id}: `, error)
     }
 
     return segment
@@ -157,7 +158,7 @@ export class SegmentationService {
       return segment
     }
 
-    updates.push(`updated_at = NOW()`)
+    updates.push("updated_at = NOW()")
     queryParams.push(id)
 
     const result = await query(
@@ -229,7 +230,7 @@ export class SegmentationService {
       try {
         await this.recalculateSegmentMembership(segment.id)
       } catch (error) {
-        console.error(`Failed to recalculate segment ${segment.name}:`, error)
+        logger.error(`Failed to recalculate segment ${segment.name}:`, error)
       }
     }
   }
@@ -242,7 +243,7 @@ export class SegmentationService {
       const result = await query(sqlQuery.sql, sqlQuery.params)
       return result.rows.map((row: any) => row.id)
     } catch (error) {
-      console.error("Error executing segment query:", error)
+      logger.error("Error executing segment query:", error)
       throw new Error(`Failed to execute segment query: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }

@@ -1,14 +1,15 @@
+import logger from "@marketplace/logger"
 import { createApp, env, gracefulShutdown } from "./app"
-import { runMigrations } from "./database/migrate"
+import { connectRedis, disconnectRedis } from "./config/redis"
 
 // Start the modern application
 const start = async () => {
   try {
-    console.log("🚀 Starting User Service v2.0...")
+    logger.info("🚀 Starting User Service v2.0...")
 
-    // Run database migrations
-    await runMigrations()
-    console.log("✅ Database migrations completed")
+    // Connect to Redis
+    await connectRedis()
+    logger.info("✅ Redis connection established")
 
     // Create and start Fastify app
     const app = await createApp()
@@ -18,12 +19,12 @@ const start = async () => {
       host: "0.0.0.0",
     })
 
-    console.log(`🚀 User Service v2.0 running on port ${env.PORT}`)
-    console.log(`📊 Environment: ${env.NODE_ENV}`)
-    console.log(`🔗 API Base URL: http://localhost:${env.PORT}/api`)
-    console.log(`💚 Health check: http://localhost:${env.PORT}/health`)
+    logger.info(`🚀 User Service v2.0 running on port ${env.PORT}`)
+    logger.info(`📊 Environment: ${env.NODE_ENV}`)
+    logger.info(`🔗 API Base URL: http://localhost:${env.PORT}/api`)
+    logger.info(`💚 Health check: http://localhost:${env.PORT}/health`)
   } catch (error) {
-    console.error("Failed to start User Service:", error)
+    logger.error("Failed to start User Service:", error)
     process.exit(1)
   }
 }
@@ -32,11 +33,13 @@ const start = async () => {
 process.on("SIGTERM", async () => {
   const app = await createApp()
   await gracefulShutdown(app, "SIGTERM")
+  await disconnectRedis()
 })
 
 process.on("SIGINT", async () => {
   const app = await createApp()
   await gracefulShutdown(app, "SIGINT")
+  await disconnectRedis()
 })
 
 // Start the application

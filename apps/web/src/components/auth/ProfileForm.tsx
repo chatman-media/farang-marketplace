@@ -49,7 +49,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ onSuccess }) => {
       newErrors.email = "Email is invalid"
     }
 
-    if (formData.phone && !/^\+?[\d\s\-\(\)]+$/.test(formData.phone)) {
+    if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
       newErrors.phone = "Phone number is invalid"
     }
 
@@ -106,7 +106,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ onSuccess }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
       </div>
     )
   }

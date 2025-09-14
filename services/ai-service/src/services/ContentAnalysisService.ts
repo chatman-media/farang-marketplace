@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import compromise from "compromise"
 import natural from "natural"
 import sentiment from "sentiment"
@@ -67,7 +68,7 @@ export class ContentAnalysisService {
       result.processingTime = Date.now() - startTime
       return result
     } catch (error) {
-      console.error("Content analysis failed:", error)
+      logger.error("Content analysis failed:", error)
       throw new Error(`Content analysis failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -111,7 +112,7 @@ export class ContentAnalysisService {
             confidence = Math.max(confidence, aiSentiment.confidence)
           }
         } catch (error) {
-          console.warn("AI sentiment analysis failed, using basic analysis")
+          logger.warn("AI sentiment analysis failed, using basic analysis")
         }
       }
 
@@ -134,7 +135,7 @@ export class ContentAnalysisService {
         confidence,
       }
     } catch (error) {
-      console.error("Sentiment analysis failed:", error)
+      logger.error("Sentiment analysis failed:", error)
       return {
         score: 0,
         label: "neutral",
@@ -183,7 +184,7 @@ Respond with only a JSON object: {"score": 0.X, "confidence": 0.X}
 
       return null
     } catch (error) {
-      console.error("AI sentiment analysis failed:", error)
+      logger.error("AI sentiment analysis failed:", error)
       return null
     }
   }
@@ -303,7 +304,7 @@ Respond with only a JSON object: {"score": 0.X, "confidence": 0.X}
             keywords.push(...aiKeywords)
           }
         } catch (error) {
-          console.warn("AI keyword extraction failed, using statistical analysis")
+          logger.warn("AI keyword extraction failed, using statistical analysis")
         }
       }
 
@@ -311,7 +312,7 @@ Respond with only a JSON object: {"score": 0.X, "confidence": 0.X}
       const uniqueKeywords = this.deduplicateKeywords(keywords)
       return uniqueKeywords.sort((a, b) => b.score - a.score).slice(0, 15)
     } catch (error) {
-      console.error("Keyword extraction failed:", error)
+      logger.error("Keyword extraction failed:", error)
       return []
     }
   }
@@ -395,7 +396,7 @@ Respond with a JSON array of keywords with scores:
 
       return null
     } catch (error) {
-      console.error("AI keyword extraction failed:", error)
+      logger.error("AI keyword extraction failed:", error)
       return null
     }
   }
@@ -445,7 +446,7 @@ Respond with a JSON array of keywords with scores:
       // Fallback to keyword-based categorization
       return this.getKeywordBasedCategories(text, categories)
     } catch (error) {
-      console.error("Content categorization failed:", error)
+      logger.error("Content categorization failed:", error)
       return []
     }
   }
@@ -517,7 +518,7 @@ Only include categories with confidence > 0.3.
 
       return null
     } catch (error) {
-      console.error("AI categorization failed:", error)
+      logger.error("AI categorization failed:", error)
       return null
     }
   }
@@ -626,13 +627,13 @@ Only include categories with confidence > 0.3.
 
       if (thaiRatio > 0.3) {
         return { detected: "th", confidence: thaiRatio }
-      } else if (englishRatio > 0.5) {
-        return { detected: "en", confidence: englishRatio }
-      } else {
-        return { detected: "mixed", confidence: 0.5 }
       }
+      if (englishRatio > 0.5) {
+        return { detected: "en", confidence: englishRatio }
+      }
+      return { detected: "mixed", confidence: 0.5 }
     } catch (error) {
-      console.error("Language detection failed:", error)
+      logger.error("Language detection failed:", error)
       return { detected: "unknown", confidence: 0 }
     }
   }
@@ -654,7 +655,7 @@ Only include categories with confidence > 0.3.
       try {
         aiModeration = await this.getAIModeration(text)
       } catch (error) {
-        console.warn("AI moderation failed, using keyword-based moderation")
+        logger.warn("AI moderation failed, using keyword-based moderation")
       }
 
       const categories: string[] = []
@@ -664,6 +665,7 @@ Only include categories with confidence > 0.3.
       // Combine results
       if (flaggedKeywords.length > 0) {
         categories.push("inappropriate_language")
+        // biome-ignore lint/complexity/useLiteralKeys: fixme
         scores["inappropriate_language"] = flaggedKeywords.length / 10
         flagged = true
       }
@@ -680,7 +682,7 @@ Only include categories with confidence > 0.3.
         scores,
       }
     } catch (error) {
-      console.error("Content moderation failed:", error)
+      logger.error("Content moderation failed:", error)
       return {
         flagged: false,
         categories: [],
@@ -743,7 +745,7 @@ Respond with JSON: {"flagged": boolean, "categories": ["category"], "scores": {"
 
       return null
     } catch (error) {
-      console.error("AI moderation failed:", error)
+      logger.error("AI moderation failed:", error)
       return null
     }
   }
@@ -803,7 +805,7 @@ Respond with JSON: {"flagged": boolean, "categories": ["category"], "scores": {"
           suggestions.push(...aiQuality.suggestions)
         }
       } catch (error) {
-        console.warn("AI quality assessment failed")
+        logger.warn("AI quality assessment failed")
       }
 
       return {
@@ -812,7 +814,7 @@ Respond with JSON: {"flagged": boolean, "categories": ["category"], "scores": {"
         suggestions: [...new Set(suggestions)],
       }
     } catch (error) {
-      console.error("Quality assessment failed:", error)
+      logger.error("Quality assessment failed:", error)
       return {
         score: 0.5,
         issues: ["Quality assessment failed"],
@@ -911,7 +913,7 @@ Respond with JSON: {"score": 0.X, "issues": ["issue"], "suggestions": ["suggesti
 
       return null
     } catch (error) {
-      console.error("AI quality assessment failed:", error)
+      logger.error("AI quality assessment failed:", error)
       return null
     }
   }
@@ -921,7 +923,8 @@ Respond with JSON: {"score": 0.X, "issues": ["issue"], "suggestions": ["suggesti
    */
   async batchAnalyze(requests: ContentAnalysisRequest[]): Promise<ContentAnalysisResult[]> {
     const results: ContentAnalysisResult[] = []
-    const batchSize = parseInt(process.env["AI_BATCH_SIZE"] || "10")
+    // biome-ignore lint/complexity/useLiteralKeys: fixme
+    const batchSize = Number.parseInt(process.env["AI_BATCH_SIZE"] || "10", 10)
 
     for (let i = 0; i < requests.length; i += batchSize) {
       const batch = requests.slice(i, i + batchSize)
@@ -931,7 +934,7 @@ Respond with JSON: {"score": 0.X, "issues": ["issue"], "suggestions": ["suggesti
         const batchResults = await Promise.all(batchPromises)
         results.push(...batchResults)
       } catch (error) {
-        console.error("Batch analysis failed:", error)
+        logger.error("Batch analysis failed:", error)
         // Add error results for failed batch
         batch.forEach((request) => {
           results.push({

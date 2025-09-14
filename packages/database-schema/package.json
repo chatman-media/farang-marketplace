@@ -19,6 +19,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@marketplace/shared-types": "^1.0.0",
+    "@marketplace/logger": "^1.0.0",
     "drizzle-orm": "^0.44.5",
     "postgres": "^3.4.7"
   },

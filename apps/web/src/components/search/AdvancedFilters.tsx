@@ -201,7 +201,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
     const value = e.target.value
     onFiltersChange({
       ...filters,
-      [field]: value === "" ? undefined : parseFloat(value),
+      [field]: value === "" ? undefined : Number.parseFloat(value),
     })
     setActivePreset(null)
   }

@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import axios, { AxiosInstance } from "axios"
 
 export interface SearchEnhancementRequest {
@@ -95,11 +96,11 @@ export class AIClient {
     // Add request interceptor for logging
     this.client.interceptors.request.use(
       (config) => {
-        console.log(`AI Service Request: ${config.method?.toUpperCase()} ${config.url}`)
+        logger.info(`AI Service Request: ${config.method?.toUpperCase()} ${config.url}`)
         return config
       },
       (error) => {
-        console.error("AI Service Request Error:", error)
+        logger.error("AI Service Request Error:", error)
         return Promise.reject(error)
       },
     )
@@ -108,7 +109,7 @@ export class AIClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
-        console.error("AI Service Response Error:", error.response?.data || error.message)
+        logger.error("AI Service Response Error:", error.response?.data || error.message)
         return Promise.reject(error)
       },
     )
@@ -122,7 +123,7 @@ export class AIClient {
       const response = await this.client.post("/api/ai/search/enhanced", request)
       return response.data.data
     } catch (error) {
-      console.error("Failed to enhance search:", error)
+      logger.error("Failed to enhance search:", error)
       // Return fallback response
       return {
         enhancedQuery: request.query,
@@ -146,7 +147,7 @@ export class AIClient {
       const response = await this.client.post("/api/recommendations/generate", request)
       return response.data.data
     } catch (error) {
-      console.error("Failed to get recommendations:", error)
+      logger.error("Failed to get recommendations:", error)
       return {
         recommendations: [],
         metadata: {
@@ -166,7 +167,7 @@ export class AIClient {
       const response = await this.client.post("/api/marketplace-integration/price-suggestions", request)
       return response.data.data
     } catch (error) {
-      console.error("Failed to get price suggestions:", error)
+      logger.error("Failed to get price suggestions:", error)
       return {
         suggestedPrice: request.currentPrice || 0,
         priceRange: { min: 0, max: 0 },
@@ -205,7 +206,7 @@ export class AIClient {
         confidence: analysis.confidence || 0.5,
       }
     } catch (error) {
-      console.error("Failed to analyze query:", error)
+      logger.error("Failed to analyze query:", error)
       return {
         intent: "search",
         entities: {},
@@ -228,7 +229,7 @@ export class AIClient {
       })
       return response.data.data.suggestions || []
     } catch (error) {
-      console.error("Failed to generate suggestions:", error)
+      logger.error("Failed to generate suggestions:", error)
       return []
     }
   }
@@ -241,7 +242,7 @@ export class AIClient {
       const response = await this.client.get("/health")
       return response.data.status === "healthy"
     } catch (error) {
-      console.error("AI service health check failed:", error)
+      logger.error("AI service health check failed:", error)
       return false
     }
   }

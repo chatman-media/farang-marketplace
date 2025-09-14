@@ -60,7 +60,7 @@ describe("TON Service Logic Tests", () => {
       ]
 
       testCases.forEach(({ ton, nanotons }) => {
-        const calculated = (parseFloat(ton) * 1e9).toString()
+        const calculated = (Number.parseFloat(ton) * 1e9).toString()
         expect(calculated).toBe(nanotons)
       })
     })
@@ -75,7 +75,7 @@ describe("TON Service Logic Tests", () => {
       ]
 
       testCases.forEach(({ nanotons, ton }) => {
-        const calculated = parseInt(nanotons) / 1e9
+        const calculated = Number.parseInt(nanotons) / 1e9
         if (calculated < 1e-6) {
           expect(calculated.toFixed(9)).toBe(ton)
         } else {
@@ -87,7 +87,7 @@ describe("TON Service Logic Tests", () => {
     it("should handle precision in TON amounts", () => {
       // TON supports up to 9 decimal places
       const preciseAmount = "1.123456789"
-      const nanotons = parseFloat(preciseAmount) * 1e9
+      const nanotons = Number.parseFloat(preciseAmount) * 1e9
       const backToTon = nanotons / 1e9
 
       expect(nanotons).toBe(1123456789)
@@ -95,7 +95,7 @@ describe("TON Service Logic Tests", () => {
 
       // Test precision limits
       const maxPrecision = "0.000000001" // 1 nanoton
-      const minNanotons = parseFloat(maxPrecision) * 1e9
+      const minNanotons = Number.parseFloat(maxPrecision) * 1e9
       expect(minNanotons).toBe(1)
     })
   })
@@ -137,7 +137,7 @@ describe("TON Service Logic Tests", () => {
       }
 
       // Simulate URL generation
-      const nanotons = (parseFloat(paymentRequest.amount) * 1e9).toString()
+      const nanotons = (Number.parseFloat(paymentRequest.amount) * 1e9).toString()
       const params = new URLSearchParams({
         to: paymentRequest.toAddress,
         amount: nanotons,
@@ -202,7 +202,7 @@ describe("TON Service Logic Tests", () => {
 
     it("should validate price bounds", () => {
       const validPrices = [0.1, 1.0, 5.0, 10.0, 100.0]
-      const invalidPrices = [0, -1, -5.5, Infinity, NaN]
+      const invalidPrices = [0, -1, -5.5, Number.POSITIVE_INFINITY, Number.NaN]
 
       validPrices.forEach((price) => {
         expect(price).toBeGreaterThan(0)
@@ -227,7 +227,7 @@ describe("TON Service Logic Tests", () => {
       ]
 
       testCases.forEach(({ amount, requiredConfirmations }) => {
-        const amountNum = parseFloat(amount)
+        const amountNum = Number.parseFloat(amount)
 
         // Higher amounts should require more confirmations
         if (amountNum >= 1000) {

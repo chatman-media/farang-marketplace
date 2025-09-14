@@ -222,7 +222,7 @@ export class Template {
       // Check time of day
       if (timeConstraints.timeOfDay) {
         const currentHour = now.getHours()
-        const [startHour, endHour] = timeConstraints.timeOfDay.split("-").map((h) => parseInt(h))
+        const [startHour, endHour] = timeConstraints.timeOfDay.split("-").map((h) => Number.parseInt(h))
         if (currentHour < startHour || currentHour > endHour) {
           return false
         }

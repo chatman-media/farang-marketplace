@@ -43,13 +43,12 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, className = "
         currency: price.currency,
         minimumFractionDigits: 0,
       }).format(price.amount)
-    } else {
-      return new Intl.NumberFormat("th-TH", {
-        style: "currency",
-        currency: listing.currency || currency,
-        minimumFractionDigits: 0,
-      }).format(price)
     }
+    return new Intl.NumberFormat("th-TH", {
+      style: "currency",
+      currency: listing.currency || currency,
+      minimumFractionDigits: 0,
+    }).format(price)
   }
 
   const getStatusColor = (status?: string) => {

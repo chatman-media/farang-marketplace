@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import {
   CommunicationChannel,
   type CommunicationHistory,
@@ -59,12 +60,12 @@ export class CommunicationService {
       // Verify email connection
       const emailReady = await this.emailService.verifyConnection()
       if (!emailReady) {
-        console.warn("Email service connection failed")
+        logger.warn("Email service connection failed")
       }
 
-      console.log("Communication services initialized")
+      logger.info("Communication services initialized")
     } catch (error) {
-      console.error("Failed to initialize communication services:", error)
+      logger.error("Failed to initialize communication services:", error)
       throw error
     }
   }
@@ -153,14 +154,14 @@ export class CommunicationService {
         try {
           await this.crmService.incrementCustomerInteractions(request.customerId)
         } catch (error) {
-          console.error("Failed to update customer interaction metrics:", error)
+          logger.error("Failed to update customer interaction metrics:", error)
           // Don't throw error here - message was sent successfully
         }
       }
 
       return result
     } catch (error: any) {
-      console.error("Failed to send unified message:", error)
+      logger.error("Failed to send unified message:", error)
       throw error
     }
   }
@@ -226,8 +227,8 @@ export class CommunicationService {
         channel: row.channel,
         messages,
         lastMessageAt: new Date(row.last_message_at),
-        messageCount: parseInt(row.message_count),
-        unreadCount: parseInt(row.unread_count),
+        messageCount: Number.parseInt(row.message_count, 10),
+        unreadCount: Number.parseInt(row.unread_count, 10),
       })
     }
 
@@ -303,7 +304,7 @@ export class CommunicationService {
       ])
       return result.rowCount > 0
     } catch (error) {
-      console.error("Error marking message as read:", error)
+      logger.error("Error marking message as read:", error)
       return false
     }
   }
@@ -316,7 +317,7 @@ export class CommunicationService {
       )
       return result.rowCount > 0
     } catch (error) {
-      console.error("Error marking message as responded:", error)
+      logger.error("Error marking message as responded:", error)
       return false
     }
   }
@@ -357,7 +358,7 @@ export class CommunicationService {
 
     result.rows.forEach((row: any) => {
       const key = `${row.channel}_${row.direction}_${row.status}`
-      stats[key] = parseInt(row.count)
+      stats[key] = Number.parseInt(row.count, 10)
     })
 
     return stats
@@ -389,7 +390,7 @@ export class CommunicationService {
         updatedAt: new Date(row.updated_at),
       }
     } catch (error) {
-      console.error("Error fetching customer:", error)
+      logger.error("Error fetching customer:", error)
       return null
     }
   }
@@ -419,9 +420,9 @@ export class CommunicationService {
     try {
       await this.telegramService.stopBot()
       await this.whatsappService.destroy()
-      console.log("Communication services shut down")
+      logger.info("Communication services shut down")
     } catch (error) {
-      console.error("Error shutting down communication services:", error)
+      logger.error("Error shutting down communication services:", error)
     }
   }
 }

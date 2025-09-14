@@ -1,6 +1,5 @@
+import { createDatabaseConnection, sql, users } from "@marketplace/database-schema"
 import { AuthProvider, UserRole, VerificationStatus } from "@marketplace/shared-types"
-import { pool, query } from "../../database/connection"
-import { runMigrations } from "../../database/migrate"
 import { UserEntity } from "../../models/User"
 
 /**
@@ -185,33 +184,37 @@ export const createUserEntities = () => {
 }
 
 /**
- * Database row format fixtures (snake_case for database compatibility)
+ * Database row format fixtures (camelCase for new schema compatibility)
  */
 export const databaseRowFixtures = {
   standardUser: {
     id: userFixtures.standardUser.id,
     email: userFixtures.standardUser.email,
-    password_hash: userFixtures.standardUser.passwordHash,
+    passwordHash: userFixtures.standardUser.passwordHash,
     phone: userFixtures.standardUser.phone,
-    telegram_id: userFixtures.standardUser.telegramId,
+    telegramId: userFixtures.standardUser.telegramId,
     role: userFixtures.standardUser.role,
+    firstName: userFixtures.standardUser.profile.firstName,
+    lastName: userFixtures.standardUser.profile.lastName,
     profile: userFixtures.standardUser.profile,
-    is_active: userFixtures.standardUser.isActive,
-    created_at: userFixtures.standardUser.createdAt,
-    updated_at: userFixtures.standardUser.updatedAt,
+    isActive: userFixtures.standardUser.isActive,
+    createdAt: userFixtures.standardUser.createdAt,
+    updatedAt: userFixtures.standardUser.updatedAt,
   },
 
   agencyUser: {
     id: userFixtures.agencyUser.id,
     email: userFixtures.agencyUser.email,
-    password_hash: userFixtures.agencyUser.passwordHash,
+    passwordHash: userFixtures.agencyUser.passwordHash,
     phone: userFixtures.agencyUser.phone,
-    telegram_id: userFixtures.agencyUser.telegramId,
+    telegramId: userFixtures.agencyUser.telegramId,
     role: userFixtures.agencyUser.role,
+    firstName: userFixtures.agencyUser.profile.firstName,
+    lastName: userFixtures.agencyUser.profile.lastName,
     profile: userFixtures.agencyUser.profile,
-    is_active: userFixtures.agencyUser.isActive,
-    created_at: userFixtures.agencyUser.createdAt,
-    updated_at: userFixtures.agencyUser.updatedAt,
+    isActive: userFixtures.agencyUser.isActive,
+    createdAt: userFixtures.agencyUser.createdAt,
+    updatedAt: userFixtures.agencyUser.updatedAt,
   },
 }
 
@@ -323,18 +326,13 @@ export const mockUserStats = {
   rejectedVerification: 5,
 }
 /**
- 
-* Setup test database
+ * Setup test database
  * Runs migrations and prepares database for testing
  */
 export async function setupTestDatabase(): Promise<void> {
   try {
-    // Skip migrations since we're using centralized schema
-    // The database schema is already set up via @marketplace/database-schema
-    console.log("Using centralized database schema, skipping local migrations")
-
-    // Clear any existing test data
-    await cleanupTestDatabase()
+    // Database setup is handled by the database-schema package
+    console.log("Test database setup completed")
   } catch (error) {
     console.error("Failed to setup test database:", error)
     throw error
@@ -347,9 +345,12 @@ export async function setupTestDatabase(): Promise<void> {
  */
 export async function cleanupTestDatabase(): Promise<void> {
   try {
+    const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@postgres:5432/marketplace"
+    const db = createDatabaseConnection(connectionString)
+
     // Delete all users (this will cascade to related tables)
-    await query("DELETE FROM users WHERE email LIKE $1", ["%@example.com"])
-    await query("DELETE FROM users WHERE email LIKE $1", ["test%@%"])
+    await db.execute(sql`DELETE FROM users WHERE email LIKE '%@example.com'`)
+    await db.execute(sql`DELETE FROM users WHERE email LIKE 'test%@%'`)
   } catch (error) {
     console.error("Failed to cleanup test database:", error)
     // Don't throw error during cleanup to avoid masking test failures
@@ -360,26 +361,28 @@ export async function cleanupTestDatabase(): Promise<void> {
  * Insert test user fixtures into database
  */
 export async function insertUserFixtures(): Promise<void> {
+  const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@postgres:5432/marketplace"
+  const db = createDatabaseConnection(connectionString)
   const fixtures = Object.values(userFixtures)
 
   for (const fixture of fixtures) {
-    await query(
-      `INSERT INTO users (id, email, password_hash, phone, telegram_id, role, profile, is_active, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-       ON CONFLICT (id) DO NOTHING`,
-      [
-        fixture.id,
-        fixture.email,
-        fixture.passwordHash,
-        fixture.phone || null,
-        fixture.telegramId || null,
-        fixture.role,
-        JSON.stringify(fixture.profile),
-        fixture.isActive,
-        fixture.createdAt,
-        fixture.updatedAt,
-      ],
-    )
+    await db
+      .insert(users)
+      .values({
+        id: fixture.id,
+        email: fixture.email,
+        passwordHash: fixture.passwordHash,
+        phone: fixture.phone || null,
+        telegramId: fixture.telegramId || null,
+        role: fixture.role as any,
+        firstName: fixture.profile.firstName,
+        lastName: fixture.profile.lastName,
+        profile: fixture.profile,
+        isActive: fixture.isActive,
+        createdAt: fixture.createdAt,
+        updatedAt: fixture.updatedAt,
+      })
+      .onConflictDoNothing()
   }
 }
 
@@ -387,5 +390,6 @@ export async function insertUserFixtures(): Promise<void> {
  * Get test database connection for direct queries
  */
 export function getTestConnection() {
-  return pool
+  const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@postgres:5432/marketplace"
+  return createDatabaseConnection(connectionString)
 }

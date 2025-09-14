@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 
 export class ListingController {
@@ -10,7 +11,7 @@ export class ListingController {
         message: "Vehicle listing created successfully",
       })
     } catch (error) {
-      console.error("Create vehicle error:", error)
+      logger.error("Create vehicle error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to create vehicle listing",
@@ -27,7 +28,7 @@ export class ListingController {
         message: "Product listing created successfully",
       })
     } catch (error) {
-      console.error("Create product error:", error)
+      logger.error("Create product error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to create product listing",
@@ -93,7 +94,7 @@ export class ListingController {
         message: "Vehicles retrieved successfully",
       })
     } catch (error) {
-      console.error("Get vehicles error:", error)
+      logger.error("Get vehicles error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to retrieve vehicles",
@@ -158,7 +159,7 @@ export class ListingController {
         message: "Products retrieved successfully",
       })
     } catch (error) {
-      console.error("Get products error:", error)
+      logger.error("Get products error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to retrieve products",
@@ -177,7 +178,7 @@ export class ListingController {
         message: "Vehicle retrieved successfully (placeholder)",
       })
     } catch (error) {
-      console.error("Get vehicle by ID error:", error)
+      logger.error("Get vehicle by ID error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to retrieve vehicle",
@@ -196,7 +197,7 @@ export class ListingController {
         message: "Product retrieved successfully (placeholder)",
       })
     } catch (error) {
-      console.error("Get product by ID error:", error)
+      logger.error("Get product by ID error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to retrieve product",
@@ -215,7 +216,7 @@ export class ListingController {
         message: "Vehicle listing updated successfully (placeholder)",
       })
     } catch (error) {
-      console.error("Update vehicle error:", error)
+      logger.error("Update vehicle error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to update vehicle listing",
@@ -234,7 +235,7 @@ export class ListingController {
         message: "Product listing updated successfully (placeholder)",
       })
     } catch (error) {
-      console.error("Update product error:", error)
+      logger.error("Update product error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to update product listing",
@@ -252,7 +253,7 @@ export class ListingController {
         message: "Vehicle listing deleted successfully (placeholder)",
       })
     } catch (error) {
-      console.error("Delete vehicle error:", error)
+      logger.error("Delete vehicle error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to delete vehicle listing",
@@ -270,7 +271,7 @@ export class ListingController {
         message: "Product listing deleted successfully (placeholder)",
       })
     } catch (error) {
-      console.error("Delete product error:", error)
+      logger.error("Delete product error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to delete product listing",
@@ -287,7 +288,7 @@ export class ListingController {
         message: "Search completed successfully (placeholder)",
       })
     } catch (error) {
-      console.error("Search listings error:", error)
+      logger.error("Search listings error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to search listings",
@@ -299,8 +300,8 @@ export class ListingController {
   getAllListings = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       const query = request.query as { page?: string; limit?: string; category?: string }
-      const page = parseInt(query.page || "1")
-      const limit = parseInt(query.limit || "12")
+      const page = Number.parseInt(query.page || "1", 10)
+      const limit = Number.parseInt(query.limit || "12", 10)
 
       // Comprehensive test data for all categories
       const mockListings = [
@@ -688,7 +689,7 @@ export class ListingController {
         message: "All listings retrieved successfully",
       })
     } catch (error) {
-      console.error("Get all listings error:", error)
+      logger.error("Get all listings error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to retrieve listings",
@@ -705,7 +706,7 @@ export class ListingController {
         message: "Featured listings retrieved successfully (placeholder)",
       })
     } catch (error) {
-      console.error("Get featured listings error:", error)
+      logger.error("Get featured listings error:", error)
       return reply.code(500).send({
         success: false,
         message: "Failed to retrieve featured listings",

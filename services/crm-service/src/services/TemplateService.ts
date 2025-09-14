@@ -77,8 +77,8 @@ export class TemplateService {
       offset?: number
     } = {},
   ): Promise<{ templates: Template[]; total: number }> {
-    let whereConditions: string[] = []
-    let queryParams: any[] = []
+    const whereConditions: string[] = []
+    const queryParams: any[] = []
     let paramIndex = 1
 
     if (filters.type) {
@@ -109,7 +109,7 @@ export class TemplateService {
 
     // Get total count
     const countResult = await query(`SELECT COUNT(*) as total FROM message_templates ${whereClause}`, queryParams)
-    const total = parseInt(countResult.rows[0].total)
+    const total = Number.parseInt(countResult.rows[0].total)
 
     // Get templates with pagination
     const limit = filters.limit || 50
@@ -309,17 +309,17 @@ export class TemplateService {
 
     const templatesByType: Record<string, number> = {}
     typeResult.rows.forEach((row: any) => {
-      templatesByType[row.type] = parseInt(row.count)
+      templatesByType[row.type] = Number.parseInt(row.count)
     })
 
     const templatesByCategory: Record<string, number> = {}
     categoryResult.rows.forEach((row: any) => {
-      templatesByCategory[row.category] = parseInt(row.count)
+      templatesByCategory[row.category] = Number.parseInt(row.count)
     })
 
     return {
-      totalTemplates: parseInt(totalResult.rows[0].total),
-      activeTemplates: parseInt(activeResult.rows[0].total),
+      totalTemplates: Number.parseInt(totalResult.rows[0].total),
+      activeTemplates: Number.parseInt(activeResult.rows[0].total),
       templatesByType,
       templatesByCategory,
     }

@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { and, desc, eq, gte, lte, sql } from "drizzle-orm"
 import { db } from "../db/connection"
 import type {
@@ -65,9 +66,9 @@ export class PaymentService {
   async initialize(): Promise<void> {
     try {
       // ModernTonService initializes automatically in constructor
-      console.log("Payment service initialized successfully")
+      logger.info("Payment service initialized successfully")
     } catch (error) {
-      console.error("Failed to initialize payment service:", error)
+      logger.error("Failed to initialize payment service:", error)
       throw error
     }
   }
@@ -85,7 +86,7 @@ export class PaymentService {
       const platformFeeRate = 0.03 // 3%
       const processingFeeRate = 0.005 // 0.5%
 
-      const amount = parseFloat(request.amount)
+      const amount = Number.parseFloat(request.amount)
       const platformFee = amount * platformFeeRate
       const processingFee = amount * processingFeeRate
       const totalFees = platformFee + processingFee
@@ -129,10 +130,10 @@ export class PaymentService {
         metadata: { paymentMethod: request.paymentMethod },
       })
 
-      console.log(`Payment created: ${payment.id}`)
+      logger.info(`Payment created: ${payment.id}`)
       return payment
     } catch (error) {
-      console.error("Failed to create payment:", error)
+      logger.error("Failed to create payment:", error)
       throw error
     }
   }
@@ -189,7 +190,7 @@ export class PaymentService {
 
       return updatedPayment
     } catch (error) {
-      console.error("Failed to process TON payment:", error)
+      logger.error("Failed to process TON payment:", error)
       await this.updatePaymentStatus(
         paymentId,
         "failed",
@@ -214,7 +215,7 @@ export class PaymentService {
       }
 
       // Convert amount to Stripe format (cents)
-      const stripeAmount = this.stripeService.convertToStripeAmount(parseFloat(payment.amount), payment.currency)
+      const stripeAmount = this.stripeService.convertToStripeAmount(Number.parseFloat(payment.amount), payment.currency)
 
       // Update payment status to processing
       await this.updatePaymentStatus(paymentId, "processing", "Stripe payment initiated")
@@ -263,7 +264,7 @@ export class PaymentService {
 
       return updatedPayment
     } catch (error) {
-      console.error("Failed to process Stripe payment:", error)
+      logger.error("Failed to process Stripe payment:", error)
       await this.updatePaymentStatus(
         paymentId,
         "failed",
@@ -314,7 +315,7 @@ export class PaymentService {
 
       return updatedPayment
     } catch (error) {
-      console.error("Failed to confirm Stripe payment:", error)
+      logger.error("Failed to confirm Stripe payment:", error)
       await this.updatePaymentStatus(
         paymentId,
         "failed",
@@ -346,7 +347,7 @@ export class PaymentService {
         await this.updatePaymentStatus(paymentId, "failed", "Payment confirmation timeout")
       }
     } catch (error) {
-      console.error("Failed to monitor payment confirmation:", error)
+      logger.error("Failed to monitor payment confirmation:", error)
       await this.updatePaymentStatus(
         paymentId,
         "failed",
@@ -384,10 +385,10 @@ export class PaymentService {
         metadata: { statusChange: { from: updatedPayment.status, to: status } },
       })
 
-      console.log(`Payment ${paymentId} status updated to ${status}`)
+      logger.info(`Payment ${paymentId} status updated to ${status}`)
       return updatedPayment
     } catch (error) {
-      console.error("Failed to update payment status:", error)
+      logger.error("Failed to update payment status:", error)
       throw error
     }
   }
@@ -401,7 +402,7 @@ export class PaymentService {
 
       return payment || null
     } catch (error) {
-      console.error("Failed to get payment:", error)
+      logger.error("Failed to get payment:", error)
       throw error
     }
   }
@@ -463,7 +464,7 @@ export class PaymentService {
         hasMore: offset + paymentResults.length < count,
       }
     } catch (error) {
-      console.error("Failed to search payments:", error)
+      logger.error("Failed to search payments:", error)
       throw error
     }
   }
@@ -477,7 +478,7 @@ export class PaymentService {
 
       return newTransaction
     } catch (error) {
-      console.error("Failed to create transaction:", error)
+      logger.error("Failed to create transaction:", error)
       throw error
     }
   }
@@ -491,13 +492,13 @@ export class PaymentService {
 
       // Update payment status if full refund
       const payment = await this.getPaymentById(refundData.paymentId)
-      if (payment && parseFloat(refundData.amount) >= parseFloat(payment.amount)) {
+      if (payment && Number.parseFloat(refundData.amount) >= Number.parseFloat(payment.amount)) {
         await this.updatePaymentStatus(payment.id, "refunded", "Full refund processed")
       }
 
       return refund
     } catch (error) {
-      console.error("Failed to create refund:", error)
+      logger.error("Failed to create refund:", error)
       throw error
     }
   }
@@ -514,7 +515,7 @@ export class PaymentService {
 
       return dispute
     } catch (error) {
-      console.error("Failed to create dispute:", error)
+      logger.error("Failed to create dispute:", error)
       throw error
     }
   }
@@ -530,7 +531,7 @@ export class PaymentService {
         .where(eq(transactions.paymentId, paymentId))
         .orderBy(desc(transactions.createdAt))
     } catch (error) {
-      console.error("Failed to get payment transactions:", error)
+      logger.error("Failed to get payment transactions:", error)
       throw error
     }
   }
@@ -590,7 +591,7 @@ export class PaymentService {
 
       return null
     } catch (error) {
-      console.error("Failed to find payment by TON transaction:", error)
+      logger.error("Failed to find payment by TON transaction:", error)
       throw error
     }
   }
@@ -610,7 +611,7 @@ export class PaymentService {
         await this.updatePaymentStatus(payment[0].id, "confirmed", "Stripe payment succeeded")
       }
     } catch (error) {
-      console.error("Failed to handle Stripe payment success:", error)
+      logger.error("Failed to handle Stripe payment success:", error)
       throw error
     }
   }
@@ -630,7 +631,7 @@ export class PaymentService {
         await this.updatePaymentStatus(payment[0].id, "failed", "Stripe payment failed")
       }
     } catch (error) {
-      console.error("Failed to handle Stripe payment failure:", error)
+      logger.error("Failed to handle Stripe payment failure:", error)
       throw error
     }
   }
@@ -646,7 +647,7 @@ export class PaymentService {
         await this.updatePaymentStatus(payment[0].id, "disputed", "Stripe dispute created")
       }
     } catch (error) {
-      console.error("Failed to handle Stripe dispute:", error)
+      logger.error("Failed to handle Stripe dispute:", error)
       throw error
     }
   }
@@ -664,7 +665,7 @@ export class PaymentService {
         })
         .where(eq(payments.id, paymentId))
     } catch (error) {
-      console.error("Failed to update payment transaction ID:", error)
+      logger.error("Failed to update payment transaction ID:", error)
       throw error
     }
   }
@@ -683,7 +684,7 @@ export class PaymentService {
         })
         .where(eq(refunds.id, refundId))
     } catch (error) {
-      console.error("Failed to update refund status:", error)
+      logger.error("Failed to update refund status:", error)
       throw error
     }
   }

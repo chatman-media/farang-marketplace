@@ -89,7 +89,7 @@ export class TestRequestBuilder {
 
   async execute(): Promise<TestResponse> {
     let payload = this.payload
-    let headers = { ...this.headers }
+    const headers = { ...this.headers }
 
     // For file uploads, we need to handle multipart form data
     if (this.files.length > 0) {

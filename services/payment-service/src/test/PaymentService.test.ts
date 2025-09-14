@@ -32,7 +32,7 @@ describe("Payment Service Logic Tests", () => {
       expect(uuidRegex.test(validPaymentRequest.payeeId)).toBe(true)
 
       // Validate amount format
-      expect(parseFloat(validPaymentRequest.amount)).toBeGreaterThan(0)
+      expect(Number.parseFloat(validPaymentRequest.amount)).toBeGreaterThan(0)
       expect(validPaymentRequest.amount).toMatch(/^\d+\.\d{1,8}$/)
     })
 
@@ -139,14 +139,14 @@ describe("Payment Service Logic Tests", () => {
     it("should handle TON amount conversions", () => {
       // TON uses 9 decimal places (nanotons)
       const tonAmount = "1.500000000" // 1.5 TON
-      const nanotons = parseFloat(tonAmount) * 1e9
+      const nanotons = Number.parseFloat(tonAmount) * 1e9
 
       expect(nanotons).toBe(1500000000)
       expect(nanotons / 1e9).toBe(1.5)
 
       // Validate precision
       const preciseAmount = "0.123456789"
-      const preciseNanotons = parseFloat(preciseAmount) * 1e9
+      const preciseNanotons = Number.parseFloat(preciseAmount) * 1e9
       expect(preciseNanotons).toBe(123456789)
     })
 

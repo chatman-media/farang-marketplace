@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import {
   CommunicationChannel,
   CommunicationHistory,
@@ -51,8 +52,8 @@ export class TelegramService {
     })
 
     // Handle errors
-    this.bot.catch((err, ctx) => {
-      console.error("Telegram bot error:", err)
+    this.bot.catch((err) => {
+      logger.error("Telegram bot error:", err)
     })
   }
 
@@ -104,7 +105,7 @@ export class TelegramService {
         sentAt: new Date(),
       }
     } catch (error: any) {
-      console.error("Telegram message sending failed:", error)
+      logger.error("Telegram message sending failed:", error)
 
       // Log failed communication
       const historyId = await this.logCommunication({
@@ -184,7 +185,7 @@ export class TelegramService {
       // Process the message (you can add custom logic here)
       await this.processIncomingMessage(customer.id, text, ctx)
     } catch (error) {
-      console.error("Error handling incoming Telegram message:", error)
+      logger.error("Error handling incoming Telegram message:", error)
     }
   }
 
@@ -218,7 +219,7 @@ export class TelegramService {
       // Process callback (you can add custom logic here)
       await this.processCallback(customer.id, data, ctx)
     } catch (error) {
-      console.error("Error handling Telegram callback query:", error)
+      logger.error("Error handling Telegram callback query:", error)
     }
   }
 
@@ -244,7 +245,7 @@ export class TelegramService {
       const result = await query("SELECT * FROM customers WHERE telegram_id = $1", [telegramId])
       return result.rows.length > 0 ? result.rows[0] : null
     } catch (error) {
-      console.error("Error finding customer by Telegram ID:", error)
+      logger.error("Error finding customer by Telegram ID:", error)
       return null
     }
   }
@@ -266,7 +267,7 @@ export class TelegramService {
         variables: row.variables || [],
       }
     } catch (error) {
-      console.error("Error fetching Telegram template:", error)
+      logger.error("Error fetching Telegram template:", error)
       return null
     }
   }
@@ -328,11 +329,11 @@ export class TelegramService {
     if (this.config.webhookUrl) {
       // Use webhook for production
       await this.bot.telegram.setWebhook(this.config.webhookUrl)
-      console.log("Telegram bot webhook set:", this.config.webhookUrl)
+      logger.log("Telegram bot webhook set:", this.config.webhookUrl)
     } else {
       // Use polling for development
       await this.bot.launch()
-      console.log("Telegram bot started with polling")
+      logger.info("Telegram bot started with polling")
     }
   }
 
