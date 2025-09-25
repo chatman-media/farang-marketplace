@@ -1,6 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+
 import Fastify from "fastify"
 import { createServer as createViteServer } from "vite"
 
@@ -81,13 +82,16 @@ async function createServer(root = process.cwd(), isProd = process.env.NODE_ENV 
 }
 
 if (!process.env.VITEST) {
-  createServer().then(({ fastify }) =>
-    fastify.listen({ port: 5173, host: "0.0.0.0" }, (err, address) => {
+  createServer().then(({ fastify }) => {
+    const port = process.env.PORT || 5173
+    const host = process.env.HOST || "0.0.0.0"
+    
+    fastify.listen({ port, host }, (err, address) => {
       if (err) {
         fastify.log.error(err)
         process.exit(1)
       }
       console.log(`Server started at ${address}`)
-    }),
-  )
+    })
+  })
 }
