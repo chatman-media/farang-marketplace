@@ -1,5 +1,8 @@
+import { Client } from "@line/bot-sdk"
 import { CommunicationChannel } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import { query } from "../db/connection"
 import { LineService } from "../services/LineService"
 
 // Mock @line/bot-sdk
@@ -14,9 +17,6 @@ vi.mock("@line/bot-sdk", () => ({
 vi.mock("../db/connection", () => ({
   query: vi.fn(),
 }))
-
-import { Client } from "@line/bot-sdk"
-import { query } from "../db/connection"
 
 describe("LineService", () => {
   let lineService: LineService

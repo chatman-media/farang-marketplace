@@ -9,9 +9,11 @@ import {
   UpdateCustomerRequest,
   UpdateLeadRequest,
 } from "@marketplace/shared-types"
+
 import { query } from "../db/connection"
 import { Customer } from "../models/Customer"
 import { Lead } from "../models/Lead"
+
 import { AutomationService } from "./AutomationService"
 
 export class CRMService {
@@ -598,7 +600,7 @@ export class CRMService {
 
     return {
       totalCustomers: Number.parseInt(customerCountResult.rows[0].total, 10),
-      totalLeads: totalLeads,
+      totalLeads,
       conversionRate: Math.round(conversionRate * 100) / 100,
       averageLeadScore: Math.round((Number.parseFloat(avgScoreResult.rows[0].avg_score) || 0) * 100) / 100,
       leadsByStatus,

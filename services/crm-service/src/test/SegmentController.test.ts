@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
+
 import { query } from "../db/connection"
 import { createApp } from "../index"
 import { SegmentDataType, SegmentOperator } from "../models/Segment"
@@ -13,7 +14,7 @@ describe("SegmentController", () => {
     app = await createApp()
 
     // Mock authentication middleware to bypass auth in tests
-    app.addHook("preHandler", async (request: any, reply) => {
+    app.addHook("preHandler", async (request: any, _reply) => {
       if (request.url.startsWith("/api/crm/segments")) {
         request.user = { id: "123e4567-e89b-12d3-a456-426614174000", role: "admin" }
       }

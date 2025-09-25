@@ -1,4 +1,6 @@
+import { UserRole } from "@marketplace/shared-types"
 import { describe, expect, it } from "vitest"
+
 import { AuthService } from "../../services/AuthService"
 
 describe("AuthService Static Methods", () => {
@@ -39,37 +41,37 @@ describe("AuthService Static Methods", () => {
 
   describe("Role Validation", () => {
     it("should validate user has required role", () => {
-      const hasRole = AuthService.hasRequiredRole("admin" as any, ["admin" as any, "manager" as any])
+      const hasRole = AuthService.hasRequiredRole(UserRole.ADMIN, [UserRole.ADMIN, UserRole.AGENCY_MANAGER])
       expect(hasRole).toBe(true)
     })
 
     it("should validate user does not have required role", () => {
-      const hasRole = AuthService.hasRequiredRole("user" as any, ["admin" as any, "manager" as any])
+      const hasRole = AuthService.hasRequiredRole(UserRole.USER, [UserRole.ADMIN, UserRole.AGENCY_MANAGER])
       expect(hasRole).toBe(false)
     })
 
     it("should validate user has one of multiple required roles", () => {
-      const hasRole = AuthService.hasRequiredRole("manager" as any, ["admin" as any, "manager" as any])
+      const hasRole = AuthService.hasRequiredRole(UserRole.AGENCY_MANAGER, [UserRole.ADMIN, UserRole.AGENCY_MANAGER])
       expect(hasRole).toBe(true)
     })
 
     it("should handle empty required roles array", () => {
-      const hasRole = AuthService.hasRequiredRole("user" as any, [])
+      const hasRole = AuthService.hasRequiredRole(UserRole.USER, [])
       expect(hasRole).toBe(false)
     })
 
     it("should identify admin users", () => {
-      expect(AuthService.isAdmin("admin" as any)).toBe(true)
-      expect(AuthService.isAdmin("user" as any)).toBe(false)
-      expect(AuthService.isAdmin("manager" as any)).toBe(false)
-      expect(AuthService.isAdmin("agency" as any)).toBe(false)
+      expect(AuthService.isAdmin(UserRole.ADMIN)).toBe(true)
+      expect(AuthService.isAdmin(UserRole.USER)).toBe(false)
+      expect(AuthService.isAdmin(UserRole.AGENCY_MANAGER)).toBe(false)
+      expect(AuthService.isAdmin(UserRole.AGENCY_OWNER)).toBe(false)
     })
 
     it("should identify manager users (including admins)", () => {
-      expect(AuthService.isManager("manager" as any)).toBe(true)
-      expect(AuthService.isManager("admin" as any)).toBe(true)
-      expect(AuthService.isManager("user" as any)).toBe(false)
-      expect(AuthService.isManager("agency" as any)).toBe(false)
+      expect(AuthService.isManager(UserRole.AGENCY_MANAGER)).toBe(true)
+      expect(AuthService.isManager(UserRole.ADMIN)).toBe(true)
+      expect(AuthService.isManager(UserRole.USER)).toBe(false)
+      expect(AuthService.isManager(UserRole.AGENCY_OWNER)).toBe(false)
     })
   })
 

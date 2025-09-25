@@ -1,5 +1,6 @@
 import type { AuthProvider, User, VerificationStatus } from "@marketplace/shared-types"
 import React, { useEffect, useState } from "react"
+
 import { useProfile, useUpdateProfile } from "../../lib/query"
 import { Button, Card, Input } from "../ui"
 

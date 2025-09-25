@@ -24,15 +24,15 @@ import { and, desc, eq, ilike, inArray, sql } from "drizzle-orm"
 import type { PgTransaction } from "drizzle-orm/pg-core"
 import { v4 as uuidv4 } from "uuid"
 
-import { db } from "../db/connection.js"
-import { listings, products, vehicles } from "../db/schema.js"
+import { db, schema } from "../db/connection.js"
 
-type ListingSelect = typeof listings.$inferSelect
-type ListingInsert = typeof listings.$inferInsert
-type VehicleSelect = typeof vehicles.$inferSelect
-type VehicleInsert = typeof vehicles.$inferInsert
-type ProductSelect = typeof products.$inferSelect
-type ProductInsert = typeof products.$inferInsert
+// Обновим типы
+type ListingSelect = typeof schema.listings.$inferSelect
+type ListingInsert = typeof schema.listings.$inferInsert
+type VehicleSelect = typeof schema.vehicles.$inferSelect
+type VehicleInsert = typeof schema.vehicles.$inferInsert
+type ProductSelect = typeof schema.products.$inferSelect
+type ProductInsert = typeof schema.products.$inferInsert
 
 export class ListingService {
   private nullToUndefined<T>(value: T | null): T | undefined {
@@ -62,7 +62,7 @@ export class ListingService {
           currency: vehicleData.pricing.currency,
           locationAddress: vehicleData.location.address,
           locationCity: vehicleData.location.city,
-          locationRegion: vehicleData.location.city, // Using city as fallback for region
+          locationRegion: vehicleData.location.city,
           locationCountry: vehicleData.location.country,
           locationLatitude: vehicleData.location.coordinates?.latitude?.toString(),
           locationLongitude: vehicleData.location.coordinates?.longitude?.toString(),
@@ -70,7 +70,7 @@ export class ListingService {
           tags: [vehicleData.specifications.make.toLowerCase(), vehicleData.specifications.model.toLowerCase()],
         }
 
-        const [listing] = await trx.insert(listings).values(listingInsert).returning()
+        const [listing] = await trx.insert(schema.listings).values(listingInsert).returning()
 
         // Create vehicle-specific data
         const vehicleInsert: VehicleInsert = {
@@ -78,7 +78,7 @@ export class ListingService {
           vehicleType: vehicleData.specifications.vehicleType.toLowerCase() as VehicleType,
           category: vehicleData.specifications.category.toLowerCase() as any,
           condition: "good" as any,
-          status: VehicleStatus.AVAILABLE,
+          status: "available" as any,
           make: vehicleData.specifications.make,
           model: vehicleData.specifications.model,
           year: vehicleData.specifications.year,
@@ -87,16 +87,14 @@ export class ListingService {
           fuelType: vehicleData.specifications.fuelType,
           transmission: vehicleData.specifications.transmission,
           seatingCapacity: vehicleData.specifications.seatingCapacity || 1,
-          licensePlate: vehicleData.documents?.licensePlate || "",
-          securityDeposit: vehicleData.pricing.securityDeposit.toString(),
-          currentLocation: vehicleData.location.address,
-          dailyRate: vehicleData.pricing.dailyRate?.toString() || null,
-          weeklyRate: vehicleData.pricing.weeklyRate?.toString() || null,
-          monthlyRate: vehicleData.pricing.monthlyRate?.toString() || null,
-          deposit: vehicleData.pricing.securityDeposit.toString(),
+          registrationNumber: vehicleData.documents?.licensePlate || "",
+          dailyRate: vehicleData.pricing.dailyRate || null,
+          weeklyRate: vehicleData.pricing.weeklyRate || null,
+          monthlyRate: vehicleData.pricing.monthlyRate || null,
+          deposit: vehicleData.pricing.securityDeposit || null,
         }
 
-        const vehicleResult = await trx.insert(vehicles).values(vehicleInsert).returning()
+        const vehicleResult = await trx.insert(schema.vehicles).values(vehicleInsert).returning()
 
         const vehicle = vehicleResult[0]
         return { listing, vehicle }
@@ -138,27 +136,21 @@ export class ListingService {
           tags: [productData.productType.toLowerCase()],
         }
 
-        const [listing] = await trx.insert(listings).values(listingInsert).returning()
+        const [listing] = await trx.insert(schema.listings).values(listingInsert).returning()
 
         // Create product-specific data
         const productInsert: ProductInsert = {
           listingId,
           productType: productData.productType.toLowerCase() as any,
           condition: productData.condition,
-          status: "active" as any,
+          status: "available" as any,
           brand: productData.specifications.brand || null,
           model: productData.specifications.model || null,
           weight: productData.specifications.weight || null,
-          listingType: "sale" as any,
-          price: (productData.pricing?.basePrice || 0).toString(),
-          priceType: "fixed" as any,
-          sellerId: "temp-seller",
-          sellerType: "individual",
-          sellerName: "Temp Seller",
-          // notes: productData.notes || null, // Property doesn't exist
+          listingType: "rental" as any,
         }
 
-        const productResult = await trx.insert(products).values(productInsert).returning()
+        const productResult = await trx.insert(schema.products).values(productInsert).returning()
 
         const product = productResult[0]
         return { listing, product }
@@ -174,13 +166,13 @@ export class ListingService {
   async getVehicleListingById(id: string): Promise<VehicleListing | null> {
     try {
       const listing = await db.query.listings.findFirst({
-        where: eq(listings.id, id),
+        where: eq(schema.listings.id, id),
       })
 
       if (!listing) return null
 
       const vehicle = await db.query.vehicles.findFirst({
-        where: eq(vehicles.listingId, id),
+        where: eq(schema.vehicles.listingId, id),
       })
 
       if (!vehicle) return null
@@ -195,13 +187,13 @@ export class ListingService {
   async getProductListingById(id: string): Promise<ProductListing | null> {
     try {
       const listing = await db.query.listings.findFirst({
-        where: eq(listings.id, id),
+        where: eq(schema.listings.id, id),
       })
 
       if (!listing) return null
 
       const product = await db.query.products.findFirst({
-        where: eq(products.listingId, id),
+        where: eq(schema.products.listingId, id),
       })
 
       if (!product) return null
@@ -213,9 +205,9 @@ export class ListingService {
     }
   }
 
-  private parseDecimal(value: string | null): number | undefined {
-    if (!value) return undefined
-    const parsed = Number.parseFloat(value)
+  private parseDecimal(value: string | number | null): number | undefined {
+    if (value === null || value === undefined) return undefined
+    const parsed = typeof value === "string" ? Number.parseFloat(value) : Number(value)
     return Number.isNaN(parsed) ? undefined : parsed
   }
 
@@ -260,7 +252,7 @@ export class ListingService {
           technologyFeatures: [],
         },
         documents: {
-          licensePlate: vehicle.licensePlate || "",
+          licensePlate: vehicle.registrationNumber || "",
           documentsComplete: false,
           documentsVerified: false,
         },
@@ -676,6 +668,242 @@ export class ListingService {
       images: listing.images || [],
       createdAt: listing.createdAt.toISOString(),
       updatedAt: listing.updatedAt.toISOString(),
+    }
+  }
+
+  async searchVehicleListings(filters: VehicleSearchFilters): Promise<VehicleListing[]> {
+    try {
+      const whereConditions = []
+
+      if (filters.make) {
+        whereConditions.push(ilike(schema.vehicles.make, `%${filters.make}%`))
+      }
+      if (filters.model) {
+        whereConditions.push(ilike(schema.vehicles.model, `%${filters.model}%`))
+      }
+      if (filters.yearFrom) {
+        whereConditions.push(sql`${schema.vehicles.year} >= ${filters.yearFrom}`)
+      }
+      if (filters.yearTo) {
+        whereConditions.push(sql`${schema.vehicles.year} <= ${filters.yearTo}`)
+      }
+      if (filters.vehicleType) {
+        whereConditions.push(eq(schema.vehicles.vehicleType, filters.vehicleType))
+      }
+      if (filters.fuelType) {
+        whereConditions.push(eq(schema.vehicles.fuelType, filters.fuelType))
+      }
+      if (filters.transmission) {
+        whereConditions.push(eq(schema.vehicles.transmission, filters.transmission))
+      }
+      if (filters.location) {
+        whereConditions.push(ilike(schema.listings.locationCity, `%${filters.location}%`))
+      }
+      if (filters.minPrice) {
+        whereConditions.push(sql`CAST(${schema.listings.basePrice} AS DECIMAL) >= ${filters.minPrice}`)
+      }
+      if (filters.maxPrice) {
+        whereConditions.push(sql`CAST(${schema.listings.basePrice} AS DECIMAL) <= ${filters.maxPrice}`)
+      }
+
+      const vehicleListings = await db.query.vehicles.findMany({
+        with: {
+          listing: true,
+        },
+        where: whereConditions.length > 0 ? and(...whereConditions) : undefined,
+        orderBy: [desc(schema.listings.createdAt)],
+        limit: filters.limit || 50,
+      })
+
+      return vehicleListings.map((v) => this.mapToVehicleListing(v.listing, v))
+    } catch (error) {
+      logger.error("Error searching vehicle listings:", error)
+      throw new Error("Failed to search vehicle listings")
+    }
+  }
+
+  async searchProductListings(filters: ProductSearchFilters): Promise<ProductListing[]> {
+    try {
+      const whereConditions = []
+
+      if (filters.productType) {
+        whereConditions.push(eq(schema.products.productType, filters.productType))
+      }
+      if (filters.condition) {
+        whereConditions.push(eq(schema.products.condition, filters.condition))
+      }
+      if (filters.brand) {
+        whereConditions.push(ilike(schema.products.brand, `%${filters.brand}%`))
+      }
+      if (filters.location) {
+        whereConditions.push(ilike(schema.listings.locationCity, `%${filters.location}%`))
+      }
+      if (filters.minPrice) {
+        whereConditions.push(sql`CAST(${schema.listings.basePrice} AS DECIMAL) >= ${filters.minPrice}`)
+      }
+      if (filters.maxPrice) {
+        whereConditions.push(sql`CAST(${schema.listings.basePrice} AS DECIMAL) <= ${filters.maxPrice}`)
+      }
+
+      const productListings = await db.query.products.findMany({
+        with: {
+          listing: true,
+        },
+        where: whereConditions.length > 0 ? and(...whereConditions) : undefined,
+        orderBy: [desc(schema.listings.createdAt)],
+        limit: filters.limit || 50,
+      })
+
+      return productListings.map((p) => this.mapToProductListing(p.listing, p))
+    } catch (error) {
+      logger.error("Error searching product listings:", error)
+      throw new Error("Failed to search product listings")
+    }
+  }
+
+  async updateListingStatus(id: string, status: ListingStatus): Promise<boolean> {
+    try {
+      const result = await db
+        .update(schema.listings)
+        .set({ status, updatedAt: new Date() })
+        .where(eq(schema.listings.id, id))
+        .returning()
+
+      return result.length > 0
+    } catch (error) {
+      logger.error("Error updating listing status:", error)
+      throw new Error("Failed to update listing status")
+    }
+  }
+
+  async updateVehicleListing(id: string, updates: Partial<CreateVehicleRequest>): Promise<VehicleListing | null> {
+    try {
+      const result = await db.transaction(async (trx) => {
+        // Update listing
+        const listingUpdate: Partial<ListingInsert> = {}
+        if (updates.pricing?.basePrice) {
+          listingUpdate.basePrice = updates.pricing.basePrice.toString()
+        }
+        if (updates.location) {
+          listingUpdate.locationAddress = updates.location.address
+          listingUpdate.locationCity = updates.location.city
+          listingUpdate.locationCountry = updates.location.country
+          listingUpdate.locationLatitude = updates.location.coordinates?.latitude?.toString()
+          listingUpdate.locationLongitude = updates.location.coordinates?.longitude?.toString()
+        }
+        if (updates.images) {
+          listingUpdate.images = updates.images
+        }
+
+        let listing
+        if (Object.keys(listingUpdate).length > 0) {
+          listingUpdate.updatedAt = new Date()
+          const [updatedListing] = await trx
+            .update(schema.listings)
+            .set(listingUpdate)
+            .where(eq(schema.listings.id, id))
+            .returning()
+          listing = updatedListing
+        } else {
+          listing = await trx.query.listings.findFirst({
+            where: eq(schema.listings.id, id),
+          })
+        }
+
+        if (!listing) return null
+
+        // Update vehicle
+        const vehicleUpdate: Partial<VehicleInsert> = {}
+        if (updates.specifications) {
+          if (updates.specifications.vehicleType)
+            vehicleUpdate.vehicleType = updates.specifications.vehicleType.toLowerCase() as VehicleType
+          if (updates.specifications.category)
+            vehicleUpdate.category = updates.specifications.category.toLowerCase() as any
+          if (updates.specifications.make) vehicleUpdate.make = updates.specifications.make
+          if (updates.specifications.model) vehicleUpdate.model = updates.specifications.model
+          if (updates.specifications.year) vehicleUpdate.year = updates.specifications.year
+          if (updates.specifications.color) vehicleUpdate.color = updates.specifications.color
+          if (updates.specifications.engineSize) vehicleUpdate.engineSize = updates.specifications.engineSize
+          if (updates.specifications.fuelType) vehicleUpdate.fuelType = updates.specifications.fuelType
+          if (updates.specifications.transmission) vehicleUpdate.transmission = updates.specifications.transmission
+          if (updates.specifications.seatingCapacity)
+            vehicleUpdate.seatingCapacity = updates.specifications.seatingCapacity
+        }
+        if (updates.documents?.licensePlate) vehicleUpdate.registrationNumber = updates.documents.licensePlate
+        if (updates.pricing?.dailyRate !== undefined) vehicleUpdate.dailyRate = updates.pricing.dailyRate || null
+        if (updates.pricing?.weeklyRate !== undefined) vehicleUpdate.weeklyRate = updates.pricing.weeklyRate || null
+        if (updates.pricing?.monthlyRate !== undefined) vehicleUpdate.monthlyRate = updates.pricing.monthlyRate || null
+        if (updates.pricing?.securityDeposit !== undefined)
+          vehicleUpdate.deposit = updates.pricing.securityDeposit || null
+
+        let vehicle
+        if (Object.keys(vehicleUpdate).length > 0) {
+          const [updatedVehicle] = await trx
+            .update(schema.vehicles)
+            .set(vehicleUpdate)
+            .where(eq(schema.vehicles.listingId, id))
+            .returning()
+          vehicle = updatedVehicle
+        } else {
+          vehicle = await trx.query.vehicles.findFirst({
+            where: eq(schema.vehicles.listingId, id),
+          })
+        }
+
+        if (!vehicle) return null
+
+        return this.mapToVehicleListing(listing, vehicle)
+      })
+
+      return result
+    } catch (error) {
+      logger.error("Error updating vehicle listing:", error)
+      throw new Error("Failed to update vehicle listing")
+    }
+  }
+
+  async deleteListing(id: string): Promise<boolean> {
+    try {
+      const result = await db.delete(schema.listings).where(eq(schema.listings.id, id)).returning()
+
+      return result.length > 0
+    } catch (error) {
+      logger.error("Error deleting listing:", error)
+      throw new Error("Failed to delete listing")
+    }
+  }
+
+  async getListingsByOwner(ownerId: string): Promise<(VehicleListing | ProductListing)[]> {
+    try {
+      const listings = await db.query.listings.findMany({
+        where: eq(schema.listings.ownerId, ownerId),
+        orderBy: [desc(schema.listings.createdAt)],
+      })
+
+      const results: (VehicleListing | ProductListing)[] = []
+
+      for (const listing of listings) {
+        if (listing.category === ListingCategory.VEHICLES) {
+          const vehicle = await db.query.vehicles.findFirst({
+            where: eq(schema.vehicles.listingId, listing.id),
+          })
+          if (vehicle) {
+            results.push(this.mapToVehicleListing(listing, vehicle))
+          }
+        } else if (listing.category === ListingCategory.PRODUCTS) {
+          const product = await db.query.products.findFirst({
+            where: eq(schema.products.listingId, listing.id),
+          })
+          if (product) {
+            results.push(this.mapToProductListing(listing, product))
+          }
+        }
+      }
+
+      return results
+    } catch (error) {
+      logger.error("Error fetching listings by owner:", error)
+      throw new Error("Failed to fetch listings by owner")
     }
   }
 }

@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm"
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
+
 import {
   aiPromptTemplates,
   chatHistory,
@@ -147,22 +148,52 @@ describe("Database Schema Tests", () => {
         sticker: "Blue rental sticker",
         rentalSticker: "Company logo sticker",
         gpsTrackerId: "ST123456",
-        gpsProvider: "sinotrack",
-        pricingSystem: "seasonal" as const,
-        dailyRate: "300.00",
-        oneYearRent: "72000.00",
-        sixMonthHighSeason: "45000.00",
-        sixMonthLowSeason: "36000.00",
-        days1To3: "350.00",
-        days4To7: "320.00",
-        days7To14: "300.00",
-        days15To25: "280.00",
-        decemberPrice: "400.00",
-        januaryPrice: "400.00",
-        februaryPrice: "380.00",
+        engineSize: 150.0,
+        fuelType: "gasoline" as const,
+        transmission: "automatic" as const,
+        mileage: 5000,
       }
 
       const [vehicle] = await db.insert(vehicles).values(vehicleData).returning()
+
+      expect(vehicle).toBeDefined()
+      expect(vehicle.model).toBe("PCX 150")
+      expect(vehicle.power).toBe("150cc")
+      expect(vehicle.oldVehicleNumber).toBe("SCT001")
+      expect(vehicle.gpsTrackerId).toBe("ST123456")
+      expect(vehicle.engineSize).toBe(150.0)
+      expect(vehicle.fuelType).toBe("gasoline")
+      expect(vehicle.transmission).toBe("automatic")
+      expect(vehicle.mileage).toBe(5000)
+    })
+
+    it("should create a vehicle with basic required fields", async () => {
+      const vehicleData = {
+        listingId: testListing.id,
+        vehicleType: "motorcycle" as const,
+        category: "rental" as const,
+        condition: "excellent" as const,
+        make: "Yamaha",
+        model: "NMAX",
+        year: 2024,
+        color: "Black",
+        power: "155cc",
+        oldVehicleNumber: "NMX001",
+        sticker: "Rental sticker",
+        rentalSticker: "Company rental",
+        gpsTrackerId: "TRK789",
+        engineSize: 155.0,
+        fuelType: "gasoline" as const,
+        transmission: "automatic" as const,
+        mileage: 1000,
+      }
+
+      const [vehicle] = await db.insert(vehicles).values(vehicleData).returning()
+
+      expect(vehicle).toBeDefined()
+      expect(vehicle.make).toBe("Yamaha")
+      expect(vehicle.model).toBe("NMAX")
+      expect(vehicle.vehicleType).toBe("motorcycle")
 
       expect(vehicle).toBeDefined()
       expect(vehicle.model).toBe("PCX 150")
@@ -524,7 +555,6 @@ describe("Database Schema Tests", () => {
           make: "Honda",
           model: "PCX 150",
           year: 2023,
-          pricingSystem: "calendar",
         })
         .returning()
     })
@@ -608,9 +638,6 @@ describe("Database Schema Tests", () => {
           make: "Honda",
           model: "PCX 150",
           year: 2023,
-          pricingSystem: "seasonal",
-          decemberPrice: "400.00",
-          januaryPrice: "400.00",
         })
         .returning()
 
@@ -640,7 +667,6 @@ describe("Database Schema Tests", () => {
           make: "Yamaha",
           model: "NMAX 155",
           year: 2023,
-          pricingSystem: "calendar",
         })
         .returning()
 
@@ -651,10 +677,6 @@ describe("Database Schema Tests", () => {
         endDate: new Date("2024-12-31"),
         dailyRate: "450.00",
       })
-
-      expect(seasonalVehicle.pricingSystem).toBe("seasonal")
-      expect(seasonalVehicle.decemberPrice).toBe("400.00")
-      expect(calendarVehicle.pricingSystem).toBe("calendar")
 
       const calendarPricing = await db
         .select()

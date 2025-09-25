@@ -347,12 +347,16 @@ export async function setupTestDatabase(): Promise<void> {
  */
 export async function cleanupTestDatabase(): Promise<void> {
   try {
-    const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@postgres:5432/marketplace"
+    const connectionString =
+      process.env.DATABASE_URL ||
+      `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
     const db = createDatabaseConnection(connectionString)
 
-    // Delete all users (this will cascade to related tables)
+    // Delete all test users (this will cascade to related tables)
     await db.execute(sql`DELETE FROM users WHERE email LIKE '%@example.com'`)
-    await db.execute(sql`DELETE FROM users WHERE email LIKE 'test%@%'`)
+    await db.execute(sql`DELETE FROM users WHERE email LIKE 'test-%@example.com'`)
+    await db.execute(sql`DELETE FROM users WHERE email LIKE 'admin-%@example.com'`)
+    await db.execute(sql`DELETE FROM users WHERE phone LIKE '+123456789%'`)
   } catch (error) {
     logger.error("Failed to cleanup test database:", error)
     // Don't throw error during cleanup to avoid masking test failures

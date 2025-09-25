@@ -1,5 +1,7 @@
 import { CommunicationChannel } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import { query } from "../db/connection"
 import { Template } from "../models/Template"
 import { TemplateService } from "../services/TemplateService"
 
@@ -7,8 +9,6 @@ import { TemplateService } from "../services/TemplateService"
 vi.mock("../db/connection", () => ({
   query: vi.fn(),
 }))
-
-import { query } from "../db/connection"
 
 const mockQuery = vi.mocked(query)
 

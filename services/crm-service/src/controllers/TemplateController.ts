@@ -1,5 +1,6 @@
 import { CommunicationChannel } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
+
 import { CreateTemplateRequest, Template, UpdateTemplateRequest } from "../models/Template"
 import { TemplateService } from "../services/TemplateService"
 

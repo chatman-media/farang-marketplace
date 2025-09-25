@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify"
+
 import { CRMController } from "../controllers/CRMController"
 import { authenticateToken, requireRole } from "../middleware/auth"
 import {

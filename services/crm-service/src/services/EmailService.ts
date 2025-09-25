@@ -2,11 +2,11 @@ import logger from "@marketplace/logger"
 import {
   CommunicationChannel,
   CommunicationHistory,
-  MessageTemplate,
   SendMessageRequest,
   SendMessageResponse,
 } from "@marketplace/shared-types"
 import * as nodemailer from "nodemailer"
+
 import { query } from "../db/connection"
 
 export interface EmailConfig {

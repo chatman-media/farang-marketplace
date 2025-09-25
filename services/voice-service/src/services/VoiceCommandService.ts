@@ -8,6 +8,7 @@ import type {
   VoiceSession,
 } from "../models/index"
 import type { SpeechToTextService } from "./SpeechToTextService"
+import { loggingService } from "./LoggingService"
 
 export class VoiceCommandService {
   private speechToTextService: SpeechToTextService
@@ -29,6 +30,8 @@ export class VoiceCommandService {
     context?: VoiceContext,
     language?: string,
   ): Promise<VoiceCommandResponse> {
+    const startTime = Date.now()
+
     try {
       // Transcribe audio to text
       const transcriptionResult = await this.speechToTextService.transcribe({
@@ -40,6 +43,19 @@ export class VoiceCommandService {
       })
 
       if (!transcriptionResult.success || !transcriptionResult.transcription) {
+        await loggingService.logVoiceAnalytics({
+          userId,
+          sessionId: sessionId || "",
+          commandType: "voice_command",
+          intent: "transcription_failed",
+          language: language || "unknown",
+          confidence: 0,
+          processingTime: Date.now() - startTime,
+          success: false,
+          provider: transcriptionResult.provider || "unknown",
+          errorType: "TRANSCRIPTION_FAILED",
+        })
+
         return {
           action: "error",
           success: false,
@@ -50,6 +66,19 @@ export class VoiceCommandService {
       // Process the transcribed text as a command
       return this.processTextCommand(transcriptionResult.transcription, userId, sessionId, context, language)
     } catch (error) {
+      await loggingService.logVoiceAnalytics({
+        userId,
+        sessionId: sessionId || "",
+        commandType: "voice_command",
+        intent: "processing_failed",
+        language: language || "unknown",
+        confidence: 0,
+        processingTime: Date.now() - startTime,
+        success: false,
+        provider: "unknown",
+        errorType: "PROCESSING_FAILED",
+      })
+
       return {
         action: "error",
         success: false,
@@ -68,6 +97,7 @@ export class VoiceCommandService {
     context?: VoiceContext,
     language?: string,
   ): Promise<VoiceCommandResponse> {
+    const startTime = Date.now()
     const session = this.getOrCreateSession(sessionId || this.generateSessionId(), userId, language)
 
     // Analyze intent and entities
@@ -88,18 +118,53 @@ export class VoiceCommandService {
       ...(context && { context }),
     }
 
-    // Update session
-    session.commands.push(command)
-    session.lastActivity = new Date()
-    if (context) {
-      session.context = context
+    try {
+      // Update session
+      session.commands.push(command)
+      session.lastActivity = new Date()
+      if (context) {
+        session.context = context
+      }
+
+      // Execute command based on intent
+      const response = await this.executeCommand(command, session)
+      command.response = response
+
+      // Log successful voice analytics
+      await loggingService.logVoiceAnalytics({
+        userId,
+        sessionId: session.id,
+        commandType: "voice_command",
+        intent: intent.name,
+        language: language || "en-US",
+        confidence: intent.confidence,
+        processingTime: Date.now() - startTime,
+        success: response.success,
+        provider: "voice-service",
+      })
+
+      return response
+    } catch (error) {
+      // Log failed voice analytics
+      await loggingService.logVoiceAnalytics({
+        userId,
+        sessionId: session.id,
+        commandType: "voice_command",
+        intent: intent.name,
+        language: language || "en-US",
+        confidence: intent.confidence,
+        processingTime: Date.now() - startTime,
+        success: false,
+        provider: "voice-service",
+        errorType: "COMMAND_EXECUTION_FAILED",
+      })
+
+      return {
+        action: "error",
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      }
     }
-
-    // Execute command based on intent
-    const response = await this.executeCommand(command, session)
-    command.response = response
-
-    return response
   }
 
   /**
@@ -579,6 +644,55 @@ export class VoiceCommandService {
   }
 
   /**
+   * Get session information
+   */
+  public getSession(sessionId: string): VoiceSession | null {
+    return this.sessions.get(sessionId) || null
+  }
+
+  /**
+   * Get session statistics
+   */
+  public getSessionStats(): any {
+    const totalSessions = this.sessions.size
+    const activeSessions = Array.from(this.sessions.values()).filter((session) => {
+      const lastActivity = new Date(session.lastActivity)
+      const now = new Date()
+      const diffMs = now.getTime() - lastActivity.getTime()
+      const diffMins = Math.floor(diffMs / 60000)
+      return diffMins < 30 // Active within last 30 minutes
+    }).length
+
+    return {
+      totalSessions,
+      activeSessions,
+      totalCommands: Array.from(this.sessions.values()).reduce((sum, session) => sum + session.commands.length, 0),
+    }
+  }
+
+  /**
+   * Clean up expired sessions
+   */
+  public cleanupSessions(): void {
+    const now = new Date()
+    const expiredSessions: string[] = []
+
+    for (const [sessionId, session] of this.sessions.entries()) {
+      const lastActivity = new Date(session.lastActivity)
+      const diffMs = now.getTime() - lastActivity.getTime()
+      const diffHours = diffMs / (1000 * 60 * 60)
+
+      if (diffHours > 24) {
+        expiredSessions.push(sessionId)
+      }
+    }
+
+    expiredSessions.forEach((sessionId) => {
+      this.sessions.delete(sessionId)
+    })
+  }
+
+  /**
    * Get or create session
    */
   private getOrCreateSession(sessionId: string, userId?: string, language?: string): VoiceSession {
@@ -588,12 +702,11 @@ export class VoiceCommandService {
       session = {
         id: sessionId,
         userId: userId || "anonymous",
-        startTime: new Date(),
-        lastActivity: new Date(),
-        language: language || "en-US",
-        context: { type: "general" },
         commands: [],
-        state: {},
+        context: undefined,
+        language: language || "en-US",
+        createdAt: new Date(),
+        lastActivity: new Date(),
       }
       this.sessions.set(sessionId, session)
     }
@@ -602,16 +715,16 @@ export class VoiceCommandService {
   }
 
   /**
-   * Generate unique session ID
+   * Generate session ID
    */
-  public generateSessionId(): string {
+  private generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
   }
 
   /**
-   * Generate unique command ID
+   * Generate command ID
    */
-  public generateCommandId(): string {
+  private generateCommandId(): string {
     return `cmd_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
   }
 

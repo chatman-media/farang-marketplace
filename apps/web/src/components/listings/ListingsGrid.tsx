@@ -1,5 +1,6 @@
 import type { Listing } from "@marketplace/shared-types"
 import React from "react"
+
 import { ListingCard } from "./ListingCard"
 
 interface ListingsGridProps {

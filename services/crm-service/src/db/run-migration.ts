@@ -1,6 +1,8 @@
-import logger from "@marketplace/logger"
 import { readFileSync } from "fs"
 import { join } from "path"
+
+import logger from "@marketplace/logger"
+
 import { query } from "./connection"
 
 async function runMigration(migrationFile: string) {
@@ -27,7 +29,7 @@ async function runMigration(migrationFile: string) {
           await query(statement)
           logger.info("✅ Executed statement")
         } catch (error) {
-          logger.error("❌ Failed to execute statement:", statement.substring(0, 100) + "...")
+          logger.error("❌ Failed to execute statement:", `${statement.substring(0, 100)}...`)
           throw error
         }
       }

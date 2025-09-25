@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { Segment, SegmentDataType, SegmentOperator } from "../models/Segment"
 
 describe("Segment Model", () => {

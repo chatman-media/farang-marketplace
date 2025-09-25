@@ -1,4 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import crypto from "crypto"
+
+import { describe, expect, it } from "vitest"
 
 // TON Service Logic Tests
 // These tests validate TON blockchain integration logic
@@ -249,7 +251,7 @@ describe("TON Service Logic Tests", () => {
         { confirmations: 3, timeout: 5000, shouldTimeout: false },
       ]
 
-      timeoutTests.forEach(({ confirmations, timeout, shouldTimeout }) => {
+      timeoutTests.forEach(({ confirmations, timeout: _timeout, shouldTimeout }) => {
         const requiredConfirmations = 3
         const hasEnoughConfirmations = confirmations >= requiredConfirmations
 
@@ -269,7 +271,6 @@ describe("TON Service Logic Tests", () => {
       const secret = "webhook-secret-key"
 
       // Simulate HMAC signature creation
-      const crypto = require("crypto")
       const validSignature = crypto.createHmac("sha256", secret).update(payload).digest("hex")
 
       const invalidSignature = "invalid-signature"
@@ -289,7 +290,6 @@ describe("TON Service Logic Tests", () => {
     })
 
     it("should handle timing-safe comparison", () => {
-      const crypto = require("crypto")
       const signature1 = "a".repeat(64)
       const signature2 = "a".repeat(64)
       const signature3 = "b".repeat(64)

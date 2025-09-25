@@ -1,3 +1,4 @@
+import logger from "@marketplace/logger"
 import { createClient } from "redis"
 
 const redisConfig = {
@@ -14,15 +15,15 @@ export const redisClient = createClient(redisConfig)
 
 // Handle Redis connection events
 redisClient.on("error", (err) => {
-  console.error("Redis Client Error:", err)
+  logger.error("Redis Client Error:", err)
 })
 
 redisClient.on("connect", () => {
-  console.log("Redis Client Connected")
+  logger.info("Redis Client Connected")
 })
 
 redisClient.on("ready", () => {
-  console.log("Redis Client Ready")
+  logger.info("Redis Client Ready")
 })
 
 // Connect to Redis
@@ -30,7 +31,7 @@ export const connectRedis = async (): Promise<void> => {
   try {
     await redisClient.connect()
   } catch (error) {
-    console.error("Failed to connect to Redis:", error)
+    logger.error("Failed to connect to Redis:", error)
     throw error
   }
 }
@@ -40,7 +41,7 @@ export const disconnectRedis = async (): Promise<void> => {
   try {
     await redisClient.disconnect()
   } catch (error) {
-    console.error("Failed to disconnect from Redis:", error)
+    logger.error("Failed to disconnect from Redis:", error)
   }
 }
 
@@ -73,7 +74,7 @@ export class OAuthStateManager {
     try {
       return JSON.parse(data)
     } catch (error) {
-      console.error("Failed to parse OAuth state data:", error)
+      logger.error("Failed to parse OAuth state data:", error)
       return null
     }
   }

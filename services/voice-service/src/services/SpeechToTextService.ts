@@ -1,4 +1,5 @@
 import type { LanguageSupport, ProviderUsage, SpeechToTextProvider, VoiceRequest, VoiceResponse } from "../models/index"
+import { loggingService } from "./LoggingService"
 import { AzureSpeechProvider } from "./providers/AzureSpeechProvider"
 import { GoogleSpeechProvider } from "./providers/GoogleSpeechProvider"
 import { MockSpeechProvider } from "./providers/MockSpeechProvider"
@@ -129,8 +130,25 @@ export class SpeechToTextService {
    */
   async transcribe(request: VoiceRequest): Promise<VoiceResponse> {
     const startTime = Date.now()
+    const requestId = crypto.randomUUID()
 
     try {
+      // Log voice request
+      await loggingService.logVoiceRequest({
+        userId: request.userId,
+        sessionId: request.sessionId || "",
+        audioLength: request.audioData ? (request.audioData as Buffer).length : undefined,
+        language: request.language,
+        provider: "", // Will be set after provider selection
+        requestId,
+        metadata: {
+          format: request.format,
+          sampleRate: request.sampleRate,
+          channels: request.channels,
+          encoding: request.encoding,
+        },
+      })
+
       // Validate request
       this.validateRequest(request)
 
@@ -146,11 +164,39 @@ export class SpeechToTextService {
       // Update usage statistics
       this.updateUsage(provider.name, Date.now() - startTime, true)
 
-      return {
+      const finalResponse = {
         ...response,
         processingTime: Date.now() - startTime,
         provider: provider.name,
       }
+
+      // Log voice response
+      await loggingService.logVoiceResponse({
+        requestId,
+        success: response.success,
+        transcription: response.transcription,
+        confidence: response.confidence,
+        processingTime: Date.now() - startTime,
+        error: response.error,
+        provider: provider.name,
+      })
+
+      // Log voice analytics
+      await loggingService.logVoiceAnalytics({
+        userId: request.userId,
+        sessionId: request.sessionId || "",
+        commandType: "transcription",
+        intent: "speech_to_text",
+        language: request.language || "unknown",
+        confidence: response.confidence || 0,
+        processingTime: Date.now() - startTime,
+        success: response.success,
+        provider: provider.name,
+        audioLength: request.audioData ? (request.audioData as Buffer).length : undefined,
+        errorType: response.error ? "TRANSCRIPTION_FAILED" : undefined,
+      })
+
+      return finalResponse
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error"
 
@@ -159,6 +205,30 @@ export class SpeechToTextService {
       if (provider) {
         this.updateUsage(provider.name, Date.now() - startTime, false)
       }
+
+      // Log failed response
+      await loggingService.logVoiceResponse({
+        requestId,
+        success: false,
+        processingTime: Date.now() - startTime,
+        error: errorMessage,
+        provider: provider?.name || "unknown",
+      })
+
+      // Log failed analytics
+      await loggingService.logVoiceAnalytics({
+        userId: request.userId,
+        sessionId: request.sessionId || "",
+        commandType: "transcription",
+        intent: "speech_to_text",
+        language: request.language || "unknown",
+        confidence: 0,
+        processingTime: Date.now() - startTime,
+        success: false,
+        provider: provider?.name || "unknown",
+        audioLength: request.audioData ? (request.audioData as Buffer).length : undefined,
+        errorType: "TRANSCRIPTION_FAILED",
+      })
 
       return {
         success: false,
@@ -200,37 +270,23 @@ export class SpeechToTextService {
     // Sort by priority (higher is better)
     availableProviders.sort((a, b) => b.priority - a.priority)
 
-    return availableProviders[0]?.provider || null
+    return availableProviders.length > 0 ? availableProviders[0].provider : null
   }
 
   /**
-   * Validate transcription request
+   * Validate voice request
    */
   private validateRequest(request: VoiceRequest): void {
     if (!request.audioData) {
       throw new Error("Audio data is required")
     }
 
-    // Check audio size
-    const maxSize = Number.parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760", 10)
-    const audioSize = Buffer.isBuffer(request.audioData)
-      ? request.audioData.length
-      : Buffer.from(request.audioData, "base64").length
-
-    if (audioSize > maxSize) {
-      throw new Error(`Audio file too large. Maximum size: ${maxSize} bytes`)
+    if (request.audioData && (request.audioData as Buffer).length === 0) {
+      throw new Error("Audio data cannot be empty")
     }
 
-    if (audioSize < 100) {
-      throw new Error("Audio file too small")
-    }
-
-    // Check language support
-    if (request.language) {
-      const isSupported = this.supportedLanguages.some((l) => l.code === request.language && l.enabled)
-      if (!isSupported) {
-        throw new Error(`Language ${request.language} is not supported`)
-      }
+    if (request.audioData && (request.audioData as Buffer).length > 10 * 1024 * 1024) {
+      throw new Error("Audio data too large (max 10MB)")
     }
   }
 
@@ -246,71 +302,123 @@ export class SpeechToTextService {
         usage.errorCount++
       }
       usage.lastUsed = new Date()
-
-      // Estimate cost (mock calculation)
-      usage.costEstimate = (usage.costEstimate || 0) + (duration / 1000) * 0.006 // $0.006 per second
     }
+  }
+
+  /**
+   * Get provider usage statistics
+   */
+  getProviderUsage(): Map<string, ProviderUsage> {
+    return new Map(this.usage)
   }
 
   /**
    * Get supported languages
    */
   getSupportedLanguages(): LanguageSupport[] {
-    return this.supportedLanguages.filter((lang) => lang.enabled)
+    return [...this.supportedLanguages]
   }
 
-  /**
-   * Get provider statistics
-   */
-  getProviderStats(): Record<string, ProviderUsage> {
-    const stats: Record<string, ProviderUsage> = {}
-    for (const [name, usage] of this.usage) {
-      stats[name] = { ...usage }
-    }
-    return stats
+  public getProviderStats(): Record<string, any> {
+    return this.providerStats
   }
 
-  /**
-   * Check if language is supported
-   */
-  isLanguageSupported(languageCode: string): boolean {
-    return this.supportedLanguages.some((lang) => lang.code === languageCode && lang.enabled)
-  }
-
-  /**
-   * Get available providers for language
-   */
-  getProvidersForLanguage(languageCode: string): string[] {
-    const language = this.supportedLanguages.find((l) => l.code === languageCode)
-    return language?.providers || []
-  }
-
-  /**
-   * Enable/disable provider
-   */
-  setProviderEnabled(providerName: string, enabled: boolean): boolean {
-    const provider = this.providers.get(providerName)
-    if (provider) {
-      provider.enabled = enabled
-      return true
-    }
-    return false
-  }
-
-  /**
-   * Get provider health status
-   */
-  async getProviderHealth(): Promise<Record<string, boolean>> {
+  public async getProviderHealth(): Promise<Record<string, boolean>> {
     const health: Record<string, boolean> = {}
 
-    for (const [name, provider] of this.providers) {
+    for (const [providerName, provider] of Object.entries(this.providers)) {
       try {
-        health[name] = await provider.isAvailable()
+        health[providerName] = await provider.isHealthy()
       } catch {
-        health[name] = false
+        health[providerName] = false
       }
     }
 
     return health
   }
+
+  public setProviderEnabled(providerName: string, enabled: boolean): boolean {
+    if (!this.providers[providerName]) {
+      return false
+    }
+
+    this.providerEnabled[providerName] = enabled
+    return true
+  }
+
+  private async updateUsage(providerName: string, duration: number, success: boolean) {
+    if (!this.providerStats[providerName]) {
+      this.providerStats[providerName] = {
+        requestCount: 0,
+        totalDuration: 0,
+        errorCount: 0,
+        costEstimate: 0,
+      }
+    }
+
+    this.providerStats[providerName].requestCount++
+    this.providerStats[providerName].totalDuration += duration
+
+    if (!success) {
+      this.providerStats[providerName].errorCount++
+    }
+
+    // Simple cost estimation (can be refined based on actual provider pricing)
+    this.providerStats[providerName].costEstimate += this.calculateCost(providerName, duration)
+  }
+
+  private calculateCost(providerName: string, duration: number): number {
+    // Basic cost calculation - can be enhanced
+    const costPerSecond = {
+      azure: 0.001,
+      google: 0.0008,
+      openai: 0.0006,
+      mock: 0,
+    }
+
+    return costPerSecond[providerName as keyof typeof costPerSecond] || 0 * (duration / 1000)
+  }
+
+  private getBestProvider(): string | null {
+    const availableProviders = Object.keys(this.providers).filter((name) => this.providerEnabled[name])
+
+    if (availableProviders.length === 0) {
+      return null
+    }
+
+    // Simple round-robin for now
+    const provider = availableProviders[this.currentProviderIndex]
+    this.currentProviderIndex = (this.currentProviderIndex + 1) % availableProviders.length
+
+    return provider
+  }
+
+  private validateRequest(request: VoiceTranscriptionRequest): { valid: boolean; error?: string } {
+    if (!request.audioData || request.audioData.length === 0) {
+      return { valid: false, error: "Audio data is required" }
+    }
+
+    const audioSize = Buffer.byteLength(request.audioData, "base64")
+    const maxSize = parseInt(process.env.MAX_AUDIO_FILE_SIZE || "10485760") // 10MB default
+
+    if (audioSize > maxSize) {
+      return { valid: false, error: "Audio file too large" }
+    }
+
+    if (audioSize < 100) {
+      return { valid: false, error: "Audio file too small" }
+    }
+
+    if (!this.supportedLanguages.includes(request.language)) {
+      return { valid: false, error: `Language ${request.language} not supported` }
+    }
+
+    return { valid: true }
+  }
+}
+
+// Add missing interface to providers
+interface SpeechProvider {
+  transcribe(audioData: string, language: string): Promise<TranscriptionResult>
+  isHealthy(): Promise<boolean>
 }

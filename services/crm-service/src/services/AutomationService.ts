@@ -1,6 +1,8 @@
 import logger from "@marketplace/logger"
 import { Automation, AutomationAction, AutomationCondition, CommunicationChannel } from "@marketplace/shared-types"
+
 import { query } from "../db/connection"
+
 import { CommunicationService } from "./CommunicationService"
 import { TemplateService } from "./TemplateService"
 
@@ -298,7 +300,7 @@ export class AutomationService {
           channel: channel || CommunicationChannel.EMAIL,
           content: messageContent || "Automated message",
           subject: messageSubject,
-          templateId: templateId,
+          templateId,
         })
       } else {
         // For testing or when communication service is not available
@@ -344,7 +346,7 @@ export class AutomationService {
   }
 
   // Create task action
-  private async executeCreateTaskAction(action: AutomationAction, data: WorkflowTriggerData): Promise<void> {
+  private async executeCreateTaskAction(action: AutomationAction, _data: WorkflowTriggerData): Promise<void> {
     // TODO: Implement task creation when task system is available
     logger.log("Creating task:", action.parameters)
   }

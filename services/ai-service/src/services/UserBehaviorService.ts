@@ -1,20 +1,17 @@
 /** biome-ignore-all lint/complexity/useLiteralKeys: Use old style dotenv */
 import logger from "@marketplace/logger"
+import { eq } from "drizzle-orm"
 
 import type { MarketInsight, UserBehavior, UserInsight } from "../models/index"
+import { db, userBehaviors } from "../database/connection"
 
 import { AIProviderService } from "./AIProviderService"
 
 export class UserBehaviorService {
   private aiProvider: AIProviderService
-  private behaviorBuffer: Map<string, UserBehavior[]> = new Map()
-  private userInsights: Map<string, UserInsight[]> = new Map()
-  private marketInsights: MarketInsight[] = []
-  private flushInterval: NodeJS.Timeout | null = null
 
   constructor(aiProvider: AIProviderService) {
     this.aiProvider = aiProvider
-    this.startBehaviorFlushing()
   }
 
   /**
@@ -25,17 +22,22 @@ export class UserBehaviorService {
     behavior: Omit<UserBehavior, "id" | "timestamp" | "userId">,
   ): Promise<{ success: boolean; message?: string }> {
     try {
-      const fullBehavior: UserBehavior = {
-        ...behavior,
+      // Store behavior in database
+      await db.insert(userBehaviors).values({
         userId,
-        id: `behavior_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        timestamp: new Date(),
-      }
-
-      // Add to buffer
-      const userBehaviors = this.behaviorBuffer.get(userId) || []
-      userBehaviors.push(fullBehavior)
-      this.behaviorBuffer.set(userId, userBehaviors)
+        action: behavior.action,
+        entityType: behavior.entityType,
+        entityId: behavior.entityId,
+        sessionId: behavior.sessionId,
+        latitude: behavior.location?.latitude,
+        longitude: behavior.location?.longitude,
+        city: behavior.location?.city,
+        country: behavior.location?.country,
+        deviceType: behavior.deviceType,
+        deviceOs: behavior.deviceOs,
+        deviceBrowser: behavior.deviceBrowser,
+        metadata: behavior.metadata || {},
+      })
 
       // Trigger real-time analysis for important events
       if (this.isImportantEvent(behavior.action)) {
@@ -44,6 +46,7 @@ export class UserBehaviorService {
 
       return { success: true }
     } catch (error) {
+      logger.error("Failed to track behavior:", error)
       return { success: false, message: error instanceof Error ? error.message : "Unknown error" }
     }
   }
@@ -60,7 +63,14 @@ export class UserBehaviorService {
    */
   async analyzeUserBehavior(userId: string): Promise<UserInsight[]> {
     try {
-      const behaviors = this.behaviorBuffer.get(userId) || []
+      // Fetch behaviors from database
+      const behaviors = await db
+        .select()
+        .from(userBehaviors)
+        .where(eq(userBehaviors.userId, userId))
+        .orderBy(userBehaviors.timestamp)
+        .limit(1000)
+
       if (behaviors.length === 0) return []
 
       const insights: UserInsight[] = []
@@ -76,9 +86,6 @@ export class UserBehaviorService {
       const statInsights = this.generateStatisticalInsights(userId, behaviors, patterns)
       insights.push(...statInsights)
 
-      // Store insights
-      this.userInsights.set(userId, insights)
-
       return insights
     } catch (error) {
       logger.error("User behavior analysis failed:", error)
@@ -89,7 +96,7 @@ export class UserBehaviorService {
   /**
    * Extract behavior patterns from user actions
    */
-  private extractBehaviorPatterns(behaviors: UserBehavior[]): {
+  private extractBehaviorPatterns(behaviors: any[]): {
     actionFrequency: Record<string, number>
     categoryPreferences: Record<string, number>
     timePatterns: Record<string, number>
@@ -104,7 +111,7 @@ export class UserBehaviorService {
     const categoryPref: Record<string, number> = {}
     const timePatterns: Record<string, number> = {}
     const locationPatterns: Record<string, number> = {}
-    const sessions = new Map<string, UserBehavior[]>()
+    const sessions = new Map<string, any[]>()
 
     // Group behaviors by session
     for (const behavior of behaviors) {
@@ -116,19 +123,19 @@ export class UserBehaviorService {
       actionFreq[behavior.action] = (actionFreq[behavior.action] || 0) + 1
 
       // Extract category from metadata
-      const category = behavior.metadata["category"]
+      const category = behavior.metadata?.category
       if (category) {
         categoryPref[category] = (categoryPref[category] || 0) + 1
       }
 
       // Time patterns
-      const hour = behavior.timestamp.getHours()
+      const hour = new Date(behavior.timestamp).getHours()
       const timeSlot = this.getTimeSlot(hour)
       timePatterns[timeSlot] = (timePatterns[timeSlot] || 0) + 1
 
       // Location patterns
-      if (behavior.location?.city) {
-        locationPatterns[behavior.location.city] = (locationPatterns[behavior.location.city] || 0) + 1
+      if (behavior.city) {
+        locationPatterns[behavior.city] = (locationPatterns[behavior.city] || 0) + 1
       }
     }
 
@@ -138,8 +145,8 @@ export class UserBehaviorService {
     let conversions = 0
 
     for (const sessionBehaviors of sessions.values()) {
-      const sessionStart = Math.min(...sessionBehaviors.map((b) => b.timestamp.getTime()))
-      const sessionEnd = Math.max(...sessionBehaviors.map((b) => b.timestamp.getTime()))
+      const sessionStart = Math.min(...sessionBehaviors.map((b) => new Date(b.timestamp).getTime()))
+      const sessionEnd = Math.max(...sessionBehaviors.map((b) => new Date(b.timestamp).getTime()))
       sessionLengths.push((sessionEnd - sessionStart) / (1000 * 60)) // minutes
 
       sessionActions.push(sessionBehaviors.length)
@@ -472,86 +479,56 @@ Focus on actionable business insights and market opportunities.
   }
 
   /**
-   * Get user insights
+   * Get user insights from database
    */
-  getUserInsights(userId: string): UserInsight[] {
-    return this.userInsights.get(userId) || []
+  async getUserInsights(userId: string): Promise<UserInsight[]> {
+    // This would typically involve fetching pre-computed insights or generating them on-demand
+    return this.analyzeUserBehavior(userId)
   }
 
   /**
-   * Get user behaviors
+   * Get user behaviors from database
    */
-  getUserBehaviors(userId: string, options?: { limit?: number }): UserBehavior[] {
-    const behaviors = this.behaviorBuffer.get(userId) || []
+  async getUserBehaviors(userId: string, options?: { limit?: number }): Promise<UserBehavior[]> {
+    const query = db
+      .select()
+      .from(userBehaviors)
+      .where(eq(userBehaviors.userId, userId))
+      .orderBy(userBehaviors.timestamp)
+
     if (options?.limit) {
-      return behaviors.slice(-options.limit) // Get most recent behaviors
+      query.limit(options.limit)
     }
-    return behaviors
+
+    return query
   }
 
   /**
-   * Get market insights
+   * Get market insights from database
    */
-  getMarketInsights(filters?: {
+  async getMarketInsights(filters?: {
     type?: string
     category?: string
     location?: string
     minConfidence?: number
-  }): MarketInsight[] {
-    let insights = this.marketInsights
+  }): Promise<MarketInsight[]> {
+    const behaviors = await db.select().from(userBehaviors).orderBy(userBehaviors.timestamp).limit(10000)
 
-    if (filters) {
-      insights = insights.filter((insight) => {
-        if (filters.type && insight.type !== filters.type) return false
-        if (filters.category && insight.category !== filters.category) return false
-        if (filters.location && insight.location !== filters.location) return false
-        if (filters.minConfidence && insight.confidence < filters.minConfidence) return false
-        return true
-      })
-    }
-
-    return insights.sort((a, b) => b.confidence - a.confidence)
+    return this.generateMarketInsights(behaviors)
   }
 
   /**
-   * Start periodic behavior flushing
+   * No longer needed - behaviors are persisted directly to database
    */
   private startBehaviorFlushing(): void {
-    const flushInterval = Number.parseInt(process.env["BEHAVIOR_FLUSH_INTERVAL"] || "300000", 10) // 5 minutes
-
-    this.flushInterval = setInterval(async () => {
-      await this.flushBehaviors()
-    }, flushInterval)
+    // Removed: behaviors are now persisted to database in real-time
   }
 
   /**
-   * Flush behaviors to persistent storage
+   * No longer needed - behaviors are persisted directly to database
    */
   private async flushBehaviors(): Promise<void> {
-    try {
-      // In a real implementation, this would save to database
-      logger.info(`Flushing ${this.behaviorBuffer.size} user behavior buffers`)
-
-      // Generate insights for active users
-      for (const userId of this.behaviorBuffer.keys()) {
-        await this.analyzeUserBehavior(userId)
-      }
-
-      // Generate market insights periodically
-      if (Math.random() < 0.1) {
-        // 10% chance
-        await this.generateMarketInsights()
-      }
-
-      // Clear old behaviors (keep last 100 per user)
-      for (const [userId, behaviors] of this.behaviorBuffer.entries()) {
-        if (behaviors.length > 100) {
-          this.behaviorBuffer.set(userId, behaviors.slice(-100))
-        }
-      }
-    } catch (error) {
-      logger.error("Behavior flushing failed:", error)
-    }
+    // Removed: behaviors are now persisted to database in real-time
   }
 
   /**

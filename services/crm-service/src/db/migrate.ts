@@ -1,48 +1,36 @@
-import logger from "@marketplace/logger"
-import { readFileSync } from "fs"
-import { join } from "path"
-import { closePool, query } from "./connection"
+import { migrate } from "drizzle-orm/postgres-js/migrator"
+import postgres from "postgres"
+import { drizzle } from "drizzle-orm/postgres-js"
+import { logger } from "@marketplace/logger"
+import * as schema from "@marketplace/database-schema"
+
+const connectionString = process.env.DATABASE_URL
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL environment variable is required")
+}
+
+const sql = postgres(connectionString, { max: 1 })
+const db = drizzle(sql, { schema })
 
 async function runMigrations() {
   try {
-    logger.info("🔄 Running CRM database migrations...")
-
-    // Read and execute schema
-    const schemaPath = join(__dirname, "schema.sql")
-    const schema = readFileSync(schemaPath, "utf8")
-
-    // Split by semicolon and execute each statement
-    const statements = schema
-      .split(";")
-      .map((stmt) => stmt.trim())
-      .filter((stmt) => stmt.length > 0)
-
-    for (const statement of statements) {
-      try {
-        await query(statement)
-        logger.info(`✅ Executed: ${statement.substring(0, 50)}...`)
-      } catch (error: any) {
-        // Ignore "already exists" errors
-        if (error.message.includes("already exists")) {
-          logger.info(`⚠️  Skipped (already exists): ${statement.substring(0, 50)}...`)
-        } else {
-          throw error
-        }
-      }
-    }
-
-    logger.info("✅ CRM database migrations completed successfully!")
+    logger.info("Starting database migrations...")
+    await migrate(db, { migrationsFolder: "./drizzle" })
+    logger.info("Database migrations completed successfully")
   } catch (error) {
-    logger.error("❌ Migration failed:", error)
-    process.exit(1)
+    logger.error("Database migration failed:", error)
+    throw error
   } finally {
-    await closePool()
+    await sql.end()
   }
 }
 
-// Run migrations if this file is executed directly
 if (require.main === module) {
-  runMigrations()
+  runMigrations().catch((error) => {
+    logger.error("Migration script failed:", error)
+    process.exit(1)
+  })
 }
 
 export { runMigrations }

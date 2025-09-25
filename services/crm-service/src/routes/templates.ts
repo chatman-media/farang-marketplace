@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify"
+
 import { TemplateController } from "../controllers/TemplateController"
 
 export default async function templateRoutes(fastify: FastifyInstance) {

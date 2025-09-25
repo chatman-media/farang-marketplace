@@ -8,6 +8,10 @@
     "build": "tsc",
     "test": "vitest --run",
     "test:watch": "vitest",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --write src/",
+    "format": "biome format src/",
+    "format:fix": "biome format --write src/",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {

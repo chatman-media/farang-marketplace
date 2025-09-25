@@ -1,10 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
-
-// Mock the database connection first
-vi.mock("../db/connection", () => ({
-  query: vi.fn(),
-}))
-
 import {
   CreateCustomerRequest,
   CreateLeadRequest,
@@ -15,6 +8,13 @@ import {
   UpdateCustomerRequest,
   UpdateLeadRequest,
 } from "@marketplace/shared-types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
+// Mock the database connection first
+vi.mock("../db/connection", () => ({
+  query: vi.fn(),
+}))
+
 import { query } from "../db/connection"
 import { Customer } from "../models/Customer"
 import { Lead } from "../models/Lead"

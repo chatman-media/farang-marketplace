@@ -1,4 +1,5 @@
 import { CommunicationChannel } from "@marketplace/shared-types"
+
 import { query } from "../db/connection"
 import { CreateTemplateRequest, Template, UpdateTemplateRequest } from "../models/Template"
 

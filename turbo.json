@@ -11,6 +11,7 @@
         "src/**/*.js",
         "src/**/*.jsx",
         "package.json",
+        "biome.json",
         "tsconfig.json",
         "vite.config.ts"
       ],
@@ -23,14 +24,19 @@
     },
     "lint": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", ".eslintrc.js", "package.json"],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", "biome.json", "package.json"],
       "outputs": []
     },
     "lint:fix": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", ".eslintrc.js", "package.json"],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", "biome.json", "package.json"],
       "outputs": [],
       "cache": false
+    },
+    "format": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", "biome.json", "package.json"],
+      "outputs": []
     },
     "type-check": {
       "dependsOn": ["^build"],

@@ -1,13 +1,13 @@
-import { Automation, AutomationAction, AutomationCondition, AutomationTrigger } from "@marketplace/shared-types"
+import { Automation } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import { query } from "../db/connection"
 import { AutomationService } from "../services/AutomationService"
 
 // Mock the database connection
 vi.mock("../db/connection", () => ({
   query: vi.fn(),
 }))
-
-import { query } from "../db/connection"
 
 const mockQuery = vi.mocked(query)
 

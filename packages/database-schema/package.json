@@ -7,7 +7,6 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "type-check": "tsc --noEmit",
     "clean": "rm -rf dist",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -16,7 +15,12 @@
     "test": "vitest run",
     "test:run": "vitest run",
     "test:watch": "vitest --watch",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --write src/",
+    "format": "biome format src/",
+    "format:fix": "biome format --write src/",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@marketplace/shared-types": "^1.0.0",
@@ -25,7 +29,7 @@
     "postgres": "^3.4.7"
   },
   "devDependencies": {
-    "@types/node": "24.3.1",
+    "@types/node": "24.4.0",
     "drizzle-kit": "^0.31.4",
     "typescript": "^5.9.2",
     "vitest": "3.2.4",

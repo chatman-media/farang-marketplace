@@ -1,6 +1,8 @@
+import { logger } from "@marketplace/logger"
 import type { LoginRequest } from "@marketplace/shared-types"
-import React, { useState } from "react"
+import React, { useId, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+
 import { useLogin } from "../../lib/query"
 import { Button, Card, Input } from "../ui"
 
@@ -12,6 +14,7 @@ interface LoginFormProps {
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, redirectTo = "/" }) => {
   const navigate = useNavigate()
   const loginMutation = useLogin()
+  const id = useId()
 
   const [formData, setFormData] = useState<LoginRequest>({
     email: "",
@@ -51,7 +54,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, redirectTo = "/
       onSuccess?.()
       navigate(redirectTo)
     } catch (error) {
-      console.error("Login failed:", error)
+      logger.error("Login failed:", error)
     }
   }
 
@@ -69,6 +72,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, redirectTo = "/
       }))
     }
   }
+
+  const emailId = `${id}-email`
+  const passwordId = `${id}-password`
+  const rememberMeId = `${id}-remember-me`
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -91,7 +98,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, redirectTo = "/
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <Input
-                  id="email"
+                  id={emailId}
                   name="email"
                   type="email"
                   autoComplete="email"
@@ -115,7 +122,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, redirectTo = "/
 
               <div>
                 <Input
-                  id="password"
+                  id={passwordId}
                   name="password"
                   type="password"
                   autoComplete="current-password"
@@ -140,12 +147,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, redirectTo = "/
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <input
-                    id="remember-me"
+                    id={rememberMeId}
                     name="remember-me"
                     type="checkbox"
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                  <label htmlFor={rememberMeId} className="ml-2 block text-sm text-gray-900">
                     Remember me
                   </label>
                 </div>

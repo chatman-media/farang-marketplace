@@ -3,6 +3,7 @@ import Fastify, { FastifyInstance } from "fastify"
 
 import { corsConfig, env, loggerConfig, rateLimitConfig } from "./config/environment.js"
 import { authMiddleware } from "./middleware/auth.js"
+import { loggingMiddleware, logResponse } from "./middleware/logging.js"
 import { Router } from "./services/Router.js"
 import { ServiceDiscovery } from "./services/ServiceDiscovery.js"
 

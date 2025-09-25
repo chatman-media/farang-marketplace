@@ -8,13 +8,14 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
   },
   "dependencies": {
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@types/node": "24.3.3",
+    "@types/node": "24.4.0",
     "@types/winston": "^2.4.4",
     "typescript": "^5.9.2"
   },

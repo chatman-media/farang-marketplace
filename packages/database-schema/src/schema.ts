@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm"
 import {
   boolean,
   decimal,
+  index,
   integer,
   json,
   jsonb,
@@ -9,6 +10,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core"
@@ -81,10 +83,94 @@ export const vehicleTypeEnum = pgEnum("vehicle_type", [
   "bus",
 ])
 
-export const vehicleCategoryEnum = pgEnum("vehicle_category", ["rental", "lease", "ride_sharing", "delivery"])
+// Additional listing enums from listing-service
+export const vehicleCategoryEnum = pgEnum("vehicle_category", [
+  "economy",
+  "standard",
+  "premium",
+  "luxury",
+  "sport",
+  "electric",
+  "classic",
+])
+
+export const buildingTypeEnum = pgEnum("building_type", [
+  "low_rise",
+  "mid_rise",
+  "high_rise",
+  "detached",
+  "semi_detached",
+  "terraced",
+  "cluster",
+])
+
+export const furnishingEnum = pgEnum("furnishing", [
+  "unfurnished",
+  "partially_furnished",
+  "fully_furnished",
+  "luxury_furnished",
+])
+
+export const listingPurposeEnum = pgEnum("listing_purpose", [
+  "rent",
+  "sale",
+  "short_term_rental",
+  "long_term_rental",
+  "both",
+])
+
+export const orientationEnum = pgEnum("orientation", [
+  "north",
+  "south",
+  "east",
+  "west",
+  "northeast",
+  "northwest",
+  "southeast",
+  "southwest",
+])
+
+export const viewTypeEnum = pgEnum("view_type", [
+  "city",
+  "sea",
+  "mountain",
+  "garden",
+  "pool",
+  "river",
+  "park",
+  "golf",
+  "no_view",
+])
+
+export const propertyTypeEnum = pgEnum("property_type", [
+  "condo",
+  "apartment",
+  "house",
+  "villa",
+  "townhouse",
+  "studio",
+  "penthouse",
+  "duplex",
+  "loft",
+  "commercial",
+  "office",
+  "retail",
+  "warehouse",
+  "land",
+  "building",
+])
+
+export const propertyStatusEnum = pgEnum("property_status", [
+  "available",
+  "rented",
+  "sold",
+  "reserved",
+  "under_contract",
+  "off_market",
+  "maintenance",
+])
 
 export const vehicleConditionEnum = pgEnum("vehicle_condition", ["new", "excellent", "good", "fair", "poor", "damaged"])
-
 export const vehicleStatusEnum = pgEnum("vehicle_status", [
   "available",
   "rented",
@@ -92,12 +178,9 @@ export const vehicleStatusEnum = pgEnum("vehicle_status", [
   "reserved",
   "inactive",
 ])
-
 export const fuelTypeEnum = pgEnum("fuel_type", ["gasoline", "diesel", "electric", "hybrid", "lpg", "cng"])
-
 export const transmissionTypeEnum = pgEnum("transmission_type", ["manual", "automatic", "cvt", "semi_automatic"])
 
-// Product related enums
 export const productTypeEnum = pgEnum("product_type", [
   // Home & Kitchen Appliances
   "home_appliances", // холодильники, стиральные машины, микроволновки
@@ -354,8 +437,6 @@ export const listings = pgTable("listings", {
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
 })
 
-// Real Estate will be added later when system stabilizes
-
 // Vehicles table
 export const vehicles = pgTable("vehicles", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -390,9 +471,12 @@ export const vehicles = pgTable("vehicles", {
   rentalSticker: varchar("rental_sticker", { length: 100 }),
 
   // GPS tracking (from your models)
-  gpsTrackerId: varchar("gps_tracker_id", { length: 100 }),
-  gpsProvider: varchar("gps_provider", { length: 50 }), // sinotrack, etc.
-
+  gpsTrackerId: varchar("gps_tracker_id", { length: 50 }),
+  gpsProvider: varchar("gps_provider", { length: 50 }),
+  hasCharger: boolean("has_charger").default(false),
+  hasHelmet: boolean("has_helmet").default(false),
+  hasLock: boolean("has_lock").default(false),
+  accessories: jsonb("accessories").$type<string[]>().default([]),
   // Features
   airConditioning: boolean("air_conditioning").default(false),
   gps: boolean("gps").default(false),
@@ -439,47 +523,145 @@ export const vehicles = pgTable("vehicles", {
   // Timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  lastMaintenanceUpdate: timestamp("last_maintenance_update"),
 
   // Additional data
-  features: jsonb("features").$type<Record<string, any>>().default({}),
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
+  notes: text("notes"),
 })
 
 // Products table
 export const products = pgTable("products", {
   id: uuid("id").primaryKey().defaultRandom(),
-  listingId: uuid("listing_id").notNull().unique(),
+  listingId: uuid("listing_id")
+    .notNull()
+    .references(() => listings.id, { onDelete: "cascade" }),
 
   // Product details
   productType: productTypeEnum("product_type").notNull(),
+  subcategory: varchar("subcategory", { length: 100 }),
   condition: productConditionEnum("condition").notNull(),
   status: productStatusEnum("status").notNull().default("available"),
   listingType: productListingTypeEnum("listing_type").notNull().default("rental"),
 
   // Basic info
-  brand: varchar("brand", { length: 100 }),
+  brand: varchar("brand", { length: 50 }),
   model: varchar("model", { length: 100 }),
   sku: varchar("sku", { length: 100 }),
+  serialNumber: varchar("serial_number", { length: 100 }),
+  manufacturingYear: integer("manufacturing_year"),
+  countryOfOrigin: varchar("country_of_origin", { length: 50 }),
 
   // Physical properties
-  weight: decimal("weight", { precision: 8, scale: 3 }),
-  dimensions: jsonb("dimensions").$type<{ length?: number; width?: number; height?: number }>(),
-  color: varchar("color", { length: 50 }),
+  length: integer("length"),
+  width: integer("width"),
+  height: integer("height"),
+  weight: integer("weight"),
+  volume: integer("volume"),
   material: varchar("material", { length: 100 }),
+  size: varchar("size", { length: 50 }),
 
-  // Inventory
-  quantity: integer("quantity").notNull().default(1),
-  minQuantity: integer("min_quantity").default(1),
-  maxQuantity: integer("max_quantity"),
+  // Technical specifications
+  technicalSpecs: jsonb("technical_specs").$type<Record<string, string | number | boolean>>().default({}),
+
+  // Features and capabilities
+  features: jsonb("features").$type<string[]>().notNull().default([]),
+  included: jsonb("included").$type<string[]>().default([]),
+  requirements: jsonb("requirements").$type<string[]>().default([]),
+
+  // Condition details
+  conditionNotes: text("condition_notes"),
+  defects: jsonb("defects").$type<string[]>().default([]),
+  repairs: jsonb("repairs").$type<string[]>().default([]),
+
+  // Warranty and support
+  warrantyPeriod: varchar("warranty_period", { length: 50 }),
+  warrantyType: varchar("warranty_type", { length: 20 }),
+  supportAvailable: boolean("support_available").default(false),
+  manualIncluded: boolean("manual_included").default(false),
 
   // Pricing
-  originalPrice: decimal("original_price", { precision: 10, scale: 2 }),
-  discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }),
+  price: decimal("price", { precision: 12, scale: 2 }).notNull(),
+  priceType: priceTypeEnum("price_type").notNull(),
+  originalPrice: decimal("original_price", { precision: 12, scale: 2 }),
+  msrp: decimal("msrp", { precision: 12, scale: 2 }),
 
-  // Shipping
-  shippingWeight: decimal("shipping_weight", { precision: 8, scale: 3 }),
-  shippingCost: decimal("shipping_cost", { precision: 10, scale: 2 }),
-  freeShipping: boolean("free_shipping").default(false),
+  // Rental pricing
+  rentalPricing: jsonb("rental_pricing").$type<{
+    hourly?: number
+    daily?: number
+    weekly?: number
+    monthly?: number
+    deposit?: number
+    minimumRentalPeriod?: string
+  }>(),
+
+  // Additional costs
+  shippingCost: decimal("shipping_cost", { precision: 8, scale: 2 }),
+  handlingFee: decimal("handling_fee", { precision: 8, scale: 2 }),
+  installationFee: decimal("installation_fee", { precision: 8, scale: 2 }),
+
+  // Payment options
+  acceptedPayments: jsonb("accepted_payments").$type<string[]>().notNull().default([]),
+  installmentAvailable: boolean("installment_available").default(false),
+  installmentOptions: jsonb("installment_options")
+    .$type<
+      {
+        months: number
+        monthlyPayment: number
+        interestRate?: number
+      }[]
+    >()
+    .default([]),
+
+  // Availability
+  isAvailable: boolean("is_available").notNull().default(true),
+  quantity: integer("quantity"),
+  quantityType: varchar("quantity_type", { length: 20 }).default("exact"),
+  stockLevel: varchar("stock_level", { length: 20 }).default("in_stock"),
+  restockDate: timestamp("restock_date"),
+
+  // Rental availability
+  availableFrom: timestamp("available_from"),
+  availableUntil: timestamp("available_until"),
+  blackoutDates: jsonb("blackout_dates").$type<string[]>().default([]),
+
+  // Location availability
+  availableLocations: jsonb("available_locations").$type<string[]>().default([]),
+  pickupLocations: jsonb("pickup_locations").$type<string[]>().default([]),
+  deliveryAvailable: boolean("delivery_available").default(false),
+  deliveryAreas: jsonb("delivery_areas").$type<string[]>().default([]),
+  deliveryTime: varchar("delivery_time", { length: 50 }),
+
+  // Seller information
+  sellerId: uuid("seller_id").notNull(),
+  sellerType: varchar("seller_type", { length: 20 }).notNull(),
+  sellerName: varchar("seller_name", { length: 100 }).notNull(),
+  sellerRating: decimal("seller_rating", { precision: 3, scale: 2 }),
+  sellerReviews: integer("seller_reviews").default(0),
+  isSellerVerified: boolean("is_seller_verified").default(false),
+  businessLicense: varchar("business_license", { length: 100 }),
+  taxId: varchar("tax_id", { length: 50 }),
+
+  // Contact information
+  contactPhone: varchar("contact_phone", { length: 20 }),
+  contactEmail: varchar("contact_email", { length: 100 }),
+  contactWebsite: varchar("contact_website", { length: 200 }),
+  contactAddress: text("contact_address"),
+  socialMedia: jsonb("social_media").$type<Record<string, string>>().default({}),
+
+  // Business details
+  businessHours: varchar("business_hours", { length: 100 }),
+  languages: jsonb("languages").$type<string[]>().default([]),
+  responseTime: varchar("response_time", { length: 50 }),
+
+  // Policies
+  returnPolicy: text("return_policy"),
+  warrantyPolicy: text("warranty_policy"),
+  shippingPolicy: text("shipping_policy"),
+
+  // Documents
+  documents: jsonb("documents").$type<string[]>().default([]),
 
   // Timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -488,6 +670,7 @@ export const products = pgTable("products", {
   // Additional data
   specifications: jsonb("specifications").$type<Record<string, any>>().default({}),
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
+  customFields: jsonb("custom_fields").$type<Record<string, any>>().default({}),
 })
 
 // Service Providers table
@@ -657,6 +840,10 @@ export const communicationHistory = pgTable("communication_history", {
   content: text("content"),
   direction: varchar("direction", { length: 10 }).notNull(), // 'inbound' or 'outbound'
 
+  // CRM automation fields
+  outcome: varchar("outcome", { length: 50 }), // Result of the communication
+  nextAction: varchar("next_action", { length: 255 }), // Next recommended action
+
   // Timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),
 
@@ -676,6 +863,9 @@ export const campaigns = pgTable("campaigns", {
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
 
+  // CRM fields
+  contactCount: integer("contact_count").default(0),
+
   // Timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -687,24 +877,66 @@ export const campaigns = pgTable("campaigns", {
 
 export const messageTemplates = pgTable("message_templates", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 255 }).notNull(),
-  type: communicationTypeEnum("type").notNull(),
+  name: varchar("name", { length: 255 }).notNull().unique(),
+  type: varchar("type", { length: 50 }).notNull(), // 'email', 'telegram', 'whatsapp', 'line', 'universal'
+  category: varchar("category", { length: 100 }), // 'welcome', 'follow_up', 'reminder', 'promotion', etc.
 
   // Template content
-  subject: varchar("subject", { length: 255 }),
+  subject: varchar("subject", { length: 500 }), // For email templates
   content: text("content").notNull(),
+  variables: jsonb("variables").$type<string[]>().default([]), // Array of variable names used in template
+  conditions: jsonb("conditions").$type<Record<string, any>>().default({}), // Conditions for when to use this template
 
   // Status
   isActive: boolean("is_active").notNull().default(true),
 
+  // Audit fields
+  createdBy: uuid("created_by"), // Reference to user who created template
+
   // Timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-
-  // Additional data
-  variables: json("variables").$type<string[]>().default([]),
-  metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
 })
+
+// Customer segments table (from CRM migration)
+export const customerSegments = pgTable("customer_segments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+
+  // Segment criteria
+  criteria: jsonb("criteria").$type<Record<string, any>>().notNull(), // Array of segment criteria
+  operator: varchar("operator", { length: 3 }).default("AND"), // 'AND' or 'OR'
+
+  // Status and stats
+  isActive: boolean("is_active").notNull().default(true),
+  customerCount: integer("customer_count").default(0),
+  lastCalculatedAt: timestamp("last_calculated_at"),
+
+  // Audit fields
+  createdBy: uuid("created_by").default("00000000-0000-0000-0000-000000000000"),
+
+  // Timestamps
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
+
+// Customer segment memberships table (from CRM migration)
+export const customerSegmentMemberships = pgTable(
+  "customer_segment_memberships",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    customerId: uuid("customer_id").notNull(),
+    segmentId: uuid("segment_id").notNull(),
+
+    // Timestamps
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    // Unique constraint to prevent duplicate memberships
+    uniqueCustomerSegment: unique().on(table.customerId, table.segmentId),
+  }),
+)
 
 export const campaignMessages = pgTable("campaign_messages", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -728,40 +960,6 @@ export const campaignMessages = pgTable("campaign_messages", {
 
   // Additional data
   metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
-})
-
-export const customerSegments = pgTable("customer_segments", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-
-  // Segment criteria
-  criteria: jsonb("criteria").$type<Record<string, any>>().notNull(),
-  operator: varchar("operator", { length: 3 }).default("AND"),
-
-  // Status
-  isActive: boolean("is_active").notNull().default(true),
-
-  // CRM fields
-  customerCount: integer("customer_count").default(0),
-  lastCalculatedAt: timestamp("last_calculated_at"),
-  createdBy: uuid("created_by").default("00000000-0000-0000-0000-000000000000"),
-
-  // Timestamps
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-
-  // Additional data
-  metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
-})
-
-export const customerSegmentMemberships = pgTable("customer_segment_memberships", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  customerId: uuid("customer_id").notNull(),
-  segmentId: uuid("segment_id").notNull(),
-
-  // Timestamps
-  createdAt: timestamp("created_at").notNull().defaultNow(),
 })
 
 export const automations = pgTable("automations", {
@@ -1214,3 +1412,854 @@ export const commissionPaymentsRelations = relations(commissionPayments, ({ one 
     references: [listingBookings.id],
   }),
 }))
+
+// Payment-related enums (additional to existing paymentStatusEnum)
+export const paymentMethodEnum = pgEnum("payment_method", [
+  "ton_wallet",
+  "ton_connect",
+  "jetton_usdt",
+  "jetton_usdc",
+  "stripe_card",
+  "promptpay",
+])
+
+export const transactionTypeEnum = pgEnum("transaction_type", [
+  "payment",
+  "refund",
+  "fee",
+  "commission",
+  "withdrawal",
+  "deposit",
+  "confirmation",
+])
+
+export const refundStatusEnum = pgEnum("refund_status", ["pending", "processing", "completed", "failed", "cancelled"])
+
+export const disputeStatusEnum = pgEnum("dispute_status", ["open", "investigating", "resolved", "closed", "escalated"])
+
+// Payments Table
+export const payments = pgTable(
+  "payments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    // Basic payment info
+    amount: decimal("amount", { precision: 20, scale: 8 }).notNull(),
+    currency: varchar("currency", { length: 3 }).notNull().default("THB"),
+    status: paymentStatusEnum("status").notNull().default("pending"),
+    paymentMethod: paymentMethodEnum("payment_method").notNull(),
+
+    // Payment provider info
+    provider: varchar("provider", { length: 50 }).notNull(), // 'ton', 'stripe', 'promptpay'
+    providerPaymentId: varchar("provider_payment_id", { length: 255 }),
+    providerReference: varchar("provider_reference", { length: 255 }),
+
+    // Related entities
+    listingId: uuid("listing_id").references(() => listings.id),
+    bookingId: uuid("booking_id").references(() => bookings.id),
+    userId: uuid("user_id").references(() => users.id),
+
+    // Blockchain info (for crypto payments)
+    blockchainTxHash: varchar("blockchain_tx_hash", { length: 255 }),
+    blockchainAddress: varchar("blockchain_address", { length: 255 }),
+    jettonAddress: varchar("jetton_address", { length: 255 }),
+
+    // Fee breakdown
+    platformFee: decimal("platform_fee", { precision: 20, scale: 8 }).default("0"),
+    processingFee: decimal("processing_fee", { precision: 20, scale: 8 }).default("0"),
+    totalAmount: decimal("total_amount", { precision: 20, scale: 8 }).notNull(),
+
+    // Metadata
+    metadata: jsonb("metadata")
+      .$type<{
+        cardBrand?: string
+        cardLast4?: string
+        failureCode?: string
+        failureMessage?: string
+        refundReason?: string
+        disputeReason?: string
+      }>()
+      .default({}),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("payments_user_id_idx").on(table.userId),
+    index("payments_listing_id_idx").on(table.listingId),
+    index("payments_booking_id_idx").on(table.bookingId),
+    index("payments_status_idx").on(table.status),
+    index("payments_created_at_idx").on(table.createdAt),
+    index("payments_provider_payment_id_idx").on(table.providerPaymentId),
+  ],
+)
+
+// Transactions Table
+export const transactions = pgTable(
+  "transactions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    // Transaction info
+    amount: decimal("amount", { precision: 20, scale: 8 }).notNull(),
+    currency: varchar("currency", { length: 3 }).notNull().default("THB"),
+    type: transactionTypeEnum("type").notNull(),
+    status: paymentStatusEnum("status").notNull().default("pending"),
+
+    // Related payment
+    paymentId: uuid("payment_id").references(() => payments.id),
+
+    // Source/destination info
+    fromUserId: uuid("from_user_id").references(() => users.id),
+    toUserId: uuid("to_user_id").references(() => users.id),
+
+    // Blockchain info
+    blockchainTxHash: varchar("blockchain_tx_hash", { length: 255 }),
+    blockchainAddress: varchar("blockchain_address", { length: 255 }),
+
+    // Additional info
+    description: text("description"),
+    reference: varchar("reference", { length: 255 }),
+
+    // Metadata
+    metadata: jsonb("metadata")
+      .$type<{
+        category?: string
+        subcategory?: string
+        tags?: string[]
+        notes?: string
+      }>()
+      .default({}),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("transactions_payment_id_idx").on(table.paymentId),
+    index("transactions_from_user_id_idx").on(table.fromUserId),
+    index("transactions_to_user_id_idx").on(table.toUserId),
+    index("transactions_type_idx").on(table.type),
+    index("transactions_status_idx").on(table.status),
+    index("transactions_created_at_idx").on(table.createdAt),
+  ],
+)
+
+// Refunds Table
+export const refunds = pgTable(
+  "refunds",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    // Refund info
+    amount: decimal("amount", { precision: 20, scale: 8 }).notNull(),
+    currency: varchar("currency", { length: 3 }).notNull().default("THB"),
+    status: refundStatusEnum("status").notNull().default("pending"),
+
+    // Related entities
+    paymentId: uuid("payment_id")
+      .references(() => payments.id)
+      .notNull(),
+    transactionId: uuid("transaction_id").references(() => transactions.id),
+
+    // Refund details
+    reason: text("reason"),
+    refundType: varchar("refund_type", { length: 50 }).notNull(), // 'full', 'partial', 'chargeback'
+
+    // Provider info
+    providerRefundId: varchar("provider_refund_id", { length: 255 }),
+    providerReference: varchar("provider_reference", { length: 255 }),
+
+    // Blockchain info
+    blockchainTxHash: varchar("blockchain_tx_hash", { length: 255 }),
+
+    // Metadata
+    metadata: jsonb("metadata")
+      .$type<{
+        reasonCode?: string
+        failureReason?: string
+        notes?: string
+        initiatedBy?: string
+      }>()
+      .default({}),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("refunds_payment_id_idx").on(table.paymentId),
+    index("refunds_transaction_id_idx").on(table.transactionId),
+    index("refunds_status_idx").on(table.status),
+    index("refunds_created_at_idx").on(table.createdAt),
+  ],
+)
+
+// Payment Methods Table
+export const paymentMethods = pgTable(
+  "payment_methods",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    // User info
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+
+    // Payment method details
+    type: paymentMethodEnum("type").notNull(),
+    provider: varchar("provider", { length: 50 }).notNull(),
+
+    // Provider-specific data
+    providerId: varchar("provider_id", { length: 255 }).notNull(),
+    last4: varchar("last4", { length: 4 }),
+    brand: varchar("brand", { length: 50 }),
+    expMonth: integer("exp_month"),
+    expYear: integer("exp_year"),
+
+    // Crypto wallet info
+    walletAddress: varchar("wallet_address", { length: 255 }),
+    jettonAddress: varchar("jetton_address", { length: 255 }),
+
+    // Status
+    isDefault: boolean("is_default").default(false),
+    isActive: boolean("is_active").default(true),
+
+    // Metadata
+    metadata: jsonb("metadata")
+      .$type<{
+        nickname?: string
+        fingerprint?: string
+        network?: string
+      }>()
+      .default({}),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("payment_methods_user_id_idx").on(table.userId),
+    index("payment_methods_type_idx").on(table.type),
+    index("payment_methods_is_default_idx").on(table.isDefault),
+    index("payment_methods_provider_id_idx").on(table.providerId),
+  ],
+)
+
+// Payment Relations
+export const paymentsRelations = relations(payments, ({ one, many }) => ({
+  user: one(users, {
+    fields: [payments.userId],
+    references: [users.id],
+  }),
+  listing: one(listings, {
+    fields: [payments.listingId],
+    references: [listings.id],
+  }),
+  booking: one(bookings, {
+    fields: [payments.bookingId],
+    references: [bookings.id],
+  }),
+  transactions: many(transactions),
+  refunds: many(refunds),
+}))
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  payment: one(payments, {
+    fields: [transactions.paymentId],
+    references: [payments.id],
+  }),
+  fromUser: one(users, {
+    fields: [transactions.fromUserId],
+    references: [users.id],
+  }),
+  toUser: one(users, {
+    fields: [transactions.toUserId],
+    references: [users.id],
+  }),
+}))
+
+export const refundsRelations = relations(refunds, ({ one }) => ({
+  payment: one(payments, {
+    fields: [refunds.paymentId],
+    references: [payments.id],
+  }),
+  transaction: one(transactions, {
+    fields: [refunds.transactionId],
+    references: [transactions.id],
+  }),
+}))
+
+export const paymentMethodsRelations = relations(paymentMethods, ({ one }) => ({
+  user: one(users, {
+    fields: [paymentMethods.userId],
+    references: [users.id],
+  }),
+}))
+
+// AI Service Tables
+// ============================================================================
+
+// User Behavior Tracking
+export const userBehaviors = pgTable(
+  "user_behaviors",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+
+    // Action details
+    action: varchar("action", { length: 20 }).notNull(), // view, search, click, bookmark, share, contact, book, purchase
+    entityType: varchar("entity_type", { length: 20 }).notNull(), // listing, service, agency, user
+    entityId: uuid("entity_id").notNull(),
+
+    // Session tracking
+    sessionId: varchar("session_id", { length: 255 }).notNull(),
+
+    // Location data
+    latitude: decimal("latitude", { precision: 10, scale: 8 }),
+    longitude: decimal("longitude", { precision: 11, scale: 8 }),
+    city: varchar("city", { length: 100 }),
+    country: varchar("country", { length: 100 }),
+
+    // Device info
+    deviceType: varchar("device_type", { length: 20 }), // mobile, tablet, desktop
+    deviceOs: varchar("device_os", { length: 50 }),
+    deviceBrowser: varchar("device_browser", { length: 50 }),
+
+    // Additional metadata
+    metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
+
+    // Timestamps
+    timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("user_behaviors_user_id_idx").on(table.userId),
+    index("user_behaviors_action_idx").on(table.action),
+    index("user_behaviors_entity_type_idx").on(table.entityType),
+    index("user_behaviors_entity_id_idx").on(table.entityId),
+    index("user_behaviors_session_id_idx").on(table.sessionId),
+    index("user_behaviors_timestamp_idx").on(table.timestamp),
+  ],
+)
+
+// Content Analysis Results
+export const contentAnalysis = pgTable(
+  "content_analysis",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    // Content identification
+    type: varchar("type", { length: 20 }).notNull(), // listing, review, message, profile
+    entityId: uuid("entity_id").notNull(),
+
+    // Content data
+    title: text("title"),
+    description: text("description"),
+    contentText: text("content_text"),
+    images: jsonb("images").$type<string[]>().default([]),
+    language: varchar("language", { length: 10 }).default("en"),
+
+    // Analysis results
+    sentimentScore: decimal("sentiment_score", { precision: 3, scale: 2 }),
+    sentimentLabel: varchar("sentiment_label", { length: 20 }),
+    sentimentConfidence: decimal("sentiment_confidence", { precision: 3, scale: 2 }),
+
+    keywords: jsonb("keywords")
+      .$type<
+        Array<{
+          word: string
+          score: number
+          category?: string
+        }>
+      >()
+      .default([]),
+
+    categories: jsonb("categories")
+      .$type<
+        Array<{
+          category: string
+          confidence: number
+        }>
+      >()
+      .default([]),
+
+    moderationFlagged: boolean("moderation_flagged").default(false),
+    moderationCategories: jsonb("moderation_categories").$type<string[]>().default([]),
+    moderationScores: jsonb("moderation_scores").$type<Record<string, number>>().default({}),
+
+    qualityScore: decimal("quality_score", { precision: 3, scale: 2 }),
+    qualityIssues: jsonb("quality_issues").$type<string[]>().default([]),
+    qualitySuggestions: jsonb("quality_suggestions").$type<string[]>().default([]),
+
+    // Processing info
+    processingTime: integer("processing_time"), // milliseconds
+    algorithm: varchar("algorithm", { length: 100 }),
+
+    // Timestamps
+    timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("content_analysis_type_idx").on(table.type),
+    index("content_analysis_entity_id_idx").on(table.entityId),
+    index("content_analysis_timestamp_idx").on(table.timestamp),
+    index("content_analysis_sentiment_score_idx").on(table.sentimentScore),
+  ],
+)
+
+// Machine Learning Models
+export const mlModels = pgTable(
+  "ml_models",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: varchar("name", { length: 255 }).notNull(),
+    type: varchar("type", { length: 20 }).notNull(), // recommendation, classification, regression, clustering
+    version: varchar("version", { length: 50 }).notNull(),
+    status: varchar("status", { length: 20 }).notNull().default("training"), // training, ready, error, deprecated
+
+    // Performance metrics
+    accuracy: decimal("accuracy", { precision: 5, scale: 4 }),
+    precision: decimal("precision", { precision: 5, scale: 4 }),
+    recall: decimal("recall", { precision: 5, scale: 4 }),
+    f1Score: decimal("f1_score", { precision: 5, scale: 4 }),
+
+    // Training data info
+    trainingSamples: integer("training_samples"),
+    trainingFeatures: integer("training_features"),
+    lastTrained: timestamp("last_trained"),
+
+    // Configuration
+    hyperparameters: jsonb("hyperparameters").$type<Record<string, any>>().default({}),
+    metadata: jsonb("metadata").$type<Record<string, any>>().default({}),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("ml_models_name_idx").on(table.name),
+    index("ml_models_type_idx").on(table.type),
+    index("ml_models_status_idx").on(table.status),
+    index("ml_models_version_idx").on(table.version),
+  ],
+)
+
+// Training Jobs
+export const trainingJobs = pgTable(
+  "training_jobs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    modelId: uuid("model_id")
+      .notNull()
+      .references(() => mlModels.id, { onDelete: "cascade" }),
+
+    status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, running, completed, failed, cancelled
+    progress: integer("progress").notNull().default(0), // 0-100
+
+    startTime: timestamp("start_time", { withTimezone: true }),
+    endTime: timestamp("end_time", { withTimezone: true }),
+
+    // Training metrics
+    metrics: jsonb("metrics")
+      .$type<{
+        loss?: number
+        accuracy?: number
+        validationLoss?: number
+        validationAccuracy?: number
+      }>()
+      .default({}),
+
+    logs: jsonb("logs").$type<string[]>().default([]),
+    error: text("error"),
+
+    // Training configuration
+    config: jsonb("config")
+      .$type<{
+        epochs: number
+        batchSize: number
+        learningRate: number
+        validationSplit: number
+      }>()
+      .default({
+        epochs: 100,
+        batchSize: 32,
+        learningRate: 0.001,
+        validationSplit: 0.2,
+      }),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("training_jobs_model_id_idx").on(table.modelId),
+    index("training_jobs_status_idx").on(table.status),
+    index("training_jobs_start_time_idx").on(table.startTime),
+  ],
+)
+
+// Search Queries
+export const searchQueries = pgTable(
+  "search_queries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+
+    query: text("query").notNull(),
+    type: varchar("type", { length: 20 }).notNull().default("text"), // text, voice, image, semantic
+
+    // Search context
+    context: jsonb("context")
+      .$type<{
+        currentListingId?: string
+        searchQuery?: string
+        category?: string
+        location?: string
+        budget?: number
+      }>()
+      .default({}),
+
+    // Search filters
+    filters: jsonb("filters")
+      .$type<{
+        categories?: string[]
+        priceRange?: { min: number; max: number }
+        location?: string
+        rating?: number
+        availability?: boolean
+      }>()
+      .default({}),
+
+    // Search results
+    resultsCount: integer("results_count"),
+    clickedResults: jsonb("clicked_results").$type<string[]>().default([]),
+
+    // Performance metrics
+    processingTime: integer("processing_time"), // milliseconds
+
+    // Timestamps
+    timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("search_queries_user_id_idx").on(table.userId),
+    index("search_queries_type_idx").on(table.type),
+    index("search_queries_timestamp_idx").on(table.timestamp),
+    index("search_queries_query_idx").on(table.query),
+  ],
+)
+
+// AI Service Relations
+export const userBehaviorsRelations = relations(userBehaviors, ({ one }) => ({
+  user: one(users, {
+    fields: [userBehaviors.userId],
+    references: [users.id],
+  }),
+}))
+
+export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [userPreferences.userId],
+    references: [users.id],
+  }),
+}))
+
+export const contentAnalysisRelations = relations(contentAnalysis, ({ one }) => ({
+  listing: one(listings, {
+    fields: [contentAnalysis.entityId],
+    references: [listings.id],
+  }),
+}))
+
+export const mlModelsRelations = relations(mlModels, ({ many }) => ({
+  trainingJobs: many(trainingJobs),
+}))
+
+export const trainingJobsRelations = relations(trainingJobs, ({ one }) => ({
+  model: one(mlModels, {
+    fields: [trainingJobs.modelId],
+    references: [mlModels.id],
+  }),
+}))
+
+export const searchQueriesRelations = relations(searchQueries, ({ one }) => ({
+  user: one(users, {
+    fields: [searchQueries.userId],
+    references: [users.id],
+  }),
+}))
+
+// Booking related enums
+export const bookingTypeEnum = pgEnum("booking_type", [
+  "accommodation",
+  "transportation",
+  "tour",
+  "activity",
+  "dining",
+  "event",
+  "service",
+])
+
+export const serviceBookingTypeEnum = pgEnum("service_booking_type", [
+  "consultation",
+  "project",
+  "hourly",
+  "package",
+  "subscription",
+])
+
+export const cancellationReasonEnum = pgEnum("cancellation_reason", [
+  "user_request",
+  "host_unavailable",
+  "payment_failed",
+  "policy_violation",
+  "force_majeure",
+  "system_error",
+])
+
+// ============================================================================
+// BOOKING SYSTEM TABLES (from booking-service)
+// ============================================================================
+
+// Main Bookings Table (extends listingBookings with more comprehensive fields)
+export const bookings = pgTable(
+  "bookings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    listingId: uuid("listing_id").notNull(),
+    guestId: uuid("guest_id").notNull(),
+    hostId: uuid("host_id").notNull(),
+    agencyId: uuid("agency_id"),
+
+    // Booking Details
+    type: bookingTypeEnum("type").notNull(),
+    status: bookingStatusEnum("status").notNull().default("pending"),
+    checkIn: timestamp("check_in", { withTimezone: true }).notNull(),
+    checkOut: timestamp("check_out", { withTimezone: true }),
+    nights: integer("nights").notNull(),
+
+    // Guest Details
+    adults: integer("adults").notNull().default(1),
+    children: integer("children").notNull().default(0),
+    infants: integer("infants").notNull().default(0),
+    guests: integer("guests").notNull().default(1), // total guests
+
+    // Pricing
+    basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
+    serviceFees: decimal("service_fees", { precision: 10, scale: 2 }).default("0"),
+    taxes: decimal("taxes", { precision: 10, scale: 2 }).default("0"),
+    totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+    currency: varchar("currency", { length: 3 }).notNull().default("THB"),
+
+    // Payment
+    paymentStatus: paymentStatusEnum("payment_status").default("pending"),
+    paymentMethod: varchar("payment_method", { length: 50 }),
+    paymentId: varchar("payment_id", { length: 255 }),
+
+    // Additional Information
+    specialRequests: text("special_requests"),
+    hostNotes: text("host_notes"),
+    guestNotes: text("guest_notes"),
+
+    // Cancellation
+    cancellationReason: cancellationReasonEnum("cancellation_reason"),
+    cancellationDate: timestamp("cancellation_date", { withTimezone: true }),
+    cancellationPolicy: jsonb("cancellation_policy").$type<{
+      type: "flexible" | "moderate" | "strict"
+      refundPercentage: number
+      deadlineHours: number
+    }>(),
+
+    // Metadata
+    metadata: jsonb("metadata")
+      .$type<{
+        source?: string
+        userAgent?: string
+        ipAddress?: string
+        referrer?: string
+      }>()
+      .default({}),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("bookings_listing_id_idx").on(table.listingId),
+    index("bookings_guest_id_idx").on(table.guestId),
+    index("bookings_host_id_idx").on(table.hostId),
+    index("bookings_status_idx").on(table.status),
+    index("bookings_check_in_idx").on(table.checkIn),
+    index("bookings_payment_status_idx").on(table.paymentStatus),
+  ],
+)
+
+// Service Bookings Table (extends bookings for service-specific fields)
+export const serviceBookings = pgTable(
+  "service_bookings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id")
+      .references(() => bookings.id, { onDelete: "cascade" })
+      .notNull(),
+    serviceType: serviceBookingTypeEnum("service_type").notNull(),
+    providerId: uuid("provider_id").notNull(),
+
+    // Scheduling
+    scheduledDate: timestamp("scheduled_date", { withTimezone: true }).notNull(),
+    scheduledTime: varchar("scheduled_time", { length: 8 }), // HH:MM:SS format
+    duration: jsonb("duration")
+      .$type<{
+        value: number
+        unit: "minutes" | "hours" | "days" | "weeks" | "months"
+      }>()
+      .notNull(),
+    timezone: varchar("timezone", { length: 50 }).notNull().default("Asia/Bangkok"),
+
+    // Service Details
+    deliveryMethod: varchar("delivery_method", { length: 20 }).notNull(), // 'online' | 'in_person' | 'hybrid'
+    location: jsonb("location").$type<{
+      address: string
+      coordinates?: {
+        latitude: number
+        longitude: number
+      }
+    }>(),
+
+    // Requirements and Deliverables
+    requirements: jsonb("requirements").$type<string[]>().default([]),
+    deliverables: jsonb("deliverables").$type<string[]>().default([]),
+
+    // Communication
+    communicationPreference: varchar("communication_preference", { length: 20 }).notNull(), // 'email' | 'phone' | 'chat' | 'video_call'
+
+    // Milestones for project-based services
+    milestones: jsonb("milestones")
+      .$type<
+        Array<{
+          id: string
+          title: string
+          description: string
+          dueDate: string
+          status: "pending" | "in_progress" | "completed" | "overdue"
+          payment?: {
+            amount: number
+            currency: string
+            status: "pending" | "paid" | "failed"
+          }
+        }>
+      >()
+      .default([]),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("service_bookings_booking_id_idx").on(table.bookingId),
+    index("service_bookings_provider_id_idx").on(table.providerId),
+    index("service_bookings_scheduled_date_idx").on(table.scheduledDate),
+    index("service_bookings_service_type_idx").on(table.serviceType),
+  ],
+)
+
+// Booking Status History
+export const bookingStatusHistory = pgTable(
+  "booking_status_history",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id")
+      .references(() => bookings.id, { onDelete: "cascade" })
+      .notNull(),
+    fromStatus: varchar("from_status", { length: 20 }),
+    toStatus: varchar("to_status", { length: 20 }).notNull(),
+    reason: text("reason"),
+    changedBy: uuid("changed_by").notNull(), // user ID who made the change
+    changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
+    metadata: jsonb("metadata")
+      .$type<{
+        automaticChange?: boolean
+        systemReason?: string
+        userAgent?: string
+      }>()
+      .default({}),
+  },
+  (table) => [
+    index("booking_status_history_booking_id_idx").on(table.bookingId),
+    index("booking_status_history_changed_at_idx").on(table.changedAt),
+  ],
+)
+
+// Availability Conflicts
+export const availabilityConflicts = pgTable(
+  "availability_conflicts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    listingId: uuid("listing_id").notNull(),
+    conflictType: varchar("conflict_type", { length: 50 }).notNull(), // 'booking', 'maintenance', 'blocked'
+    startDate: timestamp("start_date", { withTimezone: true }).notNull(),
+    endDate: timestamp("end_date", { withTimezone: true }).notNull(),
+    bookingId: uuid("booking_id").references(() => bookings.id, { onDelete: "cascade" }),
+    reason: text("reason"),
+    createdBy: uuid("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("availability_conflicts_listing_id_idx").on(table.listingId),
+    index("availability_conflicts_date_range_idx").on(table.startDate, table.endDate),
+  ],
+)
+
+// Disputes
+export const disputes = pgTable(
+  "disputes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    bookingId: uuid("booking_id")
+      .references(() => bookings.id, { onDelete: "cascade" })
+      .notNull(),
+    initiatedBy: uuid("initiated_by").notNull(), // guest or host ID
+    disputeType: varchar("dispute_type", { length: 50 }).notNull(), // 'refund', 'damage', 'service_quality', 'cancellation'
+    status: varchar("status", { length: 20 }).notNull().default("open"),
+
+    // Dispute Details
+    title: varchar("title", { length: 255 }).notNull(),
+    description: text("description").notNull(),
+    evidence: jsonb("evidence")
+      .$type<
+        Array<{
+          type: "image" | "document" | "message"
+          url: string
+          description?: string
+          uploadedAt: string
+        }>
+      >()
+      .default([]),
+
+    // Resolution
+    resolution: text("resolution"),
+    resolvedBy: uuid("resolved_by"), // admin/moderator ID
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    refundAmount: decimal("refund_amount", { precision: 10, scale: 2 }),
+
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("disputes_booking_id_idx").on(table.bookingId),
+    index("disputes_status_idx").on(table.status),
+    index("disputes_initiated_by_idx").on(table.initiatedBy),
+  ],
+)

@@ -1,4 +1,5 @@
-import { Queue, QueueEvents, Worker } from "bullmq"
+import logger from "@marketplace/logger"
+import { Queue, QueueEvents } from "bullmq"
 import { config } from "dotenv"
 import { Redis } from "ioredis"
 
@@ -43,7 +44,6 @@ import "./processors/maintenance"
 
 // Job schedulers
 import "./schedulers/index"
-import logger from "@marketplace/logger"
 
 // Graceful shutdown
 const gracefulShutdown = async () => {

@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
+
 import { UserRepository } from "../../repositories/UserRepository"
 import { UserService } from "../../services/UserService"
+import { cleanupTestDatabase } from "../fixtures/database"
 
 describe("User Preferences Integration Tests", () => {
   let userService: UserService
@@ -13,7 +15,7 @@ describe("User Preferences Integration Tests", () => {
 
   afterEach(async () => {
     // Clean up test data
-    // In a real test environment, you would clean up the test database
+    await cleanupTestDatabase()
   })
 
   describe("User Preferences Management", () => {

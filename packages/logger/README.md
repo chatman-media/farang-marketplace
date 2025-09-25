@@ -1,11 +1,11 @@
 # @marketplace/logger
 
-Централизованный пакет логирования для платформы маркетплейса.
+Универсальный логгер для клиента и сервера на основе Winston.
 
 ## Установка
 
 ```bash
-npm install @marketplace/logger
+bun add @marketplace/logger
 ```
 
 ## Использование
@@ -13,89 +13,159 @@ npm install @marketplace/logger
 ### Базовое использование
 
 ```typescript
-import { logger } from "@marketplace/logger"
+import { logger, apiLogger, dbLogger } from '@marketplace/logger';
 
-// Различные уровни логирования
-logger.error("Ошибка в приложении")
-logger.warn("Предупреждение")
-logger.info("Информационное сообщение")
-logger.http("HTTP запрос")
-logger.debug("Отладочная информация")
+// Простое логирование
+logger.info('Приложение запущено');
+logger.error('Произошла ошибка', { userId: 123 });
+
+// Использование специализированных логгеров
+apiLogger.debug('API запрос', { method: 'GET', url: '/users' });
+dbLogger.warn('Медленный запрос', { duration: 1200 });
+```
+
+### Создание кастомного логгера
+
+```typescript
+import { createLogger } from '@marketplace/logger';
+
+const myLogger = createLogger('my-service');
+myLogger.info('Кастомное сообщение');
 ```
 
 ### Структурированное логирование
 
 ```typescript
-import { logError, logInfo, logWarn, logDebug } from "@marketplace/logger"
+import { logError, logInfo, logRequest } from '@marketplace/logger';
 
-// Логирование ошибок с дополнительной информацией
-try {
-  // некоторый код
-} catch (error) {
-  logError("Ошибка при обработке запроса", error, {
-    userId: "123",
-    action: "createListing",
-  })
-}
+// Логирование ошибок с контекстом
+logError(logger, 'Ошибка обработки заказа', error, { orderId: 456 });
 
-// Информационное логирование с метаданными
-logInfo("Пользователь создал объявление", {
-  userId: "123",
-  listingId: "456",
-  category: "vehicles",
-})
-```
+// Логирование HTTP запросов
+logRequest(apiLogger, 'POST', '/api/users', 201, 150);
 
-### Использование с Express.js и Morgan
-
-```typescript
-import express from "express"
-import morgan from "morgan"
-import { stream } from "@marketplace/logger"
-
-const app = express()
-
-// Использование stream для HTTP логирования
-app.use(morgan("combined", { stream }))
+// Логирование информации
+logInfo(logger, 'Пользователь создан', { userId: 789, email: 'user@example.com' });
 ```
 
 ## Конфигурация
 
-Пакет автоматически настраивается в зависимости от переменной окружения
-`NODE_ENV`:
+### Уровни логирования
 
-- **development**: уровень логирования `debug`
-- **production**: уровень логирования `warn`
+- `error` - ошибки
+- `warn` - предупреждения
+- `info` - информационные сообщения
+- `debug` - отладочная информация
 
-## Файлы логов
+### Настройка уровня через переменные окружения
 
-Логи сохраняются в следующие файлы:
+**Для сервера:**
+```bash
+LOG_LEVEL=debug
+NODE_ENV=development
+```
 
-- `logs/error.log` - только ошибки
-- `logs/combined.log` - все логи
-- Консоль - все логи с цветовой подсветкой
+**Для клиента (Vite):**
+```bash
+VITE_LOG_LEVEL=debug
+```
 
-## Уровни логирования
+### Автоматическое определение уровня
 
-1. **error** (0) - Критические ошибки
-2. **warn** (1) - Предупреждения
-3. **info** (2) - Информационные сообщения
-4. **http** (3) - HTTP запросы
-5. **debug** (4) - Отладочная информация
+- В development: `debug`
+- В production: `info`
 
-## TypeScript поддержка
+## Формат вывода
 
-Пакет полностью поддерживает TypeScript и экспортирует интерфейс
-`LoggerInterface` для типизации.
+### Браузер
+```json
+{"timestamp":"2024-01-01T12:00:00.000Z","level":"info","category":"marketplace","message":"Приложение запущено"}
+```
+
+### Сервер
+- Консоль: цветной вывод с timestamp
+- Файлы: `logs/combined.log` и `logs/error.log`
+
+## Экспортируемые логгеры
+
+- `logger` - основной логгер для marketplace
+- `apiLogger` - для API запросов (`marketplace:api`)
+- `dbLogger` - для базы данных (`marketplace:db`)
+- `authLogger` - для аутентификации (`marketplace:auth`)
+- `serviceLogger` - для сервисов (`marketplace:service`)
+
+## API
+
+### ILogger интерфейс
 
 ```typescript
-import { LoggerInterface } from "@marketplace/logger"
+interface ILogger {
+  error(message: string, meta?: any): void;
+  warn(message: string, meta?: any): void;
+  info(message: string, meta?: any): void;
+  debug(message: string, meta?: any): void;
+}
+```
 
-class MyService {
-  constructor(private logger: LoggerInterface) {}
+### Функции
 
-  doSomething() {
-    this.logger.info("Выполняется операция")
+- `createLogger(category: string): ILogger` - создает новый логгер
+- `setupLogger(): Promise<void>` - инициализация (для совместимости)
+
+### Вспомогательные функции
+
+- `logError(logger, message, error?, context?)`
+- `logInfo(logger, message, context?)`
+- `logWarn(logger, message, context?)`
+- `logDebug(logger, message, context?)`
+- `logRequest(logger, method, url, status, duration?)`
+
+## Примеры использования в разных частях приложения
+
+### React компонент
+```typescript
+import { logger } from '@marketplace/logger';
+
+function MyComponent() {
+  useEffect(() => {
+    logger.info('Компонент смонтирован');
+  }, []);
+  
+  return <div>Hello World</div>;
+}
+```
+
+### Express middleware
+```typescript
+import { apiLogger } from '@marketplace/logger';
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    apiLogger.info(`${req.method} ${req.path}`, {
+      status: res.statusCode,
+      duration,
+      userAgent: req.get('User-Agent')
+    });
+  });
+  next();
+});
+```
+
+### Database service
+```typescript
+import { dbLogger } from '@marketplace/logger';
+
+async function getUsers() {
+  const start = Date.now();
+  try {
+    const users = await db.query('SELECT * FROM users');
+    dbLogger.debug('Users fetched', { count: users.length, duration: Date.now() - start });
+    return users;
+  } catch (error) {
+    dbLogger.error('Failed to fetch users', { error: error.message });
+    throw error;
   }
 }
 ```

@@ -1,3 +1,6 @@
+import { createHash, createHmac, randomBytes } from "crypto"
+import fs from "fs"
+
 import logger from "@marketplace/logger"
 import {
   AuthProvider,
@@ -10,7 +13,8 @@ import {
   User,
   UserRole,
 } from "@marketplace/shared-types"
-import { createHash, createHmac, randomBytes } from "crypto"
+import jwt from "jsonwebtoken"
+
 import { AuthService } from "./AuthService"
 import { UserService } from "./UserService"
 
@@ -286,19 +290,19 @@ export class OAuthService {
   private async saveSocialProfile(userId: string, _socialProfile: SocialProfile): Promise<void> {
     // Здесь нужно будет реализовать сохранение в базе данных
     // Пока заглушка
-    console.log(`Saving social profile for user ${userId}`)
+    logger.info(`Saving social profile for user ${userId}`)
   }
 
   private async updateSocialProfile(userId: string, _socialProfile: SocialProfile): Promise<void> {
     // Здесь нужно будет реализовать обновление в базе данных
     // Пока заглушка
-    console.log(`Updating social profile for user ${userId}`)
+    logger.info(`Updating social profile for user ${userId}`)
   }
 
   private async removeSocialProfile(userId: string, provider: AuthProvider): Promise<void> {
     // Здесь нужно будет реализовать удаление из базы данных
     // Пока заглушка
-    console.log(`Removing social profile ${provider} for user ${userId}`)
+    logger.info(`Removing social profile ${provider} for user ${userId}`)
   }
 
   private extractFirstName(fullName?: string): string {
@@ -549,8 +553,6 @@ export class AppleOAuthProvider extends BaseOAuthProvider {
   private async generateClientSecret(): Promise<string> {
     // Для Apple Sign In нужно генерировать JWT с приватным ключом
     // Это упрощенная версия - в реальном проекте используйте библиотеку jsonwebtoken
-    const jwt = require("jsonwebtoken")
-    const fs = require("fs")
 
     const privateKey = fs.readFileSync(this.config.privateKeyPath)
 
@@ -564,9 +566,7 @@ export class AppleOAuthProvider extends BaseOAuthProvider {
 
     return jwt.sign(payload, privateKey, {
       algorithm: "ES256",
-      header: {
-        kid: this.config.keyId,
-      },
+      keyid: this.config.keyId,
     })
   }
 

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
 import { CronJob, CronService } from "../services/CronService"
 
 // Mock the database connection

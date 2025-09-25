@@ -1,3 +1,5 @@
+import { serviceLogger, logError } from "@marketplace/logger"
+
 import { createApp } from "./app.js"
 import { env } from "./config/environment.js"
 
@@ -10,12 +12,12 @@ async function start() {
       host: "0.0.0.0",
     })
 
-    app.log.info(`🚀 API Gateway started on port ${env.PORT}`)
-    app.log.info(`📊 Health check: http://localhost:${env.PORT}/health`)
-    app.log.info(`📈 Metrics: http://localhost:${env.PORT}/metrics`)
-    app.log.info(`🔍 Services: http://localhost:${env.PORT}/services`)
+    serviceLogger.info(`🚀 API Gateway started on port ${env.PORT}`)
+    serviceLogger.info(`📊 Health check: http://localhost:${env.PORT}/health`)
+    serviceLogger.info(`📈 Metrics: http://localhost:${env.PORT}/metrics`)
+    serviceLogger.info(`🔍 Services: http://localhost:${env.PORT}/services`)
   } catch (error) {
-    console.error("Failed to start API Gateway:", error)
+    logError(serviceLogger, "Failed to start API Gateway", error as Error)
     process.exit(1)
   }
 }

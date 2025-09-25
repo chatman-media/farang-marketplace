@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios"
+
 import { getApiConfig } from "./config"
 
 const config = getApiConfig()

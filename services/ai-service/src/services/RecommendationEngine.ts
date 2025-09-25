@@ -1,6 +1,7 @@
 /** biome-ignore-all lint/complexity/useLiteralKeys: temp */
 import logger from "@marketplace/logger"
 import { Matrix } from "ml-matrix"
+import { eq, desc } from "drizzle-orm"
 
 import type {
   RecommendationRequest,
@@ -11,6 +12,8 @@ import type {
 } from "../models/index"
 
 import { AIProviderService } from "./AIProviderService"
+import { db } from "../database/connection"
+import { userBehaviors, userPreferences } from "../database/connection"
 
 export interface ItemFeatures {
   id: string
@@ -116,16 +119,87 @@ export class RecommendationEngine {
    * Build user profile from behavior and preferences
    */
   private async buildUserProfile(userId: string): Promise<UserProfile> {
-    // In a real implementation, this would fetch from database
-    const mockBehaviors: UserBehavior[] = []
-    const mockPreferences: UserPreferences = {
+    // Fetch user behaviors from database
+    const behaviors = await db
+      .select()
+      .from(userBehaviors)
+      .where(eq(userBehaviors.userId, userId))
+      .orderBy(desc(userBehaviors.timestamp))
+      .limit(1000)
+
+    // Fetch user preferences from database
+    const preferencesResult = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId)).limit(1)
+
+    const userPrefs = preferencesResult[0] || this.createDefaultPreferences(userId)
+
+    // Convert database format to UserPreferences type
+    const preferences: UserPreferences = {
+      id: userPrefs.id,
+      userId: userPrefs.userId,
+      categories: userPrefs.categories || [],
+      priceRange: userPrefs.priceRange || { min: 0, max: 10000, currency: "THB" },
+      locations: userPrefs.locations || [],
+      languages: userPrefs.languages || ["en"],
+      features: userPrefs.features || [],
+      excludeCategories: userPrefs.excludeCategories || [],
+      notificationSettings: userPrefs.notificationSettings || {
+        email: true,
+        push: true,
+        sms: false,
+        frequency: "daily",
+      },
+      privacySettings: userPrefs.privacySettings || {
+        shareData: true,
+        personalizedAds: true,
+        behaviorTracking: true,
+      },
+      updatedAt: userPrefs.updatedAt,
+      createdAt: userPrefs.createdAt,
+    }
+
+    // Convert database behaviors to UserBehavior type
+    const userBehaviors: UserBehavior[] = behaviors.map((behavior) => ({
+      id: behavior.id,
+      userId: behavior.userId,
+      action: behavior.action,
+      targetId: behavior.targetId,
+      targetType: behavior.targetType,
+      category: behavior.category,
+      location: behavior.location,
+      timestamp: behavior.timestamp,
+      metadata: behavior.metadata,
+      context: behavior.context,
+      sessionId: behavior.sessionId,
+    }))
+
+    // Extract features from behaviors and preferences
+    const features = this.extractUserFeatures(userBehaviors, preferences)
+
+    // Determine user segments
+    const segments = this.determineUserSegments(userBehaviors, preferences)
+
+    return {
+      id: userId,
+      features,
+      preferences,
+      behaviors: userBehaviors,
+      segments,
+      lastUpdated: new Date(),
+    }
+  }
+
+  /**
+   * Create default preferences for new users
+   */
+  private createDefaultPreferences(userId: string): any {
+    return {
       id: `pref_${userId}`,
       userId,
-      categories: ["electronics", "home"],
+      categories: [],
       priceRange: { min: 0, max: 10000, currency: "THB" },
-      locations: ["Bangkok", "Phuket"],
-      languages: ["th", "en"],
-      features: ["delivery", "warranty"],
+      locations: [],
+      languages: ["en"],
+      features: [],
       excludeCategories: [],
       notificationSettings: {
         email: true,
@@ -141,21 +215,6 @@ export class RecommendationEngine {
       updatedAt: new Date(),
       createdAt: new Date(),
     }
-
-    // Extract features from behaviors and preferences
-    const features = this.extractUserFeatures(mockBehaviors, mockPreferences)
-
-    // Determine user segments
-    const segments = this.determineUserSegments(mockBehaviors, mockPreferences)
-
-    return {
-      id: userId,
-      features,
-      preferences: mockPreferences,
-      behaviors: mockBehaviors,
-      segments,
-      lastUpdated: new Date(),
-    }
   }
 
   /**
@@ -167,16 +226,17 @@ export class RecommendationEngine {
     // Category preferences (one-hot encoding for top categories)
     const topCategories = ["electronics", "home", "fashion", "automotive", "services"]
     topCategories.forEach((category) => {
-      features.push(preferences.categories.includes(category) ? 1 : 0)
+      features.push(preferences.categories?.includes(category) ? 1 : 0)
     })
 
     // Price sensitivity
-    features.push(Math.log(preferences.priceRange.max + 1) / 10) // Normalized log price
+    const maxPrice = preferences.priceRange?.max || 10000
+    features.push(Math.log(maxPrice + 1) / 10) // Normalized log price
 
     // Location preferences
     const topLocations = ["Bangkok", "Phuket", "Chiang Mai", "Pattaya"]
     topLocations.forEach((location) => {
-      features.push(preferences.locations.includes(location) ? 1 : 0)
+      features.push(preferences.locations?.includes(location) ? 1 : 0)
     })
 
     // Behavior patterns
@@ -195,7 +255,8 @@ export class RecommendationEngine {
     features.push((actionCounts["purchase"] || 0) / totalActions)
 
     // Recency of activity
-    const lastActivity = behaviors.length > 0 ? Math.max(...behaviors.map((b) => b.timestamp.getTime())) : Date.now()
+    const lastActivity =
+      behaviors.length > 0 ? Math.max(...behaviors.map((b) => new Date(b.timestamp).getTime())) : Date.now()
     const daysSinceLastActivity = (Date.now() - lastActivity) / (1000 * 60 * 60 * 24)
     features.push(Math.exp(-daysSinceLastActivity / 30)) // Exponential decay
 
@@ -208,37 +269,56 @@ export class RecommendationEngine {
   private determineUserSegments(behaviors: UserBehavior[], preferences: UserPreferences): string[] {
     const segments: string[] = []
 
-    // Price-based segments
-    if (preferences.priceRange.max > 50000) {
+    // High-value user
+    const hasBookings = behaviors.some((b) => b.action === "book" || b.action === "purchase")
+    const avgPrice = (preferences.priceRange?.max || 0) > 5000
+    if (hasBookings && avgPrice) {
       segments.push("high_value")
-    } else if (preferences.priceRange.max < 5000) {
-      segments.push("budget_conscious")
-    } else {
-      segments.push("mid_market")
     }
 
-    // Activity-based segments
-    const recentBehaviors = behaviors.filter(
-      (b) => Date.now() - b.timestamp.getTime() < 7 * 24 * 60 * 60 * 1000, // Last 7 days
+    // Frequent user
+    const recentBehaviors = behaviors.filter((b) => {
+      const daysAgo = (Date.now() - new Date(b.timestamp).getTime()) / (1000 * 60 * 60 * 24)
+      return daysAgo < 7
+    })
+    if (recentBehaviors.length > 5) {
+      segments.push("frequent_user")
+    }
+
+    // Category enthusiast
+    const categoryCounts = behaviors.reduce(
+      (acc, behavior) => {
+        const category = behavior.category || "other"
+        acc[category] = (acc[category] || 0) + 1
+        return acc
+      },
+      {} as Record<string, number>,
     )
 
-    if (recentBehaviors.length > 20) {
-      segments.push("highly_active")
-    } else if (recentBehaviors.length > 5) {
-      segments.push("moderately_active")
-    } else {
-      segments.push("low_activity")
+    const topCategory = Object.keys(categoryCounts).reduce(
+      (a, b) => (categoryCounts[a] > categoryCounts[b] ? a : b),
+      "",
+    )
+    if (categoryCounts[topCategory] > 10) {
+      segments.push(`${topCategory}_enthusiast`)
     }
 
-    // Category-based segments
-    if (preferences.categories.includes("electronics")) {
-      segments.push("tech_enthusiast")
-    }
-    if (preferences.categories.includes("home")) {
-      segments.push("home_improver")
+    // Location-focused
+    if (preferences.locations?.length === 1) {
+      segments.push(`local_${preferences.locations[0].toLowerCase().replace(" ", "_")}`)
     }
 
-    return segments
+    // New user
+    if (behaviors.length < 5) {
+      segments.push("new_user")
+    }
+
+    // Power user
+    if (behaviors.length > 50) {
+      segments.push("power_user")
+    }
+
+    return segments.length > 0 ? segments : ["standard_user"]
   }
 
   /**

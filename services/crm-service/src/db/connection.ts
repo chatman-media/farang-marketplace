@@ -1,37 +1,36 @@
 import dotenv from "dotenv"
-import { Pool, PoolClient } from "pg"
+import postgres from "postgres"
+import { drizzle } from "drizzle-orm/postgres-js"
+import * as schema from "@marketplace/database-schema"
 
 dotenv.config()
 
-const pool = new Pool({
-  host: process.env.DB_HOST || "localhost",
-  port: Number.parseInt(process.env.DB_PORT || "5432"),
-  database: process.env.DB_NAME || "marketplace",
-  user: process.env.DB_USER || "marketplace_user",
-  password: process.env.DB_PASSWORD || "marketplace_pass",
+const connectionString = process.env.DATABASE_URL
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL environment variable is required")
+}
+
+const sql = postgres(connectionString, {
   max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  idle_timeout: 20,
+  max_lifetime: 60 * 30,
 })
 
-export const query = async (text: string, params?: any[]): Promise<any> => {
-  const start = Date.now()
-  const res = await pool.query(text, params)
-  const duration = Date.now() - start
+const db = drizzle(sql, { schema })
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("Executed query", { text, duration, rows: res.rowCount })
+// SQL client for raw queries (backward compatibility)
+const query = async (text: string, params?: any[]) => {
+  const result = await sql.unsafe(text, params)
+  return {
+    rows: result,
+    rowCount: result.length,
   }
-
-  return res
 }
 
-export const getClient = async (): Promise<PoolClient> => {
-  return await pool.connect()
+async function closePool(): Promise<void> {
+  await sql.end()
 }
 
-export const closePool = async (): Promise<void> => {
-  await pool.end()
-}
-
-export default pool
+export { db, sql, closePool, query, schema }
+export default db

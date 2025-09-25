@@ -1,5 +1,8 @@
 import { CommunicationChannel } from "@marketplace/shared-types"
+import * as nodemailer from "nodemailer"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+
+import { query } from "../db/connection"
 import { EmailService } from "../services/EmailService"
 
 // Mock nodemailer
@@ -14,9 +17,6 @@ vi.mock("nodemailer", () => ({
 vi.mock("../db/connection", () => ({
   query: vi.fn(),
 }))
-
-import * as nodemailer from "nodemailer"
-import { query } from "../db/connection"
 
 describe("EmailService", () => {
   let emailService: EmailService

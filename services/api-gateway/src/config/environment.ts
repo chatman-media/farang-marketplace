@@ -54,6 +54,9 @@ export const envSchema = z.object({
   METRICS_ENABLED: z.string().default("true").transform(Boolean),
   METRICS_PREFIX: z.string().default("api_gateway"),
 
+  // Database
+  DATABASE_URL: z.string().optional(),
+
   // Service URLs (fallback if service discovery is disabled)
   USER_SERVICE_URL: z.string().url().default("http://localhost:3002"),
   LISTING_SERVICE_URL: z.string().url().default("http://localhost:3003"),

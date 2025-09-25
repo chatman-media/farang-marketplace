@@ -1,5 +1,6 @@
+import { createLogger, setupLogger } from "@marketplace/logger"
 import { QueryClientProvider } from "@tanstack/react-query"
-import React from "react"
+import React, { useEffect } from "react"
 import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom"
 
 import { Layout } from "./components/layout"
@@ -10,6 +11,9 @@ import { ListingsPage, LoginPage, ProfilePage, RegisterPage } from "./pages"
 import { CategoryPage } from "./pages/CategoryPage"
 import DebugAPI from "./test/DebugAPI"
 import ReactQueryTest from "./test/ReactQueryTest"
+
+// Создаем логгер для web приложения
+const webLogger = createLogger("web")
 
 // React Query Devtools wrapper
 const DevtoolsWrapper: React.FC = () => {
@@ -126,6 +130,17 @@ const HomePage: React.FC = () => {
 }
 
 function App() {
+  // Инициализируем логгер при запуске приложения
+  useEffect(() => {
+    setupLogger().then(() => {
+      webLogger.info("Web application started", {
+        userAgent: navigator.userAgent,
+        location: window.location.href,
+        timestamp: new Date().toISOString(),
+      })
+    })
+  }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
@@ -147,7 +162,6 @@ function App() {
           </Routes>
         </Layout>
       </Router>
-      {/* React Query Devtools - only shows in development */}
       <DevtoolsWrapper />
     </QueryClientProvider>
   )

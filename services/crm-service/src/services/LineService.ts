@@ -1,3 +1,5 @@
+import crypto from "crypto"
+
 import { Client, ClientConfig, MessageEvent, TextMessage, WebhookEvent } from "@line/bot-sdk"
 import logger from "@marketplace/logger"
 import {
@@ -6,6 +8,7 @@ import {
   SendMessageRequest,
   SendMessageResponse,
 } from "@marketplace/shared-types"
+
 import { query } from "../db/connection"
 
 export interface LineConfig {
@@ -327,7 +330,6 @@ export class LineService {
 
   async verifySignature(body: string, signature: string): Promise<boolean> {
     try {
-      const crypto = require("crypto")
       const hash = crypto.createHmac("sha256", this.config.channelSecret).update(body).digest("base64")
 
       return hash === signature

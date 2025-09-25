@@ -1,7 +1,9 @@
-import logger from "@marketplace/logger"
-import dotenv from "dotenv"
 import * as fs from "fs"
 import * as path from "path"
+
+import logger from "@marketplace/logger"
+import dotenv from "dotenv"
+
 import { query } from "./connection"
 
 // Load environment variables

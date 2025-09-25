@@ -22,7 +22,7 @@
     "test:coverage:report": "./scripts/coverage-report.sh",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
-    "format": "biome format --write .",
+    "format": "turbo run format",
     "format:check": "biome format .",
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:prettier:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",

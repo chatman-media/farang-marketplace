@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
+
 import {
   aiPromptTemplates,
   chatHistory,
@@ -128,16 +129,13 @@ describe("Simple Database Schema Tests", () => {
         color: "White",
         power: "150cc",
         oldVehicleNumber: "SCT001",
-        sticker: "Blue rental sticker",
+        sticker: "Rental sticker",
+        rentalSticker: "Company rental",
         gpsTrackerId: "ST123456",
-        gpsProvider: "sinotrack",
-        pricingSystem: "seasonal" as const,
-        dailyRate: "300.00",
-        oneYearRent: "72000.00",
-        sixMonthHighSeason: "45000.00",
-        days1To3: "350.00",
-        decemberPrice: "400.00",
-        januaryPrice: "400.00",
+        engineSize: 150.0,
+        fuelType: "gasoline" as const,
+        transmission: "automatic" as const,
+        mileage: 5000,
       }
 
       const vehicleResult = await db.insert(vehicles).values(vehicleData).returning()
@@ -147,9 +145,10 @@ describe("Simple Database Schema Tests", () => {
       expect(vehicle.model).toBe("PCX 150")
       expect(vehicle.power).toBe("150cc")
       expect(vehicle.oldVehicleNumber).toBe("SCT001")
-      expect(vehicle.pricingSystem).toBe("seasonal")
-      expect(vehicle.oneYearRent).toBe("72000.00")
-      expect(vehicle.decemberPrice).toBe("400.00")
+      expect(vehicle.engineSize).toBe(150.0)
+      expect(vehicle.fuelType).toBe("gasoline")
+      expect(vehicle.transmission).toBe("automatic")
+      expect(vehicle.mileage).toBe(5000)
     })
   })
 
@@ -307,7 +306,6 @@ describe("Simple Database Schema Tests", () => {
           make: "Yamaha",
           model: "NMAX 155",
           year: 2023,
-          pricingSystem: "calendar",
         })
         .returning()
       const calendarVehicle = vehicleResult[0]
@@ -325,7 +323,6 @@ describe("Simple Database Schema Tests", () => {
         .returning()
       const pricing = pricingResult[0]
 
-      expect(calendarVehicle.pricingSystem).toBe("calendar")
       expect(pricing.dailyRate).toBe("450.00")
       expect(pricing.notes).toBe("High season pricing")
     })

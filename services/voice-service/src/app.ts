@@ -12,6 +12,7 @@ const envSchema = z.object({
   PORT: z.string().transform(Number).default(3007),
   HOST: z.string().default("localhost"),
   JWT_SECRET: z.string().optional(),
+  DATABASE_URL: z.string().optional(),
 })
 
 export const env = envSchema.parse(process.env)
