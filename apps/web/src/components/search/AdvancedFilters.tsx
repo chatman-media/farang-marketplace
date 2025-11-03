@@ -60,12 +60,12 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         tags: ["luxury", "premium", "sport"],
       },
       icon: (
-        <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
+            strokeLinecap="round"
+            strokeLinejoin="round"
             strokeWidth={2}
-            d='M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z'
+            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
           />
         </svg>
       ),
@@ -79,12 +79,12 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         sortBy: "price:asc",
       },
       icon: (
-        <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
+            strokeLinecap="round"
+            strokeLinejoin="round"
             strokeWidth={2}
-            d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1'
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
           />
         </svg>
       ),
@@ -98,12 +98,12 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         tags: ["delivery", "transport", "service"],
       },
       icon: (
-        <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
+            strokeLinecap="round"
+            strokeLinejoin="round"
             strokeWidth={2}
-            d='M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'
+            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
           />
         </svg>
       ),
@@ -116,12 +116,12 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         tags: ["pet-friendly", "pets-allowed"],
       },
       icon: (
-        <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
+            strokeLinecap="round"
+            strokeLinejoin="round"
             strokeWidth={2}
-            d='M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z'
+            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
           />
         </svg>
       ),
@@ -135,12 +135,12 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         tags: ["home-service", "on-site"],
       },
       icon: (
-        <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
+            strokeLinecap="round"
+            strokeLinejoin="round"
             strokeWidth={2}
-            d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
           />
         </svg>
       ),
@@ -154,18 +154,18 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         tags: ["rental", "daily", "weekly"],
       },
       icon: (
-        <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
+            strokeLinecap="round"
+            strokeLinejoin="round"
             strokeWidth={2}
-            d='M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z'
+            d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
           />
           <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
+            strokeLinecap="round"
+            strokeLinejoin="round"
             strokeWidth={2}
-            d='M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'
+            d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
           />
         </svg>
       ),
@@ -209,8 +209,8 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const tags = e.target.value
       .split(",")
-      .map(tag => tag.trim())
-      .filter(tag => tag.length > 0)
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0)
     onFiltersChange({
       ...filters,
       tags: tags.length > 0 ? tags : undefined,
@@ -220,7 +220,7 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
 
   const getActiveFiltersCount = () => {
     const filterKeys = Object.keys(filters).filter(
-      key => key !== "query" && filters[key as keyof ListingFilters] !== undefined
+      (key) => key !== "query" && filters[key as keyof ListingFilters] !== undefined,
     )
     return filterKeys.length
   }
@@ -228,27 +228,27 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
   return (
     <Card className={className}>
       <Card.Header>
-        <div className='flex items-center justify-between'>
-          <h3 className='text-lg font-medium text-gray-900'>Advanced Filters</h3>
-          <div className='flex items-center space-x-2'>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium text-gray-900">Advanced Filters</h3>
+          <div className="flex items-center space-x-2">
             {getActiveFiltersCount() > 0 && (
-              <Badge variant='primary' size='sm'>
+              <Badge variant="primary" size="sm">
                 {getActiveFiltersCount()} active
               </Badge>
             )}
-            <Button variant='outline' size='sm' onClick={clearFilters}>
+            <Button variant="outline" size="sm" onClick={clearFilters}>
               Clear All
             </Button>
           </div>
         </div>
       </Card.Header>
 
-      <Card.Body className='space-y-6'>
+      <Card.Body className="space-y-6">
         {/* AI-Powered Filter Presets */}
         <div>
-          <h4 className='text-sm font-medium text-gray-900 mb-3'>Smart Filter Presets</h4>
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
-            {filterPresets.map(preset => (
+          <h4 className="text-sm font-medium text-gray-900 mb-3">Smart Filter Presets</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {filterPresets.map((preset) => (
               <button
                 key={preset.id}
                 onClick={() => handlePresetClick(preset)}
@@ -258,11 +258,11 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
                     : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                 }`}
               >
-                <div className='flex items-start space-x-3'>
-                  <div className='flex-shrink-0 text-gray-400'>{preset.icon}</div>
-                  <div className='flex-1 min-w-0'>
-                    <p className='text-sm font-medium text-gray-900'>{preset.name}</p>
-                    <p className='text-xs text-gray-500 mt-1'>{preset.description}</p>
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 text-gray-400">{preset.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{preset.name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{preset.description}</p>
                   </div>
                 </div>
               </button>
@@ -271,26 +271,26 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
         </div>
 
         {/* Manual Filters */}
-        <div className='border-t pt-6'>
-          <h4 className='text-sm font-medium text-gray-900 mb-4'>Custom Filters</h4>
+        <div className="border-t pt-6">
+          <h4 className="text-sm font-medium text-gray-900 mb-4">Custom Filters</h4>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Price Range */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Min Price (THB)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Min Price (THB)</label>
               <Input
-                type='number'
-                placeholder='0'
+                type="number"
+                placeholder="0"
                 value={filters.minPrice || ""}
                 onChange={handlePriceChange("minPrice")}
               />
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Max Price (THB)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Max Price (THB)</label>
               <Input
-                type='number'
-                placeholder='No limit'
+                type="number"
+                placeholder="No limit"
                 value={filters.maxPrice || ""}
                 onChange={handlePriceChange("maxPrice")}
               />
@@ -298,33 +298,33 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
 
             {/* Location */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Province</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Province</label>
               <Input
-                type='text'
-                placeholder='Any province'
+                type="text"
+                placeholder="Any province"
                 value={filters.province || ""}
                 onChange={handleInputChange("province")}
               />
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>City</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
               <Input
-                type='text'
-                placeholder='Any city'
+                type="text"
+                placeholder="Any city"
                 value={filters.city || ""}
                 onChange={handleInputChange("city")}
               />
             </div>
           </div>
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {/* Tags */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Tags (comma separated)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma separated)</label>
               <Input
-                type='text'
-                placeholder='luxury, pool, gym, pet-friendly'
+                type="text"
+                placeholder="luxury, pool, gym, pet-friendly"
                 value={filters.tags?.join(", ") || ""}
                 onChange={handleTagsChange}
               />
@@ -332,43 +332,43 @@ export const AdvancedFilters: React.FC<AdvancedFiltersProps> = ({
 
             {/* Status */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
                 value={filters.status || ""}
                 onChange={handleInputChange("status")}
-                className='w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500'
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
               >
-                <option value=''>All Status</option>
-                <option value='active'>Active</option>
-                <option value='pending'>Pending</option>
-                <option value='inactive'>Inactive</option>
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
           </div>
 
           {/* Additional Options */}
-          <div className='flex flex-wrap gap-4 mt-4'>
-            <label className='flex items-center'>
+          <div className="flex flex-wrap gap-4 mt-4">
+            <label className="flex items-center">
               <input
-                type='checkbox'
+                type="checkbox"
                 checked={filters.featured || false}
-                onChange={e => {
+                onChange={(e) => {
                   onFiltersChange({
                     ...filters,
                     featured: e.target.checked || undefined,
                   })
                   setActivePreset(null)
                 }}
-                className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded'
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
               />
-              <span className='ml-2 text-sm text-gray-700'>Featured only</span>
+              <span className="ml-2 text-sm text-gray-700">Featured only</span>
             </label>
           </div>
         </div>
 
         {/* Apply Filters Button */}
-        <div className='border-t pt-4'>
-          <Button onClick={onApplyFilters} className='w-full'>
+        <div className="border-t pt-4">
+          <Button onClick={onApplyFilters} className="w-full">
             Apply Filters ({getActiveFiltersCount()} active)
           </Button>
         </div>

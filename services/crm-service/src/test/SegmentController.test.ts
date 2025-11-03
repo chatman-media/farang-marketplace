@@ -26,7 +26,7 @@ describe("SegmentController", () => {
 
     // Clean up any existing test data
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')"
+      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
     )
     await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
   })
@@ -38,7 +38,7 @@ describe("SegmentController", () => {
       await query("DELETE FROM customer_segments WHERE id = $1", [testSegmentId])
     }
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')"
+      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
     )
     await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
 

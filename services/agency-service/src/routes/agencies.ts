@@ -8,7 +8,7 @@ import {
   requireAgencyStaff,
 } from "../middleware/auth"
 
-const agenciesRoutes: FastifyPluginAsync = async fastify => {
+const agenciesRoutes: FastifyPluginAsync = async (fastify) => {
   // Public routes
   fastify.get("/search", {
     preHandler: [optionalAuth],

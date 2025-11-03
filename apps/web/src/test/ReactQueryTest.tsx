@@ -36,18 +36,18 @@ const TestResult: React.FC<TestResultProps> = ({ label, status, data, error }) =
   }
 
   return (
-    <div className='border rounded-lg p-4 mb-4'>
+    <div className="border rounded-lg p-4 mb-4">
       <div className={`flex items-center gap-2 font-semibold ${getStatusColor()}`}>
-        <span className='text-xl'>{getStatusIcon()}</span>
+        <span className="text-xl">{getStatusIcon()}</span>
         <span>{label}</span>
       </div>
 
-      {status === "loading" && <div className='mt-2 text-gray-600'>Loading...</div>}
+      {status === "loading" && <div className="mt-2 text-gray-600">Loading...</div>}
 
       {status === "success" && data && (
-        <div className='mt-2'>
-          <div className='text-sm text-gray-600 mb-2'>Response received:</div>
-          <div className='bg-green-50 p-3 rounded text-sm'>
+        <div className="mt-2">
+          <div className="text-sm text-gray-600 mb-2">Response received:</div>
+          <div className="bg-green-50 p-3 rounded text-sm">
             <div>
               <strong>Listings:</strong> {data.listings?.length || 0}
             </div>
@@ -66,9 +66,9 @@ const TestResult: React.FC<TestResultProps> = ({ label, status, data, error }) =
           </div>
 
           {data.listings?.length > 0 && (
-            <div className='mt-3'>
-              <div className='text-sm text-gray-600 mb-2'>First Service Provider:</div>
-              <div className='bg-blue-50 p-3 rounded text-sm'>
+            <div className="mt-3">
+              <div className="text-sm text-gray-600 mb-2">First Service Provider:</div>
+              <div className="bg-blue-50 p-3 rounded text-sm">
                 <div>
                   <strong>Name:</strong> {data.listings[0].businessName}
                 </div>
@@ -86,7 +86,7 @@ const TestResult: React.FC<TestResultProps> = ({ label, status, data, error }) =
           )}
 
           {data.listings?.length === 0 && (
-            <div className='mt-3 p-3 bg-yellow-50 rounded text-sm text-yellow-800'>
+            <div className="mt-3 p-3 bg-yellow-50 rounded text-sm text-yellow-800">
               <strong>No service providers found</strong>
             </div>
           )}
@@ -94,8 +94,8 @@ const TestResult: React.FC<TestResultProps> = ({ label, status, data, error }) =
       )}
 
       {status === "error" && (
-        <div className='mt-2'>
-          <div className='bg-red-50 p-3 rounded text-sm text-red-800'>
+        <div className="mt-2">
+          <div className="bg-red-50 p-3 rounded text-sm text-red-800">
             <strong>Error:</strong> {error?.message || "Unknown error"}
             {error?.code && (
               <div>
@@ -107,9 +107,9 @@ const TestResult: React.FC<TestResultProps> = ({ label, status, data, error }) =
                 <strong>Status:</strong> {error.status}
               </div>
             )}
-            <details className='mt-2'>
-              <summary className='cursor-pointer'>Debug Info</summary>
-              <pre className='mt-1 text-xs bg-red-100 p-2 rounded overflow-auto'>{JSON.stringify(error, null, 2)}</pre>
+            <details className="mt-2">
+              <summary className="cursor-pointer">Debug Info</summary>
+              <pre className="mt-1 text-xs bg-red-100 p-2 rounded overflow-auto">{JSON.stringify(error, null, 2)}</pre>
             </details>
           </div>
         </div>
@@ -135,44 +135,44 @@ const ReactQueryTest: React.FC = () => {
   }
 
   return (
-    <div className='max-w-4xl mx-auto p-6'>
-      <div className='mb-6'>
-        <h1 className='text-3xl font-bold text-gray-900 mb-2'>React Query API Test</h1>
-        <p className='text-gray-600'>Testing the integration between React Query and our Service Providers API</p>
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">React Query API Test</h1>
+        <p className="text-gray-600">Testing the integration between React Query and our Service Providers API</p>
         <button
           onClick={handleRefresh}
-          className='mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors'
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
         >
           🔄 Refresh All Queries
         </button>
       </div>
 
-      <div className='space-y-6'>
+      <div className="space-y-6">
         <TestResult
-          label='Test 1: Basic Service Listings Query'
+          label="Test 1: Basic Service Listings Query"
           status={basicQuery.isLoading ? "loading" : basicQuery.isError ? "error" : "success"}
           data={basicQuery.data}
           error={basicQuery.error}
         />
 
         <TestResult
-          label='Test 2: Paginated Query (page=1, limit=5)'
+          label="Test 2: Paginated Query (page=1, limit=5)"
           status={paginatedQuery.isLoading ? "loading" : paginatedQuery.isError ? "error" : "success"}
           data={paginatedQuery.data}
           error={paginatedQuery.error}
         />
 
         <TestResult
-          label='Test 3: Second Page Query (page=2, limit=3)'
+          label="Test 3: Second Page Query (page=2, limit=3)"
           status={secondPageQuery.isLoading ? "loading" : secondPageQuery.isError ? "error" : "success"}
           data={secondPageQuery.data}
           error={secondPageQuery.error}
         />
       </div>
 
-      <div className='mt-8 p-4 bg-gray-50 rounded-lg'>
-        <h3 className='font-semibold text-gray-900 mb-2'>Query States Summary:</h3>
-        <div className='grid grid-cols-3 gap-4 text-sm'>
+      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+        <h3 className="font-semibold text-gray-900 mb-2">Query States Summary:</h3>
+        <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <strong>Basic Query:</strong>
             <div>Loading: {basicQuery.isLoading ? "Yes" : "No"}</div>
@@ -197,11 +197,11 @@ const ReactQueryTest: React.FC = () => {
         </div>
       </div>
 
-      <div className='mt-6 text-sm text-gray-600'>
+      <div className="mt-6 text-sm text-gray-600">
         <p>
           <strong>Expected behavior:</strong>
         </p>
-        <ul className='list-disc list-inside mt-2 space-y-1'>
+        <ul className="list-disc list-inside mt-2 space-y-1">
           <li>All queries should start in loading state</li>
           <li>Queries should transition to success state when API responds</li>
           <li>Data should be cached and subsequent requests should be faster</li>

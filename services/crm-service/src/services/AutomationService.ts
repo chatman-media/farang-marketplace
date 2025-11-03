@@ -123,7 +123,7 @@ export class AutomationService {
         `SELECT * FROM automations
          WHERE is_active = true
          AND (trigger->>'type' = $1 OR trigger->>'event' = $1)`,
-        [eventName]
+        [eventName],
       )
 
       if (!result || !result.rows) {
@@ -385,7 +385,7 @@ export class AutomationService {
         JSON.stringify(automation.actions),
         automation.isActive,
         automation.createdBy,
-      ]
+      ],
     )
 
     const row = result.rows[0]

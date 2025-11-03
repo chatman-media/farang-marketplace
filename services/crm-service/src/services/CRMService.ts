@@ -65,7 +65,7 @@ export class CRMService {
         JSON.stringify(data.customFields || {}),
         0, // total_interactions starts at 0
         0, // lifetimeValue starts at 0
-      ]
+      ],
     )
 
     return new Customer(result.rows[0])
@@ -201,7 +201,7 @@ export class CRMService {
     const result = await query(
       `UPDATE customers SET ${updates.join(", ")}, updated_at = NOW()
        WHERE id = $${paramIndex} RETURNING *`,
-      values
+      values,
     )
 
     return result && result.rows && result.rows.length > 0 ? new Customer(result.rows[0]) : null
@@ -218,7 +218,7 @@ export class CRMService {
       tags?: string[]
       search?: string
     } = {},
-    pagination: { page?: number; limit?: number } = {}
+    pagination: { page?: number; limit?: number } = {},
   ): Promise<{ customers: Customer[]; total: number; page: number; limit: number }> {
     const { page = 1, limit = 20 } = pagination
     const offset = (page - 1) * limit
@@ -259,7 +259,7 @@ export class CRMService {
       `SELECT * FROM customers ${whereClause} 
        ORDER BY created_at DESC 
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      queryParams
+      queryParams,
     )
 
     const customers = result.rows.map((row: any) => new Customer(row))
@@ -298,7 +298,7 @@ export class CRMService {
         data.value || null,
         data.notes || "",
         data.followUpDate || null,
-      ]
+      ],
     )
 
     const lead = new Lead(result.rows[0])
@@ -374,7 +374,7 @@ export class CRMService {
     const result = await query(
       `UPDATE leads SET ${updates.join(", ")}, updated_at = NOW() 
        WHERE id = $${paramIndex} RETURNING *`,
-      values
+      values,
     )
 
     if (result.rows.length > 0) {
@@ -438,7 +438,7 @@ export class CRMService {
       assignedTo?: string
       customerId?: string
     } = {},
-    pagination: { page?: number; limit?: number } = {}
+    pagination: { page?: number; limit?: number } = {},
   ): Promise<{ leads: Lead[]; total: number; page: number; limit: number }> {
     const { page = 1, limit = 20 } = pagination
     const offset = (page - 1) * limit
@@ -474,7 +474,7 @@ export class CRMService {
       `SELECT * FROM leads ${whereClause} 
        ORDER BY created_at DESC 
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      queryParams
+      queryParams,
     )
 
     const leads = result.rows.map((row: any) => new Lead(row))
@@ -496,7 +496,7 @@ export class CRMService {
     let totalScore = 0
     let activeLeads = 0
 
-    leads.forEach(lead => {
+    leads.forEach((lead) => {
       if (lead.isActive()) {
         totalScore += lead.calculateScore()
         activeLeads++
@@ -510,7 +510,7 @@ export class CRMService {
     const multipleLeadsBonus = Math.min(activeLeads * 5, 20)
 
     // Bonus for won leads
-    const wonLeads = leads.filter(lead => lead.isWon()).length
+    const wonLeads = leads.filter((lead) => lead.isWon()).length
     const wonLeadsBonus = Math.min(wonLeads * 10, 30)
 
     const finalScore = averageLeadScore + multipleLeadsBonus + wonLeadsBonus
@@ -622,7 +622,7 @@ export class CRMService {
         updated_at = NOW()
       WHERE id = $1
     `,
-      [customerId]
+      [customerId],
     )
   }
 
@@ -635,7 +635,7 @@ export class CRMService {
       FROM payments
       WHERE customer_id = $1 AND status = 'completed'
     `,
-      [customerId]
+      [customerId],
     )
 
     const lifetimeValue = Number.parseFloat(lifetimeValueResult.rows[0]?.total_value || "0")
@@ -648,7 +648,7 @@ export class CRMService {
         updated_at = NOW()
       WHERE id = $2
     `,
-      [lifetimeValue, customerId]
+      [lifetimeValue, customerId],
     )
   }
 

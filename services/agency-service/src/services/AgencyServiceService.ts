@@ -109,7 +109,7 @@ export class AgencyServiceService {
    */
   async updateService(
     id: string,
-    updates: Partial<Omit<AgencyService, "id" | "agencyId" | "createdAt">>
+    updates: Partial<Omit<AgencyService, "id" | "agencyId" | "createdAt">>,
   ): Promise<AgencyService | null> {
     try {
       const [service] = await db
@@ -147,7 +147,7 @@ export class AgencyServiceService {
    */
   async searchServices(
     filters: ServiceFilters = {},
-    options: ServiceSearchOptions = {}
+    options: ServiceSearchOptions = {},
   ): Promise<{
     services: (AgencyService & { agencyName: string | null })[]
     total: number
@@ -177,7 +177,7 @@ export class AgencyServiceService {
 
       if (filters.search) {
         conditions.push(
-          sql`(${ilike(agencyServices.name, `%${filters.search}%`)} OR ${ilike(agencyServices.description, `%${filters.search}%`)})`
+          sql`(${ilike(agencyServices.name, `%${filters.search}%`)} OR ${ilike(agencyServices.description, `%${filters.search}%`)})`,
         )
       }
 

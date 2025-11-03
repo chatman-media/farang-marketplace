@@ -24,7 +24,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken],
       schema: createCustomerSchema,
     },
-    crmController.createCustomer
+    crmController.createCustomer,
   )
 
   fastify.get(
@@ -33,7 +33,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken],
       schema: customerQuerySchema,
     },
-    crmController.getCustomers
+    crmController.getCustomers,
   )
 
   fastify.get(
@@ -42,7 +42,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken],
       schema: uuidParamSchema,
     },
-    crmController.getCustomer
+    crmController.getCustomer,
   )
 
   fastify.put(
@@ -51,7 +51,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken],
       schema: updateCustomerSchema,
     },
-    crmController.updateCustomer
+    crmController.updateCustomer,
   )
 
   fastify.delete(
@@ -60,7 +60,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken, requireRole(["admin"])],
       schema: uuidParamSchema,
     },
-    crmController.deleteCustomer
+    crmController.deleteCustomer,
   )
 
   // Lead routes with authentication
@@ -70,7 +70,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken],
       schema: createLeadSchema,
     },
-    crmController.createLead
+    crmController.createLead,
   )
 
   fastify.get(
@@ -79,7 +79,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken],
       schema: leadQuerySchema,
     },
-    crmController.getLeads
+    crmController.getLeads,
   )
 
   fastify.get(
@@ -88,7 +88,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken],
       schema: uuidParamSchema,
     },
-    crmController.getLead
+    crmController.getLead,
   )
 
   fastify.put(
@@ -97,7 +97,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken],
       schema: updateLeadSchema,
     },
-    crmController.updateLead
+    crmController.updateLead,
   )
 
   fastify.delete(
@@ -106,7 +106,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken, requireRole(["admin", "manager"])],
       schema: uuidParamSchema,
     },
-    crmController.deleteLead
+    crmController.deleteLead,
   )
 
   // Analytics routes (admin and manager only)
@@ -115,7 +115,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authenticateToken, requireRole(["admin", "manager"])],
     },
-    crmController.getAnalytics
+    crmController.getAnalytics,
   )
 
   // Automation routes (admin only)
@@ -124,7 +124,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authenticateToken, requireRole(["admin"])],
     },
-    crmController.getAutomations
+    crmController.getAutomations,
   )
 
   fastify.post(
@@ -132,7 +132,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authenticateToken, requireRole(["admin"])],
     },
-    crmController.createAutomation
+    crmController.createAutomation,
   )
 
   fastify.get(
@@ -141,7 +141,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       preHandler: [authenticateToken, requireRole(["admin"])],
       schema: uuidParamSchema,
     },
-    crmController.getAutomationById
+    crmController.getAutomationById,
   )
 
   fastify.post(
@@ -149,7 +149,7 @@ const crmRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authenticateToken, requireRole(["admin", "manager"])],
     },
-    crmController.triggerWorkflow
+    crmController.triggerWorkflow,
   )
 
   // Template routes (admin and manager only)

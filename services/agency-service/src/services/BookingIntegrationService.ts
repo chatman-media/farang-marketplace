@@ -79,7 +79,7 @@ export class BookingIntegrationService {
           limit: 50,
           sortBy: "name",
           sortOrder: "asc",
-        }
+        },
       )
 
       const matches: AgencyServiceMatch[] = []
@@ -148,7 +148,7 @@ export class BookingIntegrationService {
    */
   async assignServiceToAgency(
     bookingRequest: BookingServiceRequest,
-    agencyMatch: AgencyServiceMatch
+    agencyMatch: AgencyServiceMatch,
   ): Promise<ServiceAssignmentResult> {
     try {
       // Create service assignment
@@ -202,7 +202,7 @@ export class BookingIntegrationService {
    */
   async calculateCommission(
     assignmentId: string,
-    finalPrice: number
+    finalPrice: number,
   ): Promise<{
     commissionAmount: number
     agencyEarnings: number
@@ -282,7 +282,7 @@ export class BookingIntegrationService {
    */
   private calculateDistance(
     coord1?: { latitude: number; longitude: number },
-    coord2?: { latitude: number; longitude: number }
+    coord2?: { latitude: number; longitude: number },
   ): number {
     if (!coord1 || !coord2) return 999 // Default high distance
 

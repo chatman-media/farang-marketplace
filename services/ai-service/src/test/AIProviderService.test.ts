@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-
 import { AIProviderService } from '../services/AIProviderService';
 
 describe('AI Provider Service Tests', () => {

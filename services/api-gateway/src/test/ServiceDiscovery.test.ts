@@ -21,7 +21,7 @@ describe("ServiceDiscovery", () => {
       const services = serviceDiscovery.getAllServices()
       expect(services).toHaveLength(8) // 8 microservices
 
-      const serviceNames = services.map(s => s.name)
+      const serviceNames = services.map((s) => s.name)
       expect(serviceNames).toContain("user-service")
       expect(serviceNames).toContain("listing-service")
       expect(serviceNames).toContain("payment-service")
@@ -34,7 +34,7 @@ describe("ServiceDiscovery", () => {
 
     it("should initialize all services as unhealthy", () => {
       const services = serviceDiscovery.getAllServices()
-      services.forEach(service => {
+      services.forEach((service) => {
         expect(service.health.healthy).toBe(false)
       })
     })
@@ -52,7 +52,7 @@ describe("ServiceDiscovery", () => {
       await serviceDiscovery.start()
 
       // Wait a bit for health check to complete
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       const userService = serviceDiscovery.getService("user-service")
       expect(userService?.health.healthy).toBe(true)
@@ -66,7 +66,7 @@ describe("ServiceDiscovery", () => {
       await serviceDiscovery.start()
 
       // Wait a bit for health check to complete
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       const userService = serviceDiscovery.getService("user-service")
       expect(userService?.health.healthy).toBe(false)
@@ -91,7 +91,7 @@ describe("ServiceDiscovery", () => {
       } as Response)
 
       await serviceDiscovery.start()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       expect(serviceUpSpy).toHaveBeenCalledWith("user-service", expect.any(Object))
       expect(healthChangedSpy).toHaveBeenCalledWith("user-service", true, expect.any(Object))
@@ -108,7 +108,7 @@ describe("ServiceDiscovery", () => {
       } as Response)
 
       await serviceDiscovery.start()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       const healthyService = serviceDiscovery.getHealthyService("user-service")
       expect(healthyService).toBeDefined()
@@ -120,7 +120,7 @@ describe("ServiceDiscovery", () => {
       mockFetch.mockRejectedValue(new Error("Service down"))
 
       await serviceDiscovery.start()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       const healthyService = serviceDiscovery.getHealthyService("user-service")
       expect(healthyService).toBeUndefined()
@@ -135,7 +135,7 @@ describe("ServiceDiscovery", () => {
       } as Response)
 
       await serviceDiscovery.start()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       const serviceUrl = serviceDiscovery.getServiceUrl("user-service")
       expect(serviceUrl).toBe("http://localhost:3001")
@@ -157,7 +157,7 @@ describe("ServiceDiscovery", () => {
         .mockRejectedValueOnce(new Error("Service down")) // crm-service
 
       await serviceDiscovery.start()
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
 
       const stats = serviceDiscovery.getStats()
       expect(stats.total).toBe(8)

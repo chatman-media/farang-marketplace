@@ -667,7 +667,7 @@ export class ListingController {
       // Filter by category if specified
       let filteredListings = mockListings
       if (query.category) {
-        filteredListings = mockListings.filter(listing => listing.category === query.category)
+        filteredListings = mockListings.filter((listing) => listing.category === query.category)
       }
 
       // Pagination

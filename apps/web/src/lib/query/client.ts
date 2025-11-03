@@ -26,7 +26,7 @@ export const queryClient = new QueryClient({
       },
 
       // Retry delay
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 
       // Refetch on window focus
       refetchOnWindowFocus: false,

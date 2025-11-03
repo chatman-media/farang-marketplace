@@ -154,12 +154,12 @@ describe("Booking API Validation Tests", () => {
       const validGuestCounts = [1, 2, 5, 10, 20]
       const invalidGuestCounts = [0, -1, 21, 100]
 
-      validGuestCounts.forEach(count => {
+      validGuestCounts.forEach((count) => {
         expect(count).toBeGreaterThan(0)
         expect(count).toBeLessThanOrEqual(20)
       })
 
-      invalidGuestCounts.forEach(count => {
+      invalidGuestCounts.forEach((count) => {
         expect(count <= 0 || count > 20).toBe(true)
       })
     })

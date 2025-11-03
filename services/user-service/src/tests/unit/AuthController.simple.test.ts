@@ -295,7 +295,7 @@ describe("AuthController Unit Tests", () => {
         {},
         {
           authorization: `Bearer ${accessToken}`,
-        }
+        },
       )
       const res = createMockResponse()
 
@@ -323,7 +323,7 @@ describe("AuthController Unit Tests", () => {
         {},
         {
           authorization: "Bearer invalid.token.here",
-        }
+        },
       )
       const res = createMockResponse()
 

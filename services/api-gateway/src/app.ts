@@ -144,7 +144,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
 }
 
 // Error handling
-process.on("uncaughtException", error => {
+process.on("uncaughtException", (error) => {
   logger.error("Uncaught Exception:", error)
   process.exit(1)
 })

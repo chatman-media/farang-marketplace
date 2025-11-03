@@ -25,7 +25,7 @@ async function runMigrations() {
 }
 
 if (require.main === module) {
-  runMigrations().catch(error => {
+  runMigrations().catch((error) => {
     logger.error("Migration script failed:", error)
     process.exit(1)
   })

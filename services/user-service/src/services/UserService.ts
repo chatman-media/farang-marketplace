@@ -41,7 +41,7 @@ const UpdateUserSchema = z.object({
             providerId: z.string(),
             username: z.string().optional(),
             profileUrl: z.string().url().optional(),
-          })
+          }),
         )
         .optional(),
       primaryAuthProvider: z.nativeEnum(AuthProvider).optional(),

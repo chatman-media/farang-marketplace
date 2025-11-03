@@ -88,7 +88,7 @@ describe("TemplateController", () => {
       expect(response.statusCode).toBe(200)
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining("WHERE type = $1"),
-        expect.arrayContaining(["email"])
+        expect.arrayContaining(["email"]),
       )
     })
 
@@ -104,7 +104,7 @@ describe("TemplateController", () => {
       expect(response.statusCode).toBe(200)
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining("name ILIKE $1 OR content ILIKE $1"),
-        expect.arrayContaining(["%welcome%"])
+        expect.arrayContaining(["%welcome%"]),
       )
     })
   })

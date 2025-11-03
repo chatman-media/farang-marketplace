@@ -103,7 +103,7 @@ describe("Auth Middleware", () => {
           success: false,
           error: "MISSING_TOKEN",
           message: "Access token required",
-        })
+        }),
       )
     })
 
@@ -121,7 +121,7 @@ describe("Auth Middleware", () => {
         expect.objectContaining({
           success: false,
           error: "MISSING_TOKEN",
-        })
+        }),
       )
     })
 
@@ -167,7 +167,7 @@ describe("Auth Middleware", () => {
         expect.objectContaining({
           success: false,
           error: "TOKEN_EXPIRED",
-        })
+        }),
       )
     })
 
@@ -185,7 +185,7 @@ describe("Auth Middleware", () => {
         expect.objectContaining({
           success: false,
           error: "INVALID_TOKEN",
-        })
+        }),
       )
     })
 
@@ -210,7 +210,7 @@ describe("Auth Middleware", () => {
         expect.objectContaining({
           success: false,
           error: "INSUFFICIENT_PERMISSIONS",
-        })
+        }),
       )
     })
 
@@ -300,7 +300,7 @@ describe("Auth Middleware", () => {
         expect.objectContaining({
           success: false,
           error: "MISSING_API_KEY",
-        })
+        }),
       )
     })
 
@@ -317,7 +317,7 @@ describe("Auth Middleware", () => {
         expect.objectContaining({
           success: false,
           error: "INVALID_API_KEY",
-        })
+        }),
       )
     })
 

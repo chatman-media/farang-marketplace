@@ -135,7 +135,7 @@ export class ServiceAssignmentService {
   async updateAssignmentStatus(
     id: string,
     status: ServiceAssignmentStatusType,
-    notes?: string
+    notes?: string,
   ): Promise<ServiceAssignment | null> {
     try {
       const updateData: any = {
@@ -189,7 +189,7 @@ export class ServiceAssignmentService {
    */
   async searchAssignments(
     filters: AssignmentFilters = {},
-    options: AssignmentSearchOptions = {}
+    options: AssignmentSearchOptions = {},
   ): Promise<{
     assignments: (ServiceAssignment & {
       agencyName: string | null

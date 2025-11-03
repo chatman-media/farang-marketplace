@@ -141,7 +141,7 @@ describe("Availability Service Logic", () => {
         return {
           date,
           available,
-          conflicts: conflicts.map(conflict => ({
+          conflicts: conflicts.map((conflict) => ({
             type: conflict.type,
             reason: conflict.reason,
           })),

@@ -117,7 +117,7 @@ export const listingsService = {
 export const serviceListingsService = {
   // Get service listings
   getServiceListings: async (
-    filters?: ServiceListingFilters & { page?: number; limit?: number }
+    filters?: ServiceListingFilters & { page?: number; limit?: number },
   ): Promise<ServiceListingsPageResponse> => {
     const params = new URLSearchParams()
 
@@ -125,7 +125,7 @@ export const serviceListingsService = {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
-            value.forEach(v => {
+            value.forEach((v) => {
               params.append(key, String(v))
             })
           } else if (typeof value === "object") {
@@ -168,7 +168,7 @@ export const serviceListingsService = {
   // Search service listings
   searchServiceListings: async (
     query: string,
-    filters?: ServiceListingFilters
+    filters?: ServiceListingFilters,
   ): Promise<ServiceListingsPageResponse> => {
     const params = new URLSearchParams({ q: query })
 
@@ -176,7 +176,7 @@ export const serviceListingsService = {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (Array.isArray(value)) {
-            value.forEach(v => {
+            value.forEach((v) => {
               params.append(key, String(v))
             })
           } else if (typeof value === "object") {

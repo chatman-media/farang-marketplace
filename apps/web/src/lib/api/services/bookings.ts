@@ -93,17 +93,17 @@ export const bookingsService = {
   checkAvailability: async (
     listingId: string,
     startDate: string,
-    endDate: string
+    endDate: string,
   ): Promise<{ available: boolean; conflicts?: any[] }> => {
     return await api.get<{ available: boolean; conflicts?: any[] }>(
-      `${config.ENDPOINTS.LISTINGS.BY_ID(listingId)}/availability?startDate=${startDate}&endDate=${endDate}`
+      `${config.ENDPOINTS.LISTINGS.BY_ID(listingId)}/availability?startDate=${startDate}&endDate=${endDate}`,
     )
   },
 
   // Get booking calendar for a listing
   getBookingCalendar: async (listingId: string, year: number, month: number): Promise<{ calendar: any[] }> => {
     return await api.get<{ calendar: any[] }>(
-      `${config.ENDPOINTS.LISTINGS.BY_ID(listingId)}/calendar?year=${year}&month=${month}`
+      `${config.ENDPOINTS.LISTINGS.BY_ID(listingId)}/calendar?year=${year}&month=${month}`,
     )
   },
 }

@@ -252,7 +252,7 @@ describe("Segment Model", () => {
       expect(fields.length).toBeGreaterThan(0)
 
       // Check that essential fields are present
-      const fieldKeys = fields.map(f => f.key)
+      const fieldKeys = fields.map((f) => f.key)
       expect(fieldKeys).toContain("firstName")
       expect(fieldKeys).toContain("lastName")
       expect(fieldKeys).toContain("email")
@@ -275,7 +275,7 @@ describe("Segment Model", () => {
 
     it("should include enum options for enum fields", () => {
       const fields = Segment.getAvailableFields()
-      const statusField = fields.find(f => f.key === "status")
+      const statusField = fields.find((f) => f.key === "status")
 
       expect(statusField).toBeDefined()
       expect(statusField?.dataType).toBe(SegmentDataType.ENUM)

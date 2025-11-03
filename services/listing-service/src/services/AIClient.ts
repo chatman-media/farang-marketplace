@@ -95,23 +95,23 @@ export class AIClient {
 
     // Add request interceptor for logging
     this.client.interceptors.request.use(
-      config => {
+      (config) => {
         logger.info(`AI Service Request: ${config.method?.toUpperCase()} ${config.url}`)
         return config
       },
-      error => {
+      (error) => {
         logger.error("AI Service Request Error:", error)
         return Promise.reject(error)
-      }
+      },
     )
 
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
-      response => response,
-      error => {
+      (response) => response,
+      (error) => {
         logger.error("AI Service Response Error:", error.response?.data || error.message)
         return Promise.reject(error)
-      }
+      },
     )
   }
 

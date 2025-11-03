@@ -4,7 +4,7 @@ import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
 const bookingIntegrationController = new BookingIntegrationController()
 
-const bookingIntegrationRoutes: FastifyPluginAsync = async fastify => {
+const bookingIntegrationRoutes: FastifyPluginAsync = async (fastify) => {
   // Find matching agencies
   fastify.post("/find-agencies", {
     preHandler: [authenticateToken],

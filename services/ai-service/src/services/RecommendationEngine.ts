@@ -3,7 +3,6 @@
 import { desc, eq } from '@marketplace/database-schema';
 import logger from '@marketplace/logger';
 import { Matrix } from 'ml-matrix';
-
 import { db, userBehaviors, userPreferences } from '../database/connection';
 import type {
   RecommendationRequest,
@@ -12,7 +11,6 @@ import type {
   UserBehavior,
   UserPreferences,
 } from '../models/index';
-
 import { AIProviderService } from './AIProviderService';
 
 export interface ItemFeatures {

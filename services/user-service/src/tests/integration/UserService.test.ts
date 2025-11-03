@@ -1,6 +1,5 @@
 import { UserRole, VerificationStatus } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { UserEntity } from "../../models/User"
 import { UserService } from "../../services/UserService"
 import { testUserData } from "../setup"
@@ -78,7 +77,7 @@ describe("UserService Integration Tests", () => {
         [],
         "email" as any,
         undefined,
-        userData.telegramId
+        userData.telegramId,
       )
 
       mockUserRepository.findByEmail.mockResolvedValue(null)
@@ -124,7 +123,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       mockUserRepository.findById.mockResolvedValue(mockUserEntity)
@@ -149,7 +148,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       mockUserRepository.findByEmail.mockResolvedValue(mockUserEntity)
@@ -174,7 +173,7 @@ describe("UserService Integration Tests", () => {
         [],
         "email" as any,
         testUserData.validUser.phone,
-        testUserData.validUser.telegramId
+        testUserData.validUser.telegramId,
       )
 
       mockUserRepository.findByTelegramId.mockResolvedValue(mockUserEntity)
@@ -194,7 +193,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email, // Keep original email since updateData doesn't have email
         "hash",
         UserRole.USER,
-        { ...testUserData.validUser.profile, ...updateData.profile }
+        { ...testUserData.validUser.profile, ...updateData.profile },
       )
 
       mockUserRepository.update.mockResolvedValue(updatedUserEntity)
@@ -206,7 +205,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.id,
         expect.objectContaining({
           profile: expect.objectContaining(updateData.profile),
-        })
+        }),
       )
       expect(result).toEqual(updatedUserEntity.toPublicUser())
     })
@@ -231,12 +230,12 @@ describe("UserService Integration Tests", () => {
           primaryAuthProvider: "email" as any,
         },
         [],
-        "email" as any
+        "email" as any,
       )
       mockUserRepository.findByEmail.mockResolvedValue(existingUser)
 
       await expect(userService.updateUser(testUserData.validUser.id, updateData)).rejects.toThrow(
-        "Email already in use by another user"
+        "Email already in use by another user",
       )
 
       expect(mockUserRepository.update).not.toHaveBeenCalled()
@@ -265,12 +264,12 @@ describe("UserService Integration Tests", () => {
         [],
         "email" as any,
         undefined,
-        "existing-telegram"
+        "existing-telegram",
       )
       mockUserRepository.findByTelegramId.mockResolvedValue(existingUser)
 
       await expect(userService.updateUser(testUserData.validUser.id, updateData)).rejects.toThrow(
-        "Telegram ID already in use by another user"
+        "Telegram ID already in use by another user",
       )
 
       expect(mockUserRepository.update).not.toHaveBeenCalled()
@@ -292,7 +291,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "old-hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       // Mock password validation to return true
@@ -313,7 +312,7 @@ describe("UserService Integration Tests", () => {
       mockUserRepository.findById.mockResolvedValue(null)
 
       await expect(userService.changePassword("non-existent-id", "oldpassword", "newpassword123")).rejects.toThrow(
-        "User not found"
+        "User not found",
       )
 
       expect(mockUserRepository.updatePassword).not.toHaveBeenCalled()
@@ -325,14 +324,14 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       vi.spyOn(mockUserEntity, "validatePassword").mockResolvedValue(false)
       mockUserRepository.findById.mockResolvedValue(mockUserEntity)
 
       await expect(
-        userService.changePassword(testUserData.validUser.id, "wrongpassword", "newpassword123")
+        userService.changePassword(testUserData.validUser.id, "wrongpassword", "newpassword123"),
       ).rejects.toThrow("Current password is incorrect")
 
       expect(mockUserRepository.updatePassword).not.toHaveBeenCalled()
@@ -344,11 +343,11 @@ describe("UserService Integration Tests", () => {
 
       // Test missing fields - these should fail validation before repository call
       await expect(
-        userService.changePassword(testUserData.validUser.id, "oldpassword", undefined as any)
+        userService.changePassword(testUserData.validUser.id, "oldpassword", undefined as any),
       ).rejects.toThrow()
 
       await expect(
-        userService.changePassword(testUserData.validUser.id, undefined as any, "newpassword123")
+        userService.changePassword(testUserData.validUser.id, undefined as any, "newpassword123"),
       ).rejects.toThrow()
     })
   })
@@ -378,7 +377,7 @@ describe("UserService Integration Tests", () => {
         "email" as any,
         undefined,
         undefined,
-        true
+        true,
       )
 
       mockUserRepository.update.mockResolvedValue(activatedUserEntity)
@@ -406,7 +405,7 @@ describe("UserService Integration Tests", () => {
         "email" as any,
         undefined,
         undefined,
-        false
+        false,
       )
 
       mockUserRepository.update.mockResolvedValue(deactivatedUserEntity)
@@ -425,7 +424,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.AGENCY_OWNER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       mockUserRepository.update.mockResolvedValue(updatedUserEntity)
@@ -447,7 +446,7 @@ describe("UserService Integration Tests", () => {
         {
           ...testUserData.validUser.profile,
           verificationStatus: VerificationStatus.UNVERIFIED,
-        }
+        },
       )
 
       const verifiedUserEntity = new UserEntity(
@@ -458,7 +457,7 @@ describe("UserService Integration Tests", () => {
         {
           ...testUserData.validUser.profile,
           verificationStatus: VerificationStatus.VERIFIED,
-        }
+        },
       )
 
       mockUserRepository.findById.mockResolvedValue(mockUserEntity)
@@ -497,7 +496,7 @@ describe("UserService Integration Tests", () => {
         "email" as any,
         undefined,
         undefined,
-        true
+        true,
       )
 
       vi.spyOn(mockUserEntity, "validatePassword").mockResolvedValue(true)
@@ -516,7 +515,7 @@ describe("UserService Integration Tests", () => {
         testUserData.validUser.email,
         "hash",
         UserRole.USER,
-        testUserData.validUser.profile
+        testUserData.validUser.profile,
       )
 
       vi.spyOn(mockUserEntity, "validatePassword").mockResolvedValue(false)
@@ -550,7 +549,7 @@ describe("UserService Integration Tests", () => {
         "email" as any,
         undefined,
         undefined,
-        false // inactive
+        false, // inactive
       )
 
       mockUserRepository.findByEmail.mockResolvedValue(inactiveUserEntity)

@@ -64,15 +64,15 @@ export const CATEGORIES_CONFIG: CategoryConfig[] = [
 
 // Helper functions
 export const getEnabledCategories = (): CategoryConfig[] => {
-  return CATEGORIES_CONFIG.filter(category => category.enabled)
+  return CATEGORIES_CONFIG.filter((category) => category.enabled)
 }
 
 export const getCategoryById = (id: string): CategoryConfig | undefined => {
-  return CATEGORIES_CONFIG.find(category => category.id === id)
+  return CATEGORIES_CONFIG.find((category) => category.id === id)
 }
 
 export const getCategoryByRoute = (route: string): CategoryConfig | undefined => {
-  return CATEGORIES_CONFIG.find(category => category.route === route)
+  return CATEGORIES_CONFIG.find((category) => category.route === route)
 }
 
 // Category management functions
@@ -106,7 +106,7 @@ export const isCategoryEnabled = (categoryId: string): boolean => {
 // Navigation items based on enabled categories
 export const getNavigationItems = () => {
   const homeItem = { name: "Home", href: "/", id: "home" }
-  const categoryItems = getEnabledCategories().map(category => ({
+  const categoryItems = getEnabledCategories().map((category) => ({
     name: category.name,
     href: category.route,
     id: category.id,

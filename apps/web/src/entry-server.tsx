@@ -6,7 +6,7 @@ export function render(url: string) {
   const html = renderToString(
     <StaticRouter location={url}>
       <App />
-    </StaticRouter>
+    </StaticRouter>,
   )
   return { html }
 }

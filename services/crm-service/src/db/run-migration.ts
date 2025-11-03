@@ -1,6 +1,6 @@
-import logger from "@marketplace/logger"
 import { readFileSync } from "fs"
 import { join } from "path"
+import logger from "@marketplace/logger"
 import { query } from "./connection"
 
 async function runMigration(migrationFile: string) {
@@ -13,13 +13,13 @@ async function runMigration(migrationFile: string) {
     // Remove comments and split by semicolon
     const cleanSql = sql
       .split("\n")
-      .filter(line => !line.trim().startsWith("--"))
+      .filter((line) => !line.trim().startsWith("--"))
       .join("\n")
 
     const statements = cleanSql
       .split(";")
-      .map(stmt => stmt.trim())
-      .filter(stmt => stmt.length > 0)
+      .map((stmt) => stmt.trim())
+      .filter((stmt) => stmt.length > 0)
 
     for (const statement of statements) {
       if (statement.trim()) {

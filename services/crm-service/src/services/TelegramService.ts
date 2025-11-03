@@ -42,17 +42,17 @@ export class TelegramService {
 
   private setupHandlers() {
     // Handle incoming messages
-    this.bot.on("text", async ctx => {
+    this.bot.on("text", async (ctx) => {
       await this.handleIncomingMessage(ctx)
     })
 
     // Handle callback queries (inline keyboard buttons)
-    this.bot.on("callback_query", async ctx => {
+    this.bot.on("callback_query", async (ctx) => {
       await this.handleCallbackQuery(ctx)
     })
 
     // Handle errors
-    this.bot.catch(err => {
+    this.bot.catch((err) => {
       logger.error("Telegram bot error:", err)
     })
   }
@@ -135,7 +135,7 @@ export class TelegramService {
 
   async sendBulkMessage(
     chatIds: string[],
-    request: Omit<SendTelegramRequest, "chatId">
+    request: Omit<SendTelegramRequest, "chatId">,
   ): Promise<SendMessageResponse[]> {
     const results: SendMessageResponse[] = []
 
@@ -144,7 +144,7 @@ export class TelegramService {
       results.push(result)
 
       // Add delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
 
     return results
@@ -254,7 +254,7 @@ export class TelegramService {
     try {
       const result = await query(
         "SELECT * FROM message_templates WHERE id = $1 AND channel = $2 AND is_active = true",
-        [templateId, CommunicationChannel.TELEGRAM]
+        [templateId, CommunicationChannel.TELEGRAM],
       )
 
       if (result.rows.length === 0) return null
@@ -319,7 +319,7 @@ export class TelegramService {
         data.outcome || null,
         data.nextAction ? JSON.stringify(data.nextAction) : null,
         JSON.stringify(data.metadata || {}),
-      ]
+      ],
     )
 
     return result.rows[0].id
@@ -343,7 +343,7 @@ export class TelegramService {
 
   async getCommunicationHistory(
     customerId: string,
-    options: { limit?: number; offset?: number } = {}
+    options: { limit?: number; offset?: number } = {},
   ): Promise<CommunicationHistory[]> {
     const { limit = 50, offset = 0 } = options
 
@@ -352,7 +352,7 @@ export class TelegramService {
        WHERE customer_id = $1 AND channel = $2
        ORDER BY created_at DESC
        LIMIT $3 OFFSET $4`,
-      [customerId, CommunicationChannel.TELEGRAM, limit, offset]
+      [customerId, CommunicationChannel.TELEGRAM, limit, offset],
     )
 
     return result.rows.map((row: any) => ({

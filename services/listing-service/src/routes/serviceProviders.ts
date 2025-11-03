@@ -8,7 +8,7 @@ interface ServiceProviderRouteOptions {
 
 const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = async (
   fastify: FastifyInstance,
-  options
+  options,
 ) => {
   const { serviceProviderController } = options
 
@@ -106,7 +106,7 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
         },
       },
     },
-    serviceProviderController.createServiceProvider.bind(serviceProviderController)
+    serviceProviderController.createServiceProvider.bind(serviceProviderController),
   )
 
   // Get all service providers
@@ -132,7 +132,7 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
     },
     async (request, reply) => {
       return serviceProviderController.getAllServiceProviders(request as any, reply)
-    }
+    },
   )
 
   // Get service provider by ID
@@ -152,7 +152,7 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
     },
     async (request, reply) => {
       return serviceProviderController.getServiceProvider(request as any, reply)
-    }
+    },
   )
 
   // Search service providers
@@ -211,7 +211,7 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
     },
     async (request, reply) => {
       return serviceProviderController.searchServiceProviders(request as any, reply)
-    }
+    },
   )
 
   // Update service provider (with optional image upload)
@@ -296,7 +296,7 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
     },
     async (request, reply) => {
       return serviceProviderController.updateServiceProvider(request as any, reply)
-    }
+    },
   )
 
   // Delete service provider
@@ -316,7 +316,7 @@ const serviceProviderRoutes: FastifyPluginAsync<ServiceProviderRouteOptions> = a
     },
     async (request, reply) => {
       return serviceProviderController.deleteServiceProvider(request as any, reply)
-    }
+    },
   )
 }
 

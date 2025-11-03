@@ -110,7 +110,7 @@ export class TestRequestBuilder {
       }
 
       // Add file fields
-      this.files.forEach(file => {
+      this.files.forEach((file) => {
         body += `--${boundary}\r\n`
         body += `Content-Disposition: form-data; name="${file.field}"; filename="${file.filename}"\r\n`
 
@@ -179,13 +179,13 @@ export class AwaitableTestRequestBuilder extends TestRequestBuilder {
   // biome-ignore lint/suspicious/noThenProperty: This is intentional to make the builder awaitable
   then<TResult1 = TestResponse, TResult2 = never>(
     onfulfilled?: ((value: TestResponse) => TResult1 | PromiseLike<TResult1>) | undefined | null,
-    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null
+    onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null,
   ): Promise<TResult1 | TResult2> {
     return this.execute().then(onfulfilled, onrejected)
   }
 
   catch<TResult = never>(
-    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null
+    onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null,
   ): Promise<TestResponse | TResult> {
     return this.execute().catch(onrejected)
   }

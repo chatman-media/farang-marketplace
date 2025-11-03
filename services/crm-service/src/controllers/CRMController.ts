@@ -75,7 +75,7 @@ export class CRMController {
         {
           page: Number.parseInt(page, 10),
           limit: Number.parseInt(limit, 10),
-        }
+        },
       )
 
       return reply.send({
@@ -214,7 +214,7 @@ export class CRMController {
         {
           page: Number.parseInt(page, 10),
           limit: Number.parseInt(limit, 10),
-        }
+        },
       )
 
       return reply.send({

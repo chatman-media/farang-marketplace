@@ -8,7 +8,6 @@ import {
   ServiceBooking,
   UpdateStatusRequest,
 } from "@marketplace/shared-types"
-
 import { db, schema } from "../db/connection"
 
 const { availabilityConflicts, bookingStatusHistory, bookings, disputes, serviceBookings } = schema
@@ -27,12 +26,12 @@ export class BookingService {
 
   // Create a new booking
   async createBooking(request: CreateBookingRequest, guestId: string, hostId: string): Promise<Booking> {
-    return db.transaction(async tx => {
+    return db.transaction(async (tx) => {
       // 1. Check availability
       const isAvailable = await this.availabilityService.checkAvailability(
         request.listingId,
         new Date(request.checkIn),
-        request.checkOut ? new Date(request.checkOut) : undefined
+        request.checkOut ? new Date(request.checkOut) : undefined,
       )
 
       if (!isAvailable) {
@@ -86,7 +85,7 @@ export class BookingService {
         request.checkOut ? new Date(request.checkOut) : new Date(request.checkIn),
         "booking",
         newBooking.id,
-        guestId
+        guestId,
       )
 
       // 5. Record status history
@@ -103,14 +102,14 @@ export class BookingService {
   async createServiceBooking(
     request: CreateServiceBookingRequest,
     guestId: string,
-    providerId: string
+    providerId: string,
   ): Promise<ServiceBooking> {
-    return db.transaction(async tx => {
+    return db.transaction(async (tx) => {
       // 1. Check service provider availability
       const isAvailable = await this.availabilityService.checkServiceAvailability(
         providerId,
         new Date(request.scheduledDate),
-        request.duration
+        request.duration,
       )
 
       if (!isAvailable) {
@@ -180,7 +179,7 @@ export class BookingService {
 
   // Update booking status
   async updateBookingStatus(bookingId: string, request: UpdateStatusRequest, userId: string): Promise<Booking> {
-    return db.transaction(async tx => {
+    return db.transaction(async (tx) => {
       // 1. Get current booking
       const [currentBooking] = await tx.select().from(bookings).where(eq(bookings.id, bookingId)).limit(1)
 
@@ -213,7 +212,7 @@ export class BookingService {
         currentBooking.status,
         request.status,
         request.reason || "Status updated",
-        userId
+        userId,
       )
 
       // 5. Handle status-specific logic
@@ -250,7 +249,7 @@ export class BookingService {
   async searchBookings(
     filters: BookingFilters,
     page: number = 1,
-    limit: number = 20
+    limit: number = 20,
   ): Promise<{
     bookings: Booking[]
     total: number
@@ -334,7 +333,7 @@ export class BookingService {
     toStatus: string,
     reason: string,
     changedBy: string,
-    metadata?: any
+    metadata?: any,
   ): Promise<void> {
     await db.insert(bookingStatusHistory).values({
       bookingId,
@@ -421,8 +420,8 @@ export class BookingService {
       conditions.push(
         and(
           gte(bookings.checkIn, new Date(filters.dateRange.startDate)),
-          lte(bookings.checkIn, new Date(filters.dateRange.endDate))
-        )
+          lte(bookings.checkIn, new Date(filters.dateRange.endDate)),
+        ),
       )
     }
 
@@ -430,8 +429,8 @@ export class BookingService {
       conditions.push(
         and(
           gte(bookings.totalPrice, filters.priceRange.min.toString()),
-          lte(bookings.totalPrice, filters.priceRange.max.toString())
-        )
+          lte(bookings.totalPrice, filters.priceRange.max.toString()),
+        ),
       )
     }
 

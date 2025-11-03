@@ -14,7 +14,7 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     {
       // preHandler: [fastify.authenticate],
     },
-    availabilityController.checkAvailability.bind(availabilityController)
+    availabilityController.checkAvailability.bind(availabilityController),
   )
 
   // Check service availability
@@ -23,7 +23,7 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     {
       // preHandler: [fastify.authenticate],
     },
-    availabilityController.checkServiceAvailability.bind(availabilityController)
+    availabilityController.checkServiceAvailability.bind(availabilityController),
   )
 
   // Get availability calendar
@@ -32,7 +32,7 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     {
       // preHandler: [fastify.authenticate],
     },
-    availabilityController.getAvailabilityCalendar.bind(availabilityController)
+    availabilityController.getAvailabilityCalendar.bind(availabilityController),
   )
 
   // Get service provider availability
@@ -41,7 +41,7 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     {
       // preHandler: [fastify.authenticate],
     },
-    availabilityController.getServiceProviderAvailability.bind(availabilityController)
+    availabilityController.getServiceProviderAvailability.bind(availabilityController),
   )
 
   // Block dates
@@ -50,7 +50,7 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     {
       // preHandler: [fastify.authenticate],
     },
-    availabilityController.blockDates.bind(availabilityController)
+    availabilityController.blockDates.bind(availabilityController),
   )
 
   // Unblock dates
@@ -59,7 +59,7 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     {
       // preHandler: [fastify.authenticate],
     },
-    availabilityController.unblockDates.bind(availabilityController)
+    availabilityController.unblockDates.bind(availabilityController),
   )
 
   // Get upcoming bookings
@@ -68,6 +68,6 @@ export default async function availabilityRoutes(fastify: FastifyInstance, optio
     {
       // preHandler: [fastify.authenticate],
     },
-    availabilityController.getUpcomingBookings.bind(availabilityController)
+    availabilityController.getUpcomingBookings.bind(availabilityController),
   )
 }

@@ -23,7 +23,7 @@ export const useInfiniteListings = (filters?: ListingFilters & { limit?: number 
   return useInfiniteQuery({
     queryKey: queryKeys.listings.list(filters),
     queryFn: ({ pageParam = 1 }) => listingsService.getListings({ ...filters, page: pageParam }),
-    getNextPageParam: lastPage => {
+    getNextPageParam: (lastPage) => {
       return lastPage.hasMore ? lastPage.page + 1 : undefined
     },
     initialPageParam: 1,

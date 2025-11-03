@@ -124,7 +124,7 @@ describe("TemplateService", () => {
       expect(result.templates).toHaveLength(1)
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining("WHERE type = $1"),
-        expect.arrayContaining([CommunicationChannel.EMAIL])
+        expect.arrayContaining([CommunicationChannel.EMAIL]),
       )
     })
   })
@@ -231,7 +231,7 @@ describe("TemplateService", () => {
       const context = { firstName: "John" }
 
       await expect(templateService.renderTemplate("123e4567-e89b-12d3-a456-426614174000", context)).rejects.toThrow(
-        "Template is not active"
+        "Template is not active",
       )
     })
 

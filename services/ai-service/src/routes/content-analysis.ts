@@ -1,5 +1,4 @@
-import { FastifyPluginAsync } from 'fastify';
-
+import { FastifyPluginAsync } from "fastify"
 import {
   analyzeContentSchema,
   batchAnalyzeSchema,
@@ -10,14 +9,14 @@ import {
   moderationSchema,
   qualityAssessmentSchema,
   sentimentAnalysisSchema,
-} from '../controllers/ContentAnalysisController';
+} from "../controllers/ContentAnalysisController"
 
 interface ContentAnalysisRouteOptions {
-  contentAnalysisController: ContentAnalysisController;
+  contentAnalysisController: ContentAnalysisController
 }
 
 const contentAnalysisRoutes: FastifyPluginAsync<ContentAnalysisRouteOptions> = async (fastify, options) => {
-  const { contentAnalysisController } = options;
+  const { contentAnalysisController } = options
 
   // All routes require authentication (middleware temporarily disabled)
   // fastify.addHook("preHandler", fastify.authenticate)
@@ -25,86 +24,86 @@ const contentAnalysisRoutes: FastifyPluginAsync<ContentAnalysisRouteOptions> = a
 
   // Content analysis routes
   fastify.post(
-    '/analyze',
+    "/analyze",
     {
       schema: analyzeContentSchema,
       // preHandler: [fastify.authenticate, fastify.roleBasedRateLimit],
     },
-    contentAnalysisController.analyzeContent.bind(contentAnalysisController)
-  );
+    contentAnalysisController.analyzeContent.bind(contentAnalysisController),
+  )
 
   fastify.post(
-    '/batch-analyze',
+    "/batch-analyze",
     {
       schema: batchAnalyzeSchema,
       // preHandler: [fastify.authenticate, fastify.roleBasedRateLimit],
     },
-    contentAnalysisController.batchAnalyzeContent.bind(contentAnalysisController)
-  );
+    contentAnalysisController.batchAnalyzeContent.bind(contentAnalysisController),
+  )
 
   // Specific analysis endpoints
   fastify.post(
-    '/sentiment',
+    "/sentiment",
     {
       schema: sentimentAnalysisSchema,
       // preHandler: [fastify.authenticate, fastify.roleBasedRateLimit],
     },
-    contentAnalysisController.analyzeSentiment.bind(contentAnalysisController)
-  );
+    contentAnalysisController.analyzeSentiment.bind(contentAnalysisController),
+  )
 
   fastify.post(
-    '/keywords',
+    "/keywords",
     {
       schema: keywordExtractionSchema,
       // preHandler: [fastify.authenticate, fastify.roleBasedRateLimit],
     },
-    contentAnalysisController.extractKeywords.bind(contentAnalysisController)
-  );
+    contentAnalysisController.extractKeywords.bind(contentAnalysisController),
+  )
 
   fastify.post(
-    '/categorize',
+    "/categorize",
     {
       schema: categorizationSchema,
       // preHandler: [fastify.authenticate, fastify.roleBasedRateLimit],
     },
-    contentAnalysisController.categorizeContent.bind(contentAnalysisController)
-  );
+    contentAnalysisController.categorizeContent.bind(contentAnalysisController),
+  )
 
   fastify.post(
-    '/moderate',
+    "/moderate",
     {
       schema: moderationSchema,
       // preHandler: [fastify.authenticate, fastify.roleBasedRateLimit],
     },
-    contentAnalysisController.moderateContent.bind(contentAnalysisController)
-  );
+    contentAnalysisController.moderateContent.bind(contentAnalysisController),
+  )
 
   fastify.post(
-    '/quality',
+    "/quality",
     {
       schema: qualityAssessmentSchema,
       // preHandler: [fastify.authenticate, fastify.roleBasedRateLimit],
     },
-    contentAnalysisController.assessQuality.bind(contentAnalysisController)
-  );
+    contentAnalysisController.assessQuality.bind(contentAnalysisController),
+  )
 
   fastify.post(
-    '/language',
+    "/language",
     {
       schema: languageDetectionSchema,
       // preHandler: [fastify.authenticate, fastify.roleBasedRateLimit],
     },
-    contentAnalysisController.detectLanguage.bind(contentAnalysisController)
-  );
+    contentAnalysisController.detectLanguage.bind(contentAnalysisController),
+  )
 
   // Admin only routes
   fastify.get(
-    '/stats',
+    "/stats",
     {
       // preHandler: [fastify.authenticate, fastify.requireAdmin, fastify.roleBasedRateLimit],
     },
-    contentAnalysisController.getAnalysisStats.bind(contentAnalysisController)
-  );
-};
+    contentAnalysisController.getAnalysisStats.bind(contentAnalysisController),
+  )
+}
 
-export default contentAnalysisRoutes;
+export default contentAnalysisRoutes

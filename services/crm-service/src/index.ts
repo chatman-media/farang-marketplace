@@ -146,7 +146,7 @@ const startApp = async () => {
 }
 
 if (require.main === module) {
-  startApp().catch(error => {
+  startApp().catch((error) => {
     logger.error("Failed to start CRM Service:", error)
     process.exit(1)
   })

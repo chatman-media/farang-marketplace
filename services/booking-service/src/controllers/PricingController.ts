@@ -46,7 +46,7 @@ export const comparePricingBodySchema = z.object({
       z.object({
         listingId: z.string().uuid("Each option must have a valid listing ID"),
         type: z.enum(["accommodation", "service"]),
-      })
+      }),
     )
     .min(1)
     .max(10, "Options must be an array with 1-10 items"),
@@ -236,7 +236,7 @@ export class PricingController {
             type: option.type,
             ...estimate,
           }
-        })
+        }),
       )
 
       reply.send({

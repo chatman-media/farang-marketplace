@@ -99,7 +99,7 @@ describe("CRMService", () => {
         mockQuery.mockResolvedValueOnce({ rows: [mockCustomerData] })
 
         await expect(crmService.createCustomer(createRequest)).rejects.toThrow(
-          "Customer with this email already exists"
+          "Customer with this email already exists",
         )
       })
 

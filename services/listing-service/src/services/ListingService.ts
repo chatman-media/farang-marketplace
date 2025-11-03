@@ -41,12 +41,12 @@ export class ListingService {
   async createVehicleListing(
     ownerId: string,
     vehicleData: CreateVehicleRequest,
-    _tx?: PgTransaction<any>
+    _tx?: PgTransaction<any>,
   ): Promise<VehicleListing> {
     const listingId = uuidv4()
 
     try {
-      const result = await db.transaction(async trx => {
+      const result = await db.transaction(async (trx) => {
         // Create main listing
         const listingInsert: ListingInsert = {
           id: listingId,
@@ -111,12 +111,12 @@ export class ListingService {
   async createProductListing(
     ownerId: string,
     productData: CreateProductRequest,
-    _tx?: PgTransaction<any>
+    _tx?: PgTransaction<any>,
   ): Promise<ProductListing> {
     const listingId = uuidv4()
 
     try {
-      const result = await db.transaction(async trx => {
+      const result = await db.transaction(async (trx) => {
         // Create main listing
         const listingInsert: ListingInsert = {
           id: listingId,
@@ -319,19 +319,19 @@ export class ListingService {
 
       // Vehicle type filter
       if (filters.type?.length) {
-        const vehicleTypes = filters.type.map(t => t.toLowerCase() as VehicleSelect["vehicleType"])
+        const vehicleTypes = filters.type.map((t) => t.toLowerCase() as VehicleSelect["vehicleType"])
         conditions.push(inArray(schema.vehicles.vehicleType, vehicleTypes))
       }
 
       // Vehicle category filter
       if (filters.category?.length) {
-        const categories = filters.category.map(c => c.toLowerCase() as VehicleSelect["category"])
+        const categories = filters.category.map((c) => c.toLowerCase() as VehicleSelect["category"])
         conditions.push(inArray(schema.vehicles.category, categories))
       }
 
       // Fuel type filter
       if (filters.fuelType?.length) {
-        const fuelTypes = filters.fuelType.filter(f => f !== null) as Array<Exclude<VehicleSelect["fuelType"], null>>
+        const fuelTypes = filters.fuelType.filter((f) => f !== null) as Array<Exclude<VehicleSelect["fuelType"], null>>
         if (fuelTypes.length > 0) {
           conditions.push(inArray(schema.vehicles.fuelType, fuelTypes as any))
         }
@@ -339,7 +339,7 @@ export class ListingService {
 
       // Transmission filter
       if (filters.transmission?.length) {
-        const transmissions = filters.transmission.filter(t => t !== null) as Array<
+        const transmissions = filters.transmission.filter((t) => t !== null) as Array<
           Exclude<VehicleSelect["transmission"], null>
         >
         if (transmissions.length > 0) {
@@ -379,7 +379,7 @@ export class ListingService {
           sql`(
             ${ilike(schema.listings.locationCity, `%${filters.location}%`)} OR
             ${ilike(schema.listings.locationAddress, `%${filters.location}%`)}
-          )`
+          )`,
         )
       }
 
@@ -405,7 +405,7 @@ export class ListingService {
 
       const results = await query
 
-      const mappedResults = results.map(result => this.mapToVehicleListing(result.listings, result.vehicles))
+      const mappedResults = results.map((result) => this.mapToVehicleListing(result.listings, result.vehicles))
 
       return {
         items: mappedResults,
@@ -441,14 +441,14 @@ export class ListingService {
       // Condition filter
       if (filters.condition?.length) {
         conditions.push(
-          inArray(schema.products.condition, filters.condition as unknown as ProductSelect["condition"][])
+          inArray(schema.products.condition, filters.condition as unknown as ProductSelect["condition"][]),
         )
       }
 
       // Listing type filter
       if (filters.listingType?.length) {
         conditions.push(
-          inArray(schema.products.listingType, filters.listingType as unknown as ProductSelect["listingType"][])
+          inArray(schema.products.listingType, filters.listingType as unknown as ProductSelect["listingType"][]),
         )
       }
 
@@ -494,7 +494,7 @@ export class ListingService {
         }
         if (filters.seller.type?.length) {
           conditions.push(
-            inArray(schema.products.sellerType, filters.seller.type as unknown as ProductSelect["sellerType"][])
+            inArray(schema.products.sellerType, filters.seller.type as unknown as ProductSelect["sellerType"][]),
           )
         }
       }
@@ -510,7 +510,7 @@ export class ListingService {
 
       const results = await query
 
-      const mappedResults = results.map(result => this.mapToProductListing(result.listings, result.products))
+      const mappedResults = results.map((result) => this.mapToProductListing(result.listings, result.products))
 
       return {
         items: mappedResults,
@@ -713,7 +713,7 @@ export class ListingService {
 
   async updateVehicleListing(id: string, updates: Partial<CreateVehicleRequest>): Promise<VehicleListing | null> {
     try {
-      const result = await db.transaction(async trx => {
+      const result = await db.transaction(async (trx) => {
         // Update listing
         const listingUpdate: Partial<ListingInsert> = {}
         if (updates.pricing?.basePrice) {

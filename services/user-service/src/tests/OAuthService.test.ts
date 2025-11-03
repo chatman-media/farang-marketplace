@@ -46,7 +46,7 @@ describe.skip("OAuthService", () => {
   describe("getAuthorizationUrl", () => {
     it("should throw error for unconfigured provider", async () => {
       await expect(oauthService.getAuthorizationUrl(AuthProvider.GOOGLE, "test-state")).rejects.toThrow(
-        "Provider google is not configured or supported"
+        "Provider google is not configured or supported",
       )
     })
 
@@ -57,7 +57,7 @@ describe.skip("OAuthService", () => {
       const newOAuthService = new OAuthService(mockUserService, mockAuthService)
 
       await expect(newOAuthService.getAuthorizationUrl(AuthProvider.TELEGRAM, "test-state")).rejects.toThrow(
-        "Telegram uses Login Widget, not authorization URL"
+        "Telegram uses Login Widget, not authorization URL",
       )
     })
   })
@@ -77,7 +77,7 @@ describe.skip("OAuthService", () => {
       }
 
       await expect(oauthService.authenticateWithProvider(request)).rejects.toThrow(
-        "Provider apple is not configured or supported"
+        "Provider apple is not configured or supported",
       )
     })
 
@@ -155,7 +155,7 @@ describe.skip("OAuthService", () => {
       }
 
       await expect(oauthService.linkSocialAccount("user-123", request)).rejects.toThrow(
-        "Provider apple is not configured or supported"
+        "Provider apple is not configured or supported",
       )
     })
 
@@ -192,7 +192,7 @@ describe.skip("OAuthService", () => {
       }
 
       await expect(newOAuthService.linkSocialAccount("user-123", request)).rejects.toThrow(
-        "This social account is already linked to another user"
+        "This social account is already linked to another user",
       )
     })
   })
@@ -228,7 +228,7 @@ describe.skip("OAuthService", () => {
       }
 
       await expect(oauthService.unlinkSocialAccount("user-123", request)).rejects.toThrow(
-        "Cannot unlink the only authentication method. Please set a password first."
+        "Cannot unlink the only authentication method. Please set a password first.",
       )
     })
   })
@@ -267,7 +267,7 @@ describe("GoogleOAuthProvider", () => {
       }
 
       await expect(provider.getUserProfile(request as any)).rejects.toThrow(
-        "Authorization code is required for Google OAuth"
+        "Authorization code is required for Google OAuth",
       )
     })
   })

@@ -148,7 +148,7 @@ Feel free to ask any questions! I'm here to help. 😊`,
             JSON.stringify(template.variables),
             JSON.stringify(template.conditions),
             true,
-          ]
+          ],
         )
         logger.info(`✅ Inserted template: ${template.name}`)
       } else {

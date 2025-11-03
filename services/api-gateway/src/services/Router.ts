@@ -62,7 +62,7 @@ export class Router {
     // Service discovery endpoint
     app.get("/services", async () => {
       return {
-        services: this.serviceDiscovery.getAllServices().map(service => ({
+        services: this.serviceDiscovery.getAllServices().map((service) => ({
           name: service.name,
           url: service.url,
           healthy: service.health.healthy,
@@ -165,7 +165,7 @@ export class Router {
     request: FastifyRequest,
     reply: FastifyReply,
     targetUrl: string,
-    options: ProxyOptions = {}
+    options: ProxyOptions = {},
   ): Promise<void> {
     const { timeout = 30000, retries = 3 } = options
 
@@ -244,7 +244,7 @@ export class Router {
 
         if (attempt < retries) {
           // Wait before retry with exponential backoff
-          await new Promise(resolve => setTimeout(resolve, 2 ** attempt * 1000))
+          await new Promise((resolve) => setTimeout(resolve, 2 ** attempt * 1000))
         }
       }
     }

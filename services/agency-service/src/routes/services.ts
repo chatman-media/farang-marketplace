@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from "fastify"
 import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
-const servicesRoutes: FastifyPluginAsync = async fastify => {
+const servicesRoutes: FastifyPluginAsync = async (fastify) => {
   // Get all services
   fastify.get("/", {
     handler: async (_request, reply) => {

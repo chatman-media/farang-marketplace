@@ -1,3 +1,5 @@
+import { createHash, createHmac, randomBytes } from "crypto"
+import fs from "fs"
 import logger from "@marketplace/logger"
 import {
   AuthProvider,
@@ -10,8 +12,6 @@ import {
   User,
   UserRole,
 } from "@marketplace/shared-types"
-import { createHash, createHmac, randomBytes } from "crypto"
-import fs from "fs"
 import jwt from "jsonwebtoken"
 import { AuthService } from "./AuthService"
 import { UserService } from "./UserService"
@@ -62,7 +62,7 @@ export class OAuthService {
 
   constructor(
     private userService: UserService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {
     this.config = this.loadConfig()
     this.initializeProviders()
@@ -462,7 +462,7 @@ export class TelegramOAuthProvider extends BaseOAuthProvider {
     // Создаем строку для проверки
     const dataCheckString = Object.keys(authData)
       .sort()
-      .map(key => `${key}=${authData[key]}`)
+      .map((key) => `${key}=${authData[key]}`)
       .join("\n")
 
     // Создаем секретный ключ

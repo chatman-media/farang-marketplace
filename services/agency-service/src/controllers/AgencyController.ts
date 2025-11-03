@@ -75,7 +75,7 @@ export class FastifyAgencyController {
         {
           page: Number.parseInt(page, 10),
           limit: Number.parseInt(limit, 10),
-        }
+        },
       )
 
       return reply.code(200).send({

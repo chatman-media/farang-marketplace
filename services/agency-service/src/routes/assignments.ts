@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from "fastify"
 import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
-const assignmentsRoutes: FastifyPluginAsync = async fastify => {
+const assignmentsRoutes: FastifyPluginAsync = async (fastify) => {
   // Get all assignments
   fastify.get("/", {
     preHandler: [authenticateToken],

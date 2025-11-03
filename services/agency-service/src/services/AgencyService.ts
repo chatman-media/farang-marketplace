@@ -133,7 +133,7 @@ export class AgencyService {
    */
   async searchAgencies(
     filters: AgencyFilters = {},
-    options: AgencySearchOptions = {}
+    options: AgencySearchOptions = {},
   ): Promise<{
     agencies: Agency[]
     total: number
@@ -155,7 +155,7 @@ export class AgencyService {
 
       if (filters.search) {
         conditions.push(
-          sql`(${ilike(agencies.name, `%${filters.search}%`)} OR ${ilike(agencies.description, `%${filters.search}%`)})`
+          sql`(${ilike(agencies.name, `%${filters.search}%`)} OR ${ilike(agencies.description, `%${filters.search}%`)})`,
         )
       }
 
@@ -185,10 +185,7 @@ export class AgencyService {
       }
 
       // Get total count
-      const countResult = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(agencies)
-        .where(whereClause)
+      const countResult = await db.select({ count: sql<number>`count(*)` }).from(agencies).where(whereClause)
 
       // Get agencies
       const agencyList = await db

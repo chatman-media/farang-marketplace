@@ -15,7 +15,7 @@ export const createBookingSchema = {
     checkIn: z
       .string()
       .datetime("Check-in date must be a valid ISO 8601 date")
-      .refine(date => new Date(date) > new Date(), "Check-in date must be in the future"),
+      .refine((date) => new Date(date) > new Date(), "Check-in date must be in the future"),
     checkOut: z.string().datetime("Check-out date must be a valid ISO 8601 date").optional(),
     adults: z.number().int().min(1).max(20, "Number of adults must be between 1 and 20").optional(),
     children: z.number().int().min(0).max(10, "Number of children must be between 0 and 10").optional(),
@@ -33,7 +33,7 @@ export const createServiceBookingSchema = {
     scheduledDate: z
       .string()
       .datetime("Scheduled date must be a valid ISO 8601 date")
-      .refine(date => new Date(date) > new Date(), "Scheduled date must be in the future"),
+      .refine((date) => new Date(date) > new Date(), "Scheduled date must be in the future"),
     scheduledTime: z
       .string()
       .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Scheduled time must be in HH:MM format")
@@ -284,7 +284,7 @@ export class BookingController {
       const updatedBooking = await this.bookingService.updateBookingStatus(
         bookingId,
         { status: updateRequest.status, reason: updateRequest.reason },
-        userId
+        userId,
       )
 
       if (!updatedBooking) {

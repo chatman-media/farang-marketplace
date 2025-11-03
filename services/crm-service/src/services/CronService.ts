@@ -250,7 +250,7 @@ export class CronService {
       FROM communications 
       WHERE campaign_id = $1
     `,
-      [campaignId]
+      [campaignId],
     )
 
     const stats = statsResult.rows[0]
@@ -321,7 +321,7 @@ export class CronService {
         metrics.bounceRate,
         metrics.unsubscribeRate,
         metrics.updatedAt,
-      ]
+      ],
     )
   }
 
@@ -403,7 +403,7 @@ export class CronService {
       `)
 
       logger.info(
-        `🧹 Cleaned up ${oldCommsResult.rowCount} old communications and ${oldExecutionsResult.rowCount} old executions`
+        `🧹 Cleaned up ${oldCommsResult.rowCount} old communications and ${oldExecutionsResult.rowCount} old executions`,
       )
     } catch (error) {
       logger.error("Failed to cleanup old data:", error)

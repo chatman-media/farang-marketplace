@@ -434,7 +434,7 @@ describe("Agency Service API Integration Tests", () => {
       Object.entries(rolePermissions).forEach(([_role, permissions]) => {
         expect(Array.isArray(permissions)).toBe(true)
         expect(permissions.length).toBeGreaterThan(0)
-        permissions.forEach(permission => {
+        permissions.forEach((permission) => {
           expect(typeof permission).toBe("string")
           expect(permission.length).toBeGreaterThan(0)
         })

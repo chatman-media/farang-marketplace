@@ -19,7 +19,7 @@ const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    listingController.createVehicle
+    listingController.createVehicle,
   )
 
   fastify.get("/vehicles", listingController.getVehicles)
@@ -39,7 +39,7 @@ const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    listingController.getVehicleById
+    listingController.getVehicleById,
   )
 
   fastify.put(
@@ -56,7 +56,7 @@ const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    listingController.updateVehicle
+    listingController.updateVehicle,
   )
 
   fastify.delete(
@@ -73,7 +73,7 @@ const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    listingController.deleteVehicle
+    listingController.deleteVehicle,
   )
 
   // Product listing routes
@@ -82,7 +82,7 @@ const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     {
       preHandler: [authMiddleware],
     },
-    listingController.createProduct
+    listingController.createProduct,
   )
 
   fastify.get("/products", listingController.getProducts)
@@ -100,7 +100,7 @@ const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    listingController.getProductById
+    listingController.getProductById,
   )
 
   fastify.put(
@@ -117,7 +117,7 @@ const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    listingController.updateProduct
+    listingController.updateProduct,
   )
 
   fastify.delete(
@@ -134,7 +134,7 @@ const listingRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    listingController.deleteProduct
+    listingController.deleteProduct,
   )
 
   // General listing routes

@@ -2,7 +2,6 @@ import { and, asc, desc, eq, type SQL, sql } from "@marketplace/database-schema"
 import { logger } from "@marketplace/logger"
 import type { ServiceProviderFilters, ServiceProviderProfile } from "@marketplace/shared-types"
 import { BusinessRegistrationStatus } from "@marketplace/shared-types"
-
 import { db, schema } from "../db/connection"
 
 const { serviceProviders } = schema
@@ -83,7 +82,7 @@ export class ServiceProviderService {
           metadata: {
             displayName: data.businessName || data.contactInfo.name || "Service Provider",
             bio: data.description,
-            serviceCapabilities: data.services.map(service => ({
+            serviceCapabilities: data.services.map((service) => ({
               serviceType: service.category,
               category: service.category,
               subcategory: service.subcategory,
@@ -144,7 +143,7 @@ export class ServiceProviderService {
     page = 1,
     limit = 20,
     sortBy: "rating" | "price" | "distance" | "created_at" = "rating",
-    sortOrder: "asc" | "desc" = "desc"
+    sortOrder: "asc" | "desc" = "desc",
   ) {
     try {
       const offset = (page - 1) * limit
@@ -177,7 +176,7 @@ export class ServiceProviderService {
         .offset(offset)
         .orderBy(orderByClause, desc(serviceProviders.createdAt))
 
-      const serviceProviderProfiles = results.map(sp => this.mapToServiceProviderProfile(sp))
+      const serviceProviderProfiles = results.map((sp) => this.mapToServiceProviderProfile(sp))
 
       // Get total count
       const totalQuery = await db.select({ count: sql<number>`count(*)` }).from(serviceProviders)
@@ -216,7 +215,7 @@ export class ServiceProviderService {
           sql`EXISTS (
             SELECT 1 FROM jsonb_array_elements(${serviceProviders.metadata}) AS capability
             WHERE capability->>'serviceType' = ANY(${filters.serviceTypes})
-          )`
+          )`,
         )
       }
 
@@ -238,7 +237,7 @@ export class ServiceProviderService {
           sql`EXISTS (
             SELECT 1 FROM jsonb_array_elements(${serviceProviders.metadata}) AS capability
             WHERE (capability->'pricing'->>'basePrice')::numeric BETWEEN ${filters.priceRange.min} AND ${filters.priceRange.max}
-          )`
+          )`,
         )
       }
 
@@ -250,7 +249,7 @@ export class ServiceProviderService {
         .offset(offset)
         .orderBy(desc(sql`0`), desc(serviceProviders.createdAt))
 
-      const serviceProviderProfiles = results.map(sp => this.mapToServiceProviderProfile(sp))
+      const serviceProviderProfiles = results.map((sp) => this.mapToServiceProviderProfile(sp))
 
       // Get total count
       const totalQuery = await db
@@ -278,7 +277,7 @@ export class ServiceProviderService {
   async updateServiceProvider(
     id: string,
     data: UpdateServiceProviderRequest,
-    userId: string
+    userId: string,
   ): Promise<ServiceProviderProfile | null> {
     try {
       // Check ownership
@@ -303,7 +302,7 @@ export class ServiceProviderService {
       if (data.images?.length) updateData.avatar = data.images[0]
 
       if (data.services) {
-        updateData.serviceCapabilities = data.services.map(service => ({
+        updateData.serviceCapabilities = data.services.map((service) => ({
           serviceType: service.category,
           category: service.category,
           subcategory: service.subcategory,

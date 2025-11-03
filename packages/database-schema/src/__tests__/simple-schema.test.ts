@@ -80,7 +80,7 @@ describe("Simple Database Schema Tests", () => {
           email: "test2@example.com",
           phone: "+66123456789", // duplicate
           telegramId: "987654321",
-        })
+        }),
       ).rejects.toThrow()
     })
   })

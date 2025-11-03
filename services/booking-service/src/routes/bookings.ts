@@ -14,7 +14,7 @@ const bookingRoutes: FastifyPluginAsync<BookingRouteOptions> = async (fastify, o
     {
       // preHandler: [fastify.authenticate],
     },
-    bookingController.createBooking.bind(bookingController)
+    bookingController.createBooking.bind(bookingController),
   )
 
   // Create service booking
@@ -23,7 +23,7 @@ const bookingRoutes: FastifyPluginAsync<BookingRouteOptions> = async (fastify, o
     {
       // preHandler: [fastify.authenticate],
     },
-    bookingController.createServiceBooking.bind(bookingController)
+    bookingController.createServiceBooking.bind(bookingController),
   )
 
   // Search bookings
@@ -32,7 +32,7 @@ const bookingRoutes: FastifyPluginAsync<BookingRouteOptions> = async (fastify, o
     {
       // preHandler: [fastify.authenticate],
     },
-    bookingController.searchBookings.bind(bookingController)
+    bookingController.searchBookings.bind(bookingController),
   )
 
   // Get specific booking
@@ -41,7 +41,7 @@ const bookingRoutes: FastifyPluginAsync<BookingRouteOptions> = async (fastify, o
     {
       // preHandler: [fastify.authenticate],
     },
-    bookingController.getBooking.bind(bookingController)
+    bookingController.getBooking.bind(bookingController),
   )
 
   // Get specific service booking
@@ -50,7 +50,7 @@ const bookingRoutes: FastifyPluginAsync<BookingRouteOptions> = async (fastify, o
     {
       // preHandler: [fastify.authenticate],
     },
-    bookingController.getServiceBooking.bind(bookingController)
+    bookingController.getServiceBooking.bind(bookingController),
   )
 
   // Update booking status
@@ -59,7 +59,7 @@ const bookingRoutes: FastifyPluginAsync<BookingRouteOptions> = async (fastify, o
     {
       // preHandler: [fastify.authenticate],
     },
-    bookingController.updateBookingStatus.bind(bookingController)
+    bookingController.updateBookingStatus.bind(bookingController),
   )
 
   // Get booking status history
@@ -68,7 +68,7 @@ const bookingRoutes: FastifyPluginAsync<BookingRouteOptions> = async (fastify, o
     {
       // preHandler: [fastify.authenticate],
     },
-    bookingController.getBookingStatusHistory.bind(bookingController)
+    bookingController.getBookingStatusHistory.bind(bookingController),
   )
 }
 

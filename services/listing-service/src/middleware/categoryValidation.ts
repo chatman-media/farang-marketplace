@@ -16,7 +16,7 @@ export interface CategoryValidationRequest extends FastifyRequest {
 
 export const validateCategoryEnabled = async (
   request: CategoryValidationRequest,
-  reply: FastifyReply
+  reply: FastifyReply,
 ): Promise<void> => {
   // Check category from body, params, or query
   const category =

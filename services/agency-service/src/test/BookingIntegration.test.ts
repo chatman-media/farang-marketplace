@@ -116,7 +116,7 @@ describe("Booking Integration Service Tests", () => {
         "other",
       ]
 
-      validCategories.forEach(category => {
+      validCategories.forEach((category) => {
         expect(typeof category).toBe("string")
         expect(category.length).toBeGreaterThan(0)
       })
@@ -332,13 +332,13 @@ describe("Booking Integration Service Tests", () => {
       const validRatings = [1, 2, 3, 4, 5]
       const invalidRatings = [0, 6, -1, 3.5]
 
-      validRatings.forEach(rating => {
+      validRatings.forEach((rating) => {
         expect(rating).toBeGreaterThanOrEqual(1)
         expect(rating).toBeLessThanOrEqual(5)
         expect(Number.isInteger(rating)).toBe(true)
       })
 
-      invalidRatings.forEach(rating => {
+      invalidRatings.forEach((rating) => {
         const isValid = rating >= 1 && rating <= 5 && Number.isInteger(rating)
         expect(isValid).toBe(false)
       })

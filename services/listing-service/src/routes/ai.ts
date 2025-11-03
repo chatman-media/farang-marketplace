@@ -85,7 +85,7 @@ const aiRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    aiController.enhancedSearch
+    aiController.enhancedSearch,
   )
 
   // Query analysis endpoint
@@ -128,7 +128,7 @@ const aiRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    aiController.analyzeQuery
+    aiController.analyzeQuery,
   )
 
   // Recommendations endpoint
@@ -187,7 +187,7 @@ const aiRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    aiController.getRecommendations
+    aiController.getRecommendations,
   )
 
   // Price suggestions endpoint
@@ -252,7 +252,7 @@ const aiRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    aiController.getPriceSuggestions
+    aiController.getPriceSuggestions,
   )
 
   // Search suggestions endpoint
@@ -296,7 +296,7 @@ const aiRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    aiController.getSuggestions
+    aiController.getSuggestions,
   )
 
   // AI status endpoint
@@ -324,7 +324,7 @@ const aiRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         },
       },
     },
-    aiController.getAIStatus
+    aiController.getAIStatus,
   )
 }
 

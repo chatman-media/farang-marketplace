@@ -109,7 +109,7 @@ export class AvailabilityController {
       const isAvailable = await this.availabilityService.checkServiceAvailability(
         providerId,
         scheduledDateTime,
-        duration
+        duration,
       )
 
       reply.send({

@@ -14,7 +14,7 @@ describe("Image Upload Functionality", () => {
         "video.mp4", // Should be invalid
       ]
 
-      testFiles.forEach(filename => {
+      testFiles.forEach((filename) => {
         const ext = path.extname(filename).toLowerCase()
         const isSupported = supportedFormats.includes(ext)
 
@@ -35,7 +35,7 @@ describe("Image Upload Functionality", () => {
         { name: "huge.jpg", size: 15 * 1024 * 1024 }, // 15MB - invalid
       ]
 
-      testFileSizes.forEach(file => {
+      testFileSizes.forEach((file) => {
         const isValidSize = file.size <= maxFileSize
 
         if (file.size <= maxFileSize) {
@@ -52,7 +52,7 @@ describe("Image Upload Functionality", () => {
 
       const testImageCounts = [0, 1, 5, 10, 20, 25]
 
-      testImageCounts.forEach(count => {
+      testImageCounts.forEach((count) => {
         const isValidCount = count >= minImages && count <= maxImages
 
         if (count >= 1 && count <= 20) {
@@ -72,7 +72,7 @@ describe("Image Upload Functionality", () => {
         { width: 300, height: 225, name: "thumbnail" },
       ]
 
-      resizeConfigs.forEach(config => {
+      resizeConfigs.forEach((config) => {
         expect(config.width).toBeGreaterThan(0)
         expect(config.height).toBeGreaterThan(0)
         expect(config.width / config.height).toBeCloseTo(4 / 3, 1) // 4:3 aspect ratio
@@ -87,7 +87,7 @@ describe("Image Upload Functionality", () => {
         { type: "large", quality: 85 },
       ]
 
-      qualitySettings.forEach(setting => {
+      qualitySettings.forEach((setting) => {
         expect(setting.quality).toBeGreaterThanOrEqual(1)
         expect(setting.quality).toBeLessThanOrEqual(100)
         expect(setting.type).toBeTruthy()
@@ -101,7 +101,7 @@ describe("Image Upload Functionality", () => {
         "product_789_gallery_2_1200x900.webp",
       ]
 
-      testFilenames.forEach(filename => {
+      testFilenames.forEach((filename) => {
         // Should contain dimensions
         expect(filename).toMatch(/\d+x\d+/)
 
@@ -122,7 +122,7 @@ describe("Image Upload Functionality", () => {
         "uploads/products/2024/01/product_789/",
       ]
 
-      uploadPaths.forEach(uploadPath => {
+      uploadPaths.forEach((uploadPath) => {
         // Should start with uploads/
         expect(uploadPath).toMatch(/^uploads\//)
 
@@ -144,7 +144,7 @@ describe("Image Upload Functionality", () => {
         { action: "delete", images: ["delete1.jpg", "delete2.jpg"] },
       ]
 
-      imageOperations.forEach(operation => {
+      imageOperations.forEach((operation) => {
         expect(operation.action).toMatch(/^(upload|update|delete)$/)
 
         if (operation.action === "upload") {
@@ -170,13 +170,13 @@ describe("Image Upload Functionality", () => {
 
       const safeFiles = ["photo.jpg", "image.png", "picture.webp", "graphic.jpeg"]
 
-      dangerousFiles.forEach(filename => {
+      dangerousFiles.forEach((filename) => {
         const ext = path.extname(filename).toLowerCase()
         const isDangerous = ![".jpg", ".jpeg", ".png", ".webp"].includes(ext)
         expect(isDangerous).toBe(true)
       })
 
-      safeFiles.forEach(filename => {
+      safeFiles.forEach((filename) => {
         const ext = path.extname(filename).toLowerCase()
         const isSafe = [".jpg", ".jpeg", ".png", ".webp"].includes(ext)
         expect(isSafe).toBe(true)
@@ -199,7 +199,7 @@ describe("Image Upload Functionality", () => {
       uploadAttempts.forEach((attempt, index) => {
         const recentAttempts = uploadAttempts
           .slice(0, index + 1)
-          .filter(a => attempt.timestamp - a.timestamp < timeWindow)
+          .filter((a) => attempt.timestamp - a.timestamp < timeWindow)
 
         const isAllowed = recentAttempts.length <= maxUploadsPerMinute
 
@@ -241,7 +241,7 @@ describe("Image Upload Functionality", () => {
         },
       ]
 
-      errorResponses.forEach(response => {
+      errorResponses.forEach((response) => {
         expect(response.success).toBe(false)
         expect(response.error).toHaveProperty("code")
         expect(response.error).toHaveProperty("message")

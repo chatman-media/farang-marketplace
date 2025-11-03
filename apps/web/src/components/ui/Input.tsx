@@ -35,14 +35,14 @@ export const Input: React.FC<InputProps> = ({
   return (
     <div>
       {label && (
-        <label htmlFor={inputId} className='form-label'>
+        <label htmlFor={inputId} className="form-label">
           {label}
         </label>
       )}
 
-      <div className='relative'>
+      <div className="relative">
         {leftIcon && (
-          <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <div className={`h-5 w-5 ${error ? "text-error-400" : "text-gray-400"}`}>{leftIcon}</div>
           </div>
         )}
@@ -50,15 +50,15 @@ export const Input: React.FC<InputProps> = ({
         <input id={inputId} className={inputClasses} {...props} />
 
         {rightIcon && (
-          <div className='absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none'>
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <div className={`h-5 w-5 ${error ? "text-error-400" : "text-gray-400"}`}>{rightIcon}</div>
           </div>
         )}
       </div>
 
-      {error && <p className='form-error'>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
 
-      {helperText && !error && <p className='mt-1 text-sm text-gray-500'>{helperText}</p>}
+      {helperText && !error && <p className="mt-1 text-sm text-gray-500">{helperText}</p>}
     </div>
   )
 }

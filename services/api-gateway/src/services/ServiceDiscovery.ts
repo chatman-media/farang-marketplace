@@ -82,7 +82,7 @@ export class ServiceDiscovery extends EventEmitter {
   }
 
   private async checkAllServices(): Promise<void> {
-    const promises = Array.from(this.services.values()).map(service => this.checkServiceHealth(service))
+    const promises = Array.from(this.services.values()).map((service) => this.checkServiceHealth(service))
 
     await Promise.allSettled(promises)
   }
@@ -161,11 +161,11 @@ export class ServiceDiscovery extends EventEmitter {
   }
 
   getHealthyServices(): ServiceInstance[] {
-    return Array.from(this.services.values()).filter(service => service.health.healthy)
+    return Array.from(this.services.values()).filter((service) => service.health.healthy)
   }
 
   getServiceHealth(): ServiceHealth[] {
-    return Array.from(this.services.values()).map(service => service.health)
+    return Array.from(this.services.values()).map((service) => service.health)
   }
 
   isServiceHealthy(name: string): boolean {
@@ -181,15 +181,15 @@ export class ServiceDiscovery extends EventEmitter {
   // Get service statistics
   getStats() {
     const services = this.getAllServices()
-    const healthy = services.filter(s => s.health.healthy)
-    const unhealthy = services.filter(s => !s.health.healthy)
+    const healthy = services.filter((s) => s.health.healthy)
+    const unhealthy = services.filter((s) => !s.health.healthy)
 
     return {
       total: services.length,
       healthy: healthy.length,
       unhealthy: unhealthy.length,
       healthyPercentage: services.length > 0 ? (healthy.length / services.length) * 100 : 0,
-      services: services.map(s => ({
+      services: services.map((s) => ({
         name: s.name,
         healthy: s.health.healthy,
         responseTime: s.health.responseTime,

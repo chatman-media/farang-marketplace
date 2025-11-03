@@ -36,7 +36,7 @@ export class SegmentController {
 
       return reply.code(200).send({
         success: true,
-        data: result.segments.map(segment => segment.toJSON()),
+        data: result.segments.map((segment) => segment.toJSON()),
         pagination: {
           page,
           limit,
@@ -264,7 +264,7 @@ export class SegmentController {
 
       return reply.code(200).send({
         success: true,
-        data: result.customers.map(customer => customer.toJSON()),
+        data: result.customers.map((customer) => customer.toJSON()),
         pagination: {
           page,
           limit,

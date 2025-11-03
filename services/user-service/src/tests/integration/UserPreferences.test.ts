@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-
 import { UserRepository } from "../../repositories/UserRepository"
 import { UserService } from "../../services/UserService"
 import { cleanupTestDatabase } from "../fixtures/database"

@@ -102,7 +102,7 @@ describe("ServiceProviderService", () => {
           },
         }
 
-        requiredFields.forEach(field => {
+        requiredFields.forEach((field) => {
           expect(serviceProviderData).toHaveProperty(field)
         })
 
@@ -167,7 +167,7 @@ describe("ServiceProviderService", () => {
           { price: 2000, currency: "THB", priceType: "project" },
         ]
 
-        pricingData.forEach(pricing => {
+        pricingData.forEach((pricing) => {
           expect(pricing.price).toBeGreaterThan(0)
           expect(pricing.currency).toBe("THB")
           expect(["hourly", "daily", "project", "fixed"]).toContain(pricing.priceType)
@@ -198,7 +198,7 @@ describe("ServiceProviderService", () => {
           { latitude: 7.8804, longitude: 98.3923, city: "Phuket" },
         ]
 
-        locations.forEach(location => {
+        locations.forEach((location) => {
           // Thailand latitude range: approximately 5.6 to 20.5
           expect(location.latitude).toBeGreaterThanOrEqual(5.6)
           expect(location.latitude).toBeLessThanOrEqual(20.5)
@@ -224,13 +224,13 @@ describe("ServiceProviderService", () => {
         }
 
         // Validate days of week (1-7, Monday-Sunday)
-        availability.daysOfWeek.forEach(day => {
+        availability.daysOfWeek.forEach((day) => {
           expect(day).toBeGreaterThanOrEqual(1)
           expect(day).toBeLessThanOrEqual(7)
         })
 
         // Validate time slots
-        availability.timeSlots.forEach(slot => {
+        availability.timeSlots.forEach((slot) => {
           expect(slot.start).toMatch(/^\d{2}:\d{2}$/)
           expect(slot.end).toMatch(/^\d{2}:\d{2}$/)
 
@@ -250,7 +250,7 @@ describe("ServiceProviderService", () => {
         const validBusinessTypes = ["individual", "company", "agency", "freelancer"]
         const testBusinessTypes = ["individual", "company", "agency", "freelancer"]
 
-        testBusinessTypes.forEach(type => {
+        testBusinessTypes.forEach((type) => {
           expect(validBusinessTypes).toContain(type)
         })
       })
@@ -276,7 +276,7 @@ describe("ServiceProviderService", () => {
           { category: "food", name: "Restaurant Delivery" },
         ]
 
-        testServices.forEach(service => {
+        testServices.forEach((service) => {
           expect(serviceCategories).toContain(service.category)
           expect(service.name).toBeTruthy()
         })

@@ -208,7 +208,7 @@ describe("EmailService", () => {
       expect(result).toBe(true)
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining("UPDATE message_templates"),
-        expect.arrayContaining(["Updated Template", "Updated Subject", false, "template-123"])
+        expect.arrayContaining(["Updated Template", "Updated Subject", false, "template-123"]),
       )
     })
 

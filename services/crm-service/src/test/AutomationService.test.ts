@@ -65,7 +65,7 @@ describe("AutomationService", () => {
         automationService.triggerWorkflow("lead_created", {
           leadId: "lead-1",
           customerId: "customer-1",
-        })
+        }),
       ).resolves.not.toThrow()
 
       expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("SELECT * FROM automations"), ["lead_created"])
@@ -275,7 +275,7 @@ describe("AutomationService", () => {
         automationService.triggerWorkflow("lead_created", {
           leadId: "lead-1",
           priority: "high",
-        })
+        }),
       ).resolves.not.toThrow()
 
       // Should not trigger for low priority lead (but won't throw)
@@ -283,7 +283,7 @@ describe("AutomationService", () => {
         automationService.triggerWorkflow("lead_created", {
           leadId: "lead-2",
           priority: "low",
-        })
+        }),
       ).resolves.not.toThrow()
     })
   })
