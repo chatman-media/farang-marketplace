@@ -105,7 +105,7 @@ async function testReactQueryBehavior() {
     const dataWithParams = await responseWithParams.json()
     console.log("✅ Request with query parameters successful")
     console.log(
-      `📊 Pagination: page ${dataWithParams.data.pagination.page}, limit ${dataWithParams.data.pagination.limit}`,
+      `📊 Pagination: page ${dataWithParams.data.pagination.page}, limit ${dataWithParams.data.pagination.limit}`
     )
 
     return true

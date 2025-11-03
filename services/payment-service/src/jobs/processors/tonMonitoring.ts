@@ -1,11 +1,13 @@
+import { and, inArray } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
 import { PaymentStatus } from "@marketplace/shared-types"
 import axios from "axios"
 import { Job, Worker } from "bullmq"
-import { and, inArray } from "drizzle-orm"
 
-import { db } from "../../db/connection"
-import { payments } from "../../db/schema"
+import { db, schema } from "../../db/connection"
+
+const { payments } = schema
+
 import { ModernTonService } from "../../services/ModernTonService"
 import { PaymentService } from "../../services/PaymentService"
 import { redis } from "../index"
@@ -27,8 +29,8 @@ async function checkPendingTransactions(job: Job) {
       .where(
         and(
           inArray(payments.paymentMethod, ["ton_wallet", "ton_connect", "jetton_usdt", "jetton_usdc"]),
-          inArray(payments.status, [PaymentStatus.PENDING, PaymentStatus.PROCESSING]),
-        ),
+          inArray(payments.status, [PaymentStatus.PENDING, PaymentStatus.PROCESSING])
+        )
       )
       .limit(batchSize)
 
@@ -36,23 +38,23 @@ async function checkPendingTransactions(job: Job) {
     let confirmed = 0
 
     for (const payment of pendingPayments) {
-      if (payment.tonTransactionHash) {
+      if (payment.blockchainTxHash) {
         try {
           // Check transaction status
-          const isConfirmed = await tonService.verifyTransaction(payment.tonTransactionHash)
+          const isConfirmed = await tonService.verifyTransaction(payment.blockchainTxHash)
 
-          if (isConfirmed && payment.status !== PaymentStatus.CONFIRMED) {
+          if (isConfirmed && payment.status !== "completed") {
             await paymentService.updatePaymentStatus(
               payment.id,
-              PaymentStatus.CONFIRMED,
-              "Transaction confirmed on TON blockchain",
+              PaymentStatus.COMPLETED,
+              "Transaction confirmed on TON blockchain"
             )
             confirmed++
           }
 
           processed++
         } catch (error) {
-          logger.error(`Failed to check transaction ${payment.tonTransactionHash}:`, error)
+          logger.error(`Failed to check transaction ${payment.blockchainTxHash}:`, error)
         }
       }
     }
@@ -151,24 +153,22 @@ async function healthCheckTonNetwork(_job: Job) {
 
 // Create worker for TON monitoring jobs
 export const tonMonitoringWorker = new Worker(
-  "ton-monitoring-v2",
+  "ton-monitoring",
   async (job: Job) => {
-    const { type } = job.data
-
-    switch (type) {
-      case "check-transactions":
+    switch (job.name) {
+      case "check-pending-transactions":
         return await checkPendingTransactions(job)
-      case "update-rates":
+      case "update-exchange-rates":
         return await updateExchangeRates(job)
-      case "sync-balances":
+      case "sync-jetton-balances":
         return await syncJettonBalances(job)
-      case "health-check":
+      case "health-check-ton-network":
         return await healthCheckTonNetwork(job)
       default:
-        throw new Error(`Unknown job type: ${type}`)
+        throw new Error(`Unknown job name: ${job.name}`)
     }
   },
-  { connection: redis },
+  { connection: redis }
 )
 
 logger.info("🔄 TON monitoring job processors loaded")

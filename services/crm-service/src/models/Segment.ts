@@ -125,7 +125,7 @@ export class Segment implements ISegment {
     if (data.criteria) {
       data.criteria.forEach((criteria, index) => {
         const criteriaErrors = Segment.validateCriteria(criteria)
-        criteriaErrors.forEach((error) => {
+        criteriaErrors.forEach(error => {
           errors.push(`Criteria ${index + 1}: ${error}`)
         })
       })
@@ -156,7 +156,7 @@ export class Segment implements ISegment {
       } else {
         data.criteria.forEach((criteria, index) => {
           const criteriaErrors = Segment.validateCriteria(criteria)
-          criteriaErrors.forEach((error) => {
+          criteriaErrors.forEach(error => {
             errors.push(`Criteria ${index + 1}: ${error}`)
           })
         })

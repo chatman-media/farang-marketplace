@@ -1,12 +1,11 @@
 import { TonConnectUIProvider } from "@tonconnect/ui-react"
-import React from "react"
 
 function App() {
   const Provider = TonConnectUIProvider as any
 
   return (
-    <Provider manifestUrl="https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json">
-      <div className="App">
+    <Provider manifestUrl='https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json'>
+      <div className='App'>
         <header>
           <h1>TON App - Thailand Marketplace</h1>
         </header>

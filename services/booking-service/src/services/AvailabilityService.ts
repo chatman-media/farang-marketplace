@@ -1,7 +1,8 @@
-import { and, between, eq, gte, lte, or } from "drizzle-orm"
+import { and, between, eq, gte, lte, or } from "@marketplace/database-schema"
 
-import { db } from "../db/connection"
-import { availabilityConflicts, bookings, serviceBookings } from "../db/schema"
+import { db, schema } from "../db/connection"
+
+const { availabilityConflicts, bookings, serviceBookings } = schema
 
 export interface TimeSlot {
   start: string // HH:MM format
@@ -48,9 +49,9 @@ export class AvailabilityService {
             // Conflict ends within our range
             and(gte(availabilityConflicts.endDate, checkIn), lte(availabilityConflicts.endDate, endDate)),
             // Our range is within the conflict
-            and(lte(availabilityConflicts.startDate, checkIn), gte(availabilityConflicts.endDate, endDate)),
-          ),
-        ),
+            and(lte(availabilityConflicts.startDate, checkIn), gte(availabilityConflicts.endDate, endDate))
+          )
+        )
       )
 
     return conflicts.length === 0
@@ -60,7 +61,7 @@ export class AvailabilityService {
   async checkServiceAvailability(
     providerId: string,
     scheduledDate: Date,
-    duration: { value: number; unit: string },
+    duration: { value: number; unit: string }
   ): Promise<boolean> {
     const endTime = this.calculateEndTime(scheduledDate, duration)
 
@@ -80,10 +81,10 @@ export class AvailabilityService {
             // Our booking starts within existing booking time
             and(
               lte(serviceBookings.scheduledDate, scheduledDate),
-              gte(serviceBookings.scheduledDate, scheduledDate), // Simplified for now
-            ),
-          ),
-        ),
+              gte(serviceBookings.scheduledDate, scheduledDate) // Simplified for now
+            )
+          )
+        )
       )
 
     return conflictingBookings.length === 0
@@ -100,9 +101,9 @@ export class AvailabilityService {
           or(
             between(availabilityConflicts.startDate, startDate, endDate),
             between(availabilityConflicts.endDate, startDate, endDate),
-            and(lte(availabilityConflicts.startDate, startDate), gte(availabilityConflicts.endDate, endDate)),
-          ),
-        ),
+            and(lte(availabilityConflicts.startDate, startDate), gte(availabilityConflicts.endDate, endDate))
+          )
+        )
       )
 
     const calendar: AvailabilityWindow[] = []
@@ -110,7 +111,7 @@ export class AvailabilityService {
 
     while (currentDate <= endDate) {
       const dateStr = currentDate.toISOString().split("T")[0]
-      const dayConflicts = conflicts.filter((conflict) => {
+      const dayConflicts = conflicts.filter(conflict => {
         const conflictStart = conflict.startDate.toISOString().split("T")[0]
         const conflictEnd = conflict.endDate.toISOString().split("T")[0]
         return dateStr >= conflictStart && dateStr <= conflictEnd
@@ -119,7 +120,7 @@ export class AvailabilityService {
       calendar.push({
         date: dateStr,
         available: dayConflicts.length === 0,
-        conflicts: dayConflicts.map((conflict) => ({
+        conflicts: dayConflicts.map(conflict => ({
           type: conflict.conflictType as "booking" | "maintenance" | "blocked",
           reason: conflict.reason || undefined,
         })),
@@ -149,18 +150,18 @@ export class AvailabilityService {
           eq(serviceBookings.providerId, providerId),
           gte(serviceBookings.scheduledDate, startOfDay),
           lte(serviceBookings.scheduledDate, endOfDay),
-          or(eq(bookings.status, "confirmed"), eq(bookings.status, "active")),
-        ),
+          or(eq(bookings.status, "confirmed"), eq(bookings.status, "in_progress"))
+        )
       )
 
     // Generate time slots (assuming 1-hour slots from 9 AM to 6 PM)
     const timeSlots = this.generateTimeSlots()
 
-    const availableSlots = timeSlots.map((slot) => {
+    const availableSlots = timeSlots.map(slot => {
       const slotStart = this.parseTimeSlot(date, slot.start)
       const slotEnd = this.parseTimeSlot(date, slot.end)
 
-      const conflictingBooking = existingBookings.find((booking) => {
+      const conflictingBooking = existingBookings.find(booking => {
         const bookingStart = booking.service_bookings.scheduledDate
         const bookingEnd = this.calculateServiceEndTime(booking.service_bookings)
 
@@ -194,7 +195,7 @@ export class AvailabilityService {
     conflictType: "booking" | "maintenance" | "blocked",
     bookingId?: string,
     createdBy?: string,
-    reason?: string,
+    reason?: string
   ): Promise<void> {
     await db.insert(availabilityConflicts).values({
       listingId,
@@ -218,7 +219,7 @@ export class AvailabilityService {
     startDate: Date,
     endDate: Date,
     reason: string,
-    createdBy: string,
+    createdBy: string
   ): Promise<void> {
     // Check if dates are already blocked or booked
     const isAvailable = await this.checkAvailability(listingId, startDate, endDate)
@@ -239,15 +240,15 @@ export class AvailabilityService {
           eq(availabilityConflicts.listingId, listingId),
           eq(availabilityConflicts.conflictType, "blocked"),
           gte(availabilityConflicts.startDate, startDate),
-          lte(availabilityConflicts.endDate, endDate),
-        ),
+          lte(availabilityConflicts.endDate, endDate)
+        )
       )
   }
 
   // Get upcoming bookings for a listing
   async getUpcomingBookings(
     listingId: string,
-    limit: number = 10,
+    limit: number = 10
   ): Promise<
     Array<{
       bookingId: string
@@ -272,13 +273,13 @@ export class AvailabilityService {
         and(
           eq(bookings.listingId, listingId),
           gte(bookings.checkIn, now),
-          or(eq(bookings.status, "confirmed"), eq(bookings.status, "active")),
-        ),
+          or(eq(bookings.status, "confirmed"), eq(bookings.status, "in_progress"))
+        )
       )
       .orderBy(bookings.checkIn)
       .limit(limit)
 
-    return upcomingBookings.map((booking) => ({
+    return upcomingBookings.map(booking => ({
       bookingId: booking.id,
       checkIn: booking.checkIn,
       checkOut: booking.checkOut || undefined,

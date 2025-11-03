@@ -87,7 +87,7 @@ export const optionalAuthMiddleware = async (request: FastifyRequest, _reply: Fa
       verified: decoded.verified,
     }
   } catch (error) {
-    logger.log("Optional auth error:", error)
+    logger.debug("Optional auth error:", error)
     // If token is invalid, continue without authentication
   }
 }

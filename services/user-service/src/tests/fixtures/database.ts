@@ -1,4 +1,4 @@
-import { createDatabaseConnection, sql, users } from "@marketplace/database-schema"
+import { createDatabaseConnection, type Database, sql, users } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
 import { AuthProvider, UserRole, VerificationStatus } from "@marketplace/shared-types"
 
@@ -178,7 +178,7 @@ export const createUserEntities = () => {
       "telegramId" in fixture ? fixture.telegramId : undefined,
       fixture.isActive,
       fixture.createdAt,
-      fixture.updatedAt,
+      fixture.updatedAt
     )
   })
 
@@ -395,7 +395,7 @@ export async function insertUserFixtures(): Promise<void> {
 /**
  * Get test database connection for direct queries
  */
-export function getTestConnection() {
+export function getTestConnection(): Database {
   const connectionString = process.env.DATABASE_URL || "postgresql://postgres:postgres@postgres:5432/marketplace"
   return createDatabaseConnection(connectionString)
 }

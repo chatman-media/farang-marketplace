@@ -116,7 +116,7 @@ describe("Payment API Tests", () => {
         expect(Array.isArray(requiredFields)).toBe(true)
         expect(Array.isArray(optionalFields)).toBe(true)
 
-        requiredFields.forEach((field) => {
+        requiredFields.forEach(field => {
           expect(typeof field).toBe("string")
           expect(field.length).toBeGreaterThan(0)
         })

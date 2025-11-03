@@ -5,7 +5,7 @@ import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
 const agencyServiceController = new AgencyServiceController()
 
-const agencyServicesRoutes: FastifyPluginAsync = async (fastify) => {
+const agencyServicesRoutes: FastifyPluginAsync = async fastify => {
   // Get all services for an agency
   fastify.get("/agency/:agencyId", {
     preHandler: [authenticateToken],

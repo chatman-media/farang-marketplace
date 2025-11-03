@@ -102,10 +102,10 @@ describe("CronService", () => {
 
       // Should have default jobs
       expect(jobs.length).toBeGreaterThan(0)
-      expect(jobs.some((job) => job.id === "campaign-metrics")).toBe(true)
-      expect(jobs.some((job) => job.id === "customer-metrics")).toBe(true)
-      expect(jobs.some((job) => job.id === "lead-followup")).toBe(true)
-      expect(jobs.some((job) => job.id === "data-cleanup")).toBe(true)
+      expect(jobs.some(job => job.id === "campaign-metrics")).toBe(true)
+      expect(jobs.some(job => job.id === "customer-metrics")).toBe(true)
+      expect(jobs.some(job => job.id === "lead-followup")).toBe(true)
+      expect(jobs.some(job => job.id === "data-cleanup")).toBe(true)
     })
 
     it("should enable and disable jobs", () => {

@@ -1,28 +1,15 @@
-import logger from "@marketplace/logger"
+import logger, { createPinoLoggerOptions } from "@marketplace/logger"
 import Fastify, { FastifyInstance } from "fastify"
 
-import { corsConfig, env, loggerConfig, rateLimitConfig } from "./config/environment.js"
+import { corsConfig, env, rateLimitConfig } from "./config/environment.js"
 import { authMiddleware } from "./middleware/auth.js"
-import { loggingMiddleware, logResponse } from "./middleware/logging.js"
 import { Router } from "./services/Router.js"
 import { ServiceDiscovery } from "./services/ServiceDiscovery.js"
 
 export const createApp = async (): Promise<FastifyInstance> => {
-  // Create Fastify app
+  // Create Fastify app with integrated logger
   const app = Fastify({
-    logger: loggerConfig.prettyPrint
-      ? {
-          level: loggerConfig.level,
-          transport: {
-            target: "pino-pretty",
-            options: {
-              colorize: true,
-            },
-          },
-        }
-      : {
-          level: loggerConfig.level,
-        },
+    logger: createPinoLoggerOptions("api-gateway"),
     bodyLimit: 10 * 1024 * 1024, // 10MB
     trustProxy: true, // Important for API Gateway
   })
@@ -158,12 +145,12 @@ export const createApp = async (): Promise<FastifyInstance> => {
 }
 
 // Error handling
-process.on("uncaughtException", (error) => {
+process.on("uncaughtException", error => {
   logger.error("Uncaught Exception:", error)
   process.exit(1)
 })
 
-process.on("unhandledRejection", (reason, promise) => {
-  logger.error("Unhandled Rejection at:", promise, "reason:", reason)
+process.on("unhandledRejection", (_reason, promise) => {
+  logger.error("Unhandled Rejection at:", promise)
   process.exit(1)
 })

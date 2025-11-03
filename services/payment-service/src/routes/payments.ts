@@ -105,7 +105,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
             method: payment.paymentMethod,
             tonPaymentUrl,
             qrCode,
-            expiresAt: payment.expiresAt?.toISOString() || new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+            expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes expiry
           },
         })
       } catch (error) {
@@ -116,7 +116,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           message: error instanceof Error ? error.message : "Unknown error",
         })
       }
-    },
+    }
   )
 
   // Get payment by ID
@@ -151,7 +151,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           error: "Failed to get payment",
         })
       }
-    },
+    }
   )
 
   // Update payment status
@@ -170,12 +170,12 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         Params: { id: string }
         Body: z.infer<typeof updatePaymentStatusSchema>
       }>,
-      reply: FastifyReply,
+      reply: FastifyReply
     ) => {
       try {
         const { status, reason } = request.body
 
-        const updatedPayment = await paymentService.updatePaymentStatus(request.params.id, status, reason)
+        const updatedPayment = await paymentService.updatePaymentStatus(request.params.id, status as any, reason)
 
         return reply.send({
           success: true,
@@ -188,7 +188,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           error: "Failed to update payment status",
         })
       }
-    },
+    }
   )
 
   // Search payments
@@ -206,12 +206,12 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         // Type-safe search with proper casting
         const searchFilters = {
           ...filters,
-          status: filters.status as PaymentStatus | undefined,
+          status: filters.status as any,
           startDate: filters.startDate ? new Date(filters.startDate) : undefined,
           endDate: filters.endDate ? new Date(filters.endDate) : undefined,
         }
 
-        const result = await paymentService.searchPayments(searchFilters, filters.page, filters.limit)
+        const result = await paymentService.searchPayments(searchFilters as any, filters.page, filters.limit)
 
         return reply.send({
           success: true,
@@ -224,6 +224,6 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           error: "Failed to search payments",
         })
       }
-    },
+    }
   )
 }

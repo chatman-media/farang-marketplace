@@ -1,17 +1,14 @@
 import { sql } from "@marketplace/database-schema"
-import { UserRole, VerificationStatus } from "@marketplace/shared-types"
+import { VerificationStatus } from "@marketplace/shared-types"
+import bcrypt from "bcryptjs"
+import { randomUUID } from "crypto"
 import { FastifyInstance } from "fastify"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest"
 
 import { createApp } from "../../app"
 import { UserRepository } from "../../repositories/UserRepository"
-import { cleanupTestDatabase, setupTestDatabase } from "../fixtures/database"
+import { cleanupTestDatabase, getTestConnection, setupTestDatabase } from "../fixtures/database"
 import { awaitableTestRequest as testRequest } from "../helpers/fastify-test-utils"
-import bcrypt from "bcryptjs"
-
-import { getTestConnection } from "../fixtures/database"
-
-import { randomUUID } from "crypto"
 
 describe("ProfileController Integration Tests", () => {
   let userRepository: UserRepository

@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "dev": "turbo run dev",
+    "dev:ui": "turbo run dev --ui=tui",
     "build": "turbo run build",
     "test": "turbo run test",
     "test:all": "./scripts/test-all.sh",
@@ -35,29 +36,37 @@
     "setup": "bun install && bun run docker:up && bun run build"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.2.4",
-    "@eslint/js": "^9.35.0",
-    "@types/node": "24.3.3",
-    "@types/react": "19.1.13",
-    "@types/react-dom": "19.1.9",
-    "@typescript-eslint/eslint-plugin": "8.43.0",
-    "@typescript-eslint/parser": "8.43.0",
-    "@vitejs/plugin-react": "^5.0.2",
+    "@biomejs/biome": "^2.3.3",
+    "@eslint/js": "^9.39.0",
+    "@fastify/compress": "^8.1.0",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/jwt": "^10.0.0",
+    "@fastify/rate-limit": "^10.3.0",
+    "@types/node": "24.10.0",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@typescript-eslint/eslint-plugin": "8.46.3",
+    "@typescript-eslint/parser": "8.46.3",
+    "@vitejs/plugin-react": "^5.1.0",
     "c8": "^10.1.3",
     "codecov": "^3.8.3",
-    "eslint": "9.35.0",
+    "eslint": "9.39.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "nyc": "^17.1.0",
     "prettier": "^3.6.2",
-    "react": "19.1.1",
-    "react-dom": "19.1.1",
-    "turbo": "2.5.6",
-    "typescript": "^5.9.2",
-    "vite": "7.1.5"
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "turbo": "2.6.0",
+    "typescript": "^5.9.3",
+    "vite": "7.1.12"
   },
   "engines": {
     "bun": ">=1.2.0"
   },
-  "packageManager": "bun@1.2.1"
+  "packageManager": "bun@1.3.1",
+  "overrides": {
+    "drizzle-orm": "0.44.7"
+  }
 }

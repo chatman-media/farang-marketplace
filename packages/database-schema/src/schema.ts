@@ -92,6 +92,7 @@ export const vehicleCategoryEnum = pgEnum("vehicle_category", [
   "sport",
   "electric",
   "classic",
+  "rental",
 ])
 
 export const buildingTypeEnum = pgEnum("building_type", [
@@ -932,10 +933,10 @@ export const customerSegmentMemberships = pgTable(
     // Timestamps
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (table) => ({
+  table => ({
     // Unique constraint to prevent duplicate memberships
     uniqueCustomerSegment: unique().on(table.customerId, table.segmentId),
-  }),
+  })
 )
 
 export const campaignMessages = pgTable("campaign_messages", {
@@ -1487,14 +1488,14 @@ export const payments = pgTable(
     processedAt: timestamp("processed_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
   },
-  (table) => [
+  table => [
     index("payments_user_id_idx").on(table.userId),
     index("payments_listing_id_idx").on(table.listingId),
     index("payments_booking_id_idx").on(table.bookingId),
     index("payments_status_idx").on(table.status),
     index("payments_created_at_idx").on(table.createdAt),
     index("payments_provider_payment_id_idx").on(table.providerPaymentId),
-  ],
+  ]
 )
 
 // Transactions Table
@@ -1539,14 +1540,14 @@ export const transactions = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     processedAt: timestamp("processed_at", { withTimezone: true }),
   },
-  (table) => [
+  table => [
     index("transactions_payment_id_idx").on(table.paymentId),
     index("transactions_from_user_id_idx").on(table.fromUserId),
     index("transactions_to_user_id_idx").on(table.toUserId),
     index("transactions_type_idx").on(table.type),
     index("transactions_status_idx").on(table.status),
     index("transactions_created_at_idx").on(table.createdAt),
-  ],
+  ]
 )
 
 // Refunds Table
@@ -1593,12 +1594,12 @@ export const refunds = pgTable(
     processedAt: timestamp("processed_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
   },
-  (table) => [
+  table => [
     index("refunds_payment_id_idx").on(table.paymentId),
     index("refunds_transaction_id_idx").on(table.transactionId),
     index("refunds_status_idx").on(table.status),
     index("refunds_created_at_idx").on(table.createdAt),
-  ],
+  ]
 )
 
 // Payment Methods Table
@@ -1644,12 +1645,12 @@ export const paymentMethods = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
+  table => [
     index("payment_methods_user_id_idx").on(table.userId),
     index("payment_methods_type_idx").on(table.type),
     index("payment_methods_is_default_idx").on(table.isDefault),
     index("payment_methods_provider_id_idx").on(table.providerId),
-  ],
+  ]
 )
 
 // Payment Relations
@@ -1741,14 +1742,14 @@ export const userBehaviors = pgTable(
     timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
+  table => [
     index("user_behaviors_user_id_idx").on(table.userId),
     index("user_behaviors_action_idx").on(table.action),
     index("user_behaviors_entity_type_idx").on(table.entityType),
     index("user_behaviors_entity_id_idx").on(table.entityId),
     index("user_behaviors_session_id_idx").on(table.sessionId),
     index("user_behaviors_timestamp_idx").on(table.timestamp),
-  ],
+  ]
 )
 
 // Content Analysis Results
@@ -1809,12 +1810,12 @@ export const contentAnalysis = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
+  table => [
     index("content_analysis_type_idx").on(table.type),
     index("content_analysis_entity_id_idx").on(table.entityId),
     index("content_analysis_timestamp_idx").on(table.timestamp),
     index("content_analysis_sentiment_score_idx").on(table.sentimentScore),
-  ],
+  ]
 )
 
 // Machine Learning Models
@@ -1846,12 +1847,12 @@ export const mlModels = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
+  table => [
     index("ml_models_name_idx").on(table.name),
     index("ml_models_type_idx").on(table.type),
     index("ml_models_status_idx").on(table.status),
     index("ml_models_version_idx").on(table.version),
-  ],
+  ]
 )
 
 // Training Jobs
@@ -1900,11 +1901,11 @@ export const trainingJobs = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
+  table => [
     index("training_jobs_model_id_idx").on(table.modelId),
     index("training_jobs_status_idx").on(table.status),
     index("training_jobs_start_time_idx").on(table.startTime),
-  ],
+  ]
 )
 
 // Search Queries
@@ -1950,12 +1951,12 @@ export const searchQueries = pgTable(
     timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
+  table => [
     index("search_queries_user_id_idx").on(table.userId),
     index("search_queries_type_idx").on(table.type),
     index("search_queries_timestamp_idx").on(table.timestamp),
     index("search_queries_query_idx").on(table.query),
-  ],
+  ]
 )
 
 // AI Service Relations
@@ -2095,14 +2096,14 @@ export const bookings = pgTable(
     confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
   },
-  (table) => [
+  table => [
     index("bookings_listing_id_idx").on(table.listingId),
     index("bookings_guest_id_idx").on(table.guestId),
     index("bookings_host_id_idx").on(table.hostId),
     index("bookings_status_idx").on(table.status),
     index("bookings_check_in_idx").on(table.checkIn),
     index("bookings_payment_status_idx").on(table.paymentStatus),
-  ],
+  ]
 )
 
 // Service Bookings Table (extends bookings for service-specific fields)
@@ -2166,12 +2167,12 @@ export const serviceBookings = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
+  table => [
     index("service_bookings_booking_id_idx").on(table.bookingId),
     index("service_bookings_provider_id_idx").on(table.providerId),
     index("service_bookings_scheduled_date_idx").on(table.scheduledDate),
     index("service_bookings_service_type_idx").on(table.serviceType),
-  ],
+  ]
 )
 
 // Booking Status History
@@ -2195,10 +2196,10 @@ export const bookingStatusHistory = pgTable(
       }>()
       .default({}),
   },
-  (table) => [
+  table => [
     index("booking_status_history_booking_id_idx").on(table.bookingId),
     index("booking_status_history_changed_at_idx").on(table.changedAt),
-  ],
+  ]
 )
 
 // Availability Conflicts
@@ -2215,10 +2216,10 @@ export const availabilityConflicts = pgTable(
     createdBy: uuid("created_by").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
+  table => [
     index("availability_conflicts_listing_id_idx").on(table.listingId),
     index("availability_conflicts_date_range_idx").on(table.startDate, table.endDate),
-  ],
+  ]
 )
 
 // Disputes
@@ -2257,9 +2258,9 @@ export const disputes = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
+  table => [
     index("disputes_booking_id_idx").on(table.bookingId),
     index("disputes_status_idx").on(table.status),
     index("disputes_initiated_by_idx").on(table.initiatedBy),
-  ],
+  ]
 )

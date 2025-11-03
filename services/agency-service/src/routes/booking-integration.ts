@@ -5,7 +5,7 @@ import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
 const bookingIntegrationController = new BookingIntegrationController()
 
-const bookingIntegrationRoutes: FastifyPluginAsync = async (fastify) => {
+const bookingIntegrationRoutes: FastifyPluginAsync = async fastify => {
   // Find matching agencies
   fastify.post("/find-agencies", {
     preHandler: [authenticateToken],
@@ -94,7 +94,7 @@ const bookingIntegrationRoutes: FastifyPluginAsync = async (fastify) => {
         required: ["bookingId", "status", "agencyId"],
       },
     },
-    handler: async (request, reply) => {
+    handler: async (_request, reply) => {
       return reply.code(200).send({
         success: true,
         message: "Webhook processed successfully",

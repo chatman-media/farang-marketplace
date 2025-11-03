@@ -5,7 +5,7 @@ import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
 const serviceAssignmentController = new ServiceAssignmentController()
 
-const serviceAssignmentsRoutes: FastifyPluginAsync = async (fastify) => {
+const serviceAssignmentsRoutes: FastifyPluginAsync = async fastify => {
   // Create new assignment
   fastify.post("/", {
     preHandler: [authenticateToken, requireAgencyStaff],

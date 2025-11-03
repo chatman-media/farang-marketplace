@@ -81,7 +81,7 @@ describe("Simple Database Schema Tests", () => {
           email: "test2@example.com",
           phone: "+66123456789", // duplicate
           telegramId: "987654321",
-        }),
+        })
       ).rejects.toThrow()
     })
   })
@@ -132,7 +132,7 @@ describe("Simple Database Schema Tests", () => {
         sticker: "Rental sticker",
         rentalSticker: "Company rental",
         gpsTrackerId: "ST123456",
-        engineSize: 150.0,
+        engineSize: "150.0",
         fuelType: "gasoline" as const,
         transmission: "automatic" as const,
         mileage: 5000,

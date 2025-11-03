@@ -1,4 +1,4 @@
-import logger from "@marketplace/logger"
+import logger, { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify from "fastify"
 import { z } from "zod"
@@ -12,16 +12,16 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.string().transform(Number).default(3007),
   CORS_ORIGIN: z.string().default("*"),
-  JWT_SECRET: z.string(),
-  DATABASE_URL: z.string(),
+  JWT_SECRET: z.string().default("dev-jwt-secret-change-in-production"),
+  DATABASE_URL: z.string().default("postgresql://user:password@localhost:5432/marketplace_crm"),
 })
 
 const env = envSchema.parse(process.env)
 
-// Create Fastify app function
+// Create Fastify app function with integrated logger
 const createApp = async () => {
   const app = Fastify({
-    logger: env.NODE_ENV === "development",
+    logger: createPinoLoggerOptions("crm-service"),
     bodyLimit: 10 * 1024 * 1024, // 10MB
   })
 
@@ -146,7 +146,7 @@ const startApp = async () => {
 }
 
 if (require.main === module) {
-  startApp().catch((error) => {
+  startApp().catch(error => {
     logger.error("Failed to start CRM Service:", error)
     process.exit(1)
   })

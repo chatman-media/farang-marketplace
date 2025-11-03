@@ -1,21 +1,25 @@
+import { and, desc, eq, gte, lte, sql } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
 import { PaymentStatus as SharedPaymentStatus } from "@marketplace/shared-types"
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm"
 
-import { db } from "../db/connection"
-import type {
-  Dispute,
-  NewDispute,
-  NewPayment,
-  NewRefund,
-  NewTransaction,
-  Payment,
-  PaymentMethodType,
-  PaymentStatus,
-  Refund,
-  Transaction,
-} from "../db/schema"
-import { disputes, payments, refunds, transactions } from "../db/schema"
+import { db, schema } from "../db/connection"
+
+const { disputes, payments, refunds, transactions } = schema
+
+// Infer types from schema
+type Payment = typeof payments.$inferSelect
+type Transaction = typeof transactions.$inferSelect
+type Refund = typeof refunds.$inferSelect
+type Dispute = typeof disputes.$inferSelect
+
+// Insert types
+type NewTransaction = typeof transactions.$inferInsert
+type NewRefund = typeof refunds.$inferInsert
+type NewDispute = typeof disputes.$inferInsert
+
+// Enum type
+type PaymentMethodType = "ton_wallet" | "ton_connect" | "jetton_usdt" | "jetton_usdc" | "stripe_card" | "promptpay"
+type PaymentStatus = "pending" | "processing" | "completed" | "failed" | "cancelled" | "refunded"
 
 import { ModernTonService } from "./ModernTonService"
 import { StripeService } from "./StripeService"
@@ -100,25 +104,31 @@ export class PaymentService {
         tonAmount = await this.tonService.calculateTonAmount(request.fiatAmount, request.fiatCurrency ?? "USD")
       }
 
-      const newPayment: NewPayment = {
+      const newPayment: any = {
         bookingId: request.bookingId,
-        payerId: request.payerId,
-        payeeId: request.payeeId,
+        userId: request.payerId,
         amount: request.amount,
         currency: request.currency || "TON",
-        fiatAmount: request.fiatAmount?.toString(),
-        fiatCurrency: request.fiatCurrency || "USD",
-        paymentMethod: request.paymentMethod,
-        status: SharedPaymentStatus.PENDING,
-        tonAmount,
-        tonWalletAddress: request.tonWalletAddress,
-        platformFee: platformFee.toString(),
-        processingFee: processingFee.toString(),
-        totalFees: totalFees.toString(),
-        description: request.description,
-        metadata: request.metadata,
-        expiresAt,
-        requiredConfirmations: 3,
+        paymentMethod: request.paymentMethod as any,
+        status: SharedPaymentStatus.PENDING as any,
+        provider: request.paymentMethod.includes("stripe")
+          ? "stripe"
+          : request.paymentMethod.includes("ton")
+            ? "ton"
+            : "promptpay",
+        totalAmount: request.amount,
+        metadata: {
+          ...request.metadata,
+          payeeId: request.payeeId,
+          tonAmount,
+          tonWalletAddress: request.tonWalletAddress,
+          platformFee: platformFee.toString(),
+          processingFee: processingFee.toString(),
+          totalFees: totalFees.toString(),
+          description: request.description,
+          expiresAt,
+          requiredConfirmations: 3,
+        },
       }
 
       const [payment] = await db.insert(payments).values(newPayment).returning()
@@ -130,7 +140,7 @@ export class PaymentService {
         amount: request.amount,
         currency: request.currency || "TON",
         description: "Payment initiated",
-        metadata: { paymentMethod: request.paymentMethod },
+        metadata: { paymentMethod: request.paymentMethod } as any,
       })
 
       logger.info(`Payment created: ${payment.id}`)
@@ -159,9 +169,10 @@ export class PaymentService {
       await this.updatePaymentStatus(paymentId, SharedPaymentStatus.PROCESSING, "TON payment initiated")
 
       // Send TON payment
+      const metadata = payment.metadata as any
       const txResult = await this.tonService.createPayment({
-        toAddress: payment.tonWalletAddress || process.env.TON_WALLET_ADDRESS!,
-        amount: payment.tonAmount || payment.amount,
+        toAddress: metadata?.tonWalletAddress || payment.blockchainAddress || process.env.TON_WALLET_ADDRESS!,
+        amount: metadata?.tonAmount || payment.amount,
         comment: `Payment for booking ${payment.bookingId}`,
         timeout: 600,
       })
@@ -171,7 +182,7 @@ export class PaymentService {
       const [updatedPayment] = await db
         .update(payments)
         .set({
-          tonTransactionHash: txHash,
+          blockchainTxHash: txHash,
           updatedAt: new Date(),
         })
         .where(eq(payments.id, paymentId))
@@ -181,11 +192,11 @@ export class PaymentService {
       await this.createTransaction({
         paymentId,
         type: "payment",
-        amount: payment.tonAmount || payment.amount,
+        amount: metadata?.tonAmount || payment.amount,
         currency: "TON",
-        tonTransactionHash: txHash,
+        blockchainTxHash: txHash,
         description: "TON payment transaction",
-        metadata: { fromAddress },
+        metadata: { fromAddress } as any,
       })
 
       // Start monitoring for confirmations
@@ -197,7 +208,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         SharedPaymentStatus.FAILED,
-        `Payment failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Payment failed: ${error instanceof Error ? error.message : "Unknown error"}`
       )
       throw error
     }
@@ -229,11 +240,11 @@ export class PaymentService {
         currency: payment.currency,
         paymentMethod: paymentMethodId,
         customerId,
-        description: `Payment for booking ${payment.bookingId}`,
+        description: `Payment for booking ${payment.bookingId ?? "N/A"}`,
         metadata: {
           paymentId,
-          bookingId: payment.bookingId,
-          payerId: payment.payerId,
+          bookingId: payment.bookingId ?? "",
+          payerId: payment.userId ?? "",
         },
       })
 
@@ -241,9 +252,9 @@ export class PaymentService {
       const [updatedPayment] = await db
         .update(payments)
         .set({
-          stripePaymentIntentId: stripeResponse.paymentIntentId,
-          stripeChargeId: stripeResponse.chargeId,
-          status: stripeResponse.status,
+          providerPaymentId: stripeResponse.paymentIntentId,
+          providerReference: stripeResponse.chargeId,
+          status: stripeResponse.status as any,
           updatedAt: new Date(),
         })
         .where(eq(payments.id, paymentId))
@@ -255,14 +266,14 @@ export class PaymentService {
         type: "payment",
         amount: payment.amount,
         currency: payment.currency,
-        stripePaymentIntentId: stripeResponse.paymentIntentId,
-        stripeChargeId: stripeResponse.chargeId,
         description: "Stripe payment transaction",
         metadata: {
           paymentMethodId,
           customerId,
           clientSecret: stripeResponse.clientSecret,
-        },
+          providerPaymentId: stripeResponse.paymentIntentId,
+          providerReference: stripeResponse.chargeId,
+        } as any,
       })
 
       return updatedPayment
@@ -271,7 +282,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         SharedPaymentStatus.FAILED,
-        `Stripe payment failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Stripe payment failed: ${error instanceof Error ? error.message : "Unknown error"}`
       )
       throw error
     }
@@ -287,19 +298,19 @@ export class PaymentService {
         throw new Error("Payment not found")
       }
 
-      if (!payment.stripePaymentIntentId) {
+      if (!payment.providerPaymentId) {
         throw new Error("No Stripe payment intent found")
       }
 
       // Confirm payment intent
-      const stripeResponse = await this.stripeService.confirmPaymentIntent(payment.stripePaymentIntentId)
+      const stripeResponse = await this.stripeService.confirmPaymentIntent(payment.providerPaymentId)
 
       // Update payment status
       const [updatedPayment] = await db
         .update(payments)
         .set({
-          status: stripeResponse.status,
-          stripeChargeId: stripeResponse.chargeId,
+          status: stripeResponse.status as any,
+          providerReference: stripeResponse.chargeId,
           updatedAt: new Date(),
         })
         .where(eq(payments.id, paymentId))
@@ -311,9 +322,11 @@ export class PaymentService {
         type: "confirmation",
         amount: payment.amount,
         currency: payment.currency,
-        stripePaymentIntentId: stripeResponse.paymentIntentId,
-        stripeChargeId: stripeResponse.chargeId,
         description: "Stripe payment confirmation",
+        metadata: {
+          providerPaymentId: stripeResponse.paymentIntentId,
+          providerReference: stripeResponse.chargeId,
+        } as any,
       })
 
       return updatedPayment
@@ -322,7 +335,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         SharedPaymentStatus.FAILED,
-        `Stripe confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Stripe confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`
       )
       throw error
     }
@@ -340,7 +353,7 @@ export class PaymentService {
       const confirmed = await this.tonService.verifyTransaction(txHash)
 
       if (confirmed) {
-        await this.updatePaymentStatus(paymentId, SharedPaymentStatus.CONFIRMED, "Payment confirmed on blockchain")
+        await this.updatePaymentStatus(paymentId, SharedPaymentStatus.COMPLETED, "Payment confirmed on blockchain")
 
         // Auto-complete payment after confirmation
         setTimeout(async () => {
@@ -354,7 +367,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         SharedPaymentStatus.FAILED,
-        `Confirmation monitoring failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Confirmation monitoring failed: ${error instanceof Error ? error.message : "Unknown error"}`
       )
     }
   }
@@ -370,9 +383,7 @@ export class PaymentService {
       }
 
       // Set timestamps based on status
-      if (status === SharedPaymentStatus.CONFIRMED) {
-        updateData.confirmedAt = new Date()
-      } else if (status === SharedPaymentStatus.COMPLETED) {
+      if (status === SharedPaymentStatus.COMPLETED) {
         updateData.completedAt = new Date()
       }
 
@@ -385,7 +396,7 @@ export class PaymentService {
         amount: "0",
         currency: updatedPayment.currency,
         description: reason || `Payment status updated to ${status}`,
-        metadata: { statusChange: { from: updatedPayment.status, to: status } },
+        metadata: { statusChange: { from: updatedPayment.status, to: status } } as any,
       })
 
       logger.info(`Payment ${paymentId} status updated to ${status}`)
@@ -416,7 +427,7 @@ export class PaymentService {
   async searchPayments(
     filters: PaymentSearchFilters,
     page: number = 1,
-    limit: number = 10,
+    limit: number = 10
   ): Promise<PaymentSearchResult> {
     try {
       const offset = (page - 1) * limit
@@ -424,14 +435,15 @@ export class PaymentService {
 
       // Build filter conditions
       if (filters.status) {
-        conditions.push(eq(payments.status, filters.status))
+        conditions.push(eq(payments.status, filters.status as any))
       }
       if (filters.payerId) {
-        conditions.push(eq(payments.payerId, filters.payerId))
+        conditions.push(eq(payments.userId, filters.payerId))
       }
-      if (filters.payeeId) {
-        conditions.push(eq(payments.payeeId, filters.payeeId))
-      }
+      // Note: payeeId is stored in metadata, would need JSON filtering
+      // if (filters.payeeId) {
+      //   conditions.push(eq(payments.payeeId, filters.payeeId))
+      // }
       if (filters.bookingId) {
         conditions.push(eq(payments.bookingId, filters.bookingId))
       }
@@ -457,7 +469,10 @@ export class PaymentService {
         .offset(offset)
 
       // Get total count
-      const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(payments).where(whereClause)
+      const [{ count }] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(payments)
+        .where(whereClause)
 
       return {
         payments: paymentResults,
@@ -513,8 +528,18 @@ export class PaymentService {
     try {
       const [dispute] = await db.insert(disputes).values(disputeData).returning()
 
-      // Update payment status to disputed
-      await this.updatePaymentStatus(disputeData.paymentId, SharedPaymentStatus.DISPUTED, "Payment disputed")
+      // Find and update payment status for this booking (if exists)
+      if (disputeData.bookingId) {
+        const bookingPayment = await db
+          .select()
+          .from(payments)
+          .where(eq(payments.bookingId, disputeData.bookingId))
+          .limit(1)
+
+        if (bookingPayment.length > 0) {
+          await this.updatePaymentStatus(bookingPayment[0].id, SharedPaymentStatus.FAILED, "Payment disputed")
+        }
+      }
 
       return dispute
     } catch (error) {
@@ -573,7 +598,7 @@ export class PaymentService {
   async findPaymentByTonTransaction(transactionHash: string, comment?: string): Promise<Payment | null> {
     try {
       // First try to find by transaction hash
-      let payment = await db.select().from(payments).where(eq(payments.tonTransactionHash, transactionHash)).limit(1)
+      let payment = await db.select().from(payments).where(eq(payments.blockchainTxHash, transactionHash)).limit(1)
 
       if (payment.length > 0) {
         return payment[0]
@@ -604,14 +629,10 @@ export class PaymentService {
    */
   async handleStripePaymentSuccess(paymentIntentId: string): Promise<void> {
     try {
-      const payment = await db
-        .select()
-        .from(payments)
-        .where(eq(payments.stripePaymentIntentId, paymentIntentId))
-        .limit(1)
+      const payment = await db.select().from(payments).where(eq(payments.providerPaymentId, paymentIntentId)).limit(1)
 
       if (payment.length > 0) {
-        await this.updatePaymentStatus(payment[0].id, SharedPaymentStatus.CONFIRMED, "Stripe payment succeeded")
+        await this.updatePaymentStatus(payment[0].id, SharedPaymentStatus.COMPLETED, "Stripe payment succeeded")
       }
     } catch (error) {
       logger.error("Failed to handle Stripe payment success:", error)
@@ -624,11 +645,7 @@ export class PaymentService {
    */
   async handleStripePaymentFailure(paymentIntentId: string): Promise<void> {
     try {
-      const payment = await db
-        .select()
-        .from(payments)
-        .where(eq(payments.stripePaymentIntentId, paymentIntentId))
-        .limit(1)
+      const payment = await db.select().from(payments).where(eq(payments.providerPaymentId, paymentIntentId)).limit(1)
 
       if (payment.length > 0) {
         await this.updatePaymentStatus(payment[0].id, SharedPaymentStatus.FAILED, "Stripe payment failed")
@@ -644,10 +661,10 @@ export class PaymentService {
    */
   async handleStripeDispute(chargeId: string): Promise<void> {
     try {
-      const payment = await db.select().from(payments).where(eq(payments.stripeChargeId, chargeId)).limit(1)
+      const payment = await db.select().from(payments).where(eq(payments.providerReference, chargeId)).limit(1)
 
       if (payment.length > 0) {
-        await this.updatePaymentStatus(payment[0].id, SharedPaymentStatus.DISPUTED, "Stripe dispute created")
+        await this.updatePaymentStatus(payment[0].id, SharedPaymentStatus.FAILED, "Stripe dispute created")
       }
     } catch (error) {
       logger.error("Failed to handle Stripe dispute:", error)
@@ -663,7 +680,7 @@ export class PaymentService {
       await db
         .update(payments)
         .set({
-          tonTransactionHash: transactionId,
+          blockchainTxHash: transactionId,
           updatedAt: new Date(),
         })
         .where(eq(payments.id, paymentId))

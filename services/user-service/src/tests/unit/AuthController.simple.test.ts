@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest"
-import { z } from "zod"
+
 import { AuthController } from "../../controllers/AuthController"
 import { AuthService } from "../../services/AuthService"
 
@@ -17,15 +17,15 @@ const createMockResponse = () => {
   const res: any = {
     statusCode: 200,
     jsonData: null,
-    status: function (code: number) {
+    status(code: number) {
       this.statusCode = code
       return this
     },
-    send: function (data: any) {
+    send(data: any) {
       this.jsonData = data
       return this
     },
-    json: function (data: any) {
+    json(data: any) {
       this.jsonData = data
       return this
     },
@@ -296,7 +296,7 @@ describe("AuthController Unit Tests", () => {
         {},
         {
           authorization: `Bearer ${accessToken}`,
-        },
+        }
       )
       const res = createMockResponse()
 
@@ -324,7 +324,7 @@ describe("AuthController Unit Tests", () => {
         {},
         {
           authorization: "Bearer invalid.token.here",
-        },
+        }
       )
       const res = createMockResponse()
 

@@ -1,7 +1,6 @@
-import { drizzle } from "drizzle-orm/postgres-js"
-import postgres from "postgres"
-import { config } from "dotenv"
 import * as schema from "@marketplace/database-schema"
+import { drizzle, postgres } from "@marketplace/database-schema"
+import { config } from "dotenv"
 
 config()
 
@@ -19,7 +18,11 @@ export const db = drizzle(client, { schema })
 export type Database = typeof db
 export type Schema = typeof schema
 
-// Re-export all schema tables for convenience
-export const { apiRequests, apiResponses, auditLogs, users, sessions } = schema
+// Re-export schema for convenience
+export { schema }
+
+// Note: apiRequests, apiResponses, auditLogs tables don't exist in centralized schema yet
+// Uncomment when these tables are added:
+// export const { apiRequests, apiResponses, auditLogs, users, sessions } = schema
 
 export default db

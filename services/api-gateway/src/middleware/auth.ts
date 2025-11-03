@@ -39,7 +39,7 @@ const roleBasedRoutes: Record<string, string[]> = {
 }
 
 export function isPublicRoute(path: string): boolean {
-  return publicRoutes.some((route) => {
+  return publicRoutes.some(route => {
     if (route.endsWith("*")) {
       return path.startsWith(route.slice(0, -1))
     }

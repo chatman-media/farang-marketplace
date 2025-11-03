@@ -1,9 +1,7 @@
+import * as schema from "@marketplace/database-schema"
+import { drizzle, postgres } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
 import { config } from "dotenv"
-import { drizzle } from "drizzle-orm/postgres-js"
-import postgres from "postgres"
-
-import * as schema from "./schema"
 
 // Load environment variables
 config()
@@ -26,6 +24,9 @@ export const db = drizzle(client, { schema })
 
 // Export types
 export type Database = typeof db
+
+// Re-export centralized schema for convenience
+export { schema }
 
 // Health check function
 export async function checkDatabaseConnection(): Promise<boolean> {

@@ -1,21 +1,21 @@
-import logger from "@marketplace/logger"
-import { FastifyReply, FastifyRequest } from "fastify"
+import logger from '@marketplace/logger';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
-import { RecommendationEngine } from "../services/RecommendationEngine"
+import { RecommendationEngine } from '../services/RecommendationEngine';
 
 interface AuthenticatedRequest extends FastifyRequest {
   user?: {
-    id: string
-    email: string
-    role: "user" | "admin" | "agency_owner" | "agency_manager"
-  }
+    id: string;
+    email: string;
+    role: 'user' | 'admin' | 'agency_owner' | 'agency_manager';
+  };
 }
 
 export class RecommendationController {
-  private recommendationEngine: RecommendationEngine
+  private recommendationEngine: RecommendationEngine;
 
   constructor(recommendationEngine: RecommendationEngine) {
-    this.recommendationEngine = recommendationEngine
+    this.recommendationEngine = recommendationEngine;
   }
 
   /**
@@ -23,28 +23,28 @@ export class RecommendationController {
    */
   async getRecommendations(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const body = req.body as any
-      const userId = req.user?.id || body?.userId
+      const body = req.body as any;
+      const userId = req.user?.id || body?.userId;
       if (!userId) {
         return reply.status(400).send({
           success: false,
-          message: "User ID is required",
-        })
+          message: 'User ID is required',
+        });
       }
 
-      const query = req.query as any
+      const query = req.query as any;
       const request = {
         userId,
-        type: query?.type || "listings",
+        type: query?.type || 'listings',
         context: {
-          currentListingId: query?.currentListingId || "",
-          searchQuery: query?.searchQuery || "",
-          category: query?.category || "",
-          location: query?.location || "",
+          currentListingId: query?.currentListingId || '',
+          searchQuery: query?.searchQuery || '',
+          category: query?.category || '',
+          location: query?.location || '',
           budget: query?.budget ? Number.parseFloat(query.budget) : 0,
         },
         filters: {
-          categories: query?.categories ? query.categories.split(",") : [],
+          categories: query?.categories ? query.categories.split(',') : [],
           priceRange:
             query?.minPrice && query?.maxPrice
               ? {
@@ -52,27 +52,27 @@ export class RecommendationController {
                   max: Number.parseFloat(query.maxPrice),
                 }
               : { min: 0, max: 999999 },
-          location: query?.filterLocation || "",
+          location: query?.filterLocation || '',
           rating: query?.minRating ? Number.parseFloat(query.minRating) : 0,
-          availability: query?.availability === "true",
+          availability: query?.availability === 'true',
         },
         limit: query?.limit ? Number.parseInt(query.limit, 10) : 20,
         diversityFactor: query?.diversityFactor ? Number.parseFloat(query.diversityFactor) : 0.3,
-      }
+      };
 
-      const recommendations = await this.recommendationEngine.generateRecommendations(request)
+      const recommendations = await this.recommendationEngine.generateRecommendations(request);
 
       return reply.send({
         success: true,
         message: `Generated ${recommendations.results.length} recommendations`,
         data: recommendations,
-      })
+      });
     } catch (error) {
-      logger.error("Error getting recommendations:", error)
+      logger.error('Error getting recommendations:', error);
       return reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to get recommendations",
-      })
+        message: error instanceof Error ? error.message : 'Failed to get recommendations',
+      });
     }
   }
 
@@ -81,13 +81,13 @@ export class RecommendationController {
    */
   async updateUserBehavior(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const body = req.body as any
-      const userId = req.user?.id || body?.userId
+      const body = req.body as any;
+      const userId = req.user?.id || body?.userId;
       if (!userId) {
         return reply.status(400).send({
           success: false,
-          message: "User ID is required",
-        })
+          message: 'User ID is required',
+        });
       }
 
       const behavior = {
@@ -101,20 +101,20 @@ export class RecommendationController {
         location: body?.location,
         device: body?.device,
         timestamp: new Date(),
-      }
+      };
 
-      await this.recommendationEngine.updateUserBehavior(behavior)
+      await this.recommendationEngine.updateUserBehavior(behavior);
 
       return reply.send({
         success: true,
-        message: "User behavior updated successfully",
-      })
+        message: 'User behavior updated successfully',
+      });
     } catch (error) {
-      logger.error("Error updating user behavior:", error)
+      logger.error('Error updating user behavior:', error);
       return reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to update user behavior",
-      })
+        message: error instanceof Error ? error.message : 'Failed to update user behavior',
+      });
     }
   }
 
@@ -123,18 +123,18 @@ export class RecommendationController {
    */
   async getRecommendationStats(_req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const stats = this.recommendationEngine.getStats()
+      const stats = this.recommendationEngine.getStats();
 
       return reply.send({
         success: true,
         data: stats,
-      })
+      });
     } catch (error) {
-      logger.error("Error getting recommendation stats:", error)
+      logger.error('Error getting recommendation stats:', error);
       return reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to get recommendation statistics",
-      })
+        message: error instanceof Error ? error.message : 'Failed to get recommendation statistics',
+      });
     }
   }
 
@@ -143,28 +143,28 @@ export class RecommendationController {
    */
   async getSimilarItems(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const params = req.params as any
-      const query = req.query as any
-      const { itemId } = params
-      const userId = req.user?.id
-      const limit = query?.limit ? Number.parseInt(query.limit, 10) : 10
+      const params = req.params as any;
+      const query = req.query as any;
+      const { itemId } = params;
+      const userId = req.user?.id;
+      const limit = query?.limit ? Number.parseInt(query.limit, 10) : 10;
 
       // Create a recommendation request based on the item
       const request = {
-        userId: userId || "anonymous",
-        type: query?.type || "listings",
+        userId: userId || 'anonymous',
+        type: query?.type || 'listings',
         context: {
-          currentListingId: itemId || "",
-          searchQuery: "",
-          category: "",
-          location: "",
+          currentListingId: itemId || '',
+          searchQuery: '',
+          category: '',
+          location: '',
           budget: 0,
         },
         limit,
         diversityFactor: 0.1, // Lower diversity for similar items
-      }
+      };
 
-      const recommendations = await this.recommendationEngine.generateRecommendations(request)
+      const recommendations = await this.recommendationEngine.generateRecommendations(request);
 
       return reply.send({
         success: true,
@@ -175,13 +175,13 @@ export class RecommendationController {
           algorithm: recommendations.algorithm,
           processingTime: recommendations.processingTime,
         },
-      })
+      });
     } catch (error) {
-      logger.error("Error getting similar items:", error)
+      logger.error('Error getting similar items:', error);
       return reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to get similar items",
-      })
+        message: error instanceof Error ? error.message : 'Failed to get similar items',
+      });
     }
   }
 
@@ -190,26 +190,26 @@ export class RecommendationController {
    */
   async getTrendingItems(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const query = req.query as any
-      const category = query?.category
-      const location = query?.location
-      const limit = query?.limit ? Number.parseInt(query.limit, 10) : 20
+      const query = req.query as any;
+      const category = query?.category;
+      const location = query?.location;
+      const limit = query?.limit ? Number.parseInt(query.limit, 10) : 20;
 
       // Mock trending items - in real implementation would use actual trending data
       const trendingItems = Array.from({ length: limit }, (_, i) => ({
         id: `trending_${i}`,
-        type: "listing",
+        type: 'listing',
         score: 0.9 - i * 0.02,
         confidence: 0.8,
-        reasons: ["High engagement", "Recent popularity surge"],
+        reasons: ['High engagement', 'Recent popularity surge'],
         metadata: {
           title: `Trending Item ${i + 1}`,
-          category: category || "electronics",
-          location: location || "Bangkok",
+          category: category || 'electronics',
+          location: location || 'Bangkok',
           trendScore: 0.9 - i * 0.02,
         },
         rank: i + 1,
-      }))
+      }));
 
       return reply.send({
         success: true,
@@ -218,16 +218,16 @@ export class RecommendationController {
           items: trendingItems,
           category,
           location,
-          algorithm: "trending_analysis",
+          algorithm: 'trending_analysis',
           timestamp: new Date(),
         },
-      })
+      });
     } catch (error) {
-      logger.error("Error getting trending items:", error)
+      logger.error('Error getting trending items:', error);
       return reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to get trending items",
-      })
+        message: error instanceof Error ? error.message : 'Failed to get trending items',
+      });
     }
   }
 
@@ -236,21 +236,21 @@ export class RecommendationController {
    */
   async getPersonalizedCategories(req: AuthenticatedRequest, reply: FastifyReply): Promise<any> {
     try {
-      const userId = req.user?.id
+      const userId = req.user?.id;
       if (!userId) {
         return reply.status(400).send({
           success: false,
-          message: "User ID is required",
-        })
+          message: 'User ID is required',
+        });
       }
 
       // Mock personalized categories - in real implementation would analyze user behavior
       const categories = [
-        { category: "electronics", score: 0.9, reason: "Frequently viewed" },
-        { category: "home", score: 0.7, reason: "Recent purchases" },
-        { category: "fashion", score: 0.6, reason: "Seasonal interest" },
-        { category: "automotive", score: 0.4, reason: "Occasional browsing" },
-      ]
+        { category: 'electronics', score: 0.9, reason: 'Frequently viewed' },
+        { category: 'home', score: 0.7, reason: 'Recent purchases' },
+        { category: 'fashion', score: 0.6, reason: 'Seasonal interest' },
+        { category: 'automotive', score: 0.4, reason: 'Occasional browsing' },
+      ];
 
       return reply.send({
         success: true,
@@ -258,16 +258,16 @@ export class RecommendationController {
         data: {
           userId,
           categories,
-          algorithm: "behavior_analysis",
+          algorithm: 'behavior_analysis',
           timestamp: new Date(),
         },
-      })
+      });
     } catch (error) {
-      logger.error("Error getting personalized categories:", error)
+      logger.error('Error getting personalized categories:', error);
       return reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to get personalized categories",
-      })
+        message: error instanceof Error ? error.message : 'Failed to get personalized categories',
+      });
     }
   }
 }

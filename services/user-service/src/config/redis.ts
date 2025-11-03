@@ -1,5 +1,5 @@
 import logger from "@marketplace/logger"
-import { createClient } from "redis"
+import { createClient, type RedisClientType } from "redis"
 
 const redisConfig = {
   url: process.env.REDIS_URL || "redis://localhost:6379/4",
@@ -11,10 +11,10 @@ const redisConfig = {
   database: Number.parseInt(process.env.REDIS_DB || "4", 10),
 }
 
-export const redisClient = createClient(redisConfig)
+export const redisClient: RedisClientType = createClient(redisConfig)
 
 // Handle Redis connection events
-redisClient.on("error", (err) => {
+redisClient.on("error", err => {
   logger.error("Redis Client Error:", err)
 })
 

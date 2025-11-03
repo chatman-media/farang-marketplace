@@ -227,7 +227,7 @@ export class AIIntegrationController {
   /**
    * Get AI service status
    */
-  getAIStatus = async (request: FastifyRequest, reply: FastifyReply) => {
+  getAIStatus = async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       const isHealthy = await aiClient.checkHealth()
 

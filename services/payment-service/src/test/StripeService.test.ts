@@ -205,7 +205,7 @@ describe("Stripe Service Logic Tests", () => {
       const regularCurrencies = ["USD", "EUR", "GBP", "THB"]
 
       // Test zero-decimal currencies
-      zeroDecimalCurrencies.forEach((currency) => {
+      zeroDecimalCurrencies.forEach(currency => {
         const amount = 1000
         const convertToStripeAmount = (amount: number, currency: string): number => {
           const zeroDecimalCurrencies = ["jpy", "krw", "vnd", "clp"]
@@ -222,7 +222,7 @@ describe("Stripe Service Logic Tests", () => {
       })
 
       // Test regular currencies
-      regularCurrencies.forEach((currency) => {
+      regularCurrencies.forEach(currency => {
         const amount = 10
         const convertToStripeAmount = (amount: number, currency: string): number => {
           const zeroDecimalCurrencies = ["jpy", "krw", "vnd", "clp"]

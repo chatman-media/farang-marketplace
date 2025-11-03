@@ -32,10 +32,10 @@ async function createServer(root = process.cwd(), isProd = process.env.NODE_ENV 
   })
 
   // Register Vite middleware
-  await fastify.register(async (fastify) => {
+  await fastify.register(async fastify => {
     fastify.addHook("onRequest", async (request, reply) => {
       return new Promise((resolve, reject) => {
-        vite.middlewares(request.raw, reply.raw, (err) => {
+        vite.middlewares(request.raw, reply.raw, err => {
           if (err) reject(err)
           else resolve()
         })
@@ -85,7 +85,7 @@ if (!process.env.VITEST) {
   createServer().then(({ fastify }) => {
     const port = process.env.PORT || 5173
     const host = process.env.HOST || "0.0.0.0"
-    
+
     fastify.listen({ port, host }, (err, address) => {
       if (err) {
         fastify.log.error(err)

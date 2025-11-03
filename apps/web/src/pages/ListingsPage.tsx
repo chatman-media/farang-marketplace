@@ -29,7 +29,7 @@ const convertToBaseFilters = (filters: ExtendedListingFilters): BaseListingFilte
     if (typeof filters.category === "string") {
       // Try to match string to enum value
       const categoryValue = Object.values(ListingCategory).find(
-        (cat) => cat === filters.category || cat.toLowerCase() === filters.category?.toLowerCase(),
+        cat => cat === filters.category || cat.toLowerCase() === filters.category?.toLowerCase()
       )
       if (categoryValue) {
         baseFilters.category = categoryValue
@@ -120,49 +120,49 @@ export const ListingsPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold text-gray-900">Browse Listings</h1>
-        <p className="mt-2 text-gray-600">Discover amazing properties, vehicles, and services in Thailand</p>
+      <div className='mb-8'>
+        <h1 className='text-3xl font-display font-bold text-gray-900'>Browse Listings</h1>
+        <p className='mt-2 text-gray-600'>Discover amazing properties, vehicles, and services in Thailand</p>
       </div>
 
       {/* AI-Enhanced Search */}
-      <div className="mb-6">
+      <div className='mb-6'>
         <AISearchBox
           onSearch={handleSearch}
-          placeholder="Search for properties, services, vehicles... (AI-powered)"
-          className="mb-4"
+          placeholder='Search for properties, services, vehicles... (AI-powered)'
+          className='mb-4'
         />
 
-        <div className="flex items-center justify-between">
+        <div className='flex items-center justify-between'>
           <button
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className='inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
           >
-            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className='h-4 w-4 mr-2' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
               <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                strokeLinecap='round'
+                strokeLinejoin='round'
                 strokeWidth={2}
-                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
+                d='M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4'
               />
             </svg>
             {showAdvancedFilters ? "Hide" : "Show"} Advanced Filters
           </button>
 
-          <div className="flex items-center space-x-2">
+          <div className='flex items-center space-x-2'>
             <select
               value={filters.sortBy || "createdAt:desc"}
-              onChange={(e) => setFilters((prev: ExtendedListingFilters) => ({ ...prev, sortBy: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+              onChange={e => setFilters((prev: ExtendedListingFilters) => ({ ...prev, sortBy: e.target.value }))}
+              className='px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500'
             >
-              <option value="createdAt:desc">Newest First</option>
-              <option value="createdAt:asc">Oldest First</option>
-              <option value="price:asc">Price: Low to High</option>
-              <option value="price:desc">Price: High to Low</option>
-              <option value="title:asc">Title: A to Z</option>
-              <option value="title:desc">Title: Z to A</option>
+              <option value='createdAt:desc'>Newest First</option>
+              <option value='createdAt:asc'>Oldest First</option>
+              <option value='price:asc'>Price: Low to High</option>
+              <option value='price:desc'>Price: High to Low</option>
+              <option value='title:asc'>Title: A to Z</option>
+              <option value='title:desc'>Title: Z to A</option>
             </select>
           </div>
         </div>
@@ -174,20 +174,20 @@ export const ListingsPage: React.FC = () => {
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onApplyFilters={handleAdvancedFiltersApply}
-          className="mb-6"
+          className='mb-6'
         />
       )}
 
       {/* Results Summary */}
       {listingsData && (
-        <div className="mb-6 flex items-center justify-between">
-          <div className="text-sm text-gray-600">
+        <div className='mb-6 flex items-center justify-between'>
+          <div className='text-sm text-gray-600'>
             Showing {listingsData.listings.length} of {listingsData.total} results
             {filters.query && <span> for "{filters.query}"</span>}
           </div>
 
           {listingsData.total > 0 && (
-            <div className="text-sm text-gray-600">
+            <div className='text-sm text-gray-600'>
               Page {listingsData.page} of {Math.ceil(listingsData.total / (listingsData.limit || 12))}
             </div>
           )}
@@ -208,15 +208,15 @@ export const ListingsPage: React.FC = () => {
 
       {/* Pagination */}
       {listingsData && listingsData.total > (listingsData.limit || 12) && (
-        <div className="mt-8 flex items-center justify-center space-x-2">
+        <div className='mt-8 flex items-center justify-center space-x-2'>
           <button
             disabled={listingsData.page <= 1}
-            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className='px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
           >
             Previous
           </button>
 
-          <div className="flex space-x-1">
+          <div className='flex space-x-1'>
             {Array.from({ length: Math.min(5, Math.ceil(listingsData.total / (listingsData.limit || 12))) }).map(
               (_, index) => {
                 const pageNumber = index + 1
@@ -234,13 +234,13 @@ export const ListingsPage: React.FC = () => {
                     {pageNumber}
                   </button>
                 )
-              },
+              }
             )}
           </div>
 
           <button
             disabled={listingsData.page >= Math.ceil(listingsData.total / (listingsData.limit || 12))}
-            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className='px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
           >
             Next
           </button>

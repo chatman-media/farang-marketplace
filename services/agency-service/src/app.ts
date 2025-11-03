@@ -1,3 +1,4 @@
+import { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"
@@ -8,18 +9,18 @@ config()
 // Environment validation with Zod
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  PORT: z.string().transform(Number).default(3005),
-  DATABASE_URL: z.string(),
-  JWT_SECRET: z.string(),
+  PORT: z.string().transform(Number).default(3008),
+  DATABASE_URL: z.string().default("postgresql://user:password@localhost:5432/marketplace_agencies"),
+  JWT_SECRET: z.string().default("dev-jwt-secret-change-in-production"),
   ALLOWED_ORIGINS: z.string().default("http://localhost:3000,http://localhost:5173"),
 })
 
 export const env = envSchema.parse(process.env)
 
 export const createApp = async (): Promise<FastifyInstance> => {
-  // Create Fastify app
+  // Create Fastify app with integrated logger
   const app = Fastify({
-    logger: env.NODE_ENV === "development",
+    logger: createPinoLoggerOptions("agency-service"),
     bodyLimit: 10 * 1024 * 1024, // 10MB
   })
 
@@ -76,7 +77,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
   })
 
   // Global error handler
-  app.setErrorHandler(async (error, request, reply) => {
+  app.setErrorHandler(async (error, _request, reply) => {
     app.log.error(error)
 
     if (error.validation) {

@@ -27,7 +27,7 @@ const convertToBaseFilters = (filters: ExtendedListingFilters): BaseListingFilte
   // Convert category string to enum if needed
   if (filters.category) {
     const categoryValue = Object.values(ListingCategory).find(
-      (cat) => cat === filters.category || cat.toLowerCase() === filters.category?.toLowerCase(),
+      cat => cat === filters.category || cat.toLowerCase() === filters.category?.toLowerCase()
     )
     if (categoryValue) {
       baseFilters.category = categoryValue
@@ -128,7 +128,7 @@ export const CategoryPage: React.FC = () => {
   // Update category when route changes
   useEffect(() => {
     if (category) {
-      setFilters((prev) => ({ ...prev, category }))
+      setFilters(prev => ({ ...prev, category }))
       refetch() // Force refetch when category changes
     }
   }, [category, refetch])
@@ -147,7 +147,7 @@ export const CategoryPage: React.FC = () => {
   }, [filters, setSearchParams])
 
   const handleFiltersChange = (newFilters: ExtendedListingFilters) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }))
+    setFilters(prev => ({ ...prev, ...newFilters }))
   }
 
   const handleSearch = (query?: string) => {
@@ -161,17 +161,17 @@ export const CategoryPage: React.FC = () => {
   const categoryDescription = getCategoryDescription(category || "")
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className='min-h-screen bg-gray-50'>
       {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">{categoryTitle}</h1>
-            <p className="mt-4 text-xl text-gray-600">{categoryDescription}</p>
+      <div className='bg-white shadow-sm'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+          <div className='text-center'>
+            <h1 className='text-3xl font-bold text-gray-900 sm:text-4xl'>{categoryTitle}</h1>
+            <p className='mt-4 text-xl text-gray-600'>{categoryDescription}</p>
           </div>
 
           {/* Search */}
-          <div className="mt-8 max-w-2xl mx-auto">
+          <div className='mt-8 max-w-2xl mx-auto'>
             <AISearchBox onSearch={handleSearch} placeholder={`Search ${categoryTitle.toLowerCase()}...`} />
           </div>
         </div>
@@ -179,8 +179,8 @@ export const CategoryPage: React.FC = () => {
 
       {/* Advanced Filters */}
       {showAdvancedFilters && (
-        <div className="bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className='bg-white border-b border-gray-200'>
+          <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6'>
             <AdvancedFilters
               filters={filters}
               onFiltersChange={handleFiltersChange}
@@ -194,13 +194,13 @@ export const CategoryPage: React.FC = () => {
       )}
 
       {/* Results */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-6">
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+        <div className='flex items-center justify-between mb-6'>
           <div>
-            <h2 className="text-lg font-medium text-gray-900">
+            <h2 className='text-lg font-medium text-gray-900'>
               {listingsData?.total ? `${listingsData.total} results` : "Results"}
             </h2>
-            {filters.query && <p className="text-sm text-gray-500 mt-1">Showing results for "{filters.query}"</p>}
+            {filters.query && <p className='text-sm text-gray-500 mt-1'>Showing results for "{filters.query}"</p>}
           </div>
         </div>
 

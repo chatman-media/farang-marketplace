@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify"
+import { FastifyInstance } from 'fastify';
 
 import {
   analyticsQuerySchema,
@@ -7,136 +7,136 @@ import {
   MarketplaceIntegrationController,
   priceSuggestionsSchema,
   smartNotificationSchema,
-} from "../controllers/MarketplaceIntegrationController"
+} from '../controllers/MarketplaceIntegrationController';
 
 interface RouteOptions {
-  marketplaceController: MarketplaceIntegrationController
+  marketplaceController: MarketplaceIntegrationController;
 }
 
 export default async function marketplaceIntegrationRoutes(fastify: FastifyInstance, options: RouteOptions) {
-  const { marketplaceController } = options
+  const { marketplaceController } = options;
 
   // Booking Intelligence
   fastify.post(
-    "/booking-intelligence",
+    '/booking-intelligence',
     {
       schema: {
         body: bookingIntelligenceSchema,
         response: {
           200: {
-            type: "object",
+            type: 'object',
             properties: {
-              success: { type: "boolean" },
-              data: { type: "object" },
+              success: { type: 'boolean' },
+              data: { type: 'object' },
             },
           },
         },
       },
       // preHandler: [fastify.authenticateToken],
     },
-    marketplaceController.generateBookingIntelligence.bind(marketplaceController),
-  )
+    marketplaceController.generateBookingIntelligence.bind(marketplaceController)
+  );
 
   // Price Suggestions
   fastify.post(
-    "/price-suggestions",
+    '/price-suggestions',
     {
       schema: {
         body: priceSuggestionsSchema,
         response: {
           200: {
-            type: "object",
+            type: 'object',
             properties: {
-              success: { type: "boolean" },
-              data: { type: "object" },
+              success: { type: 'boolean' },
+              data: { type: 'object' },
             },
           },
         },
       },
       // preHandler: [fastify.authenticateToken],
     },
-    marketplaceController.generatePriceSuggestions.bind(marketplaceController),
-  )
+    marketplaceController.generatePriceSuggestions.bind(marketplaceController)
+  );
 
   // Smart Notifications
   fastify.post(
-    "/smart-notifications",
+    '/smart-notifications',
     {
       schema: {
         body: smartNotificationSchema,
         response: {
           200: {
-            type: "object",
+            type: 'object',
             properties: {
-              success: { type: "boolean" },
-              data: { type: "object" },
+              success: { type: 'boolean' },
+              data: { type: 'object' },
             },
           },
         },
       },
       // preHandler: [fastify.authenticateToken],
     },
-    marketplaceController.createSmartNotification.bind(marketplaceController),
-  )
+    marketplaceController.createSmartNotification.bind(marketplaceController)
+  );
 
   // Fraud Detection
   fastify.post(
-    "/fraud-detection",
+    '/fraud-detection',
     {
       schema: {
         body: fraudDetectionSchema,
         response: {
           200: {
-            type: "object",
+            type: 'object',
             properties: {
-              success: { type: "boolean" },
-              data: { type: "object" },
+              success: { type: 'boolean' },
+              data: { type: 'object' },
             },
           },
         },
       },
       // preHandler: [fastify.authenticateToken],
     },
-    marketplaceController.detectFraud.bind(marketplaceController),
-  )
+    marketplaceController.detectFraud.bind(marketplaceController)
+  );
 
   // Analytics (Admin only)
   fastify.get(
-    "/analytics",
+    '/analytics',
     {
       schema: {
         querystring: analyticsQuerySchema,
         response: {
           200: {
-            type: "object",
+            type: 'object',
             properties: {
-              success: { type: "boolean" },
-              data: { type: "object" },
+              success: { type: 'boolean' },
+              data: { type: 'object' },
             },
           },
         },
       },
       // preHandler: [fastify.authenticateToken, fastify.requireAdmin],
     },
-    marketplaceController.getMarketplaceAnalytics.bind(marketplaceController),
-  )
+    marketplaceController.getMarketplaceAnalytics.bind(marketplaceController)
+  );
 
   // Health Check
   fastify.get(
-    "/health",
+    '/health',
     {
       schema: {
         response: {
           200: {
-            type: "object",
+            type: 'object',
             properties: {
-              success: { type: "boolean" },
-              data: { type: "object" },
+              success: { type: 'boolean' },
+              data: { type: 'object' },
             },
           },
         },
       },
     },
-    marketplaceController.healthCheck.bind(marketplaceController),
-  )
+    marketplaceController.healthCheck.bind(marketplaceController)
+  );
 }

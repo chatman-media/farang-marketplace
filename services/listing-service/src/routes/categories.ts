@@ -46,7 +46,7 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
         },
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       try {
         const allCategories = getAvailableCategories()
         const enabledCategories = getEnabledCategories()
@@ -68,7 +68,7 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
           message: "Failed to get categories",
         })
       }
-    },
+    }
   )
 
   // Get enabled categories only
@@ -101,10 +101,10 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
         },
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       try {
         const enabledCategories = getEnabledCategories()
-        const categoriesWithConfig = enabledCategories.map((category) => ({
+        const categoriesWithConfig = enabledCategories.map(category => ({
           category,
           ...getCategoryConfig(category),
         }))
@@ -120,7 +120,7 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
           message: "Failed to get enabled categories",
         })
       }
-    },
+    }
   )
 
   // Get specific category info
@@ -203,6 +203,6 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
           message: "Failed to get category information",
         })
       }
-    },
+    }
   )
 }

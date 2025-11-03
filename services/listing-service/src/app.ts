@@ -1,3 +1,4 @@
+import { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"
@@ -9,10 +10,10 @@ config()
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.string().transform(Number).default(3003),
-  DATABASE_URL: z.string(),
+  DATABASE_URL: z.string().default("postgresql://user:password@localhost:5432/marketplace_listings"),
   REDIS_HOST: z.string().default("localhost"),
   REDIS_PORT: z.string().transform(Number).default(6379),
-  JWT_SECRET: z.string(),
+  JWT_SECRET: z.string().default("dev-jwt-secret-change-in-production"),
   ALLOWED_ORIGINS: z.string().default("http://localhost:3000,http://localhost:3001"),
   UPLOAD_PATH: z.string().default("uploads"),
   MAX_FILE_SIZE: z.string().transform(Number).default(10485760), // 10MB
@@ -21,9 +22,9 @@ const envSchema = z.object({
 export const env = envSchema.parse(process.env)
 
 export const createApp = async (): Promise<FastifyInstance> => {
-  // Create Fastify app
+  // Create Fastify app with integrated logger
   const app = Fastify({
-    logger: env.NODE_ENV === "development",
+    logger: createPinoLoggerOptions("listing-service"),
     bodyLimit: env.MAX_FILE_SIZE,
   })
 
@@ -91,7 +92,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
   })
 
   // Global error handler
-  app.setErrorHandler(async (error, request, reply) => {
+  app.setErrorHandler(async (error, _request, reply) => {
     app.log.error(error)
 
     if (error.validation) {

@@ -38,9 +38,10 @@ export const maintenanceEvents = new QueueEvents("maintenance", { connection: re
 // Job processors
 import "./processors/tonMonitoring"
 import "./processors/paymentLifecycle"
-import "./processors/webhookProcessing"
-import "./processors/reconciliation"
-import "./processors/maintenance"
+// TODO: Implement these processors
+// import "./processors/webhookProcessing"
+// import "./processors/reconciliation"
+// import "./processors/maintenance"
 
 // Job schedulers
 import "./schedulers/index"

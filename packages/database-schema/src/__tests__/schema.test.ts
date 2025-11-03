@@ -86,7 +86,7 @@ describe("Database Schema Tests", () => {
           email: "test2@example.com",
           phone: "+66123456789", // duplicate
           telegramId: "987654321",
-        }),
+        })
       ).rejects.toThrow()
 
       // Try to insert duplicate telegram_id
@@ -95,7 +95,7 @@ describe("Database Schema Tests", () => {
           email: "test3@example.com",
           phone: "+66987654321",
           telegramId: "123456789", // duplicate
-        }),
+        })
       ).rejects.toThrow()
     })
   })
@@ -148,7 +148,7 @@ describe("Database Schema Tests", () => {
         sticker: "Blue rental sticker",
         rentalSticker: "Company logo sticker",
         gpsTrackerId: "ST123456",
-        engineSize: 150.0,
+        engineSize: "150.0",
         fuelType: "gasoline" as const,
         transmission: "automatic" as const,
         mileage: 5000,
@@ -182,7 +182,7 @@ describe("Database Schema Tests", () => {
         sticker: "Rental sticker",
         rentalSticker: "Company rental",
         gpsTrackerId: "TRK789",
-        engineSize: 155.0,
+        engineSize: "155.0",
         fuelType: "gasoline" as const,
         transmission: "automatic" as const,
         mileage: 1000,
@@ -242,7 +242,7 @@ describe("Database Schema Tests", () => {
           ...vehicleData,
           listingId: testListing2.id,
           oldVehicleNumber: "SCT001", // duplicate
-        }),
+        })
       ).rejects.toThrow()
     })
   })
@@ -513,7 +513,7 @@ describe("Database Schema Tests", () => {
       await db.update(aiPromptTemplates).set({ isActive: true }).where(eq(aiPromptTemplates.id, prompt2.id))
 
       const prompts = await db.select().from(aiPromptTemplates)
-      const activePrompts = prompts.filter((p) => p.isActive)
+      const activePrompts = prompts.filter(p => p.isActive)
 
       expect(activePrompts).toHaveLength(1)
       expect(activePrompts[0].id).toBe(prompt2.id)

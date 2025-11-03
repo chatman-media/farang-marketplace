@@ -1,125 +1,123 @@
-import { config } from "dotenv"
-import Fastify, { FastifyInstance } from "fastify"
-import { z } from "zod"
+import logger, { createPinoLoggerOptions } from '@marketplace/logger';
+import { config } from 'dotenv';
+import Fastify, { FastifyInstance } from 'fastify';
+import { z } from 'zod';
 
 // Load environment variables
-config()
+config();
 
 // Environment validation with Zod
 const envSchema = z.object({
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.string().transform(Number).default(3006),
-  JWT_SECRET: z.string(),
-  CORS_ORIGIN: z.string().default("http://localhost:3000"),
-  HELMET_ENABLED: z.string().default("true"),
+  JWT_SECRET: z.string().default('dev-jwt-secret-change-in-production'),
+  CORS_ORIGIN: z.string().default('http://localhost:3000'),
+  HELMET_ENABLED: z.string().default('true'),
   RATE_LIMIT_WINDOW: z.string().transform(Number).default(900000), // 15 minutes
   RATE_LIMIT_MAX: z.string().transform(Number).default(100),
-})
+});
 
-export const env = envSchema.parse(process.env)
+export const env = envSchema.parse(process.env);
 
-import { ContentAnalysisController } from "./controllers/ContentAnalysisController"
-import { InsightsController } from "./controllers/InsightsController"
-import { MarketplaceIntegrationController } from "./controllers/MarketplaceIntegrationController"
+import { ContentAnalysisController } from './controllers/ContentAnalysisController';
+import { InsightsController } from './controllers/InsightsController';
+import { MarketplaceIntegrationController } from './controllers/MarketplaceIntegrationController';
 // Import controllers
-import { RecommendationController } from "./controllers/RecommendationController"
-// Import routes
-import contentAnalysisRoutes from "./routes/content-analysis"
-import insightsRoutes from "./routes/insights"
-import marketplaceIntegrationRoutes from "./routes/marketplace-integration"
+import { RecommendationController } from './controllers/RecommendationController';
+import marketplaceIntegrationRoutes from './routes/marketplace-integration';
 // Import services
-import { AIProviderService } from "./services/AIProviderService"
-import { ContentAnalysisService } from "./services/ContentAnalysisService"
-import { RecommendationEngine } from "./services/RecommendationEngine"
-import { UserBehaviorService } from "./services/UserBehaviorService"
+import { AIProviderService } from './services/AIProviderService';
+import { ContentAnalysisService } from './services/ContentAnalysisService';
+import { RecommendationEngine } from './services/RecommendationEngine';
+import { UserBehaviorService } from './services/UserBehaviorService';
 // import aiProviderRoutes from './routes/ai-providers'
 // import modelManagementRoutes from './routes/model-management'
 // import usageAnalyticsRoutes from './routes/usage-analytics'
 // import systemRoutes from './routes/system'
 
 export const createApp = async (): Promise<FastifyInstance> => {
-  // Create Fastify app
+  // Create Fastify app with integrated logger
   const app = Fastify({
-    logger: env.NODE_ENV === "development",
+    logger: createPinoLoggerOptions('ai-service'),
     bodyLimit: 10 * 1024 * 1024, // 10MB
-  })
+  });
 
   // Register plugins
-  if (env.HELMET_ENABLED === "true") {
-    await app.register(import("@fastify/helmet"))
+  if (env.HELMET_ENABLED === 'true') {
+    await app.register(import('@fastify/helmet'));
   }
 
-  await app.register(import("@fastify/cors"), {
-    origin: env.CORS_ORIGIN === "*" ? true : env.CORS_ORIGIN.split(","),
+  await app.register(import('@fastify/cors'), {
+    origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN.split(','),
     credentials: true,
-  })
+  });
 
-  await app.register(import("@fastify/rate-limit"), {
+  await app.register(import('@fastify/rate-limit'), {
     max: env.RATE_LIMIT_MAX,
     timeWindow: env.RATE_LIMIT_WINDOW,
     errorResponseBuilder: () => ({
       success: false,
-      message: "Too many requests from this IP, please try again later.",
+      message: 'Too many requests from this IP, please try again later.',
     }),
-  })
+  });
 
   // Register auth middleware
-  await app.register(import("./middleware/auth"))
+  await app.register(import('./middleware/auth'));
 
   // Initialize services
-  const aiProviderService = new AIProviderService()
-  const recommendationEngine = new RecommendationEngine(aiProviderService)
-  const contentAnalysisService = new ContentAnalysisService(aiProviderService)
-  const userBehaviorService = new UserBehaviorService(aiProviderService)
+  const aiProviderService = new AIProviderService();
+  const recommendationEngine = new RecommendationEngine(aiProviderService);
+  const contentAnalysisService = new ContentAnalysisService(aiProviderService);
+  const userBehaviorService = new UserBehaviorService(aiProviderService);
 
   // Initialize controllers
-  const recommendationController = new RecommendationController(recommendationEngine)
-  const contentAnalysisController = new ContentAnalysisController(contentAnalysisService)
-  const insightsController = new InsightsController(userBehaviorService)
-  const marketplaceController = new MarketplaceIntegrationController()
+  const recommendationController = new RecommendationController(recommendationEngine);
+  const contentAnalysisController = new ContentAnalysisController(contentAnalysisService);
+  const insightsController = new InsightsController(userBehaviorService);
+  const marketplaceController = new MarketplaceIntegrationController();
 
   // Root endpoint
-  app.get("/", async () => {
+  app.get('/', async () => {
     return {
-      service: "AI Service",
-      version: "2.0.0",
-      status: "running",
+      service: 'AI Service',
+      version: '2.0.0',
+      status: 'running',
       timestamp: new Date().toISOString(),
-      framework: "Fastify 5.x",
+      framework: 'Fastify 5.x',
       features: [
-        "AI recommendations",
-        "Content analysis",
-        "User behavior insights",
-        "Marketplace integration",
-        "Fraud detection",
+        'AI recommendations',
+        'Content analysis',
+        'User behavior insights',
+        'Marketplace integration',
+        'Fraud detection',
       ],
-    }
-  })
+    };
+  });
 
   // Health check endpoint
-  app.get("/health", async () => {
+  app.get('/health', async () => {
     return {
       success: true,
-      message: "AI Service is running",
+      message: 'AI Service is running',
       timestamp: new Date().toISOString(),
-      version: "2.0.0",
+      version: '2.0.0',
       services: {
-        aiProvider: "operational",
-        recommendations: "operational",
-        contentAnalysis: "operational",
-        userBehavior: "operational",
-        marketplaceIntegration: "operational",
+        aiProvider: 'operational',
+        recommendations: 'operational',
+        contentAnalysis: 'operational',
+        userBehavior: 'operational',
+        marketplaceIntegration: 'operational',
       },
-    }
-  })
+    };
+  });
 
   // Service status endpoint
-  app.get("/status", async (request, reply) => {
+  app.get('/status', async (_request, reply) => {
     try {
-      const providerStats = aiProviderService.getProviderStats()
-      const recommendationStats = recommendationEngine.getStats()
-      const contentAnalysisStats = contentAnalysisService.getStats()
-      const behaviorStats = userBehaviorService.getStats()
+      const providerStats = aiProviderService.getProviderStats();
+      const recommendationStats = recommendationEngine.getStats();
+      const contentAnalysisStats = contentAnalysisService.getStats();
+      const behaviorStats = userBehaviorService.getStats();
 
       return {
         success: true,
@@ -132,82 +130,82 @@ export const createApp = async (): Promise<FastifyInstance> => {
           memory: process.memoryUsage(),
           timestamp: new Date(),
         },
-      }
+      };
     } catch (error) {
-      app.log.error({ error }, "Error getting service status")
-      reply.code(500)
+      app.log.error({ error }, 'Error getting service status');
+      reply.code(500);
       return {
         success: false,
-        message: "Failed to get service status",
-      }
+        message: 'Failed to get service status',
+      };
     }
-  })
+  });
 
   // AI Provider management endpoints (admin only)
-  app.get("/api/providers", async (request, reply) => {
+  app.get('/api/providers', async (_request, reply) => {
     try {
-      const providers = aiProviderService.getAvailableProviders()
+      const providers = aiProviderService.getAvailableProviders();
       return {
         success: true,
-        data: providers.map((p) => ({
+        data: providers.map(p => ({
           name: p.name,
           type: p.type,
           model: p.model,
           enabled: p.enabled,
           priority: p.priority,
         })),
-      }
+      };
     } catch (error) {
-      app.log.error({ error }, "Error getting providers")
-      reply.code(500)
+      app.log.error({ error }, 'Error getting providers');
+      reply.code(500);
       return {
         success: false,
-        message: "Failed to get AI providers",
-      }
+        message: 'Failed to get AI providers',
+      };
     }
-  })
+  });
 
-  app.get("/api/providers/stats", async (request, reply) => {
+  app.get('/api/providers/stats', async (_request, reply) => {
     try {
-      const stats = aiProviderService.getProviderStats()
+      const stats = aiProviderService.getProviderStats();
       return {
         success: true,
         data: stats,
-      }
+      };
     } catch (error) {
-      app.log.error({ error }, "Error getting provider stats")
-      reply.code(500)
+      app.log.error({ error }, 'Error getting provider stats');
+      reply.code(500);
       return {
         success: false,
-        message: "Failed to get provider statistics",
-      }
+        message: 'Failed to get provider statistics',
+      };
     }
-  })
+  });
 
   // Register routes (only working routes for now)
   try {
-    app.register(marketplaceIntegrationRoutes, { prefix: "/api/marketplace", marketplaceController })
-    console.log("✅ Marketplace integration routes registered")
+    app.register(marketplaceIntegrationRoutes, { prefix: '/api/marketplace', marketplaceController });
+    logger.info('✅ Marketplace integration routes registered');
   } catch (error) {
-    console.error("❌ Failed to register marketplace routes:", error)
+    logger.error('❌ Failed to register marketplace routes:', error);
   }
   // app.register(aiProviderRoutes, { prefix: '/api/v1/providers', aiProviderController })
   // app.register(modelManagementRoutes, { prefix: '/api/v1/models', modelManagementController })
   // app.register(usageAnalyticsRoutes, { prefix: '/api/v1/analytics', usageAnalyticsController })
   // app.register(systemRoutes, { prefix: '/api/v1/system', systemController })
 
-  return app
-}
+  return app as any;
+};
 
 export const gracefulShutdown = async (app: FastifyInstance, signal: string) => {
-  console.log(`🛑 ${signal} received, shutting down gracefully`)
+  logger.info(`🛑 ${signal} received, shutting down gracefully`);
 
   try {
-    await app.close()
-    console.log("✅ Server closed successfully")
-    process.exit(0)
+    await app.close();
+    logger.info('✅ Server closed successfully');
+    process.exit(0);
   } catch (error) {
-    console.error("❌ Error during shutdown:", error)
-    process.exit(1)
+    logger.error('❌ Error during shutdown:', error);
+    process.exit(1);
   }
-}
+};

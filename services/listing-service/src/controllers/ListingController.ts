@@ -103,7 +103,7 @@ export class ListingController {
   }
 
   // Get all products with filters
-  getProducts = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  getProducts = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       const mockProducts = [
         {
@@ -244,7 +244,7 @@ export class ListingController {
   }
 
   // Delete vehicle listing
-  deleteVehicle = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  deleteVehicle = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       // const { id } = request.params as { id: string }
 
@@ -262,7 +262,7 @@ export class ListingController {
   }
 
   // Delete product listing
-  deleteProduct = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  deleteProduct = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       // const { id } = request.params as { id: string }
 
@@ -280,7 +280,7 @@ export class ListingController {
   }
 
   // Search listings
-  searchListings = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  searchListings = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       return reply.send({
         success: true,
@@ -667,7 +667,7 @@ export class ListingController {
       // Filter by category if specified
       let filteredListings = mockListings
       if (query.category) {
-        filteredListings = mockListings.filter((listing) => listing.category === query.category)
+        filteredListings = mockListings.filter(listing => listing.category === query.category)
       }
 
       // Pagination
@@ -698,7 +698,7 @@ export class ListingController {
   }
 
   // Get featured listings
-  getFeaturedListings = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+  getFeaturedListings = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       return reply.send({
         success: true,

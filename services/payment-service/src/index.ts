@@ -3,7 +3,7 @@ import { createApp, env, gracefulShutdown } from "./app"
 import { checkDatabaseConnection } from "./db/connection"
 
 // Initialize modern job system
-import "./jobs/modern-queue"
+import "./jobs/index"
 
 // Start the modern application
 const start = async () => {
@@ -38,12 +38,12 @@ const start = async () => {
 
     // Setup graceful shutdown
     const signals = ["SIGTERM", "SIGINT", "SIGUSR2"]
-    signals.forEach((signal) => {
+    signals.forEach(signal => {
       process.on(signal, () => gracefulShutdown(app, signal))
     })
 
     // Handle uncaught exceptions
-    process.on("uncaughtException", (error) => {
+    process.on("uncaughtException", error => {
       app.log.error({ error }, "Uncaught Exception")
       gracefulShutdown(app, "uncaughtException")
     })

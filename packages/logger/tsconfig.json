@@ -6,8 +6,10 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "noEmit": false
+    "noEmit": false,
+    "module": "ES2020",
+    "target": "ES2020"
   },
-  "include": ["src/**/*", "src/vite-env.d.ts"],
+  "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]
 }

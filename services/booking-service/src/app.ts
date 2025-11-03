@@ -1,3 +1,4 @@
+import logger, { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"
@@ -16,8 +17,8 @@ config()
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.string().transform(Number).default(3004),
-  DATABASE_URL: z.string(),
-  JWT_SECRET: z.string(),
+  DATABASE_URL: z.string().default("postgresql://user:password@localhost:5432/marketplace_bookings"),
+  JWT_SECRET: z.string().default("dev-jwt-secret-change-in-production"),
   ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
   RATE_LIMIT_WINDOW_MS: z.string().transform(Number).default(900000), // 15 minutes
   RATE_LIMIT_MAX_REQUESTS: z.string().transform(Number).default(100),
@@ -26,9 +27,9 @@ const envSchema = z.object({
 export const env = envSchema.parse(process.env)
 
 export const createApp = async (): Promise<FastifyInstance> => {
-  // Create Fastify app
+  // Create Fastify app with integrated logger
   const app = Fastify({
-    logger: env.NODE_ENV === "development",
+    logger: createPinoLoggerOptions("booking-service"),
     bodyLimit: 10 * 1024 * 1024, // 10MB
   })
 
@@ -119,14 +120,14 @@ export const createApp = async (): Promise<FastifyInstance> => {
 }
 
 export const gracefulShutdown = async (app: FastifyInstance, signal: string) => {
-  console.log(`🛑 ${signal} received, shutting down gracefully`)
+  logger.info(`🛑 ${signal} received, shutting down gracefully`)
 
   try {
     await app.close()
-    console.log("✅ Server closed successfully")
+    logger.info("✅ Server closed successfully")
     process.exit(0)
   } catch (error) {
-    console.error("❌ Error during shutdown:", error)
+    logger.error("❌ Error during shutdown:", error)
     process.exit(1)
   }
 }

@@ -2,11 +2,11 @@ import { FastifyPluginAsync } from "fastify"
 
 import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
-const assignmentsRoutes: FastifyPluginAsync = async (fastify) => {
+const assignmentsRoutes: FastifyPluginAsync = async fastify => {
   // Get all assignments
   fastify.get("/", {
     preHandler: [authenticateToken],
-    handler: async (request, reply) => {
+    handler: async (_request, reply) => {
       return reply.code(200).send({
         success: true,
         data: [],
@@ -102,7 +102,7 @@ const assignmentsRoutes: FastifyPluginAsync = async (fastify) => {
         required: ["id"],
       },
     },
-    handler: async (request, reply) => {
+    handler: async (_request, reply) => {
       return reply.code(200).send({
         success: true,
         message: "Assignment deleted successfully (placeholder)",

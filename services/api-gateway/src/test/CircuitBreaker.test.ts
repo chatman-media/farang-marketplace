@@ -139,7 +139,7 @@ describe("CircuitBreaker", () => {
       }
 
       // Wait for timeout
-      await new Promise((resolve) => setTimeout(resolve, 20))
+      await new Promise(resolve => setTimeout(resolve, 20))
 
       // Next operation should transition to half-open
       const successOperation = vi.fn().mockResolvedValue("success")
@@ -176,7 +176,7 @@ describe("CircuitBreaker", () => {
       }
 
       // Wait for timeout
-      await new Promise((resolve) => setTimeout(resolve, 20))
+      await new Promise(resolve => setTimeout(resolve, 20))
 
       // First success should put it in half-open, but not close it
       await circuitBreaker.execute(successOperation)
@@ -207,7 +207,7 @@ describe("CircuitBreaker", () => {
       }
 
       // Wait for timeout
-      await new Promise((resolve) => setTimeout(resolve, 20))
+      await new Promise(resolve => setTimeout(resolve, 20))
 
       // Fail in half-open state
       try {

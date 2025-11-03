@@ -34,7 +34,7 @@ export class SegmentationService {
         data.operator || "AND",
         data.isActive !== false,
         createdBy,
-      ],
+      ]
     )
 
     const segment = new Segment(result.rows[0])
@@ -61,7 +61,7 @@ export class SegmentationService {
   }
 
   async getSegments(
-    filters: { isActive?: boolean; createdBy?: string; search?: string; limit?: number; offset?: number } = {},
+    filters: { isActive?: boolean; createdBy?: string; search?: string; limit?: number; offset?: number } = {}
   ): Promise<{ segments: Segment[]; total: number }> {
     const whereConditions: string[] = []
     const queryParams: any[] = []
@@ -89,7 +89,7 @@ export class SegmentationService {
 
     // Get total count
     const countResult = await query(`SELECT COUNT(*) as total FROM customer_segments ${whereClause}`, queryParams)
-    const total = countResult.rows && countResult.rows.length > 0 ? Number.parseInt(countResult.rows[0].total) : 0
+    const total = countResult.rows && countResult.rows.length > 0 ? Number.parseInt(countResult.rows[0].total, 10) : 0
 
     // Get segments with pagination
     const limit = filters.limit || 50
@@ -99,7 +99,7 @@ export class SegmentationService {
       `SELECT * FROM customer_segments ${whereClause}
        ORDER BY created_at DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      [...queryParams, limit, offset],
+      [...queryParams, limit, offset]
     )
 
     const segments = result.rows.map((row: any) => new Segment(row))
@@ -164,7 +164,7 @@ export class SegmentationService {
 
     const result = await query(
       `UPDATE customer_segments SET ${updates.join(", ")} WHERE id = $${paramIndex} RETURNING *`,
-      queryParams,
+      queryParams
     )
 
     if (result.rows.length === 0) {
@@ -202,13 +202,13 @@ export class SegmentationService {
     // Insert new memberships
     if (matchingCustomerIds.length > 0) {
       const values = matchingCustomerIds
-        .map((customerId, index) => {
+        .map((_customerId, index) => {
           const baseIndex = index * 2
           return `($${baseIndex + 1}, $${baseIndex + 2})`
         })
         .join(", ")
 
-      const params = matchingCustomerIds.flatMap((customerId) => [customerId, segmentId])
+      const params = matchingCustomerIds.flatMap(customerId => [customerId, segmentId])
 
       await query(`INSERT INTO customer_segment_memberships (customer_id, segment_id) VALUES ${values}`, params)
     }
@@ -218,7 +218,7 @@ export class SegmentationService {
       `UPDATE customer_segments
        SET customer_count = $1, last_calculated_at = NOW()
        WHERE id = $2`,
-      [matchingCustomerIds.length, segmentId],
+      [matchingCustomerIds.length, segmentId]
     )
 
     return matchingCustomerIds.length
@@ -251,7 +251,7 @@ export class SegmentationService {
 
   async getCustomersInSegment(
     segmentId: string,
-    pagination: { limit?: number; offset?: number } = {},
+    pagination: { limit?: number; offset?: number } = {}
   ): Promise<{ customers: Customer[]; total: number }> {
     const limit = pagination.limit || 50
     const offset = pagination.offset || 0
@@ -261,9 +261,9 @@ export class SegmentationService {
       `SELECT COUNT(*) as total
        FROM customer_segment_memberships csm
        WHERE csm.segment_id = $1`,
-      [segmentId],
+      [segmentId]
     )
-    const total = Number.parseInt(countResult.rows[0].total)
+    const total = Number.parseInt(countResult.rows[0].total, 10)
 
     // Get customers
     const result = await query(
@@ -273,7 +273,7 @@ export class SegmentationService {
        WHERE csm.segment_id = $1
        ORDER BY c.created_at DESC
        LIMIT $2 OFFSET $3`,
-      [segmentId, limit, offset],
+      [segmentId, limit, offset]
     )
 
     const customers = result.rows.map((row: any) => new Customer(row))
@@ -432,16 +432,16 @@ export class SegmentationService {
     const activeResult = await query("SELECT COUNT(*) as total FROM customer_segments WHERE is_active = true")
     const membershipsResult = await query("SELECT COUNT(*) as total FROM customer_segment_memberships")
     const avgSizeResult = await query(
-      "SELECT AVG(customer_count) as avg_size FROM customer_segments WHERE is_active = true",
+      "SELECT AVG(customer_count) as avg_size FROM customer_segments WHERE is_active = true"
     )
     const largestResult = await query(
-      "SELECT name, customer_count FROM customer_segments WHERE is_active = true ORDER BY customer_count DESC LIMIT 1",
+      "SELECT name, customer_count FROM customer_segments WHERE is_active = true ORDER BY customer_count DESC LIMIT 1"
     )
 
     return {
-      totalSegments: Number.parseInt(totalResult.rows[0].total),
-      activeSegments: Number.parseInt(activeResult.rows[0].total),
-      totalMemberships: Number.parseInt(membershipsResult.rows[0].total),
+      totalSegments: Number.parseInt(totalResult.rows[0].total, 10),
+      activeSegments: Number.parseInt(activeResult.rows[0].total, 10),
+      totalMemberships: Number.parseInt(membershipsResult.rows[0].total, 10),
       averageSegmentSize: Math.round(Number.parseFloat(avgSizeResult.rows[0].avg_size) || 0),
       largestSegment:
         largestResult.rows.length > 0

@@ -321,7 +321,7 @@ describe("CommunicationService", () => {
       }
 
       await expect(communicationService.sendMessage(request)).rejects.toThrow(
-        "No contact information available for channel",
+        "No contact information available for channel"
       )
     })
   })
@@ -447,7 +447,7 @@ describe("CommunicationService", () => {
       expect(result).toBe(true)
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining("UPDATE communication_history SET read_at = NOW()"),
-        ["history-123"],
+        ["history-123"]
       )
     })
 

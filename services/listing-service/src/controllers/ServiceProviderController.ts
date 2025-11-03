@@ -24,7 +24,7 @@ const ServiceSchema = z.object({
         z.object({
           start: z.string(),
           end: z.string(),
-        }),
+        })
       ),
       timezone: z.string(),
     })
@@ -131,7 +131,7 @@ export class ServiceProviderController {
         userId: request.user.id,
         providerType: validatedData.businessType === "individual" ? ("individual" as const) : ("company" as const),
         businessName: validatedData.businessName || `${request.user.email} Service Provider`,
-        serviceCapabilities: validatedData.services.map((service) => service.category),
+        serviceCapabilities: validatedData.services.map(service => service.category),
         primaryLocation: {
           address: validatedData.location.address,
           city: validatedData.location.city,
@@ -185,7 +185,7 @@ export class ServiceProviderController {
   // Get service provider by ID
   getServiceProvider = async (
     request: FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ): Promise<void> => {
     try {
       const { id } = request.params
@@ -223,7 +223,7 @@ export class ServiceProviderController {
         sortOrder?: "asc" | "desc"
       }
     }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ): Promise<void> => {
     try {
       const { page = 1, limit = 20, sortBy = "rating", sortOrder = "desc" } = request.query || {}
@@ -246,7 +246,7 @@ export class ServiceProviderController {
   // Search service providers
   searchServiceProviders = async (
     request: FastifyRequest<{ Querystring: any }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ): Promise<void> => {
     try {
       const validatedQuery = SearchQuerySchema.parse(request.query)
@@ -267,7 +267,7 @@ export class ServiceProviderController {
       const result = await this.serviceProviderService.searchServiceProviders(
         filters,
         validatedQuery.page,
-        validatedQuery.limit,
+        validatedQuery.limit
       )
 
       return reply.send({
@@ -302,7 +302,7 @@ export class ServiceProviderController {
   // Update service provider
   updateServiceProvider = async (
     request: AuthenticatedRequest & FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ): Promise<void> => {
     try {
       const { id } = request.params
@@ -320,7 +320,7 @@ export class ServiceProviderController {
       if (validatedData.businessName) updateData.businessName = validatedData.businessName
       if (validatedData.description) updateData.description = validatedData.description
       if (validatedData.services) {
-        updateData.serviceCapabilities = validatedData.services.map((service) => service.category)
+        updateData.serviceCapabilities = validatedData.services.map(service => service.category)
       }
       if (validatedData.location) {
         updateData.primaryLocation = {
@@ -383,7 +383,7 @@ export class ServiceProviderController {
   // Delete service provider
   deleteServiceProvider = async (
     request: AuthenticatedRequest & FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ): Promise<void> => {
     try {
       const { id } = request.params

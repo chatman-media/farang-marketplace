@@ -125,7 +125,7 @@ export class AutomationService {
         `SELECT * FROM automations
          WHERE is_active = true
          AND (trigger->>'type' = $1 OR trigger->>'event' = $1)`,
-        [eventName],
+        [eventName]
       )
 
       if (!result || !result.rows) {
@@ -348,7 +348,7 @@ export class AutomationService {
   // Create task action
   private async executeCreateTaskAction(action: AutomationAction, _data: WorkflowTriggerData): Promise<void> {
     // TODO: Implement task creation when task system is available
-    logger.log("Creating task:", action.parameters)
+    logger.info("Creating task:", action.parameters)
   }
 
   // Webhook action
@@ -387,7 +387,7 @@ export class AutomationService {
         JSON.stringify(automation.actions),
         automation.isActive,
         automation.createdBy,
-      ],
+      ]
     )
 
     const row = result.rows[0]

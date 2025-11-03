@@ -2,7 +2,16 @@ import logger from "@marketplace/logger"
 import { PaymentStatus } from "@marketplace/shared-types"
 import Stripe from "stripe"
 
-import { PaymentMethodType } from "../db/schema"
+type PaymentMethodType =
+  | "ton_wallet"
+  | "ton_connect"
+  | "jetton_usdt"
+  | "jetton_usdc"
+  | "stripe_card"
+  | "stripe_sepa"
+  | "stripe_ideal"
+  | "stripe_sofort"
+  | "promptpay"
 
 export interface StripePaymentRequest {
   amount: number // in cents
@@ -55,7 +64,7 @@ export class StripeService {
     }
 
     this.stripe = new Stripe(secretKey, {
-      apiVersion: "2025-08-27.basil",
+      apiVersion: "2025-10-29.clover",
       typescript: true,
     })
   }

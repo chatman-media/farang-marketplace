@@ -21,8 +21,8 @@ export class SegmentController {
         search?: string
       }
 
-      const page = Number.parseInt(query.page || "1")
-      const limit = Number.parseInt(query.limit || "20")
+      const page = Number.parseInt(query.page || "1", 10)
+      const limit = Number.parseInt(query.limit || "20", 10)
       const offset = (page - 1) * limit
 
       const filters = {
@@ -37,7 +37,7 @@ export class SegmentController {
 
       return reply.code(200).send({
         success: true,
-        data: result.segments.map((segment) => segment.toJSON()),
+        data: result.segments.map(segment => segment.toJSON()),
         pagination: {
           page,
           limit,
@@ -254,8 +254,8 @@ export class SegmentController {
         limit?: string
       }
 
-      const page = Number.parseInt(query.page || "1")
-      const limit = Number.parseInt(query.limit || "20")
+      const page = Number.parseInt(query.page || "1", 10)
+      const limit = Number.parseInt(query.limit || "20", 10)
       const offset = (page - 1) * limit
 
       const result = await this.segmentationService.getCustomersInSegment(params.id, {
@@ -265,7 +265,7 @@ export class SegmentController {
 
       return reply.code(200).send({
         success: true,
-        data: result.customers.map((customer) => customer.toJSON()),
+        data: result.customers.map(customer => customer.toJSON()),
         pagination: {
           page,
           limit,

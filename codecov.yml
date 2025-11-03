@@ -67,11 +67,6 @@ flags:
       - services/ai-service/
     carryforward: true
 
-  voice-service:
-    paths:
-      - services/voice-service/
-    carryforward: true
-
   crm-service:
     paths:
       - services/crm-service/

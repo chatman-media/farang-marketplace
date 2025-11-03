@@ -1,9 +1,10 @@
+import { and, count, eq, gte, lte } from "@marketplace/database-schema"
 import { logger } from "@marketplace/logger"
-import { and, count, eq, gte, lte } from "drizzle-orm"
 
 import { ListingServiceClient } from "../clients/ListingServiceClient"
-import { db } from "../db/connection"
-import { bookings } from "../db/schema"
+import { db, schema } from "../db/connection"
+
+const { bookings } = schema
 
 // Cache interface for pricing data
 interface CacheEntry<T> {
@@ -110,7 +111,7 @@ export class PricingService {
       () => {
         this.cleanupExpiredCache()
       },
-      5 * 60 * 1000,
+      5 * 60 * 1000
     )
   }
 
@@ -156,7 +157,7 @@ export class PricingService {
     cache: Map<string, CacheEntry<T>>,
     key: string,
     ttl: number,
-    fetchFn: () => Promise<T>,
+    fetchFn: () => Promise<T>
   ): Promise<T> {
     const now = Date.now()
     const cached = cache.get(key)
@@ -289,7 +290,7 @@ export class PricingService {
   async getQuickEstimate(
     listingId: string,
     type: "accommodation" | "service",
-    duration?: number,
+    duration?: number
   ): Promise<{ minPrice: number; maxPrice: number; currency: string }> {
     if (type === "accommodation") {
       const listingPrice = await this.getListingPrice(listingId)
@@ -367,7 +368,7 @@ export class PricingService {
 
   private async getServicePrice(
     listingId: string,
-    serviceType: string,
+    serviceType: string
   ): Promise<{
     priceType: "hourly" | "fixed" | "daily" | "project"
     hourlyRate: number
@@ -451,7 +452,7 @@ export class PricingService {
   private async applyPricingRules(
     basePrice: number,
     request: BookingPriceRequest,
-    numberOfNights: number,
+    numberOfNights: number
   ): Promise<{ adjustedPrice: number; discounts: number }> {
     let adjustedPrice = basePrice
     let totalDiscounts = 0
@@ -508,7 +509,7 @@ export class PricingService {
 
         // Low season (Apr-Oct)
         return 0.9 // 10% decrease
-      },
+      }
     )
   }
 
@@ -527,7 +528,7 @@ export class PricingService {
     const cacheKey = `demand_${listingId}_${checkIn.toISOString().split("T")[0]}`
 
     return this.getCachedData(this.cache.demandMultipliers, cacheKey, this.CACHE_TTL.DEMAND_MULTIPLIER, () =>
-      this.calculateDemandMultiplier(listingId, checkIn),
+      this.calculateDemandMultiplier(listingId, checkIn)
     )
   }
 
@@ -547,8 +548,8 @@ export class PricingService {
           and(
             eq(bookings.listingId, listingId),
             gte(bookings.createdAt, thirtyDaysAgo),
-            eq(bookings.status, "confirmed"),
-          ),
+            eq(bookings.status, "confirmed")
+          )
         )
 
       // Calculate historical booking activity (30-60 days ago)
@@ -560,8 +561,8 @@ export class PricingService {
             eq(bookings.listingId, listingId),
             gte(bookings.createdAt, sixtyDaysAgo),
             lte(bookings.createdAt, thirtyDaysAgo),
-            eq(bookings.status, "confirmed"),
-          ),
+            eq(bookings.status, "confirmed")
+          )
         )
 
       // Calculate occupancy rate for the target month
@@ -576,8 +577,8 @@ export class PricingService {
             eq(bookings.listingId, listingId),
             gte(bookings.checkIn, monthStart),
             lte(bookings.checkIn, monthEnd),
-            eq(bookings.status, "confirmed"),
-          ),
+            eq(bookings.status, "confirmed")
+          )
         )
 
       // Calculate demand factors

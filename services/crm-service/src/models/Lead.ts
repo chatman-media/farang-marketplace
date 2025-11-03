@@ -40,7 +40,7 @@ export class Lead implements ILead {
     this.value = data.value ? Number.parseFloat(data.value) : undefined
     this.propertyInterest = data.property_interest
     this.estimatedValue = data.estimated_value ? Number.parseFloat(data.estimated_value) : undefined
-    this.probability = data.probability ? Number.parseInt(data.probability) : undefined
+    this.probability = data.probability ? Number.parseInt(data.probability, 10) : undefined
     this.currency = data.currency || "THB"
     this.stage = data.stage
     this.campaign = data.campaign

@@ -154,12 +154,12 @@ describe("Booking API Validation Tests", () => {
       const validGuestCounts = [1, 2, 5, 10, 20]
       const invalidGuestCounts = [0, -1, 21, 100]
 
-      validGuestCounts.forEach((count) => {
+      validGuestCounts.forEach(count => {
         expect(count).toBeGreaterThan(0)
         expect(count).toBeLessThanOrEqual(20)
       })
 
-      invalidGuestCounts.forEach((count) => {
+      invalidGuestCounts.forEach(count => {
         expect(count <= 0 || count > 20).toBe(true)
       })
     })
@@ -233,7 +233,7 @@ describe("Booking API Validation Tests", () => {
 
       // Validate common status codes
       Object.entries(statusCodeMappings).forEach(([code, description]) => {
-        const numCode = Number.parseInt(code)
+        const numCode = Number.parseInt(code, 10)
         expect(numCode).toBeGreaterThanOrEqual(200)
         expect(numCode).toBeLessThan(600)
         expect(description).toBeDefined()

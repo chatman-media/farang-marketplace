@@ -50,11 +50,11 @@ describe("Payment Service Logic Tests", () => {
 
       const invalidPaymentMethods = ["bitcoin", "ethereum", "paypal", "invalid_method"]
 
-      validPaymentMethods.forEach((method) => {
+      validPaymentMethods.forEach(method => {
         expect(validPaymentMethods).toContain(method)
       })
 
-      invalidPaymentMethods.forEach((method) => {
+      invalidPaymentMethods.forEach(method => {
         expect(validPaymentMethods).not.toContain(method)
       })
     })
@@ -73,7 +73,7 @@ describe("Payment Service Logic Tests", () => {
 
       // Test valid transitions
       Object.entries(validStatusTransitions).forEach(([fromStatus, toStatuses]) => {
-        toStatuses.forEach((toStatus) => {
+        toStatuses.forEach(toStatus => {
           expect(validStatusTransitions[fromStatus as keyof typeof validStatusTransitions]).toContain(toStatus)
         })
       })
@@ -128,12 +128,12 @@ describe("Payment Service Logic Tests", () => {
       const validCurrencies = ["TON", "USDT", "USDC", "USD", "THB", "EUR", "GBP"]
       const invalidCurrencies = ["BTC", "ETH", "XYZ", "123"]
 
-      validCurrencies.forEach((currency) => {
+      validCurrencies.forEach(currency => {
         expect(validCurrencies).toContain(currency)
         expect(currency).toMatch(/^[A-Z]{3,4}$/)
       })
 
-      invalidCurrencies.forEach((currency) => {
+      invalidCurrencies.forEach(currency => {
         expect(validCurrencies).not.toContain(currency)
       })
     })
@@ -190,12 +190,12 @@ describe("Payment Service Logic Tests", () => {
       const validTimeouts = [5, 15, 30, 60, 120] // minutes
       const invalidTimeouts = [0, -5, 1440, 10080] // 0, negative, 24h, 7 days
 
-      validTimeouts.forEach((timeout) => {
+      validTimeouts.forEach(timeout => {
         expect(timeout).toBeGreaterThan(0)
         expect(timeout).toBeLessThanOrEqual(120) // Max 2 hours
       })
 
-      invalidTimeouts.forEach((timeout) => {
+      invalidTimeouts.forEach(timeout => {
         const isValid = timeout > 0 && timeout <= 120
         expect(isValid).toBe(false)
       })
@@ -263,13 +263,13 @@ describe("Payment Service Logic Tests", () => {
         "too-short",
       ]
 
-      validAddresses.forEach((address) => {
+      validAddresses.forEach(address => {
         // Basic length check (TON addresses are typically 48 characters)
         expect(address.length).toBe(48)
         expect(address).toMatch(/^[A-Za-z0-9_-]+$/)
       })
 
-      invalidAddresses.forEach((address) => {
+      invalidAddresses.forEach(address => {
         const isValid = address.length === 48 && /^[A-Za-z0-9_-]+$/.test(address)
         expect(isValid).toBe(false)
       })

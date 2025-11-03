@@ -47,16 +47,16 @@ class TokenManager {
 
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     const token = TokenManager.getToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
-  (error) => {
+  error => {
     return Promise.reject(error)
-  },
+  }
 )
 
 // Response interceptor for error handling and token refresh
@@ -97,7 +97,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error)
-  },
+  }
 )
 
 // API Error types
@@ -196,7 +196,7 @@ export const api = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-        onUploadProgress: (progressEvent) => {
+        onUploadProgress: progressEvent => {
           if (onProgress && progressEvent.total) {
             const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
             onProgress(progress)

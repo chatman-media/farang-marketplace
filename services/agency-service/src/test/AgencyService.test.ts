@@ -71,7 +71,7 @@ describe("Agency Service Logic Tests", () => {
       }
 
       Object.entries(validTransitions).forEach(([from, toStates]) => {
-        toStates.forEach((to) => {
+        toStates.forEach(to => {
           expect(typeof from).toBe("string")
           expect(typeof to).toBe("string")
           expect(["pending", "active", "suspended", "inactive", "rejected"]).toContain(from)
@@ -148,7 +148,7 @@ describe("Agency Service Logic Tests", () => {
     it("should handle different pricing models", () => {
       const pricingModels = ["fixed", "hourly", "per_item", "percentage"]
 
-      pricingModels.forEach((model) => {
+      pricingModels.forEach(model => {
         expect(typeof model).toBe("string")
         expect(model.length).toBeGreaterThan(0)
       })
@@ -228,7 +228,7 @@ describe("Agency Service Logic Tests", () => {
         "other",
       ]
 
-      validCategories.forEach((category) => {
+      validCategories.forEach(category => {
         expect(typeof category).toBe("string")
         expect(category.length).toBeGreaterThan(0)
       })
@@ -257,7 +257,7 @@ describe("Agency Service Logic Tests", () => {
       Object.entries(categoryRequirements).forEach(([_category, requirements]) => {
         expect(Array.isArray(requirements)).toBe(true)
         expect(requirements.length).toBeGreaterThan(0)
-        requirements.forEach((req) => {
+        requirements.forEach(req => {
           expect(typeof req).toBe("string")
           expect(req.length).toBeGreaterThan(0)
         })
@@ -327,7 +327,7 @@ describe("Agency Service Logic Tests", () => {
         },
       ]
 
-      validationErrors.forEach((error) => {
+      validationErrors.forEach(error => {
         expect(error.field).toBeTruthy()
         expect(error.message).toBeTruthy()
         expect(typeof error.field).toBe("string")

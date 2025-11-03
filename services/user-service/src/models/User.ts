@@ -79,7 +79,7 @@ export class UserEntity {
     public telegramId?: string,
     public isActive: boolean = true,
     public createdAt: Date = new Date(),
-    public updatedAt: Date = new Date(),
+    public updatedAt: Date = new Date()
   ) {}
 
   // Static factory method to create user from database row
@@ -96,7 +96,7 @@ export class UserEntity {
       row.telegramId || row.telegram_id,
       row.isActive !== undefined ? row.isActive : row.is_active,
       row.createdAt || row.created_at,
-      row.updatedAt || row.updated_at,
+      row.updatedAt || row.updated_at
     )
   }
 

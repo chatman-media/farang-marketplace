@@ -19,7 +19,10 @@ beforeEach(() => {
 })
 
 // Mock database connection for tests
-export const mockDatabase = {
+export const mockDatabase: {
+  query: ReturnType<typeof vi.fn>
+  end: ReturnType<typeof vi.fn>
+} = {
   query: vi.fn(),
   end: vi.fn(),
 }

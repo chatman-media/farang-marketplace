@@ -2,7 +2,7 @@ import { FastifyPluginAsync } from "fastify"
 
 import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
-const servicesRoutes: FastifyPluginAsync = async (fastify) => {
+const servicesRoutes: FastifyPluginAsync = async fastify => {
   // Get all services
   fastify.get("/", {
     handler: async (_request, reply) => {
@@ -103,7 +103,7 @@ const servicesRoutes: FastifyPluginAsync = async (fastify) => {
         required: ["id"],
       },
     },
-    handler: async (request, reply) => {
+    handler: async (_request, reply) => {
       return reply.code(200).send({
         success: true,
         message: "Service deleted successfully (placeholder)",

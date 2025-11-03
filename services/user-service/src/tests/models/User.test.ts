@@ -33,7 +33,7 @@ describe("UserEntity", () => {
       "telegram123",
       true,
       new Date("2023-01-01"),
-      new Date("2023-01-01"),
+      new Date("2023-01-01")
     )
   })
 
@@ -287,14 +287,14 @@ describe("UserEntity", () => {
     it("should validate email format in create data", () => {
       const invalidEmails = ["invalid", "@example.com", "test@", "test.example.com"]
 
-      invalidEmails.forEach((email) => {
+      invalidEmails.forEach(email => {
         const data = { ...testUserData.validCreateData, email }
         expect(() => UserEntity.validateCreateData(data)).toThrow()
       })
 
       const validEmails = ["test@example.com", "user.name@domain.co.uk", "test+tag@example.org"]
 
-      validEmails.forEach((email) => {
+      validEmails.forEach(email => {
         const data = { ...testUserData.validCreateData, email }
         expect(() => UserEntity.validateCreateData(data)).not.toThrow()
       })
@@ -303,14 +303,14 @@ describe("UserEntity", () => {
     it("should validate phone format in create data", () => {
       const invalidPhones = ["abc123", "123abc", "++123456789"]
 
-      invalidPhones.forEach((phone) => {
+      invalidPhones.forEach(phone => {
         const data = { ...testUserData.validCreateData, phone }
         expect(() => UserEntity.validateCreateData(data)).toThrow()
       })
 
       const validPhones = ["+1234567890", "+66123456789", "+44123456789", "+81123456789"]
 
-      validPhones.forEach((phone) => {
+      validPhones.forEach(phone => {
         const data = { ...testUserData.validCreateData, phone }
         expect(() => UserEntity.validateCreateData(data)).not.toThrow()
       })
@@ -322,7 +322,7 @@ describe("UserEntity", () => {
         UserEntity.validateCreateData({
           ...testUserData.validCreateData,
           profile: { ...testUserData.validCreateData.profile, firstName: "" },
-        }),
+        })
       ).toThrow()
 
       expect(() =>
@@ -332,7 +332,7 @@ describe("UserEntity", () => {
             ...testUserData.validCreateData.profile,
             firstName: "a".repeat(51),
           },
-        }),
+        })
       ).toThrow()
 
       // Test lastName validation
@@ -340,7 +340,7 @@ describe("UserEntity", () => {
         UserEntity.validateCreateData({
           ...testUserData.validCreateData,
           profile: { ...testUserData.validCreateData.profile, lastName: "" },
-        }),
+        })
       ).toThrow()
 
       expect(() =>
@@ -350,7 +350,7 @@ describe("UserEntity", () => {
             ...testUserData.validCreateData.profile,
             lastName: "a".repeat(51),
           },
-        }),
+        })
       ).toThrow()
     })
 
@@ -374,7 +374,7 @@ describe("UserEntity", () => {
         { isActive: false },
       ]
 
-      partialUpdates.forEach((update) => {
+      partialUpdates.forEach(update => {
         expect(() => UserEntity.validateUpdateData(update)).not.toThrow()
       })
     })
@@ -394,7 +394,7 @@ describe("UserEntity", () => {
         UserEntity.validatePasswordChange({
           currentPassword: "oldpassword",
           newPassword: "123", // Too short
-        }),
+        })
       ).toThrow()
 
       // Test missing fields
@@ -444,7 +444,7 @@ describe("UserEntity", () => {
         VerificationStatus.REJECTED,
       ]
 
-      statuses.forEach((status) => {
+      statuses.forEach(status => {
         user.setVerificationStatus(status)
         expect(user.profile.verificationStatus).toBe(status)
       })

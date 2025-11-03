@@ -1,8 +1,7 @@
-import * as fs from "fs"
-import * as path from "path"
-
 import logger from "@marketplace/logger"
 import dotenv from "dotenv"
+import * as fs from "fs"
+import * as path from "path"
 
 import { query } from "./connection"
 
@@ -20,8 +19,8 @@ async function runTemplatesMigration() {
     // Split by semicolon and execute each statement
     const statements = migrationSQL
       .split(";")
-      .map((stmt) => stmt.trim())
-      .filter((stmt) => stmt.length > 0 && !stmt.startsWith("--"))
+      .map(stmt => stmt.trim())
+      .filter(stmt => stmt.length > 0 && !stmt.startsWith("--"))
 
     for (const statement of statements) {
       if (statement.trim()) {

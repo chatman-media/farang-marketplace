@@ -294,7 +294,7 @@ describe("LineService", () => {
       })
       expect(mockQuery).toHaveBeenCalledWith(
         "SELECT * FROM message_templates WHERE id = $1 AND channel = $2 AND is_active = true",
-        ["template-123", CommunicationChannel.LINE],
+        ["template-123", CommunicationChannel.LINE]
       )
     })
 

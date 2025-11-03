@@ -188,7 +188,7 @@ export class OAuthController {
   // GET /auth/providers
   async getAvailableProviders(_req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      const providers = Object.values(AuthProvider).map((provider) => ({
+      const providers = Object.values(AuthProvider).map(provider => ({
         name: provider,
         displayName: this.getProviderDisplayName(provider),
         available: this.isProviderConfigured(provider),

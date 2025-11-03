@@ -175,7 +175,7 @@ describe("Customer Model", () => {
 
       // Should not add duplicate tags
       customer.addTag("new-tag")
-      expect(customer.tags.filter((tag) => tag === "new-tag")).toHaveLength(1)
+      expect(customer.tags.filter(tag => tag === "new-tag")).toHaveLength(1)
 
       customer.removeTag("vip")
       expect(customer.tags).not.toContain("vip")

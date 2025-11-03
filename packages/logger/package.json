@@ -2,8 +2,16 @@
   "name": "@marketplace/logger",
   "version": "1.0.0",
   "description": "Centralized logging package for marketplace platform",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -12,12 +20,12 @@
     "lint:fix": "eslint src --ext .ts --fix"
   },
   "dependencies": {
-    "winston": "^3.17.0"
+    "pino": "10.1.0",
+    "pino-pretty": "13.1.2"
   },
   "devDependencies": {
-    "@types/node": "24.4.0",
-    "@types/winston": "^2.4.4",
-    "typescript": "^5.9.2"
+    "@types/node": "24.10.0",
+    "typescript": "^5.9.3"
   },
   "files": [
     "dist"

@@ -1,8 +1,6 @@
-import { migrate } from "drizzle-orm/postgres-js/migrator"
-import postgres from "postgres"
-import { drizzle } from "drizzle-orm/postgres-js"
-import { logger } from "@marketplace/logger"
 import * as schema from "@marketplace/database-schema"
+import { drizzle, migrate, postgres } from "@marketplace/database-schema"
+import { logger } from "@marketplace/logger"
 
 const connectionString = process.env.DATABASE_URL
 
@@ -27,7 +25,7 @@ async function runMigrations() {
 }
 
 if (require.main === module) {
-  runMigrations().catch((error) => {
+  runMigrations().catch(error => {
     logger.error("Migration script failed:", error)
     process.exit(1)
   })

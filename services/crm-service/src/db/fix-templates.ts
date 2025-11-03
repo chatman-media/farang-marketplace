@@ -129,7 +129,7 @@ Best regards,
             JSON.stringify(template.variables),
             JSON.stringify(template.conditions),
             true,
-          ],
+          ]
         )
         logger.info(`✅ Inserted template: ${template.name}`)
       } else {

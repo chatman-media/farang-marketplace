@@ -1,3 +1,4 @@
+import logger, { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"
@@ -8,36 +9,23 @@ config()
 // Environment validation with Zod
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  PORT: z.string().transform(Number).default(3003),
-  DATABASE_URL: z.string(),
+  PORT: z.string().transform(Number).default(3009),
+  DATABASE_URL: z.string().default("postgresql://user:password@localhost:5432/marketplace_payments"),
   REDIS_HOST: z.string().default("localhost"),
   REDIS_PORT: z.string().transform(Number).default(6379),
   TON_NETWORK: z.enum(["mainnet", "testnet"]).default("testnet"),
-  TON_API_KEY: z.string(),
-  TON_WALLET_ADDRESS: z.string(),
-  STRIPE_SECRET_KEY: z.string(),
-  JWT_SECRET: z.string(),
+  TON_API_KEY: z.string().default("dev-api-key"),
+  TON_WALLET_ADDRESS: z.string().default("EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c"),
+  STRIPE_SECRET_KEY: z.string().default("sk_test_dev_key"),
+  JWT_SECRET: z.string().default("dev-jwt-secret-change-in-production"),
 })
 
 export const env = envSchema.parse(process.env)
 
-// Create Fastify instance with modern configuration
+// Create Fastify instance with integrated logger
 export const createApp = async (): Promise<FastifyInstance> => {
   const app = Fastify({
-    logger: {
-      level: env.NODE_ENV === "production" ? "info" : "debug",
-      transport:
-        env.NODE_ENV === "development"
-          ? {
-              target: "pino-pretty",
-              options: {
-                colorize: true,
-                translateTime: "HH:MM:ss Z",
-                ignore: "pid,hostname",
-              },
-            }
-          : undefined,
-    },
+    logger: createPinoLoggerOptions("payment-service"),
     trustProxy: true,
     disableRequestLogging: env.NODE_ENV === "production",
   })

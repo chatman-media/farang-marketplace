@@ -138,7 +138,7 @@ export class AuthService {
         user.telegramId,
         user.isActive,
         user.createdAt,
-        user.updatedAt,
+        user.updatedAt
       )
 
       // Generate new tokens

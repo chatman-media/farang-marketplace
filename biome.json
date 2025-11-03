@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.3/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -7,21 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**/*.{js,jsx,ts,tsx,json}"],
-    "experimentalScannerIgnores": [
-      "node_modules/**",
-      "dist/**",
-      "build/**",
-      ".next/**",
-      "out/**",
-      "coverage/**",
-      "*.min.js",
-      "*.min.css",
-      "public/**",
-      ".claude/**",
-      ".kiro/**",
-      "version.json"
-    ]
+    "includes": ["**/*.{js,jsx,ts,tsx,json}"]
   },
   "formatter": {
     "enabled": true,
@@ -112,6 +98,7 @@
         "useHookAtTopLevel": "off",
         "useIsNan": "error",
         "useJsxKeyInIterable": "off",
+        "useUniqueElementIds": "off",
         "useValidForDirection": "error",
         "useValidTypeof": "error",
         "useYield": "error"
@@ -193,7 +180,8 @@
         "noVar": "error",
         "useAwait": "off",
         "useDefaultSwitchClauseLast": "error",
-        "useGetterReturn": "error"
+        "useGetterReturn": "error",
+        "useIterableCallbackReturn": "off"
       },
       "performance": {
         "noImgElement": "off"

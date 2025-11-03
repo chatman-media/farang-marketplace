@@ -15,7 +15,7 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     {
       // preHandler: [fastify.authenticate],
     },
-    pricingController.calculateBookingPrice.bind(pricingController),
+    pricingController.calculateBookingPrice.bind(pricingController)
   )
 
   // Calculate service price
@@ -24,7 +24,7 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     {
       // preHandler: [fastify.authenticate],
     },
-    pricingController.calculateServicePrice.bind(pricingController),
+    pricingController.calculateServicePrice.bind(pricingController)
   )
 
   // Get quick estimate
@@ -33,7 +33,7 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     {
       // preHandler: [fastify.authenticate],
     },
-    pricingController.getQuickEstimate.bind(pricingController),
+    pricingController.getQuickEstimate.bind(pricingController)
   )
 
   // Apply dynamic pricing
@@ -42,7 +42,7 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     {
       // preHandler: [fastify.authenticate],
     },
-    pricingController.applyDynamicPricing.bind(pricingController),
+    pricingController.applyDynamicPricing.bind(pricingController)
   )
 
   // Get pricing breakdown
@@ -51,7 +51,7 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     {
       // preHandler: [fastify.authenticate],
     },
-    pricingController.getPricingBreakdown.bind(pricingController),
+    pricingController.getPricingBreakdown.bind(pricingController)
   )
 
   // Compare pricing
@@ -60,6 +60,6 @@ export default async function pricingRoutes(fastify: FastifyInstance, options: R
     {
       // preHandler: [fastify.authenticate],
     },
-    pricingController.comparePricing.bind(pricingController),
+    pricingController.comparePricing.bind(pricingController)
   )
 }

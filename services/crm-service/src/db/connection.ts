@@ -1,7 +1,6 @@
-import dotenv from "dotenv"
-import postgres from "postgres"
-import { drizzle } from "drizzle-orm/postgres-js"
 import * as schema from "@marketplace/database-schema"
+import { drizzle, postgres } from "@marketplace/database-schema"
+import dotenv from "dotenv"
 
 dotenv.config()
 

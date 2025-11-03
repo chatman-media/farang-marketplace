@@ -15,7 +15,7 @@ describe("SegmentationService", () => {
 
     // Clean up any existing test data
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')"
     )
     await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
   })
@@ -27,7 +27,7 @@ describe("SegmentationService", () => {
       await query("DELETE FROM customer_segments WHERE id = $1", [testSegmentId])
     }
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')"
     )
     await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
   })
@@ -84,7 +84,7 @@ describe("SegmentationService", () => {
 
       // Try to create second segment with same name
       await expect(segmentationService.createSegment(segmentData, testUserId)).rejects.toThrow(
-        'Segment with name "Test Duplicate Segment" already exists',
+        'Segment with name "Test Duplicate Segment" already exists'
       )
     })
 
@@ -184,7 +184,7 @@ describe("SegmentationService", () => {
             ],
             operator: "AND" as const,
           },
-          testUserId,
+          testUserId
         )
         createdSegments.push(segment)
       }
@@ -217,7 +217,7 @@ describe("SegmentationService", () => {
           operator: "AND" as const,
           isActive: true,
         },
-        testUserId,
+        testUserId
       )
 
       const inactiveSegment = await segmentationService.createSegment(
@@ -234,14 +234,14 @@ describe("SegmentationService", () => {
           operator: "AND" as const,
           isActive: false,
         },
-        testUserId,
+        testUserId
       )
 
       const activeResult = await segmentationService.getSegments({ isActive: true })
       const inactiveResult = await segmentationService.getSegments({ isActive: false })
 
-      expect(activeResult.segments.every((s) => s.isActive)).toBe(true)
-      expect(inactiveResult.segments.every((s) => !s.isActive)).toBe(true)
+      expect(activeResult.segments.every(s => s.isActive)).toBe(true)
+      expect(inactiveResult.segments.every(s => !s.isActive)).toBe(true)
 
       // Clean up
       await query("DELETE FROM customer_segments WHERE id IN ($1, $2)", [activeSegment.id, inactiveSegment.id])
@@ -262,13 +262,13 @@ describe("SegmentationService", () => {
           ],
           operator: "AND" as const,
         },
-        testUserId,
+        testUserId
       )
 
       const searchResult = await segmentationService.getSegments({ search: "Searchable" })
 
       expect(searchResult.segments.length).toBeGreaterThan(0)
-      expect(searchResult.segments.some((s) => s.name.includes("Searchable"))).toBe(true)
+      expect(searchResult.segments.some(s => s.name.includes("Searchable"))).toBe(true)
 
       // Clean up
       await query("DELETE FROM customer_segments WHERE id = $1", [segment.id])
@@ -291,7 +291,7 @@ describe("SegmentationService", () => {
           ],
           operator: "AND" as const,
         },
-        testUserId,
+        testUserId
       )
       const segmentId = segment.id
 
@@ -340,7 +340,7 @@ describe("SegmentationService", () => {
           ],
           operator: "AND" as const,
         },
-        testUserId,
+        testUserId
       )
 
       // Don't set testSegmentId since we're deleting it in this test

@@ -103,7 +103,7 @@ export class UserRepository {
       role?: UserRole
       profile?: UserProfile
       isActive?: boolean
-    },
+    }
   ): Promise<UserEntity | null> {
     const updateData: any = {
       updatedAt: new Date(),
@@ -185,7 +185,7 @@ export class UserRepository {
 
   async findMany(
     filters: UserFilters = {},
-    pagination: PaginationOptions = { page: 1, limit: 10 },
+    pagination: PaginationOptions = { page: 1, limit: 10 }
   ): Promise<PaginatedResult<UserEntity>> {
     const conditions: any[] = []
 
@@ -222,7 +222,7 @@ export class UserRepository {
     const totalPages = Math.ceil(total / pagination.limit)
 
     return {
-      data: data.map((row) => UserEntity.fromDatabaseRow(row)),
+      data: data.map(row => UserEntity.fromDatabaseRow(row)),
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -235,7 +235,7 @@ export class UserRepository {
       .select()
       .from(users)
       .where(eq(users.role, role as any))
-    return result.map((row) => UserEntity.fromDatabaseRow(row))
+    return result.map(row => UserEntity.fromDatabaseRow(row))
   }
 
   async findActiveUsers(limit?: number): Promise<UserEntity[]> {
@@ -243,7 +243,7 @@ export class UserRepository {
     const finalQuery = limit ? baseQuery.limit(limit) : baseQuery
 
     const result = await finalQuery
-    return result.map((row) => UserEntity.fromDatabaseRow(row))
+    return result.map(row => UserEntity.fromDatabaseRow(row))
   }
 
   async findRecentUsers(days: number = 7): Promise<UserEntity[]> {
@@ -252,7 +252,7 @@ export class UserRepository {
 
     const result = await db.select().from(users).where(gte(users.createdAt, dateThreshold))
 
-    return result.map((row) => UserEntity.fromDatabaseRow(row))
+    return result.map(row => UserEntity.fromDatabaseRow(row))
   }
 
   async existsByEmail(email: string, excludeId?: string): Promise<boolean> {
@@ -341,7 +341,7 @@ export class UserRepository {
       .where(ilike(users.email, `%${searchTerm}%`))
       .limit(limit)
 
-    return result.map((row) => UserEntity.fromDatabaseRow(row))
+    return result.map(row => UserEntity.fromDatabaseRow(row))
   }
 
   async bulkUpdateRole(userIds: string[], role: UserRole): Promise<number> {
@@ -370,6 +370,6 @@ export class UserRepository {
   async getTopRatedUsers(limit: number = 10): Promise<UserEntity[]> {
     const result = await db.select().from(users).where(eq(users.isActive, true)).limit(limit)
 
-    return result.map((row) => UserEntity.fromDatabaseRow(row))
+    return result.map(row => UserEntity.fromDatabaseRow(row))
   }
 }

@@ -23,8 +23,8 @@ export class TemplateController {
         search?: string
       }
 
-      const page = Number.parseInt(query.page || "1")
-      const limit = Number.parseInt(query.limit || "20")
+      const page = Number.parseInt(query.page || "1", 10)
+      const limit = Number.parseInt(query.limit || "20", 10)
       const offset = (page - 1) * limit
 
       const filters = {
@@ -340,7 +340,7 @@ export class TemplateController {
         })
       }
 
-      const limit = Number.parseInt(query.limit || "10")
+      const limit = Number.parseInt(query.limit || "10", 10)
       const filters = {
         type: query.type,
         category: query.category,

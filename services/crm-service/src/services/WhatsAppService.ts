@@ -47,7 +47,7 @@ export class WhatsAppService {
   }
 
   private setupHandlers() {
-    this.client.on("qr", (qr) => {
+    this.client.on("qr", qr => {
       logger.info("WhatsApp QR Code received. Please scan with your phone.")
       logger.info("QR Code:", qr)
     })
@@ -61,16 +61,16 @@ export class WhatsAppService {
       logger.info("WhatsApp client authenticated")
     })
 
-    this.client.on("auth_failure", (msg) => {
+    this.client.on("auth_failure", msg => {
       logger.error("WhatsApp authentication failed:", msg)
     })
 
-    this.client.on("disconnected", (reason) => {
+    this.client.on("disconnected", reason => {
       logger.info("WhatsApp client disconnected:", reason)
       this.isReady = false
     })
 
-    this.client.on("message", async (message) => {
+    this.client.on("message", async message => {
       await this.handleIncomingMessage(message)
     })
 
@@ -179,7 +179,7 @@ export class WhatsAppService {
 
   async sendBulkMessage(
     phoneNumbers: string[],
-    request: Omit<SendWhatsAppRequest, "phoneNumber">,
+    request: Omit<SendWhatsAppRequest, "phoneNumber">
   ): Promise<SendMessageResponse[]> {
     const results: SendMessageResponse[] = []
 
@@ -188,7 +188,7 @@ export class WhatsAppService {
       results.push(result)
 
       // Add delay to avoid rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise(resolve => setTimeout(resolve, 2000))
     }
 
     return results
@@ -256,14 +256,14 @@ export class WhatsAppService {
          SET status = $1, delivered_at = CASE WHEN $1 = 'delivered' THEN NOW() ELSE delivered_at END,
              read_at = CASE WHEN $1 = 'read' THEN NOW() ELSE read_at END
          WHERE metadata->>'messageId' = $2`,
-        [status, message.id._serialized],
+        [status, message.id._serialized]
       )
     } catch (error) {
       logger.error("Error handling WhatsApp message acknowledgment:", error)
     }
   }
 
-  private async processIncomingMessage(customerId: string, content: string, message: Message) {
+  private async processIncomingMessage(_customerId: string, content: string, message: Message) {
     // Basic auto-reply logic
     const lowerContent = content.toLowerCase()
 
@@ -304,7 +304,7 @@ export class WhatsAppService {
     try {
       const result = await query(
         "SELECT * FROM message_templates WHERE id = $1 AND channel = $2 AND is_active = true",
-        [templateId, CommunicationChannel.WHATSAPP],
+        [templateId, CommunicationChannel.WHATSAPP]
       )
 
       if (result.rows.length === 0) return null
@@ -360,7 +360,7 @@ export class WhatsAppService {
         data.campaignId || null,
         data.status,
         JSON.stringify(data.metadata || {}),
-      ],
+      ]
     )
 
     return result.rows[0].id
@@ -375,7 +375,7 @@ export class WhatsAppService {
 
   async getCommunicationHistory(
     customerId: string,
-    options: { limit?: number; offset?: number } = {},
+    options: { limit?: number; offset?: number } = {}
   ): Promise<CommunicationHistory[]> {
     const { limit = 50, offset = 0 } = options
 
@@ -384,7 +384,7 @@ export class WhatsAppService {
        WHERE customer_id = $1 AND channel = $2
        ORDER BY created_at DESC
        LIMIT $3 OFFSET $4`,
-      [customerId, CommunicationChannel.WHATSAPP, limit, offset],
+      [customerId, CommunicationChannel.WHATSAPP, limit, offset]
     )
 
     return result.rows.map((row: any) => ({

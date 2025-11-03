@@ -20,10 +20,6 @@ export interface RenderedTemplate {
 }
 
 export class TemplateService {
-  constructor() {
-    // Simple template service without external dependencies
-  }
-
   // CRUD operations
   async createTemplate(data: CreateTemplateRequest): Promise<Template> {
     const errors = Template.validateCreateRequest(data)
@@ -52,7 +48,7 @@ export class TemplateService {
         JSON.stringify(data.conditions || {}),
         data.isActive !== undefined ? data.isActive : true,
         data.createdBy || null,
-      ],
+      ]
     )
 
     return new Template(result.rows[0])
@@ -76,7 +72,7 @@ export class TemplateService {
       search?: string
       limit?: number
       offset?: number
-    } = {},
+    } = {}
   ): Promise<{ templates: Template[]; total: number }> {
     const whereConditions: string[] = []
     const queryParams: any[] = []
@@ -110,7 +106,7 @@ export class TemplateService {
 
     // Get total count
     const countResult = await query(`SELECT COUNT(*) as total FROM message_templates ${whereClause}`, queryParams)
-    const total = Number.parseInt(countResult.rows[0].total)
+    const total = Number.parseInt(countResult.rows[0].total, 10)
 
     // Get templates with pagination
     const limit = filters.limit || 50
@@ -120,7 +116,7 @@ export class TemplateService {
       `SELECT * FROM message_templates ${whereClause} 
        ORDER BY created_at DESC 
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      [...queryParams, limit, offset],
+      [...queryParams, limit, offset]
     )
 
     const templates = result.rows.map((row: any) => new Template(row))
@@ -170,7 +166,7 @@ export class TemplateService {
     const result = await query(
       `UPDATE message_templates SET ${updates.join(", ")}, updated_at = NOW()
        WHERE id = $${paramIndex} RETURNING *`,
-      values,
+      values
     )
 
     return result && result.rows && result.rows.length > 0 ? new Template(result.rows[0]) : null
@@ -224,7 +220,7 @@ export class TemplateService {
 
       // Extract variables that were actually used
       const usedVariables: Record<string, any> = {}
-      template.variables.forEach((variable) => {
+      template.variables.forEach(variable => {
         if (context[variable] !== undefined) {
           usedVariables[variable] = context[variable]
         }
@@ -273,7 +269,7 @@ export class TemplateService {
   async findMatchingTemplates(
     type: CommunicationChannel | "universal",
     category: string,
-    context: TemplateRenderContext,
+    context: TemplateRenderContext
   ): Promise<Template[]> {
     const { templates } = await this.getTemplates({
       type,
@@ -281,7 +277,7 @@ export class TemplateService {
       isActive: true,
     })
 
-    return templates.filter((template) => template.matchesConditions(context))
+    return templates.filter(template => template.matchesConditions(context))
   }
 
   // Get template statistics
@@ -310,17 +306,17 @@ export class TemplateService {
 
     const templatesByType: Record<string, number> = {}
     typeResult.rows.forEach((row: any) => {
-      templatesByType[row.type] = Number.parseInt(row.count)
+      templatesByType[row.type] = Number.parseInt(row.count, 10)
     })
 
     const templatesByCategory: Record<string, number> = {}
     categoryResult.rows.forEach((row: any) => {
-      templatesByCategory[row.category] = Number.parseInt(row.count)
+      templatesByCategory[row.category] = Number.parseInt(row.count, 10)
     })
 
     return {
-      totalTemplates: Number.parseInt(totalResult.rows[0].total),
-      activeTemplates: Number.parseInt(activeResult.rows[0].total),
+      totalTemplates: Number.parseInt(totalResult.rows[0].total, 10),
+      activeTemplates: Number.parseInt(activeResult.rows[0].total, 10),
       templatesByType,
       templatesByCategory,
     }

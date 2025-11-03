@@ -1,4 +1,3 @@
-import React from "react"
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
 
 function App() {
@@ -8,13 +7,13 @@ function App() {
 
   return (
     <RouterComponent>
-      <div className="App">
+      <div className='App'>
         <header>
           <h1>Admin Panel - Thailand Marketplace</h1>
         </header>
         <main>
           <RoutesComponent>
-            <RouteComponent path="/" element={<div>Admin Dashboard</div>} />
+            <RouteComponent path='/' element={<div>Admin Dashboard</div>} />
           </RoutesComponent>
         </main>
       </div>

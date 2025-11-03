@@ -22,7 +22,7 @@ export const Layout: React.FC<LayoutProps> = ({
   className = "",
 }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className='min-h-screen flex flex-col bg-gray-50'>
       <Header isAuthenticated={isAuthenticated} user={user} onLogout={onLogout} />
 
       <main className={`flex-1 ${className}`}>{children}</main>

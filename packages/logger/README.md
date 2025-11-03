@@ -1,6 +1,6 @@
 # @marketplace/logger
 
-Универсальный логгер для клиента и сервера на основе Winston.
+Универсальный логгер для клиента и сервера на основе Pino.
 
 ## Установка
 
@@ -13,39 +13,42 @@ bun add @marketplace/logger
 ### Базовое использование
 
 ```typescript
-import { logger, apiLogger, dbLogger } from '@marketplace/logger';
+import { logger, apiLogger, dbLogger } from "@marketplace/logger"
 
 // Простое логирование
-logger.info('Приложение запущено');
-logger.error('Произошла ошибка', { userId: 123 });
+logger.info("Приложение запущено")
+logger.error("Произошла ошибка", { userId: 123 })
 
 // Использование специализированных логгеров
-apiLogger.debug('API запрос', { method: 'GET', url: '/users' });
-dbLogger.warn('Медленный запрос', { duration: 1200 });
+apiLogger.debug("API запрос", { method: "GET", url: "/users" })
+dbLogger.warn("Медленный запрос", { duration: 1200 })
 ```
 
 ### Создание кастомного логгера
 
 ```typescript
-import { createLogger } from '@marketplace/logger';
+import { createLogger } from "@marketplace/logger"
 
-const myLogger = createLogger('my-service');
-myLogger.info('Кастомное сообщение');
+const myLogger = createLogger("my-service")
+myLogger.info("Кастомное сообщение")
 ```
 
 ### Структурированное логирование
 
 ```typescript
-import { logError, logInfo, logRequest } from '@marketplace/logger';
+import { logError, logInfo, logRequest } from "@marketplace/logger"
 
 // Логирование ошибок с контекстом
-logError(logger, 'Ошибка обработки заказа', error, { orderId: 456 });
+logError(logger, "Ошибка обработки заказа", error, { orderId: 456 })
 
 // Логирование HTTP запросов
-logRequest(apiLogger, 'POST', '/api/users', 201, 150);
+logRequest(apiLogger, "POST", "/api/users", 201, 150)
 
 // Логирование информации
-logInfo(logger, 'Пользователь создан', { userId: 789, email: 'user@example.com' });
+logInfo(logger, "Пользователь создан", {
+  userId: 789,
+  email: "user@example.com",
+})
 ```
 
 ## Конфигурация
@@ -60,12 +63,14 @@ logInfo(logger, 'Пользователь создан', { userId: 789, email: '
 ### Настройка уровня через переменные окружения
 
 **Для сервера:**
+
 ```bash
 LOG_LEVEL=debug
 NODE_ENV=development
 ```
 
 **Для клиента (Vite):**
+
 ```bash
 VITE_LOG_LEVEL=debug
 ```
@@ -78,11 +83,18 @@ VITE_LOG_LEVEL=debug
 ## Формат вывода
 
 ### Браузер
+
 ```json
-{"timestamp":"2024-01-01T12:00:00.000Z","level":"info","category":"marketplace","message":"Приложение запущено"}
+{
+  "timestamp": "2024-01-01T12:00:00.000Z",
+  "level": "info",
+  "category": "marketplace",
+  "message": "Приложение запущено"
+}
 ```
 
 ### Сервер
+
 - Консоль: цветной вывод с timestamp
 - Файлы: `logs/combined.log` и `logs/error.log`
 
@@ -100,10 +112,10 @@ VITE_LOG_LEVEL=debug
 
 ```typescript
 interface ILogger {
-  error(message: string, meta?: any): void;
-  warn(message: string, meta?: any): void;
-  info(message: string, meta?: any): void;
-  debug(message: string, meta?: any): void;
+  error(message: string, meta?: any): void
+  warn(message: string, meta?: any): void
+  info(message: string, meta?: any): void
+  debug(message: string, meta?: any): void
 }
 ```
 
@@ -123,6 +135,7 @@ interface ILogger {
 ## Примеры использования в разных частях приложения
 
 ### React компонент
+
 ```typescript
 import { logger } from '@marketplace/logger';
 
@@ -130,42 +143,47 @@ function MyComponent() {
   useEffect(() => {
     logger.info('Компонент смонтирован');
   }, []);
-  
+
   return <div>Hello World</div>;
 }
 ```
 
 ### Express middleware
+
 ```typescript
-import { apiLogger } from '@marketplace/logger';
+import { apiLogger } from "@marketplace/logger"
 
 app.use((req, res, next) => {
-  const start = Date.now();
-  res.on('finish', () => {
-    const duration = Date.now() - start;
+  const start = Date.now()
+  res.on("finish", () => {
+    const duration = Date.now() - start
     apiLogger.info(`${req.method} ${req.path}`, {
       status: res.statusCode,
       duration,
-      userAgent: req.get('User-Agent')
-    });
-  });
-  next();
-});
+      userAgent: req.get("User-Agent"),
+    })
+  })
+  next()
+})
 ```
 
 ### Database service
+
 ```typescript
-import { dbLogger } from '@marketplace/logger';
+import { dbLogger } from "@marketplace/logger"
 
 async function getUsers() {
-  const start = Date.now();
+  const start = Date.now()
   try {
-    const users = await db.query('SELECT * FROM users');
-    dbLogger.debug('Users fetched', { count: users.length, duration: Date.now() - start });
-    return users;
+    const users = await db.query("SELECT * FROM users")
+    dbLogger.debug("Users fetched", {
+      count: users.length,
+      duration: Date.now() - start,
+    })
+    return users
   } catch (error) {
-    dbLogger.error('Failed to fetch users', { error: error.message });
-    throw error;
+    dbLogger.error("Failed to fetch users", { error: error.message })
+    throw error
   }
 }
 ```

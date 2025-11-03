@@ -2,4 +2,4 @@
 // import { createApp, gracefulShutdown, env } from "./app"
 
 // Use minimal server for now
-import "./minimal-server"
+import './minimal-server';

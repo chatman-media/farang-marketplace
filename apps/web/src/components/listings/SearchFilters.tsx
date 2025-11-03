@@ -71,24 +71,24 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   ]
 
   return (
-    <Card className="mb-6">
+    <Card className='mb-6'>
       <Card.Body>
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {/* Main Search */}
-          <div className="flex gap-4">
-            <div className="flex-1">
+          <div className='flex gap-4'>
+            <div className='flex-1'>
               <Input
-                type="text"
-                placeholder="Search listings..."
+                type='text'
+                placeholder='Search listings...'
                 value={filters.query || ""}
                 onChange={handleInputChange("query")}
                 leftIcon={
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
                       strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
                     />
                   </svg>
                 }
@@ -97,19 +97,19 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
             <Button onClick={onSearch} loading={loading}>
               Search
             </Button>
-            <Button variant="outline" onClick={() => setShowAdvanced(!showAdvanced)}>
+            <Button variant='outline' onClick={() => setShowAdvanced(!showAdvanced)}>
               {showAdvanced ? "Hide" : "Show"} Filters
             </Button>
           </div>
 
           {/* Quick Filters */}
-          <div className="flex flex-wrap gap-2">
+          <div className='flex flex-wrap gap-2'>
             <select
               value={filters.category || ""}
               onChange={handleInputChange("category")}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+              className='px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500'
             >
-              {categories.map((category) => (
+              {categories.map(category => (
                 <option key={category.value} value={category.value}>
                   {category.label}
                 </option>
@@ -119,40 +119,40 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
             <select
               value={filters.sortBy || "createdAt:desc"}
               onChange={handleInputChange("sortBy")}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+              className='px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500'
             >
-              {sortOptions.map((option) => (
+              {sortOptions.map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </select>
 
-            <Button variant="outline" size="sm" onClick={clearFilters}>
+            <Button variant='outline' size='sm' onClick={clearFilters}>
               Clear All
             </Button>
           </div>
 
           {/* Advanced Filters */}
           {showAdvanced && (
-            <div className="border-t pt-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className='border-t pt-4 space-y-4'>
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
                 {/* Price Range */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Min Price (THB)</label>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>Min Price (THB)</label>
                   <Input
-                    type="number"
-                    placeholder="0"
+                    type='number'
+                    placeholder='0'
                     value={filters.minPrice || ""}
                     onChange={handlePriceChange("minPrice")}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Max Price (THB)</label>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>Max Price (THB)</label>
                   <Input
-                    type="number"
-                    placeholder="No limit"
+                    type='number'
+                    placeholder='No limit'
                     value={filters.maxPrice || ""}
                     onChange={handlePriceChange("maxPrice")}
                   />
@@ -160,20 +160,20 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 
                 {/* Location */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>Province</label>
                   <Input
-                    type="text"
-                    placeholder="Any province"
+                    type='text'
+                    placeholder='Any province'
                     value={filters.province || ""}
                     onChange={handleInputChange("province")}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>City</label>
                   <Input
-                    type="text"
-                    placeholder="Any city"
+                    type='text'
+                    placeholder='Any city'
                     value={filters.city || ""}
                     onChange={handleInputChange("city")}
                   />
@@ -181,32 +181,32 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
               </div>
 
               {/* Additional Filters */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>Status</label>
                   <select
                     value={filters.status || ""}
                     onChange={handleInputChange("status")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500"
+                    className='w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary-500 focus:border-primary-500'
                   >
-                    <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="pending">Pending</option>
-                    <option value="inactive">Inactive</option>
+                    <option value=''>All Status</option>
+                    <option value='active'>Active</option>
+                    <option value='pending'>Pending</option>
+                    <option value='inactive'>Inactive</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>Tags</label>
                   <Input
-                    type="text"
-                    placeholder="Enter tags (comma separated)"
+                    type='text'
+                    placeholder='Enter tags (comma separated)'
                     value={filters.tags?.join(", ") || ""}
-                    onChange={(e) => {
+                    onChange={e => {
                       const tags = e.target.value
                         .split(",")
-                        .map((tag) => tag.trim())
-                        .filter((tag) => tag.length > 0)
+                        .map(tag => tag.trim())
+                        .filter(tag => tag.length > 0)
                       onFiltersChange({
                         ...filters,
                         tags: tags.length > 0 ? tags : undefined,
@@ -215,20 +215,20 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                   />
                 </div>
 
-                <div className="flex items-end">
-                  <label className="flex items-center">
+                <div className='flex items-end'>
+                  <label className='flex items-center'>
                     <input
-                      type="checkbox"
+                      type='checkbox'
                       checked={filters.featured || false}
-                      onChange={(e) =>
+                      onChange={e =>
                         onFiltersChange({
                           ...filters,
                           featured: e.target.checked || undefined,
                         })
                       }
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                      className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded'
                     />
-                    <span className="ml-2 text-sm text-gray-700">Featured only</span>
+                    <span className='ml-2 text-sm text-gray-700'>Featured only</span>
                   </label>
                 </div>
               </div>

@@ -152,7 +152,7 @@ export class Template {
   extractVariables(): string[] {
     const variableRegex = /\{\{([^}]+)\}\}/g
     const variables = new Set<string>()
-    let match
+    let match: RegExpExecArray | null
 
     while ((match = variableRegex.exec(this.content)) !== null) {
       const variable = match[1].trim()
@@ -191,7 +191,7 @@ export class Template {
 
     // Check customer segment
     if (this.conditions.customerSegment && context.customer?.tags) {
-      const hasMatchingTag = this.conditions.customerSegment.some((segment) => context.customer.tags.includes(segment))
+      const hasMatchingTag = this.conditions.customerSegment.some(segment => context.customer.tags.includes(segment))
       if (!hasMatchingTag) {
         return false
       }
@@ -212,7 +212,7 @@ export class Template {
       // Check days since last contact
       if (timeConstraints.daysSinceLastContact && context.customer?.lastInteractionAt) {
         const daysSince = Math.floor(
-          (now.getTime() - new Date(context.customer.lastInteractionAt).getTime()) / (1000 * 60 * 60 * 24),
+          (now.getTime() - new Date(context.customer.lastInteractionAt).getTime()) / (1000 * 60 * 60 * 24)
         )
         if (daysSince < timeConstraints.daysSinceLastContact) {
           return false
@@ -222,7 +222,7 @@ export class Template {
       // Check time of day
       if (timeConstraints.timeOfDay) {
         const currentHour = now.getHours()
-        const [startHour, endHour] = timeConstraints.timeOfDay.split("-").map((h) => Number.parseInt(h))
+        const [startHour, endHour] = timeConstraints.timeOfDay.split("-").map(h => Number.parseInt(h, 10))
         if (currentHour < startHour || currentHour > endHour) {
           return false
         }
