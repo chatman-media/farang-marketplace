@@ -23,7 +23,6 @@ import {
   VehicleType,
 } from "@marketplace/shared-types"
 import { v4 as uuidv4 } from "uuid"
-
 import { db, schema } from "../db/connection.js"
 
 // Обновим типы

@@ -9,11 +9,9 @@ import {
   UpdateCustomerRequest,
   UpdateLeadRequest,
 } from "@marketplace/shared-types"
-
 import { query } from "../db/connection"
 import { Customer } from "../models/Customer"
 import { Lead } from "../models/Lead"
-
 import { AutomationService } from "./AutomationService"
 
 export class CRMService {

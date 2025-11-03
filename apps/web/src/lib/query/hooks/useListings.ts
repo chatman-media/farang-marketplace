@@ -7,7 +7,6 @@ import type {
   UpdateServiceListingRequest,
 } from "@marketplace/shared-types"
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-
 import { listingsService, serviceListingsService } from "../../api"
 import { queryKeys } from "../client"
 

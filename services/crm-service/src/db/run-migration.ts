@@ -1,7 +1,6 @@
 import logger from "@marketplace/logger"
 import { readFileSync } from "fs"
 import { join } from "path"
-
 import { query } from "./connection"
 
 async function runMigration(migrationFile: string) {

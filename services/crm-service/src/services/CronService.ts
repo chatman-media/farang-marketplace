@@ -1,7 +1,5 @@
 import logger from "@marketplace/logger"
-
 import { query } from "../db/connection"
-
 import { SegmentationService } from "./SegmentationService"
 
 export interface CronJob {

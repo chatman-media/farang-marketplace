@@ -122,7 +122,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
   await app.register(import("./routes/webhooks"), { prefix: "/api/v1" })
 
   // Global error handler
-  app.setErrorHandler(async (error, request, reply) => {
+  app.setErrorHandler(async (error, _request, reply) => {
     app.log.error(error)
 
     if (error.validation) {

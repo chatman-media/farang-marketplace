@@ -1,6 +1,5 @@
 import { UserRole } from "@marketplace/shared-types"
 import { describe, expect, it } from "vitest"
-
 import { AuthService } from "../../services/AuthService"
 
 describe("AuthService Static Methods", () => {

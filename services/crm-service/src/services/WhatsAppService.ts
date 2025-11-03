@@ -6,7 +6,6 @@ import {
   SendMessageResponse,
 } from "@marketplace/shared-types"
 import { Client, LocalAuth, Message } from "whatsapp-web.js"
-
 import { query } from "../db/connection"
 
 export interface WhatsAppConfig {

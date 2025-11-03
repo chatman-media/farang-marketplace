@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify"
-
 import { PricingController } from "../controllers/PricingController"
 
 interface RouteOptions {

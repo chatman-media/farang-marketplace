@@ -1,10 +1,8 @@
 # Farang Marketplace
 
 An intelligent marketplace platform designed for Thailand, connecting locals and
-foreigners to buy, sell, rent, and offer services. Enhanced with AI-driven
-features including smart search, automated recommendations, and optional voice
-assistance, supporting English and Thai as primary languages across web and
-mobile platforms.
+foreigners to buy, sell, rent, and offer services. Supporting English and Thai
+as primary languages across web and Telegram platforms.
 
 ## Overview
 
@@ -13,16 +11,11 @@ designed for the Thai market, offering:
 
 - **Universal Marketplace**: Buy, sell, rent anything - properties, vehicles,
   equipment, services, and more
-- **AI-Enhanced Experience**: Smart search, automated recommendations, and
-  optional voice assistance for convenience
 - **Dual Primary Languages**: English and Thai (ไทย) as main languages, with
   additional support for Russian (Русский), Chinese (中文), and Arabic (العربية)
-- **AI-Powered Features**: Voice recognition, automated translations, smart
-  recommendations, and intelligent search
 - **Integrated CRM**: Multi-channel communication (Email, Telegram, WhatsApp),
   automated follow-ups, and customer relationship management
-- **Cross-Platform**: Responsive web application and native mobile apps
-  (iOS/Android)
+- **Multi-Platform**: Responsive web application and Telegram bot/mini app
 - **Thailand-Focused**: Localized for Thai market with local payment methods,
   regulations, and cultural preferences
 - **Premium Positioning**: International branding that appeals to
@@ -30,18 +23,13 @@ designed for the Thai market, offering:
 
 ## Key Features
 
-### AI-Enhanced Features
+### Core Features
 
-- **Smart Search**: Intelligent search with auto-suggestions and filters in
-  English and Thai
-- **Automated Recommendations**: AI-powered suggestions based on user
-  preferences and behavior
-- **Voice Assistance**: Optional voice search and listing creation for added
-  convenience
+- **Smart Search**: Search with filters by category, location, price in English
+  and Thai
 - **Multi-language Support**: Full functionality in English, Thai, and other
   supported languages
-- **Intelligent Matching**: AI helps connect buyers and sellers with relevant
-  listings
+- **Listing Management**: Create, edit, and manage listings with image uploads
 
 ### CRM & Communication
 
@@ -99,40 +87,44 @@ designed for the Thai market, offering:
 
 This is a monorepo containing:
 
-- **Web Application** (`apps/web`) - Main web interface with AI-enhanced
-  features
-- **Mobile Apps** (`apps/mobile`) - iOS and Android native apps
+- **Web Application** (`apps/web`) - Main web interface
 - **Admin Panel** (`apps/admin`) - Administrative interface
-- **AI Service** (`services/ai-service`) - AI recommendations, search, and
-  optional voice processing
+- **TON App** (`apps/ton-app`) - TON wallet integration
+- **Telegram Bot** - Telegram bot for notifications and basic operations
+- **API Gateway** (`services/api-gateway`) - Main API entry point
 - **User Service** (`services/user-service`) - User management and
   authentication
 - **Listing Service** (`services/listing-service`) - Marketplace listings
   management
+- **Booking Service** (`services/booking-service`) - Booking and reservations
+- **Payment Service** (`services/payment-service`) - Payment processing (TON,
+  Stripe, PromptPay)
 - **CRM Service** (`services/crm-service`) - Customer relationship management
   and multi-channel communication
-- **Shared Types** (`packages/shared-types`) - Common TypeScript interfaces
+- **Shared Packages** (`packages/`) - Logger, shared types, i18n, database
+  schema
 
 ## Tech Stack
 
-- **Build Tool**: Vite for fast development and optimized builds
+- **Build Tool**: Vite + Bun
 - **Frontend**: React 18 + TypeScript
-- **Mobile**: React Native for iOS/Android
-- **Backend**: Node.js + Express microservices
-- **Database**: PostgreSQL + Redis
+- **Backend**: Node.js + Fastify microservices
+- **Database**: PostgreSQL (Drizzle ORM) + Redis
 - **File Storage**: MinIO (S3-compatible)
-- **AI/Voice**: OpenAI API, Web Speech API, speech-to-text services
-- **Communication**: Telegram Bot API, WhatsApp Business API, SMTP services
+- **Payments**: TON blockchain, Stripe, PromptPay
+- **Communication**: Telegram Bot API, WhatsApp Business API, Nodemailer
+- **Telegram**: Telegram Bot + Mini App integration
+- **Logging**: Pino
 - **Internationalization**: i18next for multi-language support
-- **Monorepo**: Turbo for task orchestration
+- **Monorepo**: Turborepo for task orchestration
 
 ## Development Setup
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
-- Docker & Docker Compose
+- Node.js 20+
+- Bun (recommended) or npm
+- Docker & Docker Compose (optional, for local database)
 
 ### Installation
 
@@ -146,110 +138,100 @@ This is a monorepo containing:
 2. Install dependencies:
 
    ```bash
-   npm install
+   bun install
    ```
 
-3. Copy environment variables:
+3. Copy environment variables for each service:
 
    ```bash
-   cp .env.example .env
+   # Copy and configure .env files in each service directory
+   # See services/*/.env for configuration
    ```
 
-4. Start development services:
-
+4. Start all services with Turbo UI:
    ```bash
-   docker-compose up -d
-   ```
-
-5. Start development servers:
-   ```bash
-   npm run dev
+   bun run dev:ui
    ```
 
 This will start:
 
-- Web app: http://localhost:3000
-- Admin panel: http://localhost:3001
-- AI Service: http://localhost:3003
-- User Service: http://localhost:3004
+- Web app: http://localhost:5173
+- Admin panel: http://localhost:5174
+- API Gateway: http://localhost:3000
+- User Service: http://localhost:3001
+- Listing Service: http://localhost:3003
+- Booking Service: http://localhost:3004
+- Payment Service: http://localhost:3009
+- CRM Service: http://localhost:3007
 
 ### Available Scripts
 
-- `npm run dev` - Start all applications in development mode
-- `npm run build` - Build all applications for production
-- `npm run test` - Run tests across all packages
-- `npm run lint` - Lint all code
-- `npm run format` - Format code with Prettier
-- `npm run type-check` - Run TypeScript type checking
+- `bun run dev` - Start all services in development mode
+- `bun run dev:ui` - Start all services with Turbo UI panel
+- `bun run build` - Build all applications for production
+- `bun run test` - Run tests across all packages
+- `bun run lint` - Lint all code with Biome
+- `bun run lint:fix` - Fix linting issues automatically
 
 ### Database
 
-The PostgreSQL database will be automatically initialized with:
+PostgreSQL with Drizzle ORM. Each service manages its own database connection.
 
-- Required extensions (uuid-ossp, postgis for location data)
-- Multi-language text search capabilities
-- Thai-specific data types and constraints
-- Performance indexes for search and filtering
+Configure `DATABASE_URL` in each service's `.env` file:
 
-Access database:
-
-```bash
-docker exec -it farang-marketplace-postgres psql -U marketplace_user -d farang_marketplace
+```
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
 ```
 
 ### File Storage
 
-MinIO is available at:
+MinIO (S3-compatible) for image and file uploads.
 
-- API: http://localhost:9000
-- Console: http://localhost:9001
-- Credentials: minioadmin / minioadmin123
+Configure in service `.env`:
+
+```
+MINIO_ENDPOINT=http://localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin123
+```
 
 ## Project Structure
 
 ```
 ├── apps/
-│   ├── web/              # Main web application with voice interface
-│   ├── mobile/           # React Native mobile apps
-│   └── admin/            # Admin panel
+│   ├── web/              # Main web application
+│   ├── admin/            # Admin panel
+│   └── ton-app/          # TON wallet integration
 ├── services/
+│   ├── api-gateway/      # Main API gateway
 │   ├── user-service/     # User management and authentication
 │   ├── listing-service/  # Marketplace listings
-│   ├── ai-service/       # AI features and recommendations
-│   ├── search-service/   # Search and recommendations
-│   ├── crm-service/      # CRM and multi-channel communication
-│   └── notification-service/ # Notifications and messaging
+│   ├── booking-service/  # Booking and reservations
+│   ├── payment-service/  # Payment processing
+│   └── crm-service/      # CRM and multi-channel communication
 ├── packages/
 │   ├── shared-types/     # Shared TypeScript types
-│   ├── ui-components/    # Shared UI components
-│   └── i18n/            # Internationalization resources
-├── docker/
-│   └── postgres/         # Database initialization
-└── docs/                 # Documentation
+│   ├── database-schema/  # Drizzle schema
+│   ├── logger/           # Pino logger
+│   └── i18n/             # Internationalization
+└── telegram/             # Telegram bot and mini app (planned)
 ```
 
-## AI Features Implementation
+## Telegram Integration
 
-### Smart Search & Recommendations
+### Telegram Bot
 
-- Advanced search algorithms with natural language processing
-- Personalized recommendations based on user behavior
-- Auto-complete and smart suggestions in multiple languages
-- Location-based and category-specific filtering
+- Listing notifications and alerts
+- Booking confirmations
+- Payment status updates
+- Direct communication with sellers
 
-### Optional Voice Features
+### Telegram Mini App (Planned)
 
-- Voice search integration for hands-free browsing
-- Voice-assisted listing creation for convenience
-- Multi-language voice recognition (English, Thai, and others)
-- Speech-to-text for quick input when needed
-
-### AI Processing
-
-- Machine learning algorithms for user preference analysis
-- Intelligent matching between buyers and sellers
-- Automated content categorization and tagging
-- Real-time translation and localization support
+- Browse marketplace within Telegram
+- Create and manage listings
+- Process payments via TON
+- Chat with buyers/sellers
 
 ## Internationalization
 
@@ -293,24 +275,23 @@ MinIO is available at:
 
 ## Development Workflow
 
-1. All shared types are defined in `packages/shared-types`
-2. UI components are shared across web and mobile in `packages/ui-components`
-3. Internationalization resources are centralized in `packages/i18n`
-4. Each service is independently deployable
-5. Voice features are integrated across all interfaces
-6. Bilingual content management for English and Thai
-7. Turbo orchestrates tasks across the monorepo
+1. Shared types defined in `packages/shared-types`
+2. Database schema in `packages/database-schema` (Drizzle ORM)
+3. Centralized logging with `packages/logger` (Pino)
+4. Internationalization in `packages/i18n`
+5. Each service independently deployable
+6. Turborepo orchestrates monorepo tasks
+7. Telegram bot integrates with all services for notifications
 
 ## Next Steps
 
 This setup provides the foundation for:
 
-- Advanced voice recognition and AI features
 - Bilingual marketplace functionality (English/Thai primary)
 - Thailand-specific localization with international appeal
 - Scalable microservices architecture
-- Cross-platform mobile and web applications
-- Real-time search and recommendations
-- Integrated payment and messaging systems
+- Web application and Telegram bot integration
+- Integrated payment systems (TON, Stripe, PromptPay)
 - Multi-channel CRM with automated customer engagement
+- Telegram Mini App for in-app marketplace experience
 - Premium user experience and trust features

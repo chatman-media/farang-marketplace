@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { CircuitBreaker, CircuitBreakerManager, CircuitState } from "../services/CircuitBreaker.js"
 
 describe("CircuitBreaker", () => {

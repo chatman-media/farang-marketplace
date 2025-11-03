@@ -1,6 +1,5 @@
 import { FastifyInstance } from "fastify"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-
 import { query } from "../db/connection"
 import { createApp } from "../index"
 import { SegmentDataType, SegmentOperator } from "../models/Segment"

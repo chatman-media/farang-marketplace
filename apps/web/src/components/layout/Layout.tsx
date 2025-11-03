@@ -1,6 +1,5 @@
 import { User } from "@marketplace/shared-types"
 import React from "react"
-
 import { Footer } from "./Footer"
 import { Header } from "./Header"
 

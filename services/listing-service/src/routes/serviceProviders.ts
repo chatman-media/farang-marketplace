@@ -1,5 +1,4 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify"
-
 import { ServiceProviderController } from "../controllers/ServiceProviderController"
 import { authMiddleware, optionalAuthMiddleware } from "../middleware/auth"
 

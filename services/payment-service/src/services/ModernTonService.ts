@@ -5,7 +5,6 @@ import { internal, TonClient, WalletContractV4 } from "ton"
 import { Address, beginCell, fromNano, toNano } from "ton-core"
 import { mnemonicToWalletKey } from "ton-crypto"
 import { z } from "zod"
-
 import { env } from "../app"
 
 // Modern Zod schemas for validation
@@ -24,7 +23,7 @@ export const tonAddressSchema = z.string().refine(
 export const tonAmountSchema = z.string().refine(
   amount => {
     const num = Number.parseFloat(amount)
-    return !isNaN(num) && num > 0 && num <= 1000000
+    return !Number.isNaN(num) && num > 0 && num <= 1000000
   },
   { message: "Invalid TON amount" }
 )

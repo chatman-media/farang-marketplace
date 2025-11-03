@@ -1,6 +1,5 @@
 import { CommunicationChannel } from "@marketplace/shared-types"
 import { describe, expect, it } from "vitest"
-
 import { Template } from "../models/Template"
 
 describe("Template Model", () => {

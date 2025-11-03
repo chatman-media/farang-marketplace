@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
-
 import { AuthenticatedRequest } from "../middleware/auth"
 import { AuthService, LoginRequest, RefreshRequest, RegisterRequest } from "../services/AuthService"
 

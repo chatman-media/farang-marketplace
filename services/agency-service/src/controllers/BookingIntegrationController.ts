@@ -1,6 +1,5 @@
 import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
-
 import { BookingIntegrationService } from "../services/BookingIntegrationService"
 
 export class BookingIntegrationController {

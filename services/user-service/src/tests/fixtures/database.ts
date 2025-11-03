@@ -1,7 +1,6 @@
 import { createDatabaseConnection, type Database, sql, users } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
 import { AuthProvider, UserRole, VerificationStatus } from "@marketplace/shared-types"
-
 import { UserEntity } from "../../models/User"
 
 /**

@@ -6,7 +6,6 @@ import type {
 } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
-
 import { BookingService } from "../services/BookingService"
 
 // Zod schemas for validation

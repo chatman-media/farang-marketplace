@@ -1,5 +1,4 @@
 import { FastifyReply, FastifyRequest } from "fastify"
-
 import { CreateSegmentRequest, Segment, UpdateSegmentRequest } from "../models/Segment"
 import { SegmentationService } from "../services/SegmentationService"
 

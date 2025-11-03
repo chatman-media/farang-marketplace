@@ -1,6 +1,5 @@
 import { ListingCategory } from "@marketplace/shared-types"
 import React, { useState } from "react"
-
 import { Badge, Button, Card, Input } from "../ui"
 
 // Extended filters for the frontend

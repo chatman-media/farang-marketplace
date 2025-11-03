@@ -5,9 +5,7 @@ import {
   type Customer,
   type SendMessageResponse,
 } from "@marketplace/shared-types"
-
 import { query } from "../db/connection"
-
 import { CRMService } from "./CRMService"
 import { EmailService } from "./EmailService"
 import { LineService } from "./LineService"

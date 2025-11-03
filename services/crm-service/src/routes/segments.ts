@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify"
-
 import { SegmentController } from "../controllers/SegmentController"
 
 export default async function segmentRoutes(fastify: FastifyInstance) {

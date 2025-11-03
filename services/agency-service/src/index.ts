@@ -1,5 +1,4 @@
 import logger from "@marketplace/logger"
-
 import { createApp, env } from "./app"
 
 const start = async () => {

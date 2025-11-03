@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from "fastify"
-
 import { BookingController } from "../controllers/BookingController"
 
 interface BookingRouteOptions {

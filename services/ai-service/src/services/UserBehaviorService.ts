@@ -2,6 +2,7 @@
 
 import { desc, eq } from '@marketplace/database-schema';
 import logger from '@marketplace/logger';
+
 import { db, userBehaviors } from '../database/connection';
 import type { MarketInsight, UserBehavior, UserInsight } from '../models/index';
 

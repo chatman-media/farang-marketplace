@@ -1,6 +1,5 @@
 import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
-
 import { AgencyService } from "../services/AgencyService"
 
 export class FastifyAgencyController {

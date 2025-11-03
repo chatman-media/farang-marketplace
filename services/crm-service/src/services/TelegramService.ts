@@ -6,7 +6,6 @@ import {
   SendMessageResponse,
 } from "@marketplace/shared-types"
 import { Context, Telegraf } from "telegraf"
-
 import { query } from "../db/connection"
 
 export interface TelegramConfig {

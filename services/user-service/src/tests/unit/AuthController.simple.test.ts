@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { AuthController } from "../../controllers/AuthController"
 import { AuthService } from "../../services/AuthService"
 

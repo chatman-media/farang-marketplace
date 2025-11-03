@@ -27,6 +27,8 @@
     "format:check": "biome format .",
     "format:prettier": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:prettier:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "organize-imports": "biome check --write --unsafe .",
+    "organize-imports:check": "biome check .",
     "type-check": "turbo run type-check",
     "clean": "turbo run clean",
     "docker:up": "docker-compose up -d",

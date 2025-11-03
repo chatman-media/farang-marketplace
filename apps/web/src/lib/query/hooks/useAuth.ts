@@ -8,7 +8,6 @@ import type {
   User,
 } from "@marketplace/shared-types"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-
 import { authService } from "../../api"
 import { queryKeys } from "../client"
 

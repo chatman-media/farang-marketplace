@@ -11,7 +11,6 @@ import type {
   UpdateListingRequest,
   UpdateServiceListingRequest,
 } from "@marketplace/shared-types"
-
 import { api } from "../client"
 import { getApiConfig } from "../config"
 

@@ -1,6 +1,5 @@
 import { AuthProvider, UserRole } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { GoogleOAuthProvider, OAuthService, TelegramOAuthProvider } from "../services/OAuthService"
 
 describe.skip("OAuthService", () => {

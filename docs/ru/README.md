@@ -65,9 +65,8 @@
    cp services/listing-service/.env.example services/listing-service/.env
    cp services/booking-service/.env.example services/booking-service/.env
    cp services/payment-service/.env.example services/payment-service/.env
-   cp services/agency-service/.env.example services/agency-service/.env
-   cp services/ai-service/.env.example services/ai-service/.env
-   cp services/voice-service/.env.example services/voice-service/.env
+   cp services/crm-service/.env.example services/crm-service/.env
+   cp services/api-gateway/.env.example services/api-gateway/.env
 
    # Отредактируйте .env файлы с вашими настройками
    ```
@@ -80,7 +79,7 @@
    cd ../listing-service && bun run db:migrate
    cd ../booking-service && bun run db:migrate
    cd ../payment-service && bun run db:migrate
-   cd ../agency-service && bun run db:migrate
+   cd ../crm-service && bun run db:migrate
    ```
 
 6. **Запустите все сервисы**
@@ -104,14 +103,17 @@
 
 ### **Порты сервисов в development режиме:**
 
+- **API Gateway**: `http://localhost:3000`
 - **User Service**: `http://localhost:3001`
-- **Listing Service**: `http://localhost:3002`
-- **Booking Service**: `http://localhost:3003`
-- **Payment Service**: `http://localhost:3004`
-- **Agency Service**: `http://localhost:3005`
-- **AI Service**: `http://localhost:3006`
-- **Voice Service**: `http://localhost:3007`
-- **CRM Service**: `http://localhost:3008`
+- **Listing Service**: `http://localhost:3003`
+- **Booking Service**: `http://localhost:3004`
+- **CRM Service**: `http://localhost:3007`
+- **Payment Service**: `http://localhost:3009`
+
+### **Веб приложения:**
+
+- **Web App**: `http://localhost:5173`
+- **Admin Panel**: `http://localhost:5174`
 
 ### **Основные API endpoints:**
 
@@ -121,11 +123,10 @@
   `GET /api/listings/search`
 - **Bookings**: `POST /api/bookings`, `GET /api/bookings`,
   `PUT /api/bookings/:id/status`
-- **Payments**: `POST /api/payments/initiate`, `POST /api/payments/webhook`
-- **Agencies**: `GET /api/agencies`, `POST /api/agencies/register`
-- **AI**: `POST /api/ai/recommendations`, `POST /api/ai/search`
-- **Voice**: `POST /api/voice/speech-to-text`, `POST /api/voice/commands`
-- **CRM**: `POST /api/crm/campaigns`, `GET /api/crm/leads`
+- **Payments**: `POST /api/payments/initiate`, `POST /api/payments/webhook`,
+  `POST /api/payments/ton`
+- **CRM**: `POST /api/crm/campaigns`, `GET /api/crm/leads`,
+  `POST /api/crm/telegram`, `POST /api/crm/whatsapp`
 
 ## 📖 Структура документации
 
@@ -143,14 +144,11 @@ docs/ru/
 
 ### **Статистика тестов:**
 
-- **Общее количество**: 516+ тестов
+- **Общее количество**: 300+ тестов
 - **User Service**: 137 тестов (аутентификация, профили, роли)
-- **Listing Service**: 51 тест (CRUD, поиск, ИИ-интеграция)
+- **Listing Service**: 51 тест (CRUD, поиск, фильтрация)
 - **Booking Service**: 91 тест (бронирование, доступность, статусы)
-- **Payment Service**: 45 тестов (платежи, webhook, возвраты)
-- **Agency Service**: 50 тестов (регистрация, назначения, комиссии)
-- **AI Service**: 75 тестов (рекомендации, анализ, провайдеры)
-- **Voice Service**: 112 тестов (распознавание речи, команды)
+- **Payment Service**: 45 тестов (платежи TON/Stripe, webhook, возвраты)
 - **CRM Service**: В разработке
 
 ### **Запуск тестов:**
@@ -174,6 +172,14 @@ bun run test:integration
 
 ### 📦 **Реализованные сервисы:**
 
+#### 🚪 **API Gateway**
+
+- Централизованная точка входа для всех API
+- Маршрутизация запросов к сервисам
+- Rate limiting и безопасность
+- Логирование запросов через Pino
+- CORS и middleware управление
+
 #### 👤 **User Service**
 
 - Регистрация и аутентификация пользователей
@@ -185,7 +191,7 @@ bun run test:integration
 #### 📋 **Listing Service**
 
 - Управление объявлениями товаров и услуг
-- ИИ-поиск с умными рекомендациями
+- Поиск с фильтрацией по категориям, цене, локации
 - Категоризация и теги
 - Геолокация и фильтрация
 - Оптимизация изображений (WebP)
@@ -201,34 +207,10 @@ bun run test:integration
 #### 💳 **Payment Service**
 
 - Интеграция с TON blockchain
-- Поддержка множественных валют (TON, USDT, USDC, USD, THB)
+- Поддержка Stripe для карт
+- Поддержка PromptPay для Таиланда
 - Обработка возвратов и споров
 - Webhook обработка
-- Интеграция с традиционными платежными системами
-
-#### 🏢 **Agency Service**
-
-- Регистрация и верификация агентств
-- Управление услугами агентств
-- Система назначений и комиссий
-- Алгоритм умного подбора агентств
-- Аналитика и отчетность
-
-#### 🤖 **AI Service**
-
-- Мультипровайдерная ИИ поддержка (OpenAI, DeepSeek, Claude)
-- Система рекомендаций на основе машинного обучения
-- Анализ поведения пользователей
-- Автоматическая категоризация контента
-- Обнаружение мошенничества
-
-#### 🎤 **Voice Service**
-
-- Голосовой поиск с преобразованием речи в текст
-- Многоязычная поддержка (английский, тайский, русский, китайский)
-- Голосовые команды для навигации
-- Интеграция с множественными провайдерами (Google, Azure, AWS)
-- Обработка естественного языка
 
 #### 📞 **CRM Service**
 
@@ -238,58 +220,55 @@ bun run test:integration
 - Аналитика взаимодействий
 - Система оценки лидов
 
+#### 📱 **Telegram Bot & Mini App**
+
+- Уведомления о новых листингах
+- Подтверждения бронирований
+- Обновления статуса платежей
+- Telegram Mini App для полноценного маркетплейса
+- Интеграция с TON для платежей
+
 ## 🛠️ Технологии
 
 ### **Backend:**
 
-- **Runtime**: Node.js, TypeScript
-- **Framework**: Express.js
+- **Runtime**: Node.js 20+, TypeScript
+- **Framework**: Fastify
 - **Database**: PostgreSQL с Drizzle ORM
 - **Cache**: Redis
 - **Authentication**: JWT, OAuth 2.0
-- **Testing**: Vitest (516+ тестов)
+- **Testing**: Vitest (300+ тестов)
 - **Package Manager**: Bun
-- **Containerization**: Docker
-
-### **AI & ML:**
-
-- **AI Providers**: OpenAI, DeepSeek, Claude
-- **Speech Recognition**: Google Speech-to-Text, Azure, AWS
-- **Natural Language Processing**: Собственные алгоритмы
-- **Machine Learning**: Система рекомендаций
+- **Logging**: Pino
+- **Monorepo**: Turborepo
+- **Linting**: Biome
 
 ### **Blockchain & Payments:**
 
 - **Blockchain**: TON (The Open Network)
-- **Cryptocurrencies**: TON, USDT, USDC
-- **Traditional Payments**: Stripe, Wise, Revolut, PromptPay
-- **Multi-currency**: USD, THB, EUR, RUB
+- **Traditional Payments**: Stripe, PromptPay
+- **Multi-currency**: USD, THB
 
 ### **Communication:**
 
-- **Email**: SMTP интеграция
+- **Email**: Nodemailer
 - **Messaging**: Telegram Bot API, WhatsApp Business API, LINE API
-- **Real-time**: WebSocket соединения
-- **Notifications**: Push уведомления
+- **Notifications**: Email, Telegram, WhatsApp уведомления
 
 ## 📚 Документация сервисов и пакетов
 
 ### 🔧 **Сервисы:**
 
+- 🚪 [API Gateway](../../services/api-gateway/README.md) - Централизованный API
+  шлюз
 - 👤 [User Service](../../services/user-service/README.md) - Аутентификация и
   управление пользователями
 - 🏠 [Listing Service](../../services/listing-service/README.md) - Управление
-  объявлениями с ИИ-поиском
+  объявлениями
 - 📅 [Booking Service](../../services/booking-service/README.md) - Система
   бронирования и транзакций
 - 💳 [Payment Service](../../services/payment-service/README.md) - Интеграция
-  платежей с TON blockchain
-- 🏢 [Agency Service](../../services/agency-service/README.md) - Система
-  управления агентствами
-- 🤖 [AI Service](../../services/ai-service/README.md) - ИИ-рекомендации и
-  анализ
-- 🎤 [Voice Service](../../services/voice-service/README.md) - Голосовые функции
-  и распознавание речи
+  платежей (TON, Stripe, PromptPay)
 - 📞 [CRM Service](../../services/crm-service/README.md) - Многоканальные
   коммуникации
 
@@ -297,6 +276,9 @@ bun run test:integration
 
 - 🌐 [Shared Types](../../packages/shared-types/README.md) - Общие типы
   TypeScript
+- 🗄️ [Database Schema](../../packages/database-schema/README.md) - Drizzle ORM
+  схемы
+- 📝 [Logger](../../packages/logger/README.md) - Pino логирование
 - 🗣️ [i18n Package](../../packages/i18n/README.md) - Интернационализация и
   локализация
 
@@ -328,28 +310,32 @@ bun run test:integration
 
 ## 📈 Статус проекта
 
-### 🎯 **Текущий статус: 434+ тестов пройдено | 8 сервисов готово | Готово к продакшену**
+### 🎯 **Текущий статус: 300+ тестов пройдено | 6 сервисов готово | В разработке**
 
 #### ✅ **Полностью реализованные сервисы:**
 
-- ✅ **User Service**: Аутентификация, управление пользователями, профили (8
+- ✅ **API Gateway**: Централизованная маршрутизация с Fastify
+- ✅ **User Service**: Аутентификация, управление пользователями, профили (137
   тестов)
-- ✅ **Listing Service**: Управление объявлениями с ИИ-поиском (4 теста)
-- ✅ **Booking Service**: Система бронирования и транзакций (4 теста)
-- ✅ **Payment Service**: Интеграция платежей с TON blockchain (4 теста)
-- ✅ **Agency Service**: Система управления агентствами (3 теста)
-- ✅ **AI Service**: ИИ-рекомендации и анализ (5 тестов)
-- ✅ **Voice Service**: Голосовые функции и распознавание речи (2 теста)
-- ✅ **CRM Service**: Многоканальные коммуникации (6 тестов)
+- ✅ **Listing Service**: Управление объявлениями и поиск (51 тест)
+- ✅ **Booking Service**: Система бронирования и транзакций (91 тест)
+- ✅ **Payment Service**: Интеграция платежей TON/Stripe/PromptPay (45 тестов)
+- ✅ **CRM Service**: Многоканальные коммуникации (в разработке)
 
 #### 🔄 **В разработке:**
 
-- 🔄 **API Gateway**: Централизованная маршрутизация
-- 🔄 **Web Application**: React фронтенд
+- 🔄 **Web Application**: React фронтенд на Vite
 - 🔄 **Admin Panel**: Административная панель
-- 🔄 **Mobile App**: React Native приложение
-- 🔄 **Telegram Bot**: Интеграция с Telegram
+- 🔄 **Telegram Bot**: Уведомления и интеграция
+- 🔄 **Telegram Mini App**: Полноценный маркетплейс в Telegram
+
+#### 📦 **Инфраструктура:**
+
+- ✅ Централизованное логирование (Pino)
+- ✅ Общие типы и схемы (shared-types, database-schema)
+- ✅ Интернационализация (i18n)
+- ✅ Turborepo для монорепо
 
 ---
 
-_Последнее обновление: Январь 2024_
+_Последнее обновление: Ноябрь 2025_

@@ -1,7 +1,6 @@
 import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
-
 import type { BookingPriceRequest, ServicePriceRequest } from "../services/PricingService"
 import { PricingService } from "../services/PricingService"
 

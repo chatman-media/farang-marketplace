@@ -1,5 +1,4 @@
 import { EventEmitter } from "events"
-
 import { ServiceConfig, servicesConfig } from "../config/services.js"
 
 export interface ServiceHealth {

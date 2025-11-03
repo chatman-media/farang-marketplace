@@ -8,7 +8,6 @@ import {
   VerificationStatus,
 } from "@marketplace/shared-types"
 import { z } from "zod"
-
 import { UserEntity } from "../models/User"
 import { UserRepository } from "../repositories/UserRepository"
 

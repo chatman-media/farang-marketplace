@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import type { JWTPayload } from "../middleware/auth.js"
 
 // Import auth functions dynamically to avoid environment loading issues

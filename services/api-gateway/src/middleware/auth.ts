@@ -1,6 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
-
 import { env } from "../config/environment.js"
 
 export interface JWTPayload {

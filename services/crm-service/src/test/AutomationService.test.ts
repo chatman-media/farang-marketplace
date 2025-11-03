@@ -1,6 +1,5 @@
 import { Automation } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { query } from "../db/connection"
 import { AutomationService } from "../services/AutomationService"
 

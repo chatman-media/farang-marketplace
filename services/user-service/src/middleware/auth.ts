@@ -1,6 +1,5 @@
 import { AuthenticatedUser, UserRole } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
-
 import { AuthService } from "../services/AuthService"
 
 // Define UserServiceAuthenticatedUser type for user-service with additional fields

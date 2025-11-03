@@ -6,7 +6,6 @@ import {
   SendMessageResponse,
 } from "@marketplace/shared-types"
 import * as nodemailer from "nodemailer"
-
 import { query } from "../db/connection"
 
 export interface EmailConfig {

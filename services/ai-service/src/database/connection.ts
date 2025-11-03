@@ -1,5 +1,6 @@
 import * as schema from '@marketplace/database-schema';
 import { drizzle, postgres } from '@marketplace/database-schema';
+
 import { config } from '../config/database';
 
 // Create database connection

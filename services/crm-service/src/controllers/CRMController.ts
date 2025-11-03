@@ -9,7 +9,6 @@ import {
   UpdateLeadRequest,
 } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
-
 import { AutomationService } from "../services/AutomationService"
 import { CRMService } from "../services/CRMService"
 

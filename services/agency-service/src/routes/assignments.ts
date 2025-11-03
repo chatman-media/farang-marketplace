@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from "fastify"
-
 import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 
 const assignmentsRoutes: FastifyPluginAsync = async fastify => {

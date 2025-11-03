@@ -9,7 +9,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { renderHook, waitFor } from "@testing-library/react"
 import { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { serviceListingsService } from "../../../api"
 import { useServiceListings } from "../useListings"
 

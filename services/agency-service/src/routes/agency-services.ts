@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from "fastify"
-
 import { AgencyServiceController } from "../controllers/AgencyServiceController"
 import { authenticateToken, requireAgencyStaff } from "../middleware/auth"
 

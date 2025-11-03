@@ -18,6 +18,19 @@
     "lineWidth": 120,
     "attributePosition": "auto"
   },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [":URL:", ":NODE:", ":PACKAGE:", ":ALIAS:", ":PATH:"],
+            "identifierOrder": "natural"
+          }
+        }
+      }
+    }
+  },
 
   "linter": {
     "enabled": true,

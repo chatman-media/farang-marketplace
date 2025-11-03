@@ -1,6 +1,5 @@
 import { LeadPriority, LeadSource, LeadStatus } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { Lead } from "../models/Lead"
 
 describe("Lead Model", () => {

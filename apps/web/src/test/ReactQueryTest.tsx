@@ -1,5 +1,4 @@
 import React from "react"
-
 import { useServiceListings } from "../lib/query/hooks/useListings"
 
 interface TestResultProps {

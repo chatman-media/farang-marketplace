@@ -1,7 +1,6 @@
 import { CommunicationChannel } from "@marketplace/shared-types"
 import * as nodemailer from "nodemailer"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { query } from "../db/connection"
 import { EmailService } from "../services/EmailService"
 

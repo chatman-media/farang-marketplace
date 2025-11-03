@@ -1,8 +1,6 @@
 import logger from "@marketplace/logger"
 import { Automation, AutomationAction, AutomationCondition, CommunicationChannel } from "@marketplace/shared-types"
-
 import { query } from "../db/connection"
-
 import { CommunicationService } from "./CommunicationService"
 import { TemplateService } from "./TemplateService"
 

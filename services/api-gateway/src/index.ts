@@ -1,5 +1,4 @@
 import { logError, serviceLogger } from "@marketplace/logger"
-
 import { createApp } from "./app.js"
 import { env } from "./config/environment.js"
 

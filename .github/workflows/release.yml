@@ -1,0 +1,175 @@
+# 🚢 Release Workflow for Thailand Marketplace
+# Creates releases with semantic versioning
+
+name: 🚢 Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g., v1.2.3)"
+        required: true
+        type: string
+
+env:
+  NODE_VERSION: "22"
+  BUN_VERSION: "1.2.1"
+
+jobs:
+  validate:
+    name: 🔍 Validate Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🥟 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🔎 Run type check
+        run: bun run type-check
+
+      - name: 🔍 Run linter
+        run: bun run lint
+
+      - name: 🧪 Run tests
+        run: bun run test
+        env:
+          NODE_ENV: test
+          CI: true
+
+  build:
+    name: 🏗️ Build Release
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🥟 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: 📦 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🏗️ Build all packages
+        run: bun run build
+        env:
+          NODE_ENV: production
+
+      - name: 📦 Create release tarball
+        run: |
+          tar -czf release.tar.gz \
+            --exclude=node_modules \
+            --exclude=.git \
+            --exclude=coverage \
+            --exclude=.turbo \
+            **/dist \
+            **/build \
+            package.json \
+            bun.lockb \
+            turbo.json \
+            README.md
+
+      - name: 📤 Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: release.tar.gz
+          retention-days: 30
+
+  create-release:
+    name: 📝 Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📥 Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+
+      - name: 📝 Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "changelog=Initial release" >> $GITHUB_OUTPUT
+          else
+            # Generate changelog from commits
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+            echo "changelog<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGELOG" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🚢 Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## 🎉 Thailand Marketplace ${{ github.ref_name }}
+
+            ### 📝 Changes
+            ${{ steps.changelog.outputs.changelog }}
+
+            ### 📦 Installation
+            ```bash
+            # Clone the repository
+            git clone -b ${{ github.ref_name }} https://github.com/${{ github.repository }}.git
+
+            # Install dependencies
+            bun install
+
+            # Build the project
+            bun run build
+
+            # Start services
+            bun run dev
+            ```
+
+            ### 🔗 Links
+            - [Documentation](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/README.md)
+            - [Full Changelog](https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.ref_name }})
+          files: release.tar.gz
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    name: 📢 Notify Release
+    runs-on: ubuntu-latest
+    needs: create-release
+    if: success()
+
+    steps:
+      - name: 📢 Release notification
+        run: |
+          echo "🎉 Release ${{ github.ref_name }} created successfully!"
+          echo "📦 Download: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"

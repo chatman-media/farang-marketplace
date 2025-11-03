@@ -1,5 +1,5 @@
-import { config } from "dotenv"
 import path from "path"
+import { config } from "dotenv"
 import { beforeAll } from "vitest"
 
 // Load test environment variables (suppress dotenv tips)

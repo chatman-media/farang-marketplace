@@ -1,5 +1,4 @@
 import crypto from "crypto"
-
 import { describe, expect, it } from "vitest"
 
 // TON Service Logic Tests
@@ -77,7 +76,7 @@ describe("TON Service Logic Tests", () => {
       ]
 
       testCases.forEach(({ nanotons, ton }) => {
-        const calculated = Number.parseInt(nanotons) / 1e9
+        const calculated = Number.parseInt(nanotons, 10) / 1e9
         if (calculated < 1e-6) {
           expect(calculated.toFixed(9)).toBe(ton)
         } else {

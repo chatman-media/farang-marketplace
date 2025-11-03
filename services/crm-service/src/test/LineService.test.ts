@@ -1,7 +1,6 @@
 import { Client } from "@line/bot-sdk"
 import { CommunicationChannel } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { query } from "../db/connection"
 import { LineService } from "../services/LineService"
 

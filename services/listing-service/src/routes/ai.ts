@@ -1,5 +1,4 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify"
-
 import { AIIntegrationController } from "../controllers/AIIntegrationController"
 
 const aiRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {

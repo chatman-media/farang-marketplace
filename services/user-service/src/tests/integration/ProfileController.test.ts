@@ -1,10 +1,10 @@
+import { randomUUID } from "crypto"
 import { sql } from "@marketplace/database-schema"
 import { VerificationStatus } from "@marketplace/shared-types"
 import bcrypt from "bcryptjs"
 import { randomUUID } from "crypto"
 import { FastifyInstance } from "fastify"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest"
-
 import { createApp } from "../../app"
 import { UserRepository } from "../../repositories/UserRepository"
 import { cleanupTestDatabase, getTestConnection, setupTestDatabase } from "../fixtures/database"

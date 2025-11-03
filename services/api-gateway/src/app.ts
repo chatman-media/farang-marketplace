@@ -1,6 +1,5 @@
 import logger, { createPinoLoggerOptions } from "@marketplace/logger"
 import Fastify, { FastifyInstance } from "fastify"
-
 import { corsConfig, env, rateLimitConfig } from "./config/environment.js"
 import { authMiddleware } from "./middleware/auth.js"
 import { Router } from "./services/Router.js"

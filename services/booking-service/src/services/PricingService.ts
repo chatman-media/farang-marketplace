@@ -1,6 +1,5 @@
 import { and, count, eq, gte, lte } from "@marketplace/database-schema"
 import { logger } from "@marketplace/logger"
-
 import { ListingServiceClient } from "../clients/ListingServiceClient"
 import { db, schema } from "../db/connection"
 

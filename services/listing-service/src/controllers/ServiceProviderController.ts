@@ -3,7 +3,6 @@ import type { ServiceProviderFilters } from "@marketplace/shared-types"
 import { ProviderVerificationLevel } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
-
 import { AuthenticatedRequest } from "../middleware/auth"
 import { ServiceProviderService } from "../services/ServiceProviderService"
 

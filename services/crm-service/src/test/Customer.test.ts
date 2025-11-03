@@ -1,6 +1,5 @@
 import { CommunicationChannel, CustomerStatus } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it } from "vitest"
-
 import { Customer } from "../models/Customer"
 
 describe("Customer Model", () => {

@@ -6,7 +6,6 @@ import {
   UnlinkSocialAccountRequest,
 } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
-
 import { OAuthStateManager } from "../config/redis"
 import { AuthenticatedRequest } from "../middleware/auth"
 import { OAuthService } from "../services/OAuthService"

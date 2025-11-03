@@ -1,8 +1,6 @@
 import { Location, User, UserRole } from "@marketplace/shared-types"
 import * as jwt from "jsonwebtoken"
-
 import { UserEntity } from "../models/User"
-
 import { UserService } from "./UserService"
 
 export interface LoginRequest {
