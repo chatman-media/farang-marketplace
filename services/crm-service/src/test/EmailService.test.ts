@@ -4,13 +4,26 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { query } from "../db/connection"
 import { EmailService } from "../services/EmailService"
 
-// Mock nodemailer
-vi.mock("nodemailer", () => ({
-  createTransport: vi.fn(() => ({
-    sendMail: vi.fn(),
-    verify: vi.fn(),
-  })),
+// Mock transporter methods - using vi.hoisted to avoid hoisting issues
+const { mockSendMail, mockVerify } = vi.hoisted(() => ({
+  mockSendMail: vi.fn(),
+  mockVerify: vi.fn(),
 }))
+
+// Mock nodemailer
+vi.mock("nodemailer", () => {
+  const mockTransporter = {
+    sendMail: mockSendMail,
+    verify: mockVerify,
+  }
+  const mockCreateTransport = vi.fn().mockReturnValue(mockTransporter)
+  return {
+    default: {
+      createTransport: mockCreateTransport,
+    },
+    createTransport: mockCreateTransport,
+  }
+})
 
 // Mock database connection
 vi.mock("../db/connection", () => ({
@@ -19,17 +32,10 @@ vi.mock("../db/connection", () => ({
 
 describe("EmailService", () => {
   let emailService: EmailService
-  const mockTransporter = {
-    sendMail: vi.fn(),
-    verify: vi.fn(),
-  }
   const mockQuery = vi.mocked(query)
 
   beforeEach(() => {
     vi.clearAllMocks()
-
-    // Mock nodemailer.createTransport
-    vi.mocked(nodemailer.createTransport).mockReturnValue(mockTransporter as any)
 
     emailService = new EmailService({
       host: "smtp.test.com",
@@ -49,7 +55,7 @@ describe("EmailService", () => {
         accepted: ["recipient@test.com"],
       }
 
-      mockTransporter.sendMail.mockResolvedValueOnce(mockEmailInfo)
+      mockSendMail.mockResolvedValueOnce(mockEmailInfo)
       mockQuery.mockResolvedValueOnce({ rows: [{ id: "history-123" }] })
 
       const request = {
@@ -66,7 +72,7 @@ describe("EmailService", () => {
       expect(result.messageId).toBe("test-message-id")
       expect(result.channel).toBe(CommunicationChannel.EMAIL)
       expect(result.status).toBe("sent")
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith({
+      expect(mockSendMail).toHaveBeenCalledWith({
         from: "test@test.com",
         to: "recipient@test.com",
         subject: "Test Subject",
@@ -92,7 +98,7 @@ describe("EmailService", () => {
       // Mock template fetch
       mockQuery.mockResolvedValueOnce({ rows: [mockTemplate] })
       // Mock email send
-      mockTransporter.sendMail.mockResolvedValueOnce(mockEmailInfo)
+      mockSendMail.mockResolvedValueOnce(mockEmailInfo)
       // Mock history log
       mockQuery.mockResolvedValueOnce({ rows: [{ id: "history-123" }] })
 
@@ -109,7 +115,7 @@ describe("EmailService", () => {
       const result = await emailService.sendEmail(request)
 
       expect(result.success).toBe(true)
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith({
+      expect(mockSendMail).toHaveBeenCalledWith({
         from: "test@test.com",
         to: "recipient@test.com",
         subject: "Welcome John Doe!",
@@ -120,7 +126,7 @@ describe("EmailService", () => {
 
     it("should handle email sending failure", async () => {
       const error = new Error("SMTP connection failed")
-      mockTransporter.sendMail.mockRejectedValueOnce(error)
+      mockSendMail.mockRejectedValueOnce(error)
       mockQuery.mockResolvedValueOnce({ rows: [{ id: "history-123" }] })
 
       const request = {
@@ -242,16 +248,16 @@ describe("EmailService", () => {
 
   describe("verifyConnection", () => {
     it("should verify SMTP connection successfully", async () => {
-      mockTransporter.verify.mockResolvedValueOnce(true)
+      mockVerify.mockResolvedValueOnce(true)
 
       const result = await emailService.verifyConnection()
 
       expect(result).toBe(true)
-      expect(mockTransporter.verify).toHaveBeenCalled()
+      expect(mockVerify).toHaveBeenCalled()
     })
 
     it("should handle connection verification failure", async () => {
-      mockTransporter.verify.mockRejectedValueOnce(new Error("Connection failed"))
+      mockVerify.mockRejectedValueOnce(new Error("Connection failed"))
 
       const result = await emailService.verifyConnection()
 
