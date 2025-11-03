@@ -4,13 +4,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { query } from "../db/connection"
 import { LineService } from "../services/LineService"
 
+// Mock client methods
+const mockPushMessage = vi.fn()
+const mockReplyMessage = vi.fn()
+
 // Mock @line/bot-sdk
-vi.mock("@line/bot-sdk", () => ({
-  Client: vi.fn(() => ({
-    pushMessage: vi.fn(),
-    replyMessage: vi.fn(),
-  })),
-}))
+vi.mock("@line/bot-sdk", () => {
+  return {
+    Client: class {
+      pushMessage = mockPushMessage
+      replyMessage = mockReplyMessage
+    },
+  }
+})
 
 // Mock database connection
 vi.mock("../db/connection", () => ({
@@ -20,16 +26,13 @@ vi.mock("../db/connection", () => ({
 describe("LineService", () => {
   let lineService: LineService
   const mockClient = {
-    pushMessage: vi.fn(),
-    replyMessage: vi.fn(),
+    pushMessage: mockPushMessage,
+    replyMessage: mockReplyMessage,
   }
   const mockQuery = vi.mocked(query)
 
   beforeEach(() => {
     vi.clearAllMocks()
-
-    // Mock Line Client constructor
-    vi.mocked(Client).mockImplementation(() => mockClient as any)
 
     lineService = new LineService({
       channelAccessToken: "test-access-token",

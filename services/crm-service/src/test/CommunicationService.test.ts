@@ -7,34 +7,45 @@ import { LineService } from "../services/LineService"
 import { TelegramService } from "../services/TelegramService"
 import { WhatsAppService } from "../services/WhatsAppService"
 
+// Mock service methods
+const mockEmailSend = vi.fn()
+const mockEmailVerify = vi.fn()
+const mockTelegramSend = vi.fn()
+const mockTelegramStart = vi.fn()
+const mockTelegramStop = vi.fn()
+const mockWhatsAppSend = vi.fn()
+const mockWhatsAppInit = vi.fn()
+const mockWhatsAppDestroy = vi.fn()
+const mockLineSend = vi.fn()
+
 // Mock all communication services
 vi.mock("../services/EmailService", () => ({
-  EmailService: vi.fn(() => ({
-    sendEmail: vi.fn(),
-    verifyConnection: vi.fn(),
-  })),
+  EmailService: class {
+    sendEmail = mockEmailSend
+    verifyConnection = mockEmailVerify
+  },
 }))
 
 vi.mock("../services/TelegramService", () => ({
-  TelegramService: vi.fn(() => ({
-    sendMessage: vi.fn(),
-    startBot: vi.fn(),
-    stopBot: vi.fn(),
-  })),
+  TelegramService: class {
+    sendMessage = mockTelegramSend
+    startBot = mockTelegramStart
+    stopBot = mockTelegramStop
+  },
 }))
 
 vi.mock("../services/WhatsAppService", () => ({
-  WhatsAppService: vi.fn(() => ({
-    sendMessage: vi.fn(),
-    initialize: vi.fn(),
-    destroy: vi.fn(),
-  })),
+  WhatsAppService: class {
+    sendMessage = mockWhatsAppSend
+    initialize = mockWhatsAppInit
+    destroy = mockWhatsAppDestroy
+  },
 }))
 
 vi.mock("../services/LineService", () => ({
-  LineService: vi.fn(() => ({
-    sendMessage: vi.fn(),
-  })),
+  LineService: class {
+    sendMessage = mockLineSend
+  },
 }))
 
 // Mock database connection
@@ -53,33 +64,27 @@ describe("CommunicationService", () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    // Setup mock services
+    // Setup mock services using the shared mocks
     mockEmailService = {
-      sendEmail: vi.fn(),
-      verifyConnection: vi.fn(),
+      sendEmail: mockEmailSend,
+      verifyConnection: mockEmailVerify,
     }
 
     mockTelegramService = {
-      sendMessage: vi.fn(),
-      startBot: vi.fn(),
-      stopBot: vi.fn(),
+      sendMessage: mockTelegramSend,
+      startBot: mockTelegramStart,
+      stopBot: mockTelegramStop,
     }
 
     mockWhatsAppService = {
-      sendMessage: vi.fn(),
-      initialize: vi.fn(),
-      destroy: vi.fn(),
+      sendMessage: mockWhatsAppSend,
+      initialize: mockWhatsAppInit,
+      destroy: mockWhatsAppDestroy,
     }
 
     mockLineService = {
-      sendMessage: vi.fn(),
+      sendMessage: mockLineSend,
     }
-
-    // Mock constructors
-    vi.mocked(EmailService).mockImplementation(() => mockEmailService)
-    vi.mocked(TelegramService).mockImplementation(() => mockTelegramService)
-    vi.mocked(WhatsAppService).mockImplementation(() => mockWhatsAppService)
-    vi.mocked(LineService).mockImplementation(() => mockLineService)
 
     communicationService = new CommunicationService()
   })
