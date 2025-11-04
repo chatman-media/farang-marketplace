@@ -1,0 +1,38 @@
+{
+  "name": "@marketplace/storage-service",
+  "version": "1.0.0",
+  "description": "Unified storage service for Vercel Blob and S3-compatible storage",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "@vercel/blob": "^0.23.4"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.8"
+  },
+  "keywords": [
+    "storage",
+    "vercel-blob",
+    "s3",
+    "upload",
+    "files"
+  ]
+}
