@@ -1,0 +1,223 @@
+# 🐳 Docker Build & Validation
+# Validates Docker images and docker-compose configuration
+# Ensures containers build and run correctly
+
+name: 🐳 Docker Build & Validation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'docker-compose*.yml'
+      - '**/Dockerfile'
+      - '.dockerignore'
+      - 'docker/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'docker-compose*.yml'
+      - '**/Dockerfile'
+      - '.dockerignore'
+      - 'docker/**'
+
+env:
+  BUN_VERSION: '1.2.1'
+
+jobs:
+  validate-compose:
+    name: ✅ Validate Docker Compose
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: ✅ Validate docker-compose.yml syntax
+        run: |
+          docker compose config > /dev/null
+          echo "✅ Docker Compose configuration is valid"
+
+      - name: 📊 Show Docker Compose config
+        run: docker compose config
+
+  docker-compose-test:
+    name: 🧪 Test Docker Compose Stack
+    runs-on: ubuntu-latest
+    needs: validate-compose
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Create required directories
+        run: |
+          mkdir -p docker/postgres
+          mkdir -p docker/redis
+
+          # Create minimal init.sql if it doesn't exist
+          if [ ! -f docker/postgres/init.sql ]; then
+            cat > docker/postgres/init.sql << 'EOF'
+          -- Initialize marketplace database
+          CREATE SCHEMA IF NOT EXISTS payment;
+          CREATE SCHEMA IF NOT EXISTS users;
+          CREATE SCHEMA IF NOT EXISTS listings;
+          CREATE SCHEMA IF NOT EXISTS bookings;
+          CREATE SCHEMA IF NOT EXISTS notifications;
+          CREATE SCHEMA IF NOT EXISTS ai;
+          CREATE SCHEMA IF NOT EXISTS crm;
+          CREATE SCHEMA IF NOT EXISTS agency;
+
+          -- Grant permissions
+          GRANT ALL PRIVILEGES ON SCHEMA payment TO marketplace_user;
+          GRANT ALL PRIVILEGES ON SCHEMA users TO marketplace_user;
+          GRANT ALL PRIVILEGES ON SCHEMA listings TO marketplace_user;
+          GRANT ALL PRIVILEGES ON SCHEMA bookings TO marketplace_user;
+          GRANT ALL PRIVILEGES ON SCHEMA notifications TO marketplace_user;
+          GRANT ALL PRIVILEGES ON SCHEMA ai TO marketplace_user;
+          GRANT ALL PRIVILEGES ON SCHEMA crm TO marketplace_user;
+          GRANT ALL PRIVILEGES ON SCHEMA agency TO marketplace_user;
+          EOF
+          fi
+
+          # Create minimal redis.conf if it doesn't exist
+          if [ ! -f docker/redis/redis.conf ]; then
+            cat > docker/redis/redis.conf << 'EOF'
+          # Redis configuration for marketplace
+          maxmemory 256mb
+          maxmemory-policy allkeys-lru
+          save 900 1
+          save 300 10
+          save 60 10000
+          EOF
+          fi
+
+      - name: 🚀 Start Docker Compose stack
+        run: |
+          docker compose up -d
+          echo "Waiting for services to be healthy..."
+          sleep 30
+
+      - name: 🔍 Check services health
+        run: |
+          echo "=== Docker Compose Services ==="
+          docker compose ps
+
+          echo "=== PostgreSQL Health ==="
+          docker compose exec -T postgres pg_isready -U marketplace_user || exit 1
+
+          echo "=== Redis Health ==="
+          docker compose exec -T redis redis-cli ping || exit 1
+
+          echo "=== MinIO Health ==="
+          curl -f http://localhost:9000/minio/health/live || exit 1
+
+          echo "✅ All services are healthy!"
+
+      - name: 🧪 Test database connectivity
+        run: |
+          docker compose exec -T postgres psql -U marketplace_user -d marketplace -c "\dt" || true
+          docker compose exec -T postgres psql -U marketplace_user -d marketplace -c "SELECT version();"
+
+      - name: 🧪 Test Redis connectivity
+        run: |
+          docker compose exec -T redis redis-cli SET test_key "test_value"
+          docker compose exec -T redis redis-cli GET test_key
+          docker compose exec -T redis redis-cli DEL test_key
+
+      - name: 🧪 Test MinIO connectivity
+        run: |
+          # Install MinIO client
+          wget -q https://dl.min.io/client/mc/release/linux-amd64/mc
+          chmod +x mc
+
+          # Configure and test
+          ./mc alias set testminio http://localhost:9000 minioadmin minioadmin123
+          ./mc admin info testminio
+
+      - name: 📊 Show service logs
+        if: always()
+        run: |
+          echo "=== PostgreSQL Logs ==="
+          docker compose logs postgres | tail -50
+
+          echo "=== Redis Logs ==="
+          docker compose logs redis | tail -50
+
+          echo "=== MinIO Logs ==="
+          docker compose logs minio | tail -50
+
+      - name: 🛑 Stop Docker Compose
+        if: always()
+        run: docker compose down -v
+
+  docker-security-scan:
+    name: 🔒 Docker Security Scan
+    runs-on: ubuntu-latest
+    needs: validate-compose
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Scan docker-compose.yml with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'docker-compose.yml'
+          format: 'sarif'
+          output: 'trivy-docker-compose.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
+
+      - name: 📊 Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-docker-compose.sarif'
+          category: 'trivy-docker-compose'
+
+  docker-summary:
+    name: 📊 Docker Validation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-compose, docker-compose-test, docker-security-scan]
+    if: always()
+
+    steps:
+      - name: 📊 Generate summary
+        run: |
+          echo "## 🐳 Docker Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.validate-compose.result }}" == "success" ]; then
+            echo "| Compose Validation | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Compose Validation | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.docker-compose-test.result }}" == "success" ]; then
+            echo "| Compose Stack Test | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Compose Stack Test | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.docker-security-scan.result }}" == "success" ]; then
+            echo "| Security Scan | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Security Scan | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: ✅ All Docker checks passed
+        if: needs.validate-compose.result == 'success' && needs.docker-compose-test.result == 'success'
+        run: echo "✅ All Docker validation checks passed!"
+
+      - name: ❌ Some Docker checks failed
+        if: needs.validate-compose.result != 'success' || needs.docker-compose-test.result != 'success'
+        run: |
+          echo "❌ Some Docker validation checks failed"
+          exit 1

@@ -1,0 +1,176 @@
+# 🛡️ Trivy Security Scanning
+# Scans for vulnerabilities in dependencies, container images, and infrastructure
+# Comprehensive security checks for the entire stack
+
+name: 🛡️ Trivy Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run at 4 AM UTC every day
+    - cron: '0 4 * * *'
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+
+env:
+  BUN_VERSION: '1.2.1'
+
+jobs:
+  # Scan filesystem for vulnerabilities
+  fs-scan:
+    name: 📁 Filesystem Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Trivy vulnerability scanner (filesystem)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-fs-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: 📊 Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-fs-results.sarif'
+          category: 'trivy-fs'
+
+      - name: 📝 Generate readable report
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+
+  # Scan for misconfigurations
+  config-scan:
+    name: ⚙️ Configuration Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run Trivy configuration scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-config-results.sarif'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: 📊 Upload config results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-config-results.sarif'
+          category: 'trivy-config'
+
+      - name: 📝 Generate configuration report
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+  # Scan Docker Compose services
+  docker-scan:
+    name: 🐳 Docker Images Scan
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        image:
+          - 'postgres:15-alpine'
+          - 'redis:7-alpine'
+          - 'minio/minio:latest'
+
+    steps:
+      - name: 🐳 Pull Docker image
+        run: docker pull ${{ matrix.image }}
+
+      - name: 🔍 Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ matrix.image }}
+          format: 'sarif'
+          output: 'trivy-docker-${{ matrix.image }}.sarif'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: 📊 Upload Docker scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-docker-${{ matrix.image }}.sarif'
+          category: 'trivy-docker-${{ matrix.image }}'
+
+  # Check for secrets
+  secret-scan:
+    name: 🔑 Secret Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Run Trivy secret scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          scanners: 'secret'
+          format: 'sarif'
+          output: 'trivy-secret-results.sarif'
+          exit-code: '0'
+
+      - name: 📊 Upload secret scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-secret-results.sarif'
+          category: 'trivy-secrets'
+
+      - name: 📝 Generate secret report
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          scanners: 'secret'
+          format: 'table'
+
+  # Final security status check
+  security-summary:
+    name: 📊 Security Summary
+    runs-on: ubuntu-latest
+    needs: [fs-scan, config-scan, docker-scan, secret-scan]
+    if: always()
+
+    steps:
+      - name: 📊 Security scan completed
+        run: |
+          echo "🛡️ All security scans completed"
+          echo "📝 Check the Security tab for detailed results"
+          echo "🔍 Results available at: ${{ github.server_url }}/${{ github.repository }}/security/code-scanning"

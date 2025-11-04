@@ -1,5 +1,6 @@
 # 🚀 Main CI Pipeline for Thailand Marketplace
 # Fast checks on every push and PR
+# Runs lint, type-check, tests, and build with full environment
 
 name: 🚀 CI Pipeline
 
@@ -8,10 +9,15 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  workflow_dispatch:
 
 env:
   NODE_VERSION: "22"
   BUN_VERSION: "1.2.1"
+  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"
+  REDIS_URL: "redis://localhost:6379"
+  NODE_ENV: "test"
+  CI: "true"
 
 jobs:
   lint:
@@ -101,20 +107,62 @@ jobs:
       - name: 📦 Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: 🔧 Setup environment
+      - name: 🔧 Setup test environment
         run: |
-          cp .env.example .env
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/test_db" >> .env
-          echo "REDIS_URL=redis://localhost:6379" >> .env
+          cp .env.example .env.test
+          cat >> .env.test << EOF
+          DATABASE_URL=${{ env.DATABASE_URL }}
+          REDIS_URL=${{ env.REDIS_URL }}
+          JWT_SECRET=test-jwt-secret-for-ci
+          NODE_ENV=test
+          LOG_LEVEL=error
+          EOF
 
-      - name: 🏗️ Build packages
+      - name: ⏳ Wait for services to be ready
+        run: |
+          echo "Waiting for PostgreSQL..."
+          timeout 30 bash -c 'until pg_isready -h localhost -p 5432 -U postgres; do sleep 1; done'
+
+          echo "Waiting for Redis..."
+          timeout 30 bash -c 'until redis-cli -h localhost -p 6379 ping; do sleep 1; done'
+
+          echo "✅ All services are ready!"
+
+      - name: 🗄️ Initialize test database
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "
+            CREATE SCHEMA IF NOT EXISTS payment;
+            CREATE SCHEMA IF NOT EXISTS users;
+            CREATE SCHEMA IF NOT EXISTS listings;
+            CREATE SCHEMA IF NOT EXISTS bookings;
+          "
+
+      - name: 🏗️ Build shared packages first
+        run: |
+          bun run build --filter=@marketplace/shared-types
+          bun run build --filter=@marketplace/database-schema
+          bun run build --filter=@marketplace/logger
+
+      - name: 🏗️ Build all packages
         run: bun run build
 
-      - name: 🧪 Run tests
+      - name: 🧪 Run tests with coverage
         run: bun run test
         env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          REDIS_URL: ${{ env.REDIS_URL }}
           NODE_ENV: test
           CI: true
+
+      - name: 📊 Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            **/coverage/
+            **/test-results/
+          retention-days: 7
 
   build:
     name: 🏗️ Build
@@ -154,6 +202,37 @@ jobs:
     if: always()
 
     steps:
+      - name: 📊 Generate CI summary
+        run: |
+          echo "## 🚀 CI Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.lint.result }}" == "success" ]; then
+            echo "| 🔍 Lint & Format | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 🔍 Lint & Format | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.type-check.result }}" == "success" ]; then
+            echo "| 🔎 Type Check | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 🔎 Type Check | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.test.result }}" == "success" ]; then
+            echo "| 🧪 Tests | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 🧪 Tests | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.build.result }}" == "success" ]; then
+            echo "| 🏗️ Build | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 🏗️ Build | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: ✅ Verify all jobs passed
         run: |
           if [ "${{ needs.lint.result }}" != "success" ] || \
