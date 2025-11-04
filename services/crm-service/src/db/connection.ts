@@ -7,22 +7,29 @@ if (process.env.NODE_ENV !== "test") {
   dotenv.config()
 }
 
-const connectionString = process.env.DATABASE_URL
+// Lazy initialization to ensure env vars are loaded first
+let sql: ReturnType<typeof postgres> | null = null
+let db: ReturnType<typeof drizzle> | null = null
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL environment variable is required")
+function getConnection() {
+  if (!sql) {
+    const connectionString = process.env.DATABASE_URL
+    if (!connectionString) {
+      throw new Error("DATABASE_URL environment variable is required")
+    }
+    sql = postgres(connectionString, {
+      max: 20,
+      idle_timeout: 20,
+      max_lifetime: 60 * 30,
+    })
+    db = drizzle(sql, { schema })
+  }
+  return { sql, db }
 }
-
-const sql = postgres(connectionString, {
-  max: 20,
-  idle_timeout: 20,
-  max_lifetime: 60 * 30,
-})
-
-const db = drizzle(sql, { schema })
 
 // SQL client for raw queries (backward compatibility)
 const query = async (text: string, params?: any[]) => {
+  const { sql } = getConnection()
   const result = await sql.unsafe(text, params)
   return {
     rows: result,
@@ -33,8 +40,19 @@ const query = async (text: string, params?: any[]) => {
 }
 
 async function closePool(): Promise<void> {
-  await sql.end()
+  if (sql) {
+    await sql.end()
+    sql = null
+    db = null
+  }
 }
 
-export { db, sql, closePool, query, schema }
-export default db
+// Export getters that use lazy initialization
+export { closePool, query, schema }
+export function getDb() {
+  return getConnection().db
+}
+export function getSql() {
+  return getConnection().sql
+}
+export default getDb()

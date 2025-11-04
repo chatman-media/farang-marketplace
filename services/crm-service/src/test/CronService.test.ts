@@ -7,10 +7,11 @@ vi.mock("../db/connection", () => ({
 }))
 
 // Mock AutomationService to avoid circular dependency
+const mockTriggerWorkflow = vi.fn().mockResolvedValue(undefined)
 vi.mock("../services/AutomationService", () => ({
-  AutomationService: vi.fn().mockImplementation(() => ({
-    triggerWorkflow: vi.fn().mockResolvedValue(undefined),
-  })),
+  AutomationService: class {
+    triggerWorkflow = mockTriggerWorkflow
+  },
 }))
 
 describe("CronService", () => {
