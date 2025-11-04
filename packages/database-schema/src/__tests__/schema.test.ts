@@ -193,15 +193,9 @@ describe("Database Schema Tests", () => {
       expect(vehicle.make).toBe("Yamaha")
       expect(vehicle.model).toBe("NMAX")
       expect(vehicle.vehicleType).toBe("motorcycle")
-
-      expect(vehicle).toBeDefined()
-      expect(vehicle.model).toBe("PCX 150")
-      expect(vehicle.power).toBe("150cc")
-      expect(vehicle.oldVehicleNumber).toBe("SCT001")
-      expect(vehicle.gpsTrackerId).toBe("ST123456")
-      expect(vehicle.pricingSystem).toBe("seasonal")
-      expect(vehicle.oneYearRent).toBe("72000.00")
-      expect(vehicle.decemberPrice).toBe("400.00")
+      expect(vehicle.year).toBe(2024)
+      expect(vehicle.color).toBe("Black")
+      expect(vehicle.engineSize).toBe(155.0)
     })
 
     it("should enforce unique constraint on oldVehicleNumber", async () => {
