@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { useState } from "react"
 import { api } from "../lib/api/client"
 import { getApiConfig } from "../lib/api/config"

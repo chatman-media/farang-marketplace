@@ -29,9 +29,7 @@ updates:
         patterns:
           - "@types/*"
           - "typescript"
-          - "eslint*"
           - "@biomejs/*"
-          - "prettier"
           - "vitest"
           - "vite"
 
