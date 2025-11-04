@@ -5,13 +5,15 @@
 name: 🔐 CodeQL Security Analysis
 
 on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+  # Temporarily disabled for testing
+  # push:
+  #   branches: [main, develop]
+  # pull_request:
+  #   branches: [main, develop]
   schedule:
     # Run at 3 AM UTC every day
     - cron: '0 3 * * *'
+  workflow_dispatch:
 
 permissions:
   actions: read
