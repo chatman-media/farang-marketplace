@@ -1,9 +1,9 @@
 /**
- * @marketplace/storage-service
+ * Storage Service
  * Unified storage service supporting Vercel Blob and S3-compatible storage
  */
 
-import { put, del, list, head, copy } from '@vercel/blob';
+import { put, del, list, head, copy, type PutBlobResult, type ListBlobResult } from '@vercel/blob';
 
 export interface UploadOptions {
   /** File category for organization */
@@ -160,7 +160,7 @@ export class StorageService {
     });
 
     return {
-      blobs: result.blobs.map((blob) => ({
+      blobs: result.blobs.map((blob: any) => ({
         url: blob.url,
         pathname: blob.pathname,
         size: blob.size,
@@ -230,7 +230,7 @@ export class StorageService {
    */
   async deleteCategory(category: string): Promise<number> {
     const { blobs } = await this.list({ category, limit: 1000 });
-    const urls = blobs.map((b) => b.url);
+    const urls = blobs.map((b: any) => b.url);
 
     if (urls.length > 0) {
       await this.deleteMany(urls);
@@ -250,7 +250,7 @@ export class StorageService {
    */
   async getCategorySize(category: string): Promise<number> {
     const { blobs } = await this.list({ category, limit: 1000 });
-    return blobs.reduce((total, blob) => total + blob.size, 0);
+    return blobs.reduce((total: number, blob: any) => total + blob.size, 0);
   }
 }
 
@@ -260,7 +260,7 @@ export class StorageService {
  *
  * @example
  * ```ts
- * import { storage } from '@marketplace/storage-service';
+ * import { storage } from 'storage-service';
  *
  * const result = await storage.upload(file, { category: 'cars' });
  * ```

@@ -6,7 +6,7 @@ Quick start guide for switching from MinIO to Vercel Blob storage.
 
 - ✅ **Removed**: MinIO Docker container
 - ✅ **Added**: Vercel Blob configuration
-- ✅ **Created**: `@marketplace/storage-service` package
+- ✅ **Created**: `storage-service` in services/
 - ✅ **Updated**: Environment variables
 
 ## 🚀 Quick Setup (5 minutes)
@@ -41,17 +41,16 @@ vercel env add BLOB_READ_WRITE_TOKEN production
 
 ```bash
 # Install storage service
-cd packages/storage-service
+cd services/storage-service
 bun install
 
-# Build
-bun run build
+# Ready to use (no build needed with Bun)
 ```
 
 ### 4. Use in Code
 
 ```typescript
-import { storage } from '@marketplace/storage-service';
+import { storage } from '../services/storage-service/src';
 
 // Upload
 const result = await storage.upload(file, {
@@ -65,7 +64,7 @@ console.log(result.url); // Ready to use!
 ## 📋 Full Documentation
 
 - **Setup Guide**: [docs/VERCEL_BLOB_SETUP.md](docs/VERCEL_BLOB_SETUP.md)
-- **API Reference**: [packages/storage-service/README.md](packages/storage-service/README.md)
+- **API Reference**: [services/storage-service/README.md](services/storage-service/README.md)
 
 ## 💡 Benefits
 
@@ -81,7 +80,7 @@ console.log(result.url); // Ready to use!
 
 1. ✅ Get token from Vercel
 2. ✅ Add to environment variables
-3. ✅ Use `@marketplace/storage-service`
+3. ✅ Use storage-service
 4. ✅ Deploy and test
 
 Questions? Check [VERCEL_BLOB_SETUP.md](docs/VERCEL_BLOB_SETUP.md)
