@@ -481,32 +481,6 @@ when the system stabilizes.
 - По расстоянию
 - По рейтингу
 
-## 📊 Интеграция с ИИ сервисами
-
-### AI Service интеграция
-
-```typescript
-// Генерация описания
-const aiDescription = await aiService.generateDescription({
-  type: listing.type,
-  features: listing.features,
-  location: listing.location,
-  images: listing.images,
-})
-
-// Векторизация для поиска
-const searchVector = await aiService.createEmbedding(
-  `${listing.title} ${listing.description}`
-)
-
-// Получение рекомендаций
-const recommendations = await aiService.getRecommendations({
-  userId: user.id,
-  currentListing: listing.id,
-  preferences: user.preferences,
-})
-```
-
 ## 🖼️ Управление медиафайлами
 
 ### Загрузка изображений
@@ -605,7 +579,6 @@ SENTRY_DSN=your-sentry-dsn
 
 ### Внутренние сервисы
 
-- **AI Service**: ИИ-рекомендации и обработка
 - **User Service**: Аутентификация и профили
 - **Booking Service**: Связь с бронированиями
 - **Agency Service**: Управление агентствами

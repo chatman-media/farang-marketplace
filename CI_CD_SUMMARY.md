@@ -103,7 +103,7 @@ Comprehensive CI/CD pipeline configured for Thailand Marketplace with:
 
 **Service Flags**:
 - `payment-service`, `user-service`, `listing-service`
-- `booking-service`, `notification-service`, `ai-service`
+- `booking-service`, `notification-service`
 - `crm-service`, `agency-service`
 - `web-app`, `mobile-app`, `admin-dashboard`
 - `shared-types`, `shared-utils`
@@ -439,7 +439,6 @@ NODE_ENV=test
 
 2. **Add More Services**
    - notification-service tests
-   - ai-service integration
    - Full service mesh testing
 
 3. **Enhance Security**
