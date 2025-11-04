@@ -34,7 +34,7 @@
     "multer": "2.0.2",
     "natural": "8.1.0",
     "node-cron": "4.2.1",
-    "openai": "6.7.0",
+    "openai": "6.8.0",
     "redis": "5.9.0",
     "sentiment": "^5.0.2",
     "sharp": "^0.34.4",
