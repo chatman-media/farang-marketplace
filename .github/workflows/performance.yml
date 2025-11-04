@@ -35,7 +35,13 @@ jobs:
       - name: 📦 Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: 🏗️ Build project
+      - name: 🏗️ Build shared packages
+        run: |
+          bun run build --filter=@marketplace/shared-types
+          bun run build --filter=@marketplace/database-schema
+          bun run build --filter=@marketplace/logger
+
+      - name: 🏗️ Build remaining packages
         run: bun run build
         env:
           NODE_ENV: production
@@ -95,6 +101,12 @@ jobs:
           DURATION=$((END_TIME - START_TIME))
           echo "install_duration=$DURATION" >> $GITHUB_ENV
           echo "📦 Dependencies installed in ${DURATION}s"
+
+      - name: 🏗️ Build shared packages
+        run: |
+          bun run build --filter=@marketplace/shared-types
+          bun run build --filter=@marketplace/database-schema
+          bun run build --filter=@marketplace/logger
 
       - name: 🏗️ Build with timing
         run: |
@@ -156,6 +168,12 @@ jobs:
 
       - name: 📦 Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: 🏗️ Build shared packages
+        run: |
+          bun run build --filter=@marketplace/shared-types
+          bun run build --filter=@marketplace/database-schema
+          bun run build --filter=@marketplace/logger
 
       - name: 🏗️ Build services
         run: bun run build
