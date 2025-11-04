@@ -25,7 +25,7 @@ export default defineConfig({
         server: "./src/entry-server.tsx",
       },
       output: {
-        entryFileNames: chunkInfo => {
+        entryFileNames: (chunkInfo) => {
           return chunkInfo.name === "server" ? "entry-server.js" : "[name]-[hash].js"
         },
       },

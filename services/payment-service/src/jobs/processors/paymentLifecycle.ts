@@ -1,8 +1,7 @@
-import { and, eq, inArray, lt, sql } from "@marketplace/database-schema"
+import { and, eq, lt, sql } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
 import { PaymentStatus } from "@marketplace/shared-types"
 import { Job, Worker } from "bullmq"
-
 import { db, schema } from "../../db/connection"
 
 const { payments, refunds } = schema
@@ -42,9 +41,9 @@ async function retryFailedPayments(job: Job) {
       .from(payments)
       .where(
         and(
-          eq(payments.status, PaymentStatus.FAILED)
+          eq(payments.status, PaymentStatus.FAILED),
           // Note: retryCount and retryAfter fields need to be added to schema
-        )
+        ),
       )
       .limit(batchSize)
 
@@ -128,8 +127,8 @@ async function autoCompletePayments(job: Job) {
       .where(
         and(
           eq(payments.status, "processing" as any),
-          payments.processedAt ? lt(payments.processedAt, cutoffTime) : sql`false`
-        )
+          payments.processedAt ? lt(payments.processedAt, cutoffTime) : sql`false`,
+        ),
       )
       .limit(batchSize)
 
@@ -140,7 +139,7 @@ async function autoCompletePayments(job: Job) {
         await paymentService.updatePaymentStatus(
           payment.id,
           PaymentStatus.COMPLETED,
-          "Auto-completed after processing delay"
+          "Auto-completed after processing delay",
         )
         completed++
       } catch (error) {
@@ -174,7 +173,7 @@ export function createPaymentLifecycleWorker(redisConnection: any) {
           throw new Error(`Unknown job name: ${job.name}`)
       }
     },
-    { connection: redisConnection }
+    { connection: redisConnection },
   )
 
   logger.info("🔄 Payment lifecycle job processors loaded")

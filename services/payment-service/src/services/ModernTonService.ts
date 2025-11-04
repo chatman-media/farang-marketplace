@@ -5,12 +5,11 @@ import { internal, TonClient, WalletContractV4 } from "ton"
 import { Address, beginCell, fromNano, toNano } from "ton-core"
 import { mnemonicToWalletKey } from "ton-crypto"
 import { z } from "zod"
-
 import { env } from "../app"
 
 // Modern Zod schemas for validation
 export const tonAddressSchema = z.string().refine(
-  addr => {
+  (addr) => {
     try {
       Address.parse(addr)
       return true
@@ -18,15 +17,15 @@ export const tonAddressSchema = z.string().refine(
       return false
     }
   },
-  { message: "Invalid TON address format" }
+  { message: "Invalid TON address format" },
 )
 
 export const tonAmountSchema = z.string().refine(
-  amount => {
+  (amount) => {
     const num = Number.parseFloat(amount)
     return !Number.isNaN(num) && num > 0 && num <= 1000000
   },
-  { message: "Invalid TON amount" }
+  { message: "Invalid TON amount" },
 )
 
 export const paymentRequestSchema = z.object({
@@ -269,7 +268,7 @@ export class ModernTonService {
     try {
       const transactions = await this.client.getTransactions(Address.parse(env.TON_WALLET_ADDRESS), { limit: 100 })
 
-      const transaction = transactions.find(tx => tx.hash().toString("hex") === hash)
+      const transaction = transactions.find((tx) => tx.hash().toString("hex") === hash)
 
       return !!transaction
     } catch (error) {

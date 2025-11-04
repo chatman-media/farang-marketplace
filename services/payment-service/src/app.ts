@@ -1,4 +1,4 @@
-import logger, { createPinoLoggerOptions } from "@marketplace/logger"
+import { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"

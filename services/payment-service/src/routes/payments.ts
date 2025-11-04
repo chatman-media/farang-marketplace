@@ -1,7 +1,6 @@
 import { PaymentStatus } from "@marketplace/shared-types"
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify"
 import { z } from "zod"
-
 import { ModernTonService } from "../services/ModernTonService"
 import { PaymentService } from "../services/PaymentService"
 
@@ -116,7 +115,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           message: error instanceof Error ? error.message : "Unknown error",
         })
       }
-    }
+    },
   )
 
   // Get payment by ID
@@ -151,7 +150,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           error: "Failed to get payment",
         })
       }
-    }
+    },
   )
 
   // Update payment status
@@ -170,7 +169,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
         Params: { id: string }
         Body: z.infer<typeof updatePaymentStatusSchema>
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const { status, reason } = request.body
@@ -188,7 +187,7 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           error: "Failed to update payment status",
         })
       }
-    }
+    },
   )
 
   // Search payments
@@ -224,6 +223,6 @@ export default async function paymentsRoutes(fastify: FastifyInstance) {
           error: "Failed to search payments",
         })
       }
-    }
+    },
   )
 }

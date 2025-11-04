@@ -2,7 +2,6 @@
 import { createWriteStream } from "node:fs"
 import { mkdir } from "node:fs/promises"
 import { dirname } from "node:path"
-
 import type { Logger as PinoLogger } from "pino"
 import pino from "pino"
 
@@ -46,7 +45,7 @@ class UniversalLogger implements ILogger {
       name: category,
       level,
       formatters: {
-        level: label => {
+        level: (label) => {
           return { level: label }
         },
       },
@@ -257,7 +256,7 @@ export const createPinoLoggerOptions = (category: string = "marketplace"): pino.
     name: category,
     level,
     formatters: {
-      level: label => {
+      level: (label) => {
         return { level: label }
       },
     },

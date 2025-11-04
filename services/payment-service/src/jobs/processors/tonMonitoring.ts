@@ -3,7 +3,6 @@ import logger from "@marketplace/logger"
 import { PaymentStatus } from "@marketplace/shared-types"
 import axios from "axios"
 import { Job, Worker } from "bullmq"
-
 import { db, schema } from "../../db/connection"
 
 const { payments } = schema
@@ -28,8 +27,8 @@ async function checkPendingTransactions(job: Job) {
       .where(
         and(
           inArray(payments.paymentMethod, ["ton_wallet", "ton_connect", "jetton_usdt", "jetton_usdc"]),
-          inArray(payments.status, [PaymentStatus.PENDING, PaymentStatus.PROCESSING])
-        )
+          inArray(payments.status, [PaymentStatus.PENDING, PaymentStatus.PROCESSING]),
+        ),
       )
       .limit(batchSize)
 
@@ -46,7 +45,7 @@ async function checkPendingTransactions(job: Job) {
             await paymentService.updatePaymentStatus(
               payment.id,
               PaymentStatus.COMPLETED,
-              "Transaction confirmed on TON blockchain"
+              "Transaction confirmed on TON blockchain",
             )
             confirmed++
           }
@@ -168,7 +167,7 @@ export function createTonMonitoringWorker(redisConnection: any) {
           throw new Error(`Unknown job name: ${job.name}`)
       }
     },
-    { connection: redisConnection }
+    { connection: redisConnection },
   )
 
   logger.info("🔄 TON monitoring job processors loaded")

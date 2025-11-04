@@ -67,7 +67,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
               await paymentService.updatePaymentStatus(
                 payment.id,
                 PaymentStatus.COMPLETED,
-                `TON transaction confirmed: ${transaction_hash}`
+                `TON transaction confirmed: ${transaction_hash}`,
               )
 
               fastify.log.info({ paymentId: payment.id }, "Payment confirmed via TON webhook")
@@ -87,7 +87,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           error: "Failed to process webhook",
         })
       }
-    }
+    },
   )
 
   // Stripe webhook
@@ -159,7 +159,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           error: "Failed to process webhook",
         })
       }
-    }
+    },
   )
 
   // Generic payment webhook
@@ -186,7 +186,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           metadata?: Record<string, any>
         }
       }>,
-      reply: FastifyReply
+      reply: FastifyReply,
     ) => {
       try {
         const { payment_id, status, transaction_id, reason } = request.body
@@ -207,7 +207,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           error: "Failed to process webhook",
         })
       }
-    }
+    },
   )
 
   // Refund webhook
@@ -238,7 +238,7 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
           error: "Failed to process webhook",
         })
       }
-    }
+    },
   )
 
   // Webhook health check

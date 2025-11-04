@@ -1,5 +1,4 @@
 import crypto from "crypto"
-
 import { describe, expect, it } from "vitest"
 
 // TON Service Logic Tests
@@ -23,14 +22,14 @@ describe("TON Service Logic Tests", () => {
         "EQD4FPq-PRDieyQKkizFTRtSDyucUIqrj0v_zXJmqaDp6_0t_TOOLONG", // Too long
       ]
 
-      validAddresses.forEach(address => {
+      validAddresses.forEach((address) => {
         // TON addresses are typically 48 characters and start with EQ
         expect(address.length).toBe(48)
         expect(address.startsWith("EQ")).toBe(true)
         expect(address).toMatch(/^EQ[A-Za-z0-9_-]+$/)
       })
 
-      invalidAddresses.forEach(address => {
+      invalidAddresses.forEach((address) => {
         const isValid = address.length === 48 && address.startsWith("EQ") && /^EQ[A-Za-z0-9_-]+$/.test(address)
         expect(isValid).toBe(false)
       })
@@ -118,12 +117,12 @@ describe("TON Service Logic Tests", () => {
         "", // Empty
       ]
 
-      validHashes.forEach(hash => {
+      validHashes.forEach((hash) => {
         expect(hash.length).toBe(64)
         expect(hash).toMatch(/^[a-fA-F0-9]{64}$/)
       })
 
-      invalidHashes.forEach(hash => {
+      invalidHashes.forEach((hash) => {
         const isValid = hash.length === 64 && /^[a-fA-F0-9]{64}$/.test(hash)
         expect(isValid).toBe(false)
       })
@@ -163,7 +162,7 @@ describe("TON Service Logic Tests", () => {
         "Multi\nline\ncomment",
       ]
 
-      specialComments.forEach(comment => {
+      specialComments.forEach((comment) => {
         const params = new URLSearchParams({
           text: comment,
         })
@@ -206,13 +205,13 @@ describe("TON Service Logic Tests", () => {
       const validPrices = [0.1, 1.0, 5.0, 10.0, 100.0]
       const invalidPrices = [0, -1, -5.5, Number.POSITIVE_INFINITY, Number.NaN]
 
-      validPrices.forEach(price => {
+      validPrices.forEach((price) => {
         expect(price).toBeGreaterThan(0)
         expect(price).toBeLessThan(1000) // Reasonable upper bound
         expect(Number.isFinite(price)).toBe(true)
       })
 
-      invalidPrices.forEach(price => {
+      invalidPrices.forEach((price) => {
         const isValid = price > 0 && price < 1000 && Number.isFinite(price)
         expect(isValid).toBe(false)
       })
@@ -327,12 +326,12 @@ describe("TON Service Logic Tests", () => {
 
       const invalidApiKeys = ["", "short", "key with spaces", "key-with-special-chars!@#"]
 
-      validApiKeys.forEach(key => {
+      validApiKeys.forEach((key) => {
         expect(key.length).toBeGreaterThan(10)
         expect(key).toMatch(/^[a-zA-Z0-9]+$/)
       })
 
-      invalidApiKeys.forEach(key => {
+      invalidApiKeys.forEach((key) => {
         const isValid = key.length > 10 && /^[a-zA-Z0-9]+$/.test(key)
         expect(isValid).toBe(false)
       })

@@ -1,11 +1,5 @@
 import logger from "@marketplace/logger"
-import {
-  maintenanceQueue,
-  paymentLifecycleQueue,
-  reconciliationQueue,
-  tonMonitoringQueue,
-  webhookQueue,
-} from "../index"
+import { paymentLifecycleQueue, tonMonitoringQueue } from "../index"
 
 // Schedule recurring jobs
 export const scheduleJobs = async () => {
@@ -19,7 +13,7 @@ export const scheduleJobs = async () => {
       repeat: { pattern: "*/30 * * * * *" }, // Every 30 seconds
       removeOnComplete: 10,
       removeOnFail: 5,
-    }
+    },
   )
 
   tonMonitoringQueue.add(
@@ -29,7 +23,7 @@ export const scheduleJobs = async () => {
       repeat: { pattern: "0 */5 * * * *" }, // Every 5 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   tonMonitoringQueue.add(
@@ -39,7 +33,7 @@ export const scheduleJobs = async () => {
       repeat: { pattern: "0 */10 * * * *" }, // Every 10 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   tonMonitoringQueue.add(
@@ -49,7 +43,7 @@ export const scheduleJobs = async () => {
       repeat: { pattern: "0 */5 * * * *" }, // Every 5 minutes
       removeOnComplete: 3,
       removeOnFail: 2,
-    }
+    },
   )
 
   // Payment Lifecycle Jobs
@@ -60,7 +54,7 @@ export const scheduleJobs = async () => {
       repeat: { pattern: "0 0 * * * *" }, // Every hour
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   paymentLifecycleQueue.add(
@@ -70,7 +64,7 @@ export const scheduleJobs = async () => {
       repeat: { pattern: "0 */15 * * * *" }, // Every 15 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   paymentLifecycleQueue.add(
@@ -80,7 +74,7 @@ export const scheduleJobs = async () => {
       repeat: { pattern: "0 */5 * * * *" }, // Every 5 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   paymentLifecycleQueue.add(
@@ -90,7 +84,7 @@ export const scheduleJobs = async () => {
       repeat: { pattern: "0 */2 * * * *" }, // Every 2 minutes
       removeOnComplete: 5,
       removeOnFail: 3,
-    }
+    },
   )
 
   // TODO: Webhook Processing Jobs - implement processors first

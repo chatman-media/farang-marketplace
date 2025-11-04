@@ -38,12 +38,12 @@ const start = async () => {
 
     // Setup graceful shutdown
     const signals = ["SIGTERM", "SIGINT", "SIGUSR2"]
-    signals.forEach(signal => {
+    signals.forEach((signal) => {
       process.on(signal, () => gracefulShutdown(app, signal))
     })
 
     // Handle uncaught exceptions
-    process.on("uncaughtException", error => {
+    process.on("uncaughtException", (error) => {
       app.log.error({ error }, "Uncaught Exception")
       gracefulShutdown(app, "uncaughtException")
     })

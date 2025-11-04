@@ -1,7 +1,6 @@
 import { and, desc, eq, gte, lte, sql } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
 import { PaymentStatus as SharedPaymentStatus } from "@marketplace/shared-types"
-
 import { db, schema } from "../db/connection"
 
 const { disputes, payments, refunds, transactions } = schema
@@ -208,7 +207,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         SharedPaymentStatus.FAILED,
-        `Payment failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Payment failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
       throw error
     }
@@ -282,7 +281,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         SharedPaymentStatus.FAILED,
-        `Stripe payment failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Stripe payment failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
       throw error
     }
@@ -335,7 +334,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         SharedPaymentStatus.FAILED,
-        `Stripe confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Stripe confirmation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
       throw error
     }
@@ -367,7 +366,7 @@ export class PaymentService {
       await this.updatePaymentStatus(
         paymentId,
         SharedPaymentStatus.FAILED,
-        `Confirmation monitoring failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Confirmation monitoring failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       )
     }
   }
@@ -427,7 +426,7 @@ export class PaymentService {
   async searchPayments(
     filters: PaymentSearchFilters,
     page: number = 1,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<PaymentSearchResult> {
     try {
       const offset = (page - 1) * limit
@@ -469,10 +468,7 @@ export class PaymentService {
         .offset(offset)
 
       // Get total count
-      const [{ count }] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(payments)
-        .where(whereClause)
+      const [{ count }] = await db.select({ count: sql<number>`count(*)` }).from(payments).where(whereClause)
 
       return {
         payments: paymentResults,
