@@ -8,6 +8,7 @@ describe("SegmentController", () => {
   let app: FastifyInstance
   let testSegmentId: string
   let authToken: string
+  const TEST_PREFIX = "TestController"
 
   beforeEach(async () => {
     app = await createApp()
@@ -26,9 +27,9 @@ describe("SegmentController", () => {
 
     // Clean up any existing test data
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+      `DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%')`,
     )
-    await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
+    await query(`DELETE FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%'`)
   })
 
   afterEach(async () => {
@@ -38,9 +39,9 @@ describe("SegmentController", () => {
       await query("DELETE FROM customer_segments WHERE id = $1", [testSegmentId])
     }
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+      `DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%')`,
     )
-    await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
+    await query(`DELETE FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%'`)
 
     await app.close()
   })
@@ -48,9 +49,9 @@ describe("SegmentController", () => {
   afterAll(async () => {
     // Final cleanup
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+      `DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%')`,
     )
-    await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
+    await query(`DELETE FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%'`)
   })
 
   describe("GET /api/crm/segments", () => {
@@ -123,8 +124,8 @@ describe("SegmentController", () => {
   describe("POST /api/crm/segments", () => {
     it("should create a new segment", async () => {
       const segmentData = {
-        name: "Test API Segment",
-        description: "Test segment created via API",
+        name: "TestController API Segment",
+        description: "TestController segment created via API",
         criteria: [
           {
             field: "lifetimeValue",
@@ -187,7 +188,7 @@ describe("SegmentController", () => {
 
     it("should fail with conflict error for duplicate name", async () => {
       const segmentData = {
-        name: "Test Duplicate API Segment",
+        name: "TestController Duplicate API Segment",
         criteria: [
           {
             field: "status",
@@ -236,7 +237,7 @@ describe("SegmentController", () => {
     it("should return segment by ID", async () => {
       // First create a segment
       const segmentData = {
-        name: "Test Get Segment",
+        name: "TestController Get Segment",
         criteria: [
           {
             field: "leadScore",
@@ -298,7 +299,7 @@ describe("SegmentController", () => {
     it("should update segment successfully", async () => {
       // First create a segment
       const segmentData = {
-        name: "Test Update Segment",
+        name: "TestController Update Segment",
         criteria: [
           {
             field: "status",
@@ -373,7 +374,7 @@ describe("SegmentController", () => {
     it("should delete segment successfully", async () => {
       // First create a segment
       const segmentData = {
-        name: "Test Delete Segment",
+        name: "TestController Delete Segment",
         criteria: [
           {
             field: "status",

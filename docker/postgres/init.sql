@@ -1,6 +1,5 @@
 -- Create database extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "postgis";
 
 -- Create custom types
 CREATE TYPE user_role AS ENUM ('user', 'agency', 'manager', 'admin');
@@ -63,6 +62,30 @@ CREATE TABLE customers (
     custom_fields JSONB DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Customer Segmentation Tables
+CREATE TABLE customer_segments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    criteria JSONB NOT NULL,
+    operator VARCHAR(3) DEFAULT 'AND',
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    customer_count INTEGER DEFAULT 0,
+    last_calculated_at TIMESTAMP WITH TIME ZONE,
+    created_by UUID DEFAULT '00000000-0000-0000-0000-000000000000',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE customer_segment_memberships (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+    segment_id UUID NOT NULL REFERENCES customer_segments(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(customer_id, segment_id)
 );
 
 CREATE TABLE leads (
@@ -177,6 +200,13 @@ CREATE INDEX idx_customers_email ON customers(email);
 CREATE INDEX idx_customers_user_id ON customers(user_id);
 CREATE INDEX idx_customers_status ON customers(status);
 CREATE INDEX idx_customers_created_at ON customers(created_at);
+
+-- Customer Segmentation Indexes
+CREATE INDEX idx_customer_segments_name ON customer_segments(name);
+CREATE INDEX idx_customer_segments_is_active ON customer_segments(is_active);
+CREATE INDEX idx_customer_segments_created_at ON customer_segments(created_at);
+CREATE INDEX idx_customer_segment_memberships_customer_id ON customer_segment_memberships(customer_id);
+CREATE INDEX idx_customer_segment_memberships_segment_id ON customer_segment_memberships(segment_id);
 
 CREATE INDEX idx_leads_customer_id ON leads(customer_id);
 CREATE INDEX idx_leads_status ON leads(status);

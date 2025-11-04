@@ -7,6 +7,7 @@ describe("SegmentationService", () => {
   let segmentationService: SegmentationService
   let testSegmentId: string
   let testUserId: string
+  const TEST_PREFIX = "TestService"
 
   beforeEach(async () => {
     segmentationService = new SegmentationService()
@@ -14,9 +15,9 @@ describe("SegmentationService", () => {
 
     // Clean up any existing test data
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+      `DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%')`,
     )
-    await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
+    await query(`DELETE FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%'`)
   })
 
   afterEach(async () => {
@@ -26,24 +27,24 @@ describe("SegmentationService", () => {
       await query("DELETE FROM customer_segments WHERE id = $1", [testSegmentId])
     }
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+      `DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%')`,
     )
-    await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
+    await query(`DELETE FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%'`)
   })
 
   afterAll(async () => {
     // Final cleanup and close database connection
     await query(
-      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+      `DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%')`,
     )
-    await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
+    await query(`DELETE FROM customer_segments WHERE name LIKE '${TEST_PREFIX}%'`)
     await closePool()
   })
 
   describe("createSegment", () => {
     it("should create a new segment successfully", async () => {
       const segmentData = {
-        name: "Test High Value Customers",
+        name: "TestServiceHigh Value Customers",
         description: "Test segment for high value customers",
         criteria: [
           {
@@ -74,7 +75,7 @@ describe("SegmentationService", () => {
 
     it("should fail to create segment with duplicate name", async () => {
       const segmentData = {
-        name: "Test Duplicate Segment",
+        name: "TestServiceDuplicate Segment",
         criteria: [
           {
             field: "status",
@@ -92,7 +93,7 @@ describe("SegmentationService", () => {
 
       // Try to create second segment with same name
       await expect(segmentationService.createSegment(segmentData, testUserId)).rejects.toThrow(
-        'Segment with name "Test Duplicate Segment" already exists',
+        'Segment with name "TestServiceDuplicate Segment" already exists',
       )
     })
 
@@ -111,7 +112,7 @@ describe("SegmentationService", () => {
     it("should retrieve segment by ID", async () => {
       // Create a test segment
       const segmentData = {
-        name: "Test Segment By ID",
+        name: "TestServiceSegment By ID",
         criteria: [
           {
             field: "status",
@@ -145,7 +146,7 @@ describe("SegmentationService", () => {
   describe("getSegmentByName", () => {
     it("should retrieve segment by name", async () => {
       const segmentData = {
-        name: "Test Segment By Name",
+        name: "TestServiceSegment By Name",
         criteria: [
           {
             field: "leadScore",
@@ -175,7 +176,7 @@ describe("SegmentationService", () => {
   describe("getSegments", () => {
     it("should retrieve segments with pagination", async () => {
       // Create multiple test segments
-      const segmentNames = ["Test Segment 1", "Test Segment 2", "Test Segment 3"]
+      const segmentNames = ["TestService Segment 1", "TestService Segment 2", "TestService Segment 3"]
       const createdSegments = []
 
       for (const name of segmentNames) {
@@ -213,7 +214,7 @@ describe("SegmentationService", () => {
       // Create active and inactive segments
       const activeSegment = await segmentationService.createSegment(
         {
-          name: "Test Active Segment",
+          name: "TestServiceActive Segment",
           criteria: [
             {
               field: "status",
@@ -230,7 +231,7 @@ describe("SegmentationService", () => {
 
       const inactiveSegment = await segmentationService.createSegment(
         {
-          name: "Test Inactive Segment",
+          name: "TestServiceInactive Segment",
           criteria: [
             {
               field: "status",
@@ -258,7 +259,7 @@ describe("SegmentationService", () => {
     it("should search segments by name and description", async () => {
       const segment = await segmentationService.createSegment(
         {
-          name: "Test Searchable Segment",
+          name: "TestServiceSearchable Segment",
           description: "This is a searchable test segment",
           criteria: [
             {
@@ -288,7 +289,7 @@ describe("SegmentationService", () => {
       // Create a test segment
       const segment = await segmentationService.createSegment(
         {
-          name: "Test Update Segment",
+          name: "TestServiceUpdate Segment",
           criteria: [
             {
               field: "status",
@@ -337,7 +338,7 @@ describe("SegmentationService", () => {
       // Create a test segment
       const segment = await segmentationService.createSegment(
         {
-          name: "Test Delete Segment",
+          name: "TestServiceDelete Segment",
           criteria: [
             {
               field: "status",
@@ -389,7 +390,7 @@ describe("SegmentationService", () => {
     it("should build simple query for single criteria", async () => {
       const segment = new Segment({
         id: "test-id",
-        name: "Test Segment",
+        name: "TestServiceSegment",
         criteria: [
           {
             field: "status",

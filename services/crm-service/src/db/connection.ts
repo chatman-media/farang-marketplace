@@ -30,7 +30,7 @@ function getConnection() {
 // SQL client for raw queries (backward compatibility)
 const query = async (text: string, params?: any[]) => {
   const { sql } = getConnection()
-  const result = await sql.unsafe(text, params)
+  const result = await sql.unsafe(text, params || [])
   return {
     rows: result,
     // For INSERT/UPDATE/DELETE, postgres.js returns result.count
