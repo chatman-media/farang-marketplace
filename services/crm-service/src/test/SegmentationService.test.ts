@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import { query } from "../db/connection"
+import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest"
+import { closePool, query } from "../db/connection"
 import { Segment, SegmentDataType, SegmentOperator } from "../models/Segment"
 import { SegmentationService } from "../services/SegmentationService"
 
@@ -29,6 +29,15 @@ describe("SegmentationService", () => {
       "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
     )
     await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
+  })
+
+  afterAll(async () => {
+    // Final cleanup and close database connection
+    await query(
+      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+    )
+    await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
+    await closePool()
   })
 
   describe("createSegment", () => {

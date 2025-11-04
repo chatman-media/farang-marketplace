@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest"
 import { query } from "../db/connection"
 import { createApp } from "../index"
 import { SegmentDataType, SegmentOperator } from "../models/Segment"
@@ -43,6 +43,14 @@ describe("SegmentController", () => {
     await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
 
     await app.close()
+  })
+
+  afterAll(async () => {
+    // Final cleanup
+    await query(
+      "DELETE FROM customer_segment_memberships WHERE segment_id IN (SELECT id FROM customer_segments WHERE name LIKE 'Test%')",
+    )
+    await query("DELETE FROM customer_segments WHERE name LIKE 'Test%'")
   })
 
   describe("GET /api/crm/segments", () => {

@@ -4,22 +4,26 @@ import { query } from "../db/connection"
 import { EmailService } from "../services/EmailService"
 
 // Mock transporter methods - using vi.hoisted to avoid hoisting issues
-const { mockSendMail, mockVerify } = vi.hoisted(() => ({
-  mockSendMail: vi.fn(),
-  mockVerify: vi.fn(),
-}))
-
-// Mock nodemailer
-vi.mock("nodemailer", () => {
+const { mockSendMail, mockVerify, mockCreateTransport } = vi.hoisted(() => {
+  const sendMail = vi.fn()
+  const verify = vi.fn()
   const mockTransporter = {
-    sendMail: mockSendMail,
-    verify: mockVerify,
+    sendMail,
+    verify,
   }
-  const mockCreateTransport = vi.fn().mockReturnValue(mockTransporter)
+  const createTransport = vi.fn(() => mockTransporter)
+
   return {
-    default: {
-      createTransport: mockCreateTransport,
-    },
+    mockSendMail: sendMail,
+    mockVerify: verify,
+    mockCreateTransport: createTransport,
+  }
+})
+
+// Mock nodemailer - must match "import * as nodemailer" usage
+vi.mock("nodemailer", () => {
+  return {
+    default: mockCreateTransport,
     createTransport: mockCreateTransport,
   }
 })
