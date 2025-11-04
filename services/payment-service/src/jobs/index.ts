@@ -35,20 +35,24 @@ export const webhookEvents = new QueueEvents("webhook-processing", { connection:
 export const reconciliationEvents = new QueueEvents("reconciliation", { connection: redis })
 export const maintenanceEvents = new QueueEvents("maintenance", { connection: redis })
 
-// Job processors
-import "./processors/tonMonitoring"
-import "./processors/paymentLifecycle"
+// Initialize job processors after Redis connection is ready
+import { createPaymentLifecycleWorker } from "./processors/paymentLifecycle"
+import { createTonMonitoringWorker } from "./processors/tonMonitoring"
 // TODO: Implement these processors
 // import "./processors/webhookProcessing"
 // import "./processors/reconciliation"
 // import "./processors/maintenance"
+
+// Create workers
+export const tonMonitoringWorker = createTonMonitoringWorker(redis)
+export const paymentLifecycleWorker = createPaymentLifecycleWorker(redis)
 
 // Job schedulers
 import "./schedulers/index"
 
 // Graceful shutdown
 const gracefulShutdown = async () => {
-  logger.info("🔄 Shutting down job queues...")
+  logger.info("🔄 Shutting down job queues and workers...")
 
   await Promise.all([
     tonMonitoringQueue.close(),
@@ -56,9 +60,13 @@ const gracefulShutdown = async () => {
     webhookQueue.close(),
     reconciliationQueue.close(),
     maintenanceQueue.close(),
+    tonMonitoringWorker.close(),
+    paymentLifecycleWorker.close(),
   ])
 
-  logger.info("✅ Job queues shut down successfully")
+  await redis.quit()
+
+  logger.info("✅ Job queues and workers shut down successfully")
 }
 
 process.on("SIGTERM", gracefulShutdown)

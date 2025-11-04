@@ -8,7 +8,6 @@ import { db, schema } from "../../db/connection"
 const { payments, refunds } = schema
 
 import { PaymentService } from "../../services/PaymentService"
-import { redis } from "../index"
 
 const paymentService = new PaymentService()
 
@@ -158,23 +157,26 @@ async function autoCompletePayments(job: Job) {
 }
 
 // Create worker for payment lifecycle jobs
-export const paymentLifecycleWorker = new Worker(
-  "payment-lifecycle",
-  async (job: Job) => {
-    switch (job.name) {
-      case "expire-old-payments":
-        return await expireOldPayments(job)
-      case "retry-failed-payments":
-        return await retryFailedPayments(job)
-      case "process-refunds":
-        return await processRefunds(job)
-      case "auto-complete-payments":
-        return await autoCompletePayments(job)
-      default:
-        throw new Error(`Unknown job name: ${job.name}`)
-    }
-  },
-  { connection: redis }
-)
+export function createPaymentLifecycleWorker(redisConnection: any) {
+  const worker = new Worker(
+    "payment-lifecycle",
+    async (job: Job) => {
+      switch (job.name) {
+        case "expire-old-payments":
+          return await expireOldPayments(job)
+        case "retry-failed-payments":
+          return await retryFailedPayments(job)
+        case "process-refunds":
+          return await processRefunds(job)
+        case "auto-complete-payments":
+          return await autoCompletePayments(job)
+        default:
+          throw new Error(`Unknown job name: ${job.name}`)
+      }
+    },
+    { connection: redisConnection }
+  )
 
-logger.info("🔄 Payment lifecycle job processors loaded")
+  logger.info("🔄 Payment lifecycle job processors loaded")
+  return worker
+}

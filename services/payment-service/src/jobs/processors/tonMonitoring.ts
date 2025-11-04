@@ -10,7 +10,6 @@ const { payments } = schema
 
 import { ModernTonService } from "../../services/ModernTonService"
 import { PaymentService } from "../../services/PaymentService"
-import { redis } from "../index"
 
 const tonService = new ModernTonService()
 const paymentService = new PaymentService()
@@ -152,23 +151,26 @@ async function healthCheckTonNetwork(_job: Job) {
 }
 
 // Create worker for TON monitoring jobs
-export const tonMonitoringWorker = new Worker(
-  "ton-monitoring",
-  async (job: Job) => {
-    switch (job.name) {
-      case "check-pending-transactions":
-        return await checkPendingTransactions(job)
-      case "update-exchange-rates":
-        return await updateExchangeRates(job)
-      case "sync-jetton-balances":
-        return await syncJettonBalances(job)
-      case "health-check-ton-network":
-        return await healthCheckTonNetwork(job)
-      default:
-        throw new Error(`Unknown job name: ${job.name}`)
-    }
-  },
-  { connection: redis }
-)
+export function createTonMonitoringWorker(redisConnection: any) {
+  const worker = new Worker(
+    "ton-monitoring",
+    async (job: Job) => {
+      switch (job.name) {
+        case "check-pending-transactions":
+          return await checkPendingTransactions(job)
+        case "update-exchange-rates":
+          return await updateExchangeRates(job)
+        case "sync-jetton-balances":
+          return await syncJettonBalances(job)
+        case "health-check-ton-network":
+          return await healthCheckTonNetwork(job)
+        default:
+          throw new Error(`Unknown job name: ${job.name}`)
+      }
+    },
+    { connection: redisConnection }
+  )
 
-logger.info("🔄 TON monitoring job processors loaded")
+  logger.info("🔄 TON monitoring job processors loaded")
+  return worker
+}
