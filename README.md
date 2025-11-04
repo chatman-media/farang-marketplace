@@ -177,10 +177,56 @@ This will start:
 
 PostgreSQL with Drizzle ORM. Each service manages its own database connection.
 
-Configure `DATABASE_URL` in each service's `.env` file:
+**Option 1: Local Development with Docker**
 
+Start PostgreSQL and Redis with Docker Compose:
+```bash
+docker-compose up -d postgres redis
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+
+Configure `DATABASE_URL` in each service's `.env` file:
+```
+DATABASE_URL=postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace
+```
+
+**Option 2: Cloud Database (for testing/production)**
+
+Configure cloud PostgreSQL (e.g., Neon, Supabase, AWS RDS):
+```
+DATABASE_URL=postgresql://user:password@host:5432/dbname?sslmode=require
+```
+
+**Note**: Integration tests use Neon PostgreSQL cloud database for CI/CD compatibility.
+
+### Redis (for Job Queues)
+
+Payment Service uses Redis for job queues (BullMQ) to process background tasks like:
+- Transaction monitoring
+- Exchange rate updates
+- Payment lifecycle management
+
+**Option 1: Local Development with Docker**
+```bash
+docker-compose up -d redis
+```
+
+**Option 2: Local Redis (without Docker)**
+```bash
+# macOS
+brew install redis
+brew services start redis
+
+# Ubuntu/Debian
+sudo apt-get install redis-server
+sudo systemctl start redis
+```
+
+Configure in `services/payment-service/.env`:
+```
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
 ```
 
 ### File Storage

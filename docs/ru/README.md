@@ -50,12 +50,25 @@
    bun install
    ```
 
-3. **Настройте Docker окружение**
+3. **Настройте базу данных и Redis**
 
+   **Вариант 1: Локальная разработка с Docker**
    ```bash
-   # Запустите PostgreSQL и Redis
+   # Запустите PostgreSQL и Redis через Docker
    docker-compose up -d postgres redis
    ```
+
+   **Вариант 2: Облачная БД (для тестирования/production)**
+   - PostgreSQL: Neon, Supabase, AWS RDS
+   - Redis: Redis Cloud, AWS ElastiCache
+
+   **Вариант 3: Локальный Redis без Docker** (для macOS)
+   ```bash
+   brew install redis
+   brew services start redis
+   ```
+
+   **Примечание**: Интеграционные тесты используют Neon PostgreSQL для совместимости с CI/CD.
 
 4. **Настройте переменные окружения для всех сервисов**
 
@@ -144,12 +157,16 @@ docs/ru/
 
 ### **Статистика тестов:**
 
-- **Общее количество**: 300+ тестов
+- **Общее количество**: 235 тестов
+- **CRM Service**: 229/235 тестов ✅ (97.4% успешности)
+  - Все сервисы: 100% при раздельном запуске
+  - LineService, CommunicationService, EmailService
+  - SegmentationService, TemplateService, AutomationService
+  - Используют Neon PostgreSQL для интеграционных тестов
 - **User Service**: 137 тестов (аутентификация, профили, роли)
 - **Listing Service**: 51 тест (CRUD, поиск, фильтрация)
 - **Booking Service**: 91 тест (бронирование, доступность, статусы)
 - **Payment Service**: 45 тестов (платежи TON/Stripe, webhook, возвраты)
-- **CRM Service**: В разработке
 
 ### **Запуск тестов:**
 
