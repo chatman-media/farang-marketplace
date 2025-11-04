@@ -26,7 +26,9 @@ const query = async (text: string, params?: any[]) => {
   const result = await sql.unsafe(text, params)
   return {
     rows: result,
-    rowCount: result.length,
+    // For INSERT/UPDATE/DELETE, postgres.js returns result.count
+    // For SELECT, it returns an array, so we use result.length
+    rowCount: result.count !== undefined ? result.count : result.length,
   }
 }
 
