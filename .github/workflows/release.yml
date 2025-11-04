@@ -23,6 +23,30 @@ jobs:
     name: 🔍 Validate Release
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -34,8 +58,45 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
+      - name: 🔧 Install PostgreSQL and Redis client tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client redis-tools
+
       - name: 📦 Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: ⏳ Wait for services
+        run: |
+          echo "Waiting for PostgreSQL..."
+          timeout 30 bash -c 'until pg_isready -h localhost -p 5432 -U postgres; do sleep 1; done'
+
+          echo "Waiting for Redis..."
+          timeout 30 bash -c 'until redis-cli -h localhost -p 6379 ping; do sleep 1; done'
+
+          echo "✅ All services are ready!"
+
+      - name: 🗄️ Initialize test database
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "
+            CREATE SCHEMA IF NOT EXISTS payment;
+            CREATE SCHEMA IF NOT EXISTS users;
+            CREATE SCHEMA IF NOT EXISTS listings;
+            CREATE SCHEMA IF NOT EXISTS bookings;
+          "
+
+      - name: 🏗️ Build shared packages
+        run: |
+          bun run build --filter=@marketplace/shared-types
+          bun run build --filter=@marketplace/database-schema
+          bun run build --filter=@marketplace/logger
+
+      - name: 🗄️ Setup database schema
+        run: |
+          cd packages/database-schema
+          bun run db:push 2>&1 || true
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
       - name: 🔎 Run type check
         run: bun run type-check
@@ -46,6 +107,8 @@ jobs:
       - name: 🧪 Run tests
         run: bun run test
         env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
           NODE_ENV: test
           CI: true
 
@@ -66,7 +129,13 @@ jobs:
       - name: 📦 Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: 🏗️ Build all packages
+      - name: 🏗️ Build shared packages
+        run: |
+          bun run build --filter=@marketplace/shared-types
+          bun run build --filter=@marketplace/database-schema
+          bun run build --filter=@marketplace/logger
+
+      - name: 🏗️ Build remaining packages
         run: bun run build
         env:
           NODE_ENV: production
