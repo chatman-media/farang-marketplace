@@ -146,6 +146,13 @@ jobs:
       - name: 🏗️ Build all packages
         run: bun run build
 
+      - name: 🗄️ Push database schema
+        run: |
+          cd packages/database-schema
+          bunx drizzle-kit push --force
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
       - name: 🧪 Run tests with coverage
         run: bun run test
         env:
