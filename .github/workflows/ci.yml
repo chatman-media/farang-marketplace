@@ -104,6 +104,11 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
+      - name: 🔧 Install PostgreSQL and Redis client tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client redis-tools
+
       - name: 📦 Install dependencies
         run: bun install --frozen-lockfile
 
@@ -149,7 +154,7 @@ jobs:
       - name: 🗄️ Push database schema
         run: |
           cd packages/database-schema
-          bunx drizzle-kit push --force
+          bun run db:push
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
