@@ -111,15 +111,6 @@ updates:
       - "notification-service"
 
   - package-ecosystem: "npm"
-    directory: "/services/ai-service"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 3
-    labels:
-      - "dependencies"
-      - "ai-service"
-
-  - package-ecosystem: "npm"
     directory: "/services/crm-service"
     schedule:
       interval: "weekly"
