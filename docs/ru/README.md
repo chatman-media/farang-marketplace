@@ -52,23 +52,25 @@
 
 3. **Настройте базу данных и Redis**
 
-   **Вариант 1: Локальная разработка с Docker**
+   **Вариант 1: Локальная разработка с Docker** ⭐ Рекомендуется
+
+   **Важно**: Сначала остановите локальный PostgreSQL, если он запущен:
    ```bash
-   # Запустите PostgreSQL и Redis через Docker
+   brew services stop postgresql@14  # macOS
+   # или
+   sudo systemctl stop postgresql    # Linux
+   ```
+
+   Запустите PostgreSQL и Redis через Docker:
+   ```bash
    docker-compose up -d postgres redis
    ```
 
-   **Вариант 2: Облачная БД (для тестирования/production)**
+   **Вариант 2: Облачная БД** (для production)
    - PostgreSQL: Neon, Supabase, AWS RDS
    - Redis: Redis Cloud, AWS ElastiCache
 
-   **Вариант 3: Локальный Redis без Docker** (для macOS)
-   ```bash
-   brew install redis
-   brew services start redis
-   ```
-
-   **Примечание**: Интеграционные тесты используют Neon PostgreSQL для совместимости с CI/CD.
+   **Примечание**: Все `.env` и `.env.test` файлы уже настроены на Docker PostgreSQL.
 
 4. **Настройте переменные окружения для всех сервисов**
 

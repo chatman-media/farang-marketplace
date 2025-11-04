@@ -177,7 +177,14 @@ This will start:
 
 PostgreSQL with Drizzle ORM. Each service manages its own database connection.
 
-**Option 1: Local Development with Docker**
+**Option 1: Local Development with Docker** ⭐ Recommended
+
+**Important**: Stop any local PostgreSQL instance first to avoid port conflicts:
+```bash
+brew services stop postgresql@14  # macOS
+# or
+sudo systemctl stop postgresql    # Linux
+```
 
 Start PostgreSQL and Redis with Docker Compose:
 ```bash
@@ -188,6 +195,8 @@ Configure `DATABASE_URL` in each service's `.env` file:
 ```
 DATABASE_URL=postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace
 ```
+
+All `.env.test` files are already configured for Docker PostgreSQL.
 
 **Option 2: Cloud Database (for testing/production)**
 
