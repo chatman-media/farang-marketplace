@@ -30,7 +30,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15-alpine
+        image: postgres:16
         env:
           POSTGRES_DB: marketplace_test
           POSTGRES_USER: marketplace_user
@@ -96,8 +96,6 @@ jobs:
             CREATE SCHEMA IF NOT EXISTS users;
             CREATE SCHEMA IF NOT EXISTS listings;
             CREATE SCHEMA IF NOT EXISTS bookings;
-            CREATE SCHEMA IF NOT EXISTS notifications;
-            CREATE SCHEMA IF NOT EXISTS ai;
             CREATE SCHEMA IF NOT EXISTS crm;
             CREATE SCHEMA IF NOT EXISTS agency;
           "
@@ -135,7 +133,7 @@ jobs:
         if: failure()
         run: |
           echo "=== PostgreSQL Logs ==="
-          docker logs $(docker ps -q --filter ancestor=postgres:15-alpine) || true
+          docker logs $(docker ps -q --filter ancestor=postgres:16) || true
 
           echo "=== Redis Status ==="
           redis-cli -h localhost -p 6379 INFO || true
@@ -151,7 +149,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15-alpine
+        image: postgres:16
         env:
           POSTGRES_DB: marketplace_e2e
           POSTGRES_USER: marketplace_user
