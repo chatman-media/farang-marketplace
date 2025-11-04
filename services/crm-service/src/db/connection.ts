@@ -2,7 +2,10 @@ import * as schema from "@marketplace/database-schema"
 import { drizzle, postgres } from "@marketplace/database-schema"
 import dotenv from "dotenv"
 
-dotenv.config()
+// Only load .env if not in test mode (tests handle their own env loading)
+if (process.env.NODE_ENV !== "test") {
+  dotenv.config()
+}
 
 const connectionString = process.env.DATABASE_URL
 

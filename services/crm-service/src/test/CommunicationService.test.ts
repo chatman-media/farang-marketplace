@@ -2,10 +2,6 @@ import { CommunicationChannel } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { query } from "../db/connection"
 import { CommunicationService, UnifiedSendRequest } from "../services/CommunicationService"
-import { EmailService } from "../services/EmailService"
-import { LineService } from "../services/LineService"
-import { TelegramService } from "../services/TelegramService"
-import { WhatsAppService } from "../services/WhatsAppService"
 
 // Mock service methods
 const mockEmailSend = vi.fn()
