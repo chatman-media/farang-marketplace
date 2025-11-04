@@ -57,11 +57,6 @@ flags:
       - services/booking-service/
     carryforward: true
 
-  notification-service:
-    paths:
-      - services/notification-service/
-    carryforward: true
-
   crm-service:
     paths:
       - services/crm-service/
@@ -70,6 +65,16 @@ flags:
   agency-service:
     paths:
       - services/agency-service/
+    carryforward: true
+
+  storage-service:
+    paths:
+      - services/storage-service/
+    carryforward: true
+
+  api-gateway:
+    paths:
+      - services/api-gateway/
     carryforward: true
 
   # Frontend Apps

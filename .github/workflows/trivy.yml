@@ -100,12 +100,12 @@ jobs:
     strategy:
       matrix:
         image:
-          - 'postgres:15-alpine'
+          - 'postgres:16'
           - 'redis:7-alpine'
           - 'minio/minio:latest'
         include:
-          - image: 'postgres:15-alpine'
-            name: 'postgres-15-alpine'
+          - image: 'postgres:16'
+            name: 'postgres-16'
           - image: 'redis:7-alpine'
             name: 'redis-7-alpine'
           - image: 'minio/minio:latest'
