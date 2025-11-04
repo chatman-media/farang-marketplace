@@ -62,11 +62,6 @@ flags:
       - services/notification-service/
     carryforward: true
 
-  ai-service:
-    paths:
-      - services/ai-service/
-    carryforward: true
-
   crm-service:
     paths:
       - services/crm-service/
