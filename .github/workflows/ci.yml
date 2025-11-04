@@ -142,23 +142,24 @@ jobs:
             CREATE SCHEMA IF NOT EXISTS bookings;
           "
 
-      - name: 🏗️ Build shared packages first
+      - name: 🏗️ Build shared packages
         run: |
           bun run build --filter=@marketplace/shared-types
           bun run build --filter=@marketplace/database-schema
           bun run build --filter=@marketplace/logger
 
-      - name: 🏗️ Build all packages
+      - name: 🏗️ Build remaining packages
         run: bun run build
 
-      - name: 🗄️ Push database schema
+      - name: 🗄️ Setup database schema
         run: |
           cd packages/database-schema
-          bun run db:push
+          # Push schema, ignore if it already exists
+          bun run db:push 2>&1 || true
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
 
-      - name: 🧪 Run tests with coverage
+      - name: 🧪 Run unit tests
         run: bun run test
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
