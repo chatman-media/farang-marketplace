@@ -14,8 +14,8 @@ export interface UploadOptions {
   addRandomSuffix?: boolean;
   /** Content type override */
   contentType?: string;
-  /** Access level */
-  access?: 'public' | 'private';
+  /** Access level (only 'public' is supported by Vercel Blob) */
+  access?: 'public';
 }
 
 export interface UploadResult {
@@ -23,10 +23,10 @@ export interface UploadResult {
   url: string;
   /** File path in storage */
   pathname: string;
-  /** File size in bytes */
-  size: number;
-  /** Upload timestamp */
-  uploadedAt: Date;
+  /** Content type of the blob */
+  contentType: string;
+  /** Content disposition header value */
+  contentDisposition: string;
 }
 
 export interface ListOptions {
@@ -88,8 +88,8 @@ export class StorageService {
     return {
       url: blob.url,
       pathname: blob.pathname,
-      size: blob.size,
-      uploadedAt: blob.uploadedAt,
+      contentType: blob.contentType,
+      contentDisposition: blob.contentDisposition,
     };
   }
 
@@ -206,7 +206,7 @@ export class StorageService {
   async copy(
     sourceUrl: string,
     destinationPath: string,
-    options: { access?: 'public' | 'private' } = {}
+    options: { access?: 'public' } = {}
   ): Promise<UploadResult> {
     const blob = await copy(sourceUrl, destinationPath, {
       access: options.access || 'public',
@@ -215,8 +215,8 @@ export class StorageService {
     return {
       url: blob.url,
       pathname: blob.pathname,
-      size: blob.size,
-      uploadedAt: blob.uploadedAt,
+      contentType: blob.contentType,
+      contentDisposition: blob.contentDisposition,
     };
   }
 
