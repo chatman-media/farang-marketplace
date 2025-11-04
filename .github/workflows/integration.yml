@@ -1,6 +1,6 @@
 # 🔄 Integration Tests
 # Comprehensive testing with full environment stack
-# Tests all services with PostgreSQL, Redis, and MinIO
+# Tests all services with PostgreSQL and Redis
 
 name: 🔄 Integration Tests
 
@@ -18,9 +18,6 @@ env:
   BUN_VERSION: '1.2.1'
   DATABASE_URL: 'postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test'
   REDIS_URL: 'redis://localhost:6379'
-  MINIO_ENDPOINT: 'http://localhost:9000'
-  MINIO_ACCESS_KEY: 'minioadmin'
-  MINIO_SECRET_KEY: 'minioadmin123'
   JWT_SECRET: 'test-jwt-secret-for-ci'
   NODE_ENV: 'test'
   CI: 'true'
@@ -57,19 +54,6 @@ jobs:
         ports:
           - 6379:6379
 
-      minio:
-        image: minio/minio:latest
-        env:
-          MINIO_ROOT_USER: minioadmin
-          MINIO_ROOT_PASSWORD: minioadmin123
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/live"
-          --health-interval 30s
-          --health-timeout 20s
-          --health-retries 3
-        ports:
-          - 9000:9000
-
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -90,9 +74,6 @@ jobs:
           cat >> .env.test << EOF
           DATABASE_URL=${{ env.DATABASE_URL }}
           REDIS_URL=${{ env.REDIS_URL }}
-          MINIO_ENDPOINT=${{ env.MINIO_ENDPOINT }}
-          MINIO_ACCESS_KEY=${{ env.MINIO_ACCESS_KEY }}
-          MINIO_SECRET_KEY=${{ env.MINIO_SECRET_KEY }}
           JWT_SECRET=${{ env.JWT_SECRET }}
           NODE_ENV=test
           EOF
@@ -104,9 +85,6 @@ jobs:
 
           echo "Waiting for Redis..."
           timeout 30 bash -c 'until redis-cli -h localhost -p 6379 ping; do sleep 1; done'
-
-          echo "Waiting for MinIO..."
-          timeout 60 bash -c 'until curl -f http://localhost:9000/minio/health/live; do sleep 2; done'
 
           echo "✅ All services are ready!"
 
@@ -136,31 +114,11 @@ jobs:
           cd packages/database-schema
           bun run db:push || echo "Migrations completed"
 
-      - name: 🪣 Initialize MinIO buckets
-        run: |
-          # Install MinIO client
-          wget -q https://dl.min.io/client/mc/release/linux-amd64/mc
-          chmod +x mc
-
-          # Configure MinIO client
-          ./mc alias set myminio http://localhost:9000 minioadmin minioadmin123
-
-          # Create buckets
-          ./mc mb myminio/marketplace-images || true
-          ./mc mb myminio/marketplace-documents || true
-          ./mc mb myminio/test-uploads || true
-
-          # Set public policy for test buckets
-          ./mc anonymous set download myminio/marketplace-images
-
-          echo "✅ MinIO buckets initialized"
-
       - name: 🧪 Run integration tests
         run: bun run test
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           REDIS_URL: ${{ env.REDIS_URL }}
-          MINIO_ENDPOINT: ${{ env.MINIO_ENDPOINT }}
           NODE_ENV: test
 
       - name: 📊 Generate test report
@@ -172,7 +130,6 @@ jobs:
           echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| PostgreSQL | ✅ Running |" >> $GITHUB_STEP_SUMMARY
           echo "| Redis | ✅ Running |" >> $GITHUB_STEP_SUMMARY
-          echo "| MinIO | ✅ Running |" >> $GITHUB_STEP_SUMMARY
 
       - name: 🐛 Debug on failure
         if: failure()
@@ -183,11 +140,8 @@ jobs:
           echo "=== Redis Status ==="
           redis-cli -h localhost -p 6379 INFO || true
 
-          echo "=== MinIO Status ==="
-          curl -v http://localhost:9000/minio/health/live || true
-
           echo "=== Environment Variables ==="
-          env | grep -E "DATABASE|REDIS|MINIO" | sort
+          env | grep -E "DATABASE|REDIS" | sort
 
   e2e-tests:
     name: 🌐 E2E Tests
