@@ -66,22 +66,29 @@ describe("ProfileController Integration Tests", () => {
       },
     })
 
-    // Verify registrations succeeded
+    // Verify registrations succeeded with detailed logging
+    console.log("📝 User registration status:", userRegisterResponse.statusCode)
+    console.log("📝 Admin registration status:", adminRegisterResponse.statusCode)
+
     if (userRegisterResponse.statusCode !== 201) {
       console.error("❌ User registration failed:", {
         status: userRegisterResponse.statusCode,
         body: userRegisterResponse.body,
+        email: testEmail,
       })
     }
     if (adminRegisterResponse.statusCode !== 201) {
       console.error("❌ Admin registration failed:", {
         status: adminRegisterResponse.statusCode,
         body: adminRegisterResponse.body,
+        email: adminEmail,
       })
     }
 
     expect(userRegisterResponse.statusCode).toBe(201)
     expect(adminRegisterResponse.statusCode).toBe(201)
+
+    console.log("✅ Both users registered successfully")
 
     // Update admin role via database
     await db.execute(sql`UPDATE users SET role = 'admin', is_verified = true WHERE email = ${adminEmail}`)
@@ -105,20 +112,42 @@ describe("ProfileController Integration Tests", () => {
       },
     })
 
-    // Log failure details if login fails
+    // Log login attempts with detailed information
+    console.log("🔐 User login status:", userLoginResponse.statusCode)
+    console.log("🔐 Admin login status:", adminLoginResponse.statusCode)
+    console.log("🔐 Using DATABASE_URL:", process.env.DATABASE_URL?.replace(/:[^:]*@/, ":***@"))
+
     if (userLoginResponse.statusCode !== 200) {
       console.error("❌ User login failed:", {
         status: userLoginResponse.statusCode,
         body: userLoginResponse.body,
         email: testEmail,
+        password: "password123",
       })
+      // Try to query database to see if user exists
+      try {
+        const db = getTestConnection()
+        const userCheck = await db.execute(sql`SELECT email, role, is_active FROM users WHERE email = ${testEmail}`)
+        console.log("📊 User in database:", userCheck)
+      } catch (e) {
+        console.error("Failed to check user in database:", e)
+      }
     }
     if (adminLoginResponse.statusCode !== 200) {
       console.error("❌ Admin login failed:", {
         status: adminLoginResponse.statusCode,
         body: adminLoginResponse.body,
         email: adminEmail,
+        password: "password123",
       })
+      // Try to query database to see if admin exists
+      try {
+        const db = getTestConnection()
+        const adminCheck = await db.execute(sql`SELECT email, role, is_active FROM users WHERE email = ${adminEmail}`)
+        console.log("📊 Admin in database:", adminCheck)
+      } catch (e) {
+        console.error("Failed to check admin in database:", e)
+      }
     }
 
     expect(userLoginResponse.statusCode).toBe(200)
