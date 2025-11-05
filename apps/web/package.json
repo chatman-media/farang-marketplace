@@ -11,7 +11,7 @@
     "build:server": "vite build --ssr src/entry-server.tsx",
     "preview": "node server.js",
     "serve": "node server.js",
-    "test": "vitest run",
+    "test": "vitest run --no-coverage --reporter=verbose",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "lint": "biome check src/",
