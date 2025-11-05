@@ -5,10 +5,6 @@
 [![Coverage](https://github.com/chatman-media/farang-marketplace/workflows/%F0%9F%A7%AA%20Coverage%20Report/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
 [![codecov](https://codecov.io/gh/chatman-media/farang-marketplace/branch/main/graph/badge.svg?token=YOUR_TOKEN_HERE)](https://codecov.io/gh/chatman-media/farang-marketplace)
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Bun](https://img.shields.io/badge/Bun-1.2.0+-black?logo=bun&logoColor=white)](https://bun.sh/)
-
 An intelligent marketplace platform designed for Thailand, connecting locals and
 foreigners to buy, sell, rent, and offer services. Supporting English and Thai
 as primary languages across web and Telegram platforms.
