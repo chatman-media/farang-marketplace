@@ -55,8 +55,8 @@ describe("Simple Database Schema Tests", () => {
         email: "simple-test@example.com",
         firstName: "John",
         lastName: "Doe",
-        phone: "+66123456789",
-        telegramId: "123456789",
+        phone: "+66666666666",
+        telegramId: "666666666",
         telegramUsername: "johndoe",
         isClient: true,
         hasRentedBefore: false,
@@ -78,8 +78,8 @@ describe("Simple Database Schema Tests", () => {
     it("should enforce unique constraints", async () => {
       const userData = {
         email: "simple-test1@example.com",
-        phone: "+66123456789",
-        telegramId: "123456789",
+        phone: "+66777777777",
+        telegramId: "777777777",
       }
 
       // First insert should succeed
@@ -93,8 +93,8 @@ describe("Simple Database Schema Tests", () => {
           .insert(users)
           .values({
             email: "simple-test2@example.com",
-            phone: "+66123456789", // duplicate
-            telegramId: "987654321",
+            phone: "+66777777777", // duplicate
+            telegramId: "888888888",
           })
           .returning(),
       ).rejects.toThrow()
@@ -143,7 +143,7 @@ describe("Simple Database Schema Tests", () => {
         year: 2023,
         color: "White",
         power: "150cc",
-        oldVehicleNumber: "SCT001",
+        oldVehicleNumber: "SCT003",
         sticker: "Rental sticker",
         rentalSticker: "Company rental",
         gpsTrackerId: "ST123456",
@@ -159,7 +159,7 @@ describe("Simple Database Schema Tests", () => {
       expect(vehicle).toBeDefined()
       expect(vehicle.model).toBe("PCX 150")
       expect(vehicle.power).toBe("150cc")
-      expect(vehicle.oldVehicleNumber).toBe("SCT001")
+      expect(vehicle.oldVehicleNumber).toBe("SCT003")
       expect(vehicle.engineSize).toBe("150.00")
       expect(vehicle.fuelType).toBe("gasoline")
       expect(vehicle.transmission).toBe("automatic")
@@ -236,7 +236,7 @@ describe("Simple Database Schema Tests", () => {
         .insert(users)
         .values({
           email: "simple-chat-customer@example.com",
-          telegramId: "123456789",
+          telegramId: "999999999",
           telegramUsername: "johndoe",
         })
         .returning()

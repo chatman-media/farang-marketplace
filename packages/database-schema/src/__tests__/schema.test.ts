@@ -58,8 +58,8 @@ describe("Database Schema Tests", () => {
         email: "test@example.com",
         firstName: "John",
         lastName: "Doe",
-        phone: "+66123456789",
-        telegramId: "123456789",
+        phone: "+66111111111",
+        telegramId: "111111111",
         telegramUsername: "johndoe",
         isClient: true,
         hasRentedBefore: false,
@@ -83,8 +83,8 @@ describe("Database Schema Tests", () => {
     it("should enforce unique constraints on phone and telegram_id", async () => {
       const userData = {
         email: "test1@example.com",
-        phone: "+66123456789",
-        telegramId: "123456789",
+        phone: "+66222222222",
+        telegramId: "222222222",
       }
 
       // First insert should succeed
@@ -98,8 +98,8 @@ describe("Database Schema Tests", () => {
           .insert(users)
           .values({
             email: "test2@example.com",
-            phone: "+66123456789", // duplicate
-            telegramId: "987654321",
+            phone: "+66222222222", // duplicate
+            telegramId: "333333333",
           })
           .returning(),
       ).rejects.toThrow()
@@ -110,8 +110,8 @@ describe("Database Schema Tests", () => {
           .insert(users)
           .values({
             email: "test3@example.com",
-            phone: "+66987654321",
-            telegramId: "123456789", // duplicate
+            phone: "+66444444444",
+            telegramId: "222222222", // duplicate
           })
           .returning(),
       ).rejects.toThrow()
@@ -162,7 +162,7 @@ describe("Database Schema Tests", () => {
         year: 2023,
         color: "White",
         power: "150cc",
-        oldVehicleNumber: "SCT001",
+        oldVehicleNumber: "SCT002",
         sticker: "Blue rental sticker",
         rentalSticker: "Company logo sticker",
         gpsTrackerId: "ST123456",
@@ -177,7 +177,7 @@ describe("Database Schema Tests", () => {
       expect(vehicle).toBeDefined()
       expect(vehicle.model).toBe("PCX 150")
       expect(vehicle.power).toBe("150cc")
-      expect(vehicle.oldVehicleNumber).toBe("SCT001")
+      expect(vehicle.oldVehicleNumber).toBe("SCT002")
       expect(vehicle.gpsTrackerId).toBe("ST123456")
       expect(vehicle.engineSize).toBe("150.00")
       expect(vehicle.fuelType).toBe("gasoline")
@@ -357,7 +357,7 @@ describe("Database Schema Tests", () => {
           email: "rental-customer@example.com",
           firstName: "John",
           lastName: "Customer",
-          phone: "+66123456789",
+          phone: "+66555555555",
         })
         .returning()
 
