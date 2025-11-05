@@ -3,6 +3,8 @@ import { config } from "dotenv"
 import Fastify from "fastify"
 import { z } from "zod"
 import { CronService } from "./services/CronService"
+import { TelegramService } from "./services/TelegramService"
+import { setTelegramService } from "./routes/webhooks"
 
 // Load environment variables
 config()
@@ -14,6 +16,8 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default("*"),
   JWT_SECRET: z.string().default("dev-jwt-secret-change-in-production"),
   DATABASE_URL: z.string().default("postgresql://user:password@localhost:5432/marketplace_crm"),
+  TELEGRAM_BOT_TOKEN: z.string().optional(),
+  TELEGRAM_WEBHOOK_URL: z.string().optional(),
 })
 
 const env = envSchema.parse(process.env)
@@ -63,6 +67,7 @@ const createApp = async () => {
 
   // Register routes
   await app.register(import("./routes/crm"), { prefix: "/api/crm" })
+  await app.register(import("./routes/webhooks"), { prefix: "/webhook" })
 
   // Global error handler
   app.setErrorHandler(async (error, _request, reply) => {
@@ -99,11 +104,18 @@ const createApp = async () => {
 // Graceful shutdown
 let appInstance: any = null
 let cronService: CronService | null = null
+let telegramService: TelegramService | null = null
 
 const gracefulShutdown = async (signal: string) => {
   logger.info(`${signal} received, shutting down gracefully`)
   try {
-    // Stop cron service first
+    // Stop Telegram bot first
+    if (telegramService) {
+      await telegramService.stopBot()
+      logger.info("Telegram bot stopped")
+    }
+
+    // Stop cron service
     if (cronService) {
       await cronService.stop()
     }
@@ -136,6 +148,26 @@ const startApp = async () => {
   logger.info(`📊 Environment: ${env.NODE_ENV}`)
   logger.info(`🔗 API Base URL: http://localhost:${env.PORT}/api/crm`)
   logger.info(`💚 Health check: http://localhost:${env.PORT}/health`)
+
+  // Initialize and start Telegram bot
+  if (env.NODE_ENV !== "test" && env.TELEGRAM_BOT_TOKEN) {
+    try {
+      telegramService = new TelegramService({
+        botToken: env.TELEGRAM_BOT_TOKEN,
+        webhookUrl: env.TELEGRAM_WEBHOOK_URL,
+      })
+      setTelegramService(telegramService)
+      await telegramService.startBot()
+
+      if (env.TELEGRAM_WEBHOOK_URL) {
+        logger.info(`📱 Telegram bot started with webhook: ${env.TELEGRAM_WEBHOOK_URL}`)
+      } else {
+        logger.info(`📱 Telegram bot started with polling mode`)
+      }
+    } catch (error) {
+      logger.error("Failed to start Telegram bot:", error)
+    }
+  }
 
   // Start cron service for background tasks
   if (env.NODE_ENV !== "test") {

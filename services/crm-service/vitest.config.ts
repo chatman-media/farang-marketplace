@@ -17,5 +17,27 @@ export default defineConfig({
         singleThread: true,
       },
     },
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov"],
+      reportsDirectory: "./coverage",
+      exclude: [
+        "node_modules/",
+        "dist/",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/test/**",
+        "**/*.config.ts",
+        "**/migrations/**",
+        "**/drizzle/**",
+        "**/db/**",
+      ],
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
+      },
+    },
   },
 })

@@ -1,5 +1,10 @@
 # Farang Marketplace
 
+[![codecov](https://codecov.io/gh/chatman-media/farang-marketplace/branch/main/graph/badge.svg?token=YOUR_TOKEN_HERE)](https://codecov.io/gh/chatman-media/farang-marketplace)
+[![CI](https://github.com/chatman-media/farang-marketplace/workflows/CI/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
+[![Tests](https://github.com/chatman-media/farang-marketplace/workflows/Tests/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
+[![Coverage](https://github.com/chatman-media/farang-marketplace/workflows/%F0%9F%A7%AA%20Coverage%20Report/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
+
 An intelligent marketplace platform designed for Thailand, connecting locals and
 foreigners to buy, sell, rent, and offer services. Supporting English and Thai
 as primary languages across web and Telegram platforms.
