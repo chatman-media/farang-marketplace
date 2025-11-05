@@ -3,25 +3,39 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { query } from "../db/connection"
 import { TelegramService } from "../services/TelegramService"
 
-// Mock telegraf
-const mockSendMessage = vi.fn()
-const mockSetWebhook = vi.fn()
-const mockLaunch = vi.fn()
-const mockStop = vi.fn()
-const mockOn = vi.fn().mockReturnThis()
-const mockCatch = vi.fn().mockReturnThis()
+// Mock telegraf - using vi.hoisted to define mocks before vi.mock
+const { mockSendMessage, mockSetWebhook, mockLaunch, mockStop, mockOn, mockCatch, MockTelegraf } = vi.hoisted(() => {
+  const sendMessage = vi.fn()
+  const setWebhook = vi.fn()
+  const launch = vi.fn()
+  const stop = vi.fn()
+  const on = vi.fn().mockReturnThis()
+  const catchFn = vi.fn().mockReturnThis()
+
+  class Telegraf {
+    telegram = {
+      sendMessage,
+      setWebhook,
+    }
+    on = on
+    catch = catchFn
+    launch = launch
+    stop = stop
+  }
+
+  return {
+    mockSendMessage: sendMessage,
+    mockSetWebhook: setWebhook,
+    mockLaunch: launch,
+    mockStop: stop,
+    mockOn: on,
+    mockCatch: catchFn,
+    MockTelegraf: Telegraf,
+  }
+})
 
 vi.mock("telegraf", () => ({
-  Telegraf: vi.fn(() => ({
-    telegram: {
-      sendMessage: mockSendMessage,
-      setWebhook: mockSetWebhook,
-    },
-    on: mockOn,
-    catch: mockCatch,
-    launch: mockLaunch,
-    stop: mockStop,
-  })),
+  Telegraf: MockTelegraf,
 }))
 
 // Mock database connection
