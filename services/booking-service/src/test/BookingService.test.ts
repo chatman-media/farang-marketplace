@@ -1,4 +1,3 @@
-// biome-ignore lint/suspicious/noThenProperty: Mocking database query builder requires then property
 import { BookingStatus } from "@marketplace/shared-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { BookingService } from "../services/BookingService"

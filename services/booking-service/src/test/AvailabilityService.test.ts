@@ -1,4 +1,3 @@
-// biome-ignore lint/suspicious/noThenProperty: Mocking database query builder requires then property
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { AvailabilityService } from "../services/AvailabilityService"
 
