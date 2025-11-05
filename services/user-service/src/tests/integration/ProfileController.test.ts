@@ -94,6 +94,22 @@ describe("ProfileController Integration Tests", () => {
       },
     })
 
+    // Log failure details if login fails
+    if (userLoginResponse.statusCode !== 200) {
+      console.error("❌ User login failed:", {
+        status: userLoginResponse.statusCode,
+        body: userLoginResponse.body,
+        email: testEmail,
+      })
+    }
+    if (adminLoginResponse.statusCode !== 200) {
+      console.error("❌ Admin login failed:", {
+        status: adminLoginResponse.statusCode,
+        body: adminLoginResponse.body,
+        email: adminEmail,
+      })
+    }
+
     expect(userLoginResponse.statusCode).toBe(200)
     expect(adminLoginResponse.statusCode).toBe(200)
 
