@@ -348,8 +348,7 @@ export async function cleanupTestDatabase(): Promise<void> {
   try {
     // Ensure DATABASE_URL is set (should be set in setup.ts but fallback just in case)
     const connectionString =
-      process.env.DATABASE_URL ||
-      "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace"
+      process.env.DATABASE_URL || "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace"
 
     if (!connectionString || connectionString.includes("undefined")) {
       logger.warn("Skipping test database cleanup - DATABASE_URL not properly configured")

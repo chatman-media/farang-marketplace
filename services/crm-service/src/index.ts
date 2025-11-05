@@ -2,9 +2,9 @@ import logger, { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify from "fastify"
 import { z } from "zod"
+import { setTelegramService } from "./routes/webhooks"
 import { CronService } from "./services/CronService"
 import { TelegramService } from "./services/TelegramService"
-import { setTelegramService } from "./routes/webhooks"
 
 // Load environment variables
 config()
@@ -162,7 +162,7 @@ const startApp = async () => {
       if (env.TELEGRAM_WEBHOOK_URL) {
         logger.info(`📱 Telegram bot started with webhook: ${env.TELEGRAM_WEBHOOK_URL}`)
       } else {
-        logger.info(`📱 Telegram bot started with polling mode`)
+        logger.info("📱 Telegram bot started with polling mode")
       }
     } catch (error) {
       logger.error("Failed to start Telegram bot:", error)

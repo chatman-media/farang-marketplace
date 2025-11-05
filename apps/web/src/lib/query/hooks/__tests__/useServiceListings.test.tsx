@@ -19,7 +19,6 @@ vi.mock("../../../api", () => ({
   },
 }))
 
-// @ts-ignore - vi.mocked may not be available in all vitest versions
 const mockServiceListingsService = serviceListingsService as any
 
 // Mock data that matches our API response

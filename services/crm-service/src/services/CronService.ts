@@ -403,9 +403,7 @@ export class CronService {
       //   WHERE created_at < NOW() - INTERVAL '3 months'
       // `)
 
-      logger.info(
-        `🧹 Cleaned up ${oldCommsResult.rowCount} old communications`,
-      )
+      logger.info(`🧹 Cleaned up ${oldCommsResult.rowCount} old communications`)
     } catch (error) {
       logger.error("Failed to cleanup old data:", error)
     }

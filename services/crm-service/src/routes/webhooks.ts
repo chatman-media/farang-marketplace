@@ -1,5 +1,5 @@
-import { FastifyInstance, FastifyPluginAsync } from "fastify"
 import logger from "@marketplace/logger"
+import { FastifyInstance, FastifyPluginAsync } from "fastify"
 
 // This will be set by the main app
 let telegramService: any = null

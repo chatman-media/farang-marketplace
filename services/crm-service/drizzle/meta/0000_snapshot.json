@@ -100,9 +100,7 @@
         "agencies_email_unique": {
           "name": "agencies_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -410,12 +408,8 @@
           "name": "availability_conflicts_booking_id_bookings_id_fk",
           "tableFrom": "availability_conflicts",
           "tableTo": "bookings",
-          "columnsFrom": [
-            "booking_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["booking_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -519,12 +513,8 @@
           "name": "booking_status_history_booking_id_bookings_id_fk",
           "tableFrom": "booking_status_history",
           "tableTo": "bookings",
-          "columnsFrom": [
-            "booking_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["booking_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1571,10 +1561,7 @@
         "customer_segment_memberships_customer_id_segment_id_unique": {
           "name": "customer_segment_memberships_customer_id_segment_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "customer_id",
-            "segment_id"
-          ]
+          "columns": ["customer_id", "segment_id"]
         }
       },
       "policies": {},
@@ -1829,9 +1816,7 @@
         "customers_user_id_unique": {
           "name": "customers_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -1984,12 +1969,8 @@
           "name": "disputes_booking_id_bookings_id_fk",
           "tableFrom": "disputes",
           "tableTo": "bookings",
-          "columnsFrom": [
-            "booking_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["booking_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2509,9 +2490,7 @@
         "listings_slug_unique": {
           "name": "listings_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -2608,9 +2587,7 @@
         "message_templates_name_unique": {
           "name": "message_templates_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -2649,9 +2626,7 @@
         "migrations_name_unique": {
           "name": "migrations_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -3009,12 +2984,8 @@
           "name": "payment_methods_user_id_users_id_fk",
           "tableFrom": "payment_methods",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3269,12 +3240,8 @@
           "name": "payments_listing_id_listings_id_fk",
           "tableFrom": "payments",
           "tableTo": "listings",
-          "columnsFrom": [
-            "listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3282,12 +3249,8 @@
           "name": "payments_booking_id_bookings_id_fk",
           "tableFrom": "payments",
           "tableTo": "bookings",
-          "columnsFrom": [
-            "booking_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["booking_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3295,12 +3258,8 @@
           "name": "payments_user_id_users_id_fk",
           "tableFrom": "payments",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3839,12 +3798,8 @@
           "name": "products_listing_id_listings_id_fk",
           "tableFrom": "products",
           "tableTo": "listings",
-          "columnsFrom": [
-            "listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4030,12 +3985,8 @@
           "name": "refunds_payment_id_payments_id_fk",
           "tableFrom": "refunds",
           "tableTo": "payments",
-          "columnsFrom": [
-            "payment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["payment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -4043,12 +3994,8 @@
           "name": "refunds_transaction_id_transactions_id_fk",
           "tableFrom": "refunds",
           "tableTo": "transactions",
-          "columnsFrom": [
-            "transaction_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["transaction_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -4204,12 +4151,8 @@
           "name": "search_queries_user_id_users_id_fk",
           "tableFrom": "search_queries",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -4469,12 +4412,8 @@
           "name": "service_bookings_booking_id_bookings_id_fk",
           "tableFrom": "service_bookings",
           "tableTo": "bookings",
-          "columnsFrom": [
-            "booking_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["booking_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4677,9 +4616,7 @@
         "service_providers_user_id_unique": {
           "name": "service_providers_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -4823,12 +4760,8 @@
           "name": "training_jobs_model_id_ml_models_id_fk",
           "tableFrom": "training_jobs",
           "tableTo": "ml_models",
-          "columnsFrom": [
-            "model_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["model_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5045,12 +4978,8 @@
           "name": "transactions_payment_id_payments_id_fk",
           "tableFrom": "transactions",
           "tableTo": "payments",
-          "columnsFrom": [
-            "payment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["payment_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5058,12 +4987,8 @@
           "name": "transactions_from_user_id_users_id_fk",
           "tableFrom": "transactions",
           "tableTo": "users",
-          "columnsFrom": [
-            "from_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["from_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -5071,12 +4996,8 @@
           "name": "transactions_to_user_id_users_id_fk",
           "tableFrom": "transactions",
           "tableTo": "users",
-          "columnsFrom": [
-            "to_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["to_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -5289,12 +5210,8 @@
           "name": "user_behaviors_user_id_users_id_fk",
           "tableFrom": "user_behaviors",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5566,23 +5483,17 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "users_phone_unique": {
           "name": "users_phone_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "phone"
-          ]
+          "columns": ["phone"]
         },
         "users_telegram_id_unique": {
           "name": "users_telegram_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "telegram_id"
-          ]
+          "columns": ["telegram_id"]
         }
       },
       "policies": {},
@@ -5871,9 +5782,7 @@
         "vehicle_maintenance_vehicle_id_unique": {
           "name": "vehicle_maintenance_vehicle_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "vehicle_id"
-          ]
+          "columns": ["vehicle_id"]
         }
       },
       "policies": {},
@@ -6390,16 +6299,12 @@
         "vehicles_listing_id_unique": {
           "name": "vehicles_listing_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "listing_id"
-          ]
+          "columns": ["listing_id"]
         },
         "vehicles_old_vehicle_number_unique": {
           "name": "vehicles_old_vehicle_number_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "old_vehicle_number"
-          ]
+          "columns": ["old_vehicle_number"]
         }
       },
       "policies": {},
@@ -6411,75 +6316,32 @@
     "public.agency_status": {
       "name": "agency_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "active",
-        "suspended",
-        "inactive",
-        "rejected"
-      ]
+      "values": ["pending", "active", "suspended", "inactive", "rejected"]
     },
     "public.availability_status": {
       "name": "availability_status",
       "schema": "public",
-      "values": [
-        "available",
-        "busy",
-        "away",
-        "offline"
-      ]
+      "values": ["available", "busy", "away", "offline"]
     },
     "public.booking_status": {
       "name": "booking_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "confirmed",
-        "in_progress",
-        "completed",
-        "cancelled",
-        "no_show",
-        "expired",
-        "disputed"
-      ]
+      "values": ["pending", "confirmed", "in_progress", "completed", "cancelled", "no_show", "expired", "disputed"]
     },
     "public.booking_type": {
       "name": "booking_type",
       "schema": "public",
-      "values": [
-        "accommodation",
-        "transportation",
-        "tour",
-        "activity",
-        "dining",
-        "event",
-        "service"
-      ]
+      "values": ["accommodation", "transportation", "tour", "activity", "dining", "event", "service"]
     },
     "public.building_type": {
       "name": "building_type",
       "schema": "public",
-      "values": [
-        "low_rise",
-        "mid_rise",
-        "high_rise",
-        "detached",
-        "semi_detached",
-        "terraced",
-        "cluster"
-      ]
+      "values": ["low_rise", "mid_rise", "high_rise", "detached", "semi_detached", "terraced", "cluster"]
     },
     "public.campaign_status": {
       "name": "campaign_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "scheduled",
-        "active",
-        "paused",
-        "completed",
-        "cancelled"
-      ]
+      "values": ["draft", "scheduled", "active", "paused", "completed", "cancelled"]
     },
     "public.cancellation_reason": {
       "name": "cancellation_reason",
@@ -6496,115 +6358,52 @@
     "public.communication_platform": {
       "name": "communication_platform",
       "schema": "public",
-      "values": [
-        "telegram",
-        "whatsapp",
-        "phone",
-        "email",
-        "website",
-        "other"
-      ]
+      "values": ["telegram", "whatsapp", "phone", "email", "website", "other"]
     },
     "public.communication_type": {
       "name": "communication_type",
       "schema": "public",
-      "values": [
-        "email",
-        "sms",
-        "call",
-        "whatsapp",
-        "line",
-        "telegram",
-        "in_person"
-      ]
+      "values": ["email", "sms", "call", "whatsapp", "line", "telegram", "in_person"]
     },
     "public.customer_type": {
       "name": "customer_type",
       "schema": "public",
-      "values": [
-        "individual",
-        "business",
-        "enterprise"
-      ]
+      "values": ["individual", "business", "enterprise"]
     },
     "public.dispute_status": {
       "name": "dispute_status",
       "schema": "public",
-      "values": [
-        "open",
-        "investigating",
-        "resolved",
-        "closed",
-        "escalated"
-      ]
+      "values": ["open", "investigating", "resolved", "closed", "escalated"]
     },
     "public.fuel_type": {
       "name": "fuel_type",
       "schema": "public",
-      "values": [
-        "gasoline",
-        "diesel",
-        "electric",
-        "hybrid",
-        "lpg",
-        "cng"
-      ]
+      "values": ["gasoline", "diesel", "electric", "hybrid", "lpg", "cng"]
     },
     "public.furnishing": {
       "name": "furnishing",
       "schema": "public",
-      "values": [
-        "unfurnished",
-        "partially_furnished",
-        "fully_furnished",
-        "luxury_furnished"
-      ]
+      "values": ["unfurnished", "partially_furnished", "fully_furnished", "luxury_furnished"]
     },
     "public.language": {
       "name": "language",
       "schema": "public",
-      "values": [
-        "en",
-        "th",
-        "ru",
-        "zh",
-        "ja"
-      ]
+      "values": ["en", "th", "ru", "zh", "ja"]
     },
     "public.lead_status": {
       "name": "lead_status",
       "schema": "public",
-      "values": [
-        "new",
-        "contacted",
-        "qualified",
-        "proposal",
-        "negotiation",
-        "closed_won",
-        "closed_lost"
-      ]
+      "values": ["new", "contacted", "qualified", "proposal", "negotiation", "closed_won", "closed_lost"]
     },
     "public.listing_category": {
       "name": "listing_category",
       "schema": "public",
-      "values": [
-        "transportation",
-        "tours",
-        "services",
-        "vehicles",
-        "products"
-      ]
+      "values": ["transportation", "tours", "services", "vehicles", "products"]
     },
     "public.listing_purpose": {
       "name": "listing_purpose",
       "schema": "public",
-      "values": [
-        "rent",
-        "sale",
-        "short_term_rental",
-        "long_term_rental",
-        "both"
-      ]
+      "values": ["rent", "sale", "short_term_rental", "long_term_rental", "both"]
     },
     "public.listing_status": {
       "name": "listing_status",
@@ -6625,120 +6424,57 @@
     "public.listing_type": {
       "name": "listing_type",
       "schema": "public",
-      "values": [
-        "rental",
-        "service"
-      ]
+      "values": ["rental", "service"]
     },
     "public.message_status": {
       "name": "message_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "sent",
-        "delivered",
-        "read",
-        "failed"
-      ]
+      "values": ["pending", "sent", "delivered", "read", "failed"]
     },
     "public.message_type": {
       "name": "message_type",
       "schema": "public",
-      "values": [
-        "incoming",
-        "outgoing",
-        "system",
-        "ai_generated"
-      ]
+      "values": ["incoming", "outgoing", "system", "ai_generated"]
     },
     "public.orientation": {
       "name": "orientation",
       "schema": "public",
-      "values": [
-        "north",
-        "south",
-        "east",
-        "west",
-        "northeast",
-        "northwest",
-        "southeast",
-        "southwest"
-      ]
+      "values": ["north", "south", "east", "west", "northeast", "northwest", "southeast", "southwest"]
     },
     "public.payment_method": {
       "name": "payment_method",
       "schema": "public",
-      "values": [
-        "ton_wallet",
-        "ton_connect",
-        "jetton_usdt",
-        "jetton_usdc",
-        "stripe_card",
-        "promptpay"
-      ]
+      "values": ["ton_wallet", "ton_connect", "jetton_usdt", "jetton_usdc", "stripe_card", "promptpay"]
     },
     "public.payment_status": {
       "name": "payment_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "processing",
-        "completed",
-        "failed",
-        "cancelled",
-        "refunded"
-      ]
+      "values": ["pending", "processing", "completed", "failed", "cancelled", "refunded"]
     },
     "public.price_type": {
       "name": "price_type",
       "schema": "public",
-      "values": [
-        "fixed",
-        "negotiable",
-        "auction",
-        "per_hour",
-        "per_day",
-        "per_week",
-        "per_month",
-        "per_year"
-      ]
+      "values": ["fixed", "negotiable", "auction", "per_hour", "per_day", "per_week", "per_month", "per_year"]
     },
     "public.pricing_system": {
       "name": "pricing_system",
       "schema": "public",
-      "values": [
-        "calendar",
-        "seasonal"
-      ]
+      "values": ["calendar", "seasonal"]
     },
     "public.product_condition": {
       "name": "product_condition",
       "schema": "public",
-      "values": [
-        "new",
-        "like_new",
-        "good",
-        "fair",
-        "poor"
-      ]
+      "values": ["new", "like_new", "good", "fair", "poor"]
     },
     "public.product_listing_type": {
       "name": "product_listing_type",
       "schema": "public",
-      "values": [
-        "rental",
-        "service"
-      ]
+      "values": ["rental", "service"]
     },
     "public.product_status": {
       "name": "product_status",
       "schema": "public",
-      "values": [
-        "available",
-        "rented",
-        "reserved",
-        "inactive"
-      ]
+      "values": ["available", "rented", "reserved", "inactive"]
     },
     "public.product_type": {
       "name": "product_type",
@@ -6770,15 +6506,7 @@
     "public.property_status": {
       "name": "property_status",
       "schema": "public",
-      "values": [
-        "available",
-        "rented",
-        "sold",
-        "reserved",
-        "under_contract",
-        "off_market",
-        "maintenance"
-      ]
+      "values": ["available", "rented", "sold", "reserved", "under_contract", "off_market", "maintenance"]
     },
     "public.property_type": {
       "name": "property_type",
@@ -6804,175 +6532,77 @@
     "public.provider_type": {
       "name": "provider_type",
       "schema": "public",
-      "values": [
-        "individual",
-        "company",
-        "agency",
-        "freelancer"
-      ]
+      "values": ["individual", "company", "agency", "freelancer"]
     },
     "public.refund_status": {
       "name": "refund_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "processing",
-        "completed",
-        "failed",
-        "cancelled"
-      ]
+      "values": ["pending", "processing", "completed", "failed", "cancelled"]
     },
     "public.rental_status": {
       "name": "rental_status",
       "schema": "public",
-      "values": [
-        "active",
-        "completed",
-        "cancelled",
-        "overdue",
-        "pending"
-      ]
+      "values": ["active", "completed", "cancelled", "overdue", "pending"]
     },
     "public.service_assignment_status": {
       "name": "service_assignment_status",
       "schema": "public",
-      "values": [
-        "active",
-        "paused",
-        "completed",
-        "cancelled"
-      ]
+      "values": ["active", "paused", "completed", "cancelled"]
     },
     "public.service_booking_type": {
       "name": "service_booking_type",
       "schema": "public",
-      "values": [
-        "consultation",
-        "project",
-        "hourly",
-        "package",
-        "subscription"
-      ]
+      "values": ["consultation", "project", "hourly", "package", "subscription"]
     },
     "public.transaction_type": {
       "name": "transaction_type",
       "schema": "public",
-      "values": [
-        "payment",
-        "refund",
-        "fee",
-        "commission",
-        "withdrawal",
-        "deposit",
-        "confirmation"
-      ]
+      "values": ["payment", "refund", "fee", "commission", "withdrawal", "deposit", "confirmation"]
     },
     "public.transmission_type": {
       "name": "transmission_type",
       "schema": "public",
-      "values": [
-        "manual",
-        "automatic",
-        "cvt",
-        "semi_automatic"
-      ]
+      "values": ["manual", "automatic", "cvt", "semi_automatic"]
     },
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "user",
-        "admin",
-        "moderator",
-        "service_provider"
-      ]
+      "values": ["user", "admin", "moderator", "service_provider"]
     },
     "public.vehicle_category": {
       "name": "vehicle_category",
       "schema": "public",
-      "values": [
-        "economy",
-        "standard",
-        "premium",
-        "luxury",
-        "sport",
-        "electric",
-        "classic",
-        "rental"
-      ]
+      "values": ["economy", "standard", "premium", "luxury", "sport", "electric", "classic", "rental"]
     },
     "public.vehicle_condition": {
       "name": "vehicle_condition",
       "schema": "public",
-      "values": [
-        "new",
-        "excellent",
-        "good",
-        "fair",
-        "poor",
-        "damaged"
-      ]
+      "values": ["new", "excellent", "good", "fair", "poor", "damaged"]
     },
     "public.vehicle_status": {
       "name": "vehicle_status",
       "schema": "public",
-      "values": [
-        "available",
-        "rented",
-        "maintenance",
-        "reserved",
-        "inactive"
-      ]
+      "values": ["available", "rented", "maintenance", "reserved", "inactive"]
     },
     "public.vehicle_type": {
       "name": "vehicle_type",
       "schema": "public",
-      "values": [
-        "scooter",
-        "motorcycle",
-        "car",
-        "bicycle",
-        "boat",
-        "jet_ski",
-        "atv",
-        "truck",
-        "van",
-        "bus"
-      ]
+      "values": ["scooter", "motorcycle", "car", "bicycle", "boat", "jet_ski", "atv", "truck", "van", "bus"]
     },
     "public.verification_level": {
       "name": "verification_level",
       "schema": "public",
-      "values": [
-        "basic",
-        "verified",
-        "premium",
-        "enterprise"
-      ]
+      "values": ["basic", "verified", "premium", "enterprise"]
     },
     "public.verification_status": {
       "name": "verification_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "verified",
-        "rejected"
-      ]
+      "values": ["pending", "verified", "rejected"]
     },
     "public.view_type": {
       "name": "view_type",
       "schema": "public",
-      "values": [
-        "city",
-        "sea",
-        "mountain",
-        "garden",
-        "pool",
-        "river",
-        "park",
-        "golf",
-        "no_view"
-      ]
+      "values": ["city", "sea", "mountain", "garden", "pool", "river", "park", "golf", "no_view"]
     }
   },
   "schemas": {},

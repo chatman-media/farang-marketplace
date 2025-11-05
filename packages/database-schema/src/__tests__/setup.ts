@@ -8,7 +8,8 @@ config({ path: path.resolve(__dirname, "../../.env.test"), debug: false })
 
 beforeAll(async () => {
   // Use DATABASE_URL from environment (set by CI) or fallback to test default
-  const testDbUrl = process.env.DATABASE_URL || "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test"
+  const testDbUrl =
+    process.env.DATABASE_URL || "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test"
 
   console.log("Test setup started")
   console.log("Test DB URL:", testDbUrl.replace(/:[^:]*@/, ":***@"))

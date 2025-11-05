@@ -1,4 +1,3 @@
-// biome-ignore assist/source/organizeImports: fix
 import path from "path"
 
 // IMPORTANT: Set DATABASE_URL FIRST before any imports that might use it
