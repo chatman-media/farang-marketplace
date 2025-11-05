@@ -430,7 +430,7 @@ describe("CRMService", () => {
         mockQuery.mockResolvedValueOnce({ rows: [mockCustomerData] })
 
         // Mock automation service to throw error
-        const automationService = crmService.automationService
+        const automationService = (crmService as any).automationService
         vi.spyOn(automationService, "triggerWorkflow").mockRejectedValueOnce(new Error("Automation failed"))
 
         const result = await crmService.updateLead("lead-123", updateRequest)
@@ -451,7 +451,7 @@ describe("CRMService", () => {
         mockQuery.mockResolvedValueOnce({ rows: [{ ...mockLeadData, stage: "proposal" }] })
 
         // Mock automation service to throw error
-        const automationService = crmService.automationService
+        const automationService = (crmService as any).automationService
         vi.spyOn(automationService, "triggerWorkflow").mockRejectedValueOnce(new Error("Automation failed"))
 
         const result = await crmService.updateLead("lead-123", updateRequest)
