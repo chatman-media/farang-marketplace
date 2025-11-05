@@ -31,19 +31,24 @@ describe("Database Schema Tests", () => {
   })
 
   beforeEach(async () => {
-    // Clean up test data before each test
-    // Delete in reverse order of dependencies (child tables first)
+    // Clean up test data before each test with TRUNCATE for full cleanup
     try {
-      await db.delete(vehicleCalendarPricing)
-      await db.delete(vehicleRentals)
-      await db.delete(vehicleMaintenance)
-      await db.delete(vehicles)
-      await db.delete(chatHistory)
-      await db.delete(listings)
-      await db.delete(aiPromptTemplates)
-      await db.delete(users)
+      // Use TRUNCATE CASCADE to reset all tables completely
+      await sql`TRUNCATE TABLE vehicle_calendar_pricing, vehicle_rentals, vehicle_maintenance, vehicles, chat_history, listings, ai_prompt_templates, users RESTART IDENTITY CASCADE`
     } catch (e) {
-      // Tables might not exist yet or cleanup failed - will be handled by test
+      // If TRUNCATE fails, fallback to DELETE (tables might not exist yet)
+      try {
+        await db.delete(vehicleCalendarPricing)
+        await db.delete(vehicleRentals)
+        await db.delete(vehicleMaintenance)
+        await db.delete(vehicles)
+        await db.delete(chatHistory)
+        await db.delete(listings)
+        await db.delete(aiPromptTemplates)
+        await db.delete(users)
+      } catch (e2) {
+        // Tables might not exist yet - will be handled by test
+      }
     }
   })
 

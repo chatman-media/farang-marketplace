@@ -15,6 +15,8 @@ export default defineConfig({
         singleThread: true,
       },
     },
+    // Exclude compiled files to avoid running tests twice
+    exclude: ["**/node_modules/**", "**/dist/**", "**/build/**", "**/.{idea,git,cache,output,temp}/**"],
   },
   resolve: {
     alias: {
