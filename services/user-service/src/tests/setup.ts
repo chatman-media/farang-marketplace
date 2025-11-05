@@ -1,15 +1,21 @@
 import path from "path"
 
 // IMPORTANT: Set DATABASE_URL FIRST before any imports that might use it
-process.env.DATABASE_URL = "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace"
+// Only set if not already provided (e.g., in CI)
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace"
+}
 process.env.NODE_ENV = "test"
 
 import dotenv from "dotenv"
 import { beforeEach, vi } from "vitest"
 
-// Load test environment variables (this will override if needed)
-dotenv.config({ path: path.join(__dirname, "../../../.env.test") })
-dotenv.config({ path: path.join(__dirname, "../../.env.test") })
+// Load test environment variables only in local environment (not CI)
+// In CI, environment variables are provided by the workflow
+if (!process.env.CI) {
+  dotenv.config({ path: path.join(__dirname, "../../../.env.test") })
+  dotenv.config({ path: path.join(__dirname, "../../.env.test") })
+}
 
 // Note: bcrypt is not mocked to allow real password hashing in tests
 

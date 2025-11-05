@@ -5,7 +5,10 @@ import postgres from "postgres"
 import { afterAll, beforeAll } from "vitest"
 
 // Load test environment variables (suppress dotenv tips)
-config({ path: path.resolve(__dirname, "../../.env.test"), debug: false })
+// Skip loading .env.test in CI to respect CI-provided DATABASE_URL
+if (!process.env.CI) {
+  config({ path: path.resolve(__dirname, "../../.env.test"), debug: false })
+}
 
 // Create a global connection for cleanup
 const testDbUrl =

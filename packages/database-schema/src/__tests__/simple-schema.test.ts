@@ -13,8 +13,11 @@ import {
 } from "../schema"
 
 // Test database connection
+// In CI, DATABASE_URL is set, otherwise use TEST_DATABASE_URL or fallback
 const testDbUrl =
-  process.env.TEST_DATABASE_URL || "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test"
+  process.env.DATABASE_URL ||
+  process.env.TEST_DATABASE_URL ||
+  "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test"
 const sql = postgres(testDbUrl)
 const db = drizzle(sql)
 
