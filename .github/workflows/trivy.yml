@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🔍 Run Trivy vulnerability scanner (filesystem)
         uses: aquasecurity/trivy-action@master
@@ -67,7 +67,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🔍 Run Trivy configuration scanner
         uses: aquasecurity/trivy-action@master
@@ -115,7 +115,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🐳 Pull Docker image
         run: docker pull ${{ matrix.image }}
@@ -144,7 +144,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
