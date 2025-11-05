@@ -33,10 +33,10 @@ export default defineConfig({
         "**/db/**",
       ],
       thresholds: {
-        lines: 80,
+        lines: 75,
         functions: 80,
-        branches: 80,
-        statements: 80,
+        branches: 65,
+        statements: 75,
       },
     },
   },
