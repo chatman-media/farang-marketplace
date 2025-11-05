@@ -8,17 +8,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.2.0+-black?logo=bun&logoColor=white)](https://bun.sh/)
-[![React](https://img.shields.io/badge/React-19.2.0-61DAFB?logo=react&logoColor=white)](https://react.dev/)
-[![Fastify](https://img.shields.io/badge/Fastify-Latest-000000?logo=fastify&logoColor=white)](https://www.fastify.io/)
-
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?logo=redis&logoColor=white)](https://redis.io/)
-[![Drizzle ORM](https://img.shields.io/badge/Drizzle_ORM-0.44.7-C5F74F?logo=drizzle&logoColor=black)](https://orm.drizzle.team/)
-[![MinIO](https://img.shields.io/badge/MinIO-S3_Compatible-C72E49?logo=minio&logoColor=white)](https://min.io/)
-
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Monorepo](https://img.shields.io/badge/Monorepo-Turborepo-EF4444?logo=turborepo&logoColor=white)](https://turbo.build/)
-[![Code Style](https://img.shields.io/badge/Code_Style-Biome-60A5FA?logo=biome&logoColor=white)](https://biomejs.dev/)
 
 An intelligent marketplace platform designed for Thailand, connecting locals and
 foreigners to buy, sell, rent, and offer services. Supporting English and Thai
