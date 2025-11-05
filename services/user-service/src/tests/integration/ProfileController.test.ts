@@ -72,6 +72,9 @@ describe("ProfileController Integration Tests", () => {
          })}, true, true, NOW(), NOW())
     `)
 
+    // Small delay to ensure data is fully persisted in CI environments
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
     // Now get tokens - users are guaranteed to exist
     const userLoginResponse = await app.inject({
       method: "POST",
