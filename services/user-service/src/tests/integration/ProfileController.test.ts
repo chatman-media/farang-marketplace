@@ -48,9 +48,9 @@ describe("ProfileController Integration Tests", () => {
     adminEmail = "admin@example.com"
 
     await db.execute(sql`
-      INSERT INTO users (id, email, password_hash, role, first_name, last_name, profile, is_active, created_at, updated_at)
-      VALUES 
-        (${testUserId}, ${testEmail}, ${hashedPassword}, 'user', 'Test', 'User', 
+      INSERT INTO users (id, email, password_hash, role, first_name, last_name, profile, is_active, is_verified, created_at, updated_at)
+      VALUES
+        (${testUserId}, ${testEmail}, ${hashedPassword}, 'user', 'Test', 'User',
          ${JSON.stringify({
            firstName: "Test",
            lastName: "User",
@@ -59,8 +59,8 @@ describe("ProfileController Integration Tests", () => {
            verificationStatus: "unverified",
            socialProfiles: [],
            primaryAuthProvider: "email",
-         })}, true, NOW(), NOW()),
-        (${adminUserId}, ${adminEmail}, ${hashedPassword}, 'admin', 'Admin', 'User', 
+         })}, true, false, NOW(), NOW()),
+        (${adminUserId}, ${adminEmail}, ${hashedPassword}, 'admin', 'Admin', 'User',
          ${JSON.stringify({
            firstName: "Admin",
            lastName: "User",
@@ -69,7 +69,7 @@ describe("ProfileController Integration Tests", () => {
            verificationStatus: "verified",
            socialProfiles: [],
            primaryAuthProvider: "email",
-         })}, true, NOW(), NOW())
+         })}, true, true, NOW(), NOW())
     `)
 
     // Now get tokens - users are guaranteed to exist
@@ -91,8 +91,8 @@ describe("ProfileController Integration Tests", () => {
       },
     })
 
-    expect(userLoginResponse.statusCode).toBe(401)
-    expect(adminLoginResponse.statusCode).toBe(401)
+    expect(userLoginResponse.statusCode).toBe(200)
+    expect(adminLoginResponse.statusCode).toBe(200)
 
     const userData = JSON.parse(userLoginResponse.body)
     const adminData = JSON.parse(adminLoginResponse.body)
