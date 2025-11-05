@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+echo "🔍 Running pre-commit checks..."
+
+# Run lint-staged for linting and formatting
+echo "\n📝 Checking and fixing code style..."
+bunx lint-staged || exit 1
+
+# Run type checking
+echo "\n🔎 Running type checks..."
+bun run type-check || exit 1
+
+echo "\n✅ All pre-commit checks passed!"
+echo "ℹ️  Tests will run in CI"
