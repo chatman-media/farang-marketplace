@@ -26,6 +26,8 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "type-check": "turbo run type-check",
+    "fix:all": "bun run format && bun run lint:fix && bun run type-check",
+    "check:all": "bun run format:check && bun run lint && bun run type-check",
     "clean": "turbo run clean",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
