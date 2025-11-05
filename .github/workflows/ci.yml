@@ -111,7 +111,10 @@ jobs:
 
       - name: 🔧 Setup test environment
         run: |
-          cp .env.example .env.test
+          cp .env.example .env.test || touch .env.test
+          # Remove existing DATABASE_URL to avoid duplicates
+          sed -i '/^DATABASE_URL=/d' .env.test || true
+          # Append CI-specific configuration
           cat >> .env.test << EOF
           DATABASE_URL=${{ env.DATABASE_URL }}
           REDIS_URL=${{ env.REDIS_URL }}
