@@ -50,6 +50,31 @@ vi.mock("../services/PricingService", () => ({
   },
 }))
 
+let mockQueryBuilderData: any[] = [
+  {
+    id: "booking-123",
+    listingId: "listing-123",
+    guestId: "guest-123",
+    hostId: "host-123",
+    type: "accommodation",
+    status: "pending",
+    checkIn: new Date("2024-03-01"),
+    checkOut: new Date("2024-03-03"),
+    nights: 2,
+    adults: 2,
+    children: 0,
+    infants: 0,
+    guests: 2,
+    basePrice: "3000",
+    serviceFees: "300",
+    taxes: "231",
+    totalPrice: "3531",
+    currency: "THB",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+]
+
 const mockQueryBuilder = {
   from: vi.fn().mockReturnThis(),
   where: vi.fn().mockReturnThis(),
@@ -57,37 +82,20 @@ const mockQueryBuilder = {
   offset: vi.fn().mockReturnThis(),
   orderBy: vi.fn().mockReturnThis(),
   returning: vi.fn().mockReturnThis(),
-  values: vi.fn().mockReturnThis(),
-  set: vi.fn().mockReturnThis(),
-  leftJoin: vi.fn().mockReturnThis(),
-  then: vi.fn((callback) => {
-    return Promise.resolve(
-      callback([
-        {
-          id: "booking-123",
-          listingId: "listing-123",
-          guestId: "guest-123",
-          hostId: "host-123",
-          type: "accommodation",
-          status: "pending",
-          checkIn: new Date("2024-03-01"),
-          checkOut: new Date("2024-03-03"),
-          nights: 2,
-          adults: 2,
-          children: 0,
-          infants: 0,
-          guests: 2,
-          basePrice: "3000",
-          serviceFees: "300",
-          taxes: "231",
-          totalPrice: "3531",
-          currency: "THB",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ]),
-    )
+  values: vi.fn(function (this: any, data: any) {
+    // Update mockQueryBuilderData when inserting
+    if (data.listingId || data.bookingId) {
+      mockQueryBuilderData = [{ ...mockQueryBuilderData[0], ...data, id: data.id || "booking-new" }]
+    }
+    return this
   }),
+  set: vi.fn(function (this: any, data: any) {
+    // Update mockQueryBuilderData when updating
+    mockQueryBuilderData = [{ ...mockQueryBuilderData[0], ...data }]
+    return this
+  }),
+  leftJoin: vi.fn().mockReturnThis(),
+  then: vi.fn((callback) => Promise.resolve(callback([...mockQueryBuilderData]))),
 }
 
 const mockTx = {
@@ -102,6 +110,31 @@ describe("BookingService", () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // Reset mockQueryBuilderData to default state
+    mockQueryBuilderData = [
+      {
+        id: "booking-123",
+        listingId: "listing-123",
+        guestId: "guest-123",
+        hostId: "host-123",
+        type: "accommodation",
+        status: "pending",
+        checkIn: new Date("2024-03-01"),
+        checkOut: new Date("2024-03-03"),
+        nights: 2,
+        adults: 2,
+        children: 0,
+        infants: 0,
+        guests: 2,
+        basePrice: "3000",
+        serviceFees: "300",
+        taxes: "231",
+        totalPrice: "3531",
+        currency: "THB",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]
     bookingService = new BookingService()
   })
 
