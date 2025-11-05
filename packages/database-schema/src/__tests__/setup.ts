@@ -1,14 +1,15 @@
 import { execSync } from "node:child_process"
-import { config } from "dotenv"
 import path from "path"
+import { config } from "dotenv"
 import postgres from "postgres"
-import { afterAll, beforeAll, beforeEach } from "vitest"
+import { afterAll, beforeAll } from "vitest"
 
 // Load test environment variables (suppress dotenv tips)
 config({ path: path.resolve(__dirname, "../../.env.test"), debug: false })
 
 // Create a global connection for cleanup
-const testDbUrl = process.env.DATABASE_URL || "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test"
+const testDbUrl =
+  process.env.DATABASE_URL || "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test"
 const globalSql = postgres(testDbUrl)
 
 beforeAll(async () => {
@@ -52,14 +53,8 @@ beforeAll(async () => {
   console.log("Test setup completed")
 }, 60000) // Increase timeout for migrations
 
-beforeEach(async () => {
-  // Clean database before EACH test to ensure isolation
-  try {
-    await globalSql`TRUNCATE TABLE vehicle_calendar_pricing, vehicle_rentals, vehicle_maintenance, vehicles, chat_history, listings, ai_prompt_templates, users RESTART IDENTITY CASCADE`
-  } catch (e) {
-    // Ignore errors (tables may not exist in some tests)
-  }
-})
+// Cleanup is now handled in each test file's beforeEach
+// to avoid conflicts with test-specific setup
 
 afterAll(async () => {
   await globalSql.end()

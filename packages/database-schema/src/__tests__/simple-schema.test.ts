@@ -52,7 +52,7 @@ describe("Simple Database Schema Tests", () => {
   describe("Users Table Extended Fields", () => {
     it("should create a user with telegram and customer fields", async () => {
       const userData = {
-        email: "test@example.com",
+        email: "simple-test@example.com",
         firstName: "John",
         lastName: "Doe",
         phone: "+66123456789",
@@ -77,20 +77,26 @@ describe("Simple Database Schema Tests", () => {
 
     it("should enforce unique constraints", async () => {
       const userData = {
-        email: "test1@example.com",
+        email: "simple-test1@example.com",
         phone: "+66123456789",
         telegramId: "123456789",
       }
 
-      await db.insert(users).values(userData)
+      // First insert should succeed
+      const result = await db.insert(users).values(userData).returning()
+      expect(result).toHaveLength(1)
+      expect(result[0].phone).toBe(userData.phone)
 
-      // Try to insert duplicate phone
+      // Try to insert duplicate phone - should throw error
       await expect(
-        db.insert(users).values({
-          email: "test2@example.com",
-          phone: "+66123456789", // duplicate
-          telegramId: "987654321",
-        }),
+        db
+          .insert(users)
+          .values({
+            email: "simple-test2@example.com",
+            phone: "+66123456789", // duplicate
+            telegramId: "987654321",
+          })
+          .returning(),
       ).rejects.toThrow()
     })
   })
@@ -101,7 +107,7 @@ describe("Simple Database Schema Tests", () => {
       const userResult = await db
         .insert(users)
         .values({
-          email: "owner@example.com",
+          email: "simple-vehicle-owner@example.com",
           firstName: "Vehicle",
           lastName: "Owner",
         })
@@ -167,7 +173,7 @@ describe("Simple Database Schema Tests", () => {
       const userResult = await db
         .insert(users)
         .values({
-          email: "owner@example.com",
+          email: "simple-maintenance-owner@example.com",
         })
         .returning()
       const testUser = userResult[0]
@@ -229,7 +235,7 @@ describe("Simple Database Schema Tests", () => {
       const userResult = await db
         .insert(users)
         .values({
-          email: "customer@example.com",
+          email: "simple-chat-customer@example.com",
           telegramId: "123456789",
           telegramUsername: "johndoe",
         })
@@ -284,7 +290,7 @@ describe("Simple Database Schema Tests", () => {
       const userResult = await db
         .insert(users)
         .values({
-          email: "owner@example.com",
+          email: "simple-pricing-owner@example.com",
         })
         .returning()
       const testUser = userResult[0]

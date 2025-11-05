@@ -87,24 +87,33 @@ describe("Database Schema Tests", () => {
         telegramId: "123456789",
       }
 
-      await db.insert(users).values(userData)
+      // First insert should succeed
+      const result = await db.insert(users).values(userData).returning()
+      expect(result).toHaveLength(1)
+      expect(result[0].phone).toBe(userData.phone)
 
-      // Try to insert duplicate phone
+      // Try to insert duplicate phone - should throw error
       await expect(
-        db.insert(users).values({
-          email: "test2@example.com",
-          phone: "+66123456789", // duplicate
-          telegramId: "987654321",
-        }),
+        db
+          .insert(users)
+          .values({
+            email: "test2@example.com",
+            phone: "+66123456789", // duplicate
+            telegramId: "987654321",
+          })
+          .returning(),
       ).rejects.toThrow()
 
-      // Try to insert duplicate telegram_id
+      // Try to insert duplicate telegram_id - should throw error
       await expect(
-        db.insert(users).values({
-          email: "test3@example.com",
-          phone: "+66987654321",
-          telegramId: "123456789", // duplicate
-        }),
+        db
+          .insert(users)
+          .values({
+            email: "test3@example.com",
+            phone: "+66987654321",
+            telegramId: "123456789", // duplicate
+          })
+          .returning(),
       ).rejects.toThrow()
     })
   })
@@ -117,7 +126,7 @@ describe("Database Schema Tests", () => {
       const users_result = await db
         .insert(users)
         .values({
-          email: "owner@example.com",
+          email: "vehicle-owner@example.com",
           firstName: "Vehicle",
           lastName: "Owner",
         })
@@ -220,7 +229,10 @@ describe("Database Schema Tests", () => {
         oldVehicleNumber: "SCT001",
       }
 
-      await db.insert(vehicles).values(vehicleData)
+      // First insert should succeed
+      const result = await db.insert(vehicles).values(vehicleData).returning()
+      expect(result).toHaveLength(1)
+      expect(result[0].oldVehicleNumber).toBe("SCT001")
 
       // Create another listing for second vehicle
       const [testListing2] = await db
@@ -239,13 +251,16 @@ describe("Database Schema Tests", () => {
         })
         .returning()
 
-      // Try to insert duplicate oldVehicleNumber
+      // Try to insert duplicate oldVehicleNumber - should throw error
       await expect(
-        db.insert(vehicles).values({
-          ...vehicleData,
-          listingId: testListing2.id,
-          oldVehicleNumber: "SCT001", // duplicate
-        }),
+        db
+          .insert(vehicles)
+          .values({
+            ...vehicleData,
+            listingId: testListing2.id,
+            oldVehicleNumber: "SCT001", // duplicate
+          })
+          .returning(),
       ).rejects.toThrow()
     })
   })
@@ -257,7 +272,7 @@ describe("Database Schema Tests", () => {
       const [testUser] = await db
         .insert(users)
         .values({
-          email: "owner@example.com",
+          email: "maintenance-owner@example.com",
         })
         .returning()
 
@@ -339,7 +354,7 @@ describe("Database Schema Tests", () => {
       ;[testUser] = await db
         .insert(users)
         .values({
-          email: "customer@example.com",
+          email: "rental-customer@example.com",
           firstName: "John",
           lastName: "Customer",
           phone: "+66123456789",
@@ -349,7 +364,7 @@ describe("Database Schema Tests", () => {
       const [owner] = await db
         .insert(users)
         .values({
-          email: "owner@example.com",
+          email: "rental-owner@example.com",
         })
         .returning()
 
@@ -530,7 +545,7 @@ describe("Database Schema Tests", () => {
       const [testUser] = await db
         .insert(users)
         .values({
-          email: "owner@example.com",
+          email: "pricing-owner@example.com",
         })
         .returning()
 
@@ -612,7 +627,7 @@ describe("Database Schema Tests", () => {
       const [testUser] = await db
         .insert(users)
         .values({
-          email: "owner@example.com",
+          email: "integration-owner@example.com",
         })
         .returning()
 
