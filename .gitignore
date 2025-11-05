@@ -110,3 +110,5 @@ build/
 # Note: bun.lockb should be committed to ensure consistent dependencies
 
 .history/
+
+services/user-service/uploads

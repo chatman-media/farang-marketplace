@@ -86,17 +86,6 @@ export class ProfileController {
   // Get current user's profile
   getProfile = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
-      if (!req.user) {
-        return reply.status(401).send({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          },
-        })
-      }
-
       const user = await this.userService.getUserById((req.user as any).userId)
       if (!user) {
         return reply.status(404).send({
@@ -129,17 +118,6 @@ export class ProfileController {
   // Update current user's profile
   updateProfile = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
-      if (!req.user) {
-        return reply.status(401).send({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          },
-        })
-      }
-
       // Validate request body
       const profileData = UpdateProfileSchema.parse(req.body)
 
@@ -192,17 +170,6 @@ export class ProfileController {
   // Upload profile avatar
   uploadAvatar = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
-      if (!req.user) {
-        return reply.status(401).send({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          },
-        })
-      }
-
       // Handle Fastify multipart
       let data: any | null = null
       try {
@@ -314,17 +281,6 @@ export class ProfileController {
   // Request user verification
   requestVerification = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
-      if (!req.user) {
-        return reply.status(401).send({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          },
-        })
-      }
-
       // Validate request body
       const verificationData = VerificationRequestSchema.parse(req.body)
 
@@ -414,17 +370,6 @@ export class ProfileController {
   // Approve user verification (Admin/Manager only)
   approveVerification = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
-      if (!req.user) {
-        return reply.status(401).send({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          },
-        })
-      }
-
       // Check if user has admin or manager role
       if ((req.user as any).role !== UserRole.ADMIN && (req.user as any).role !== UserRole.AGENCY_MANAGER) {
         return reply.status(403).send({
@@ -490,17 +435,6 @@ export class ProfileController {
   // Reject user verification (Admin/Manager only)
   rejectVerification = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
-      if (!req.user) {
-        return reply.status(401).send({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          },
-        })
-      }
-
       // Check if user has admin or manager role
       if ((req.user as any).role !== UserRole.ADMIN && (req.user as any).role !== UserRole.AGENCY_MANAGER) {
         return reply.status(403).send({
@@ -574,17 +508,6 @@ export class ProfileController {
   // Get user profile by ID (Admin/Manager or own profile)
   getUserProfile = async (req: AuthenticatedRequest, reply: FastifyReply) => {
     try {
-      if (!req.user) {
-        return reply.status(401).send({
-          error: {
-            code: "AUTHENTICATION_REQUIRED",
-            message: "Authentication required",
-            timestamp: new Date().toISOString(),
-            requestId: req.headers["x-request-id"] || `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          },
-        })
-      }
-
       const { userId } = req.params as any
 
       // Check if user can access this profile

@@ -14,7 +14,7 @@ export default defineConfig({
       NODE_ENV: "test",
     },
     include: ["src/**/*.test.ts"],
-    exclude: ["node_modules", "dist"],
+    exclude: ["**/node_modules/**", "**/dist/**", "**/build/**", "**/.{idea,git,cache,output,temp}/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
