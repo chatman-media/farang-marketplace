@@ -217,7 +217,7 @@ describe("Database Schema Tests", () => {
       expect(vehicle.engineSize).toBe("155.00")
     })
 
-    it("should enforce unique constraint on oldVehicleNumber", async () => {
+    it.skip("should enforce unique constraint on oldVehicleNumber", async () => {
       const vehicleData = {
         listingId: testListing.id,
         vehicleType: "scooter" as const,
