@@ -1,14 +1,10 @@
+import { execSync } from "node:child_process"
 import path from "path"
 import { config } from "dotenv"
-import { beforeAll, afterAll } from "vitest"
-import { execSync } from "node:child_process"
-import { drizzle } from "drizzle-orm/postgres-js"
-import postgres from "postgres"
+import { afterAll, beforeAll } from "vitest"
 
 // Load test environment variables (suppress dotenv tips)
 config({ path: path.resolve(__dirname, "../../.env.test"), debug: false })
-
-let sql: ReturnType<typeof postgres> | null = null
 
 beforeAll(async () => {
   // Set default test database URL if not provided
@@ -43,10 +39,6 @@ beforeAll(async () => {
   console.log("Test setup completed")
 }, 60000) // Increase timeout for migrations
 
-afterAll(async () => {
-  // Clean up database connection
-  if (sql) {
-    await sql.end()
-  }
+afterAll(() => {
   console.log("Test cleanup completed")
 })
