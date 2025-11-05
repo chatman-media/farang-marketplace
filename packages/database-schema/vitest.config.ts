@@ -8,10 +8,11 @@ export default defineConfig({
     setupFiles: ["./src/__tests__/setup.ts"],
     testTimeout: 30000,
     hookTimeout: 30000,
-    pool: "forks",
+    // Use threads instead of forks for better CI compatibility
+    pool: "threads",
     poolOptions: {
-      forks: {
-        singleFork: true,
+      threads: {
+        singleThread: true,
       },
     },
   },
