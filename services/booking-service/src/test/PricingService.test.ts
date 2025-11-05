@@ -179,13 +179,14 @@ describe("PricingService", () => {
       expect(multiplier).toBeLessThanOrEqual(2.0)
     })
 
-    it("should return 1.0 for low demand", async () => {
+    it("should return lower multiplier for low demand", async () => {
       // Mock low demand (few bookings)
       mockQueryBuilder.then = vi.fn((callback) => Promise.resolve(callback([{ count: "2" }])))
 
       const multiplier = await (pricingService as any).calculateDemandMultiplier("listing-123", new Date("2024-03-15"))
 
-      expect(multiplier).toBe(1.0)
+      expect(multiplier).toBeLessThanOrEqual(1.0)
+      expect(multiplier).toBeGreaterThanOrEqual(0.7)
     })
 
     it("should use cached multiplier if available", async () => {
@@ -201,122 +202,94 @@ describe("PricingService", () => {
     })
   })
 
-  describe("calculateSeasonalMultiplier", () => {
-    it("should apply seasonal multiplier for high season", () => {
+  describe("getSeasonalMultiplier", () => {
+    it("should apply seasonal multiplier for high season", async () => {
       // December - high season in Thailand
       const date = new Date("2024-12-15")
 
-      const multiplier = (pricingService as any).calculateSeasonalMultiplier(date)
+      const multiplier = await (pricingService as any).getSeasonalMultiplier(date)
 
       expect(multiplier).toBeGreaterThan(1.0)
     })
 
-    it("should apply lower multiplier for low season", () => {
+    it("should apply lower multiplier for low season", async () => {
       // May - low season in Thailand (rainy season)
       const date = new Date("2024-05-15")
 
-      const multiplier = (pricingService as any).calculateSeasonalMultiplier(date)
+      const multiplier = await (pricingService as any).getSeasonalMultiplier(date)
 
-      expect(multiplier).toBeGreaterThanOrEqual(1.0)
-      expect(multiplier).toBeLessThanOrEqual(1.2)
+      expect(multiplier).toBeLessThan(1.0)
     })
 
-    it("should handle different months appropriately", () => {
-      const highSeasonMonths = [11, 0, 1] // Dec, Jan, Feb
+    it("should handle different months appropriately", async () => {
+      const highSeasonMonths = [11, 0, 1, 2] // Dec, Jan, Feb, Mar
       const lowSeasonMonths = [4, 5, 6, 7, 8] // May-Sep
 
-      highSeasonMonths.forEach((month) => {
+      for (const month of highSeasonMonths) {
         const date = new Date(2024, month, 15)
-        const multiplier = (pricingService as any).calculateSeasonalMultiplier(date)
-        expect(multiplier).toBeGreaterThanOrEqual(1.15)
-      })
+        const multiplier = await (pricingService as any).getSeasonalMultiplier(date)
+        expect(multiplier).toBeGreaterThanOrEqual(1.2)
+      }
 
-      lowSeasonMonths.forEach((month) => {
+      for (const month of lowSeasonMonths) {
         const date = new Date(2024, month, 15)
-        const multiplier = (pricingService as any).calculateSeasonalMultiplier(date)
-        expect(multiplier).toBeGreaterThanOrEqual(0.9)
-        expect(multiplier).toBeLessThanOrEqual(1.05)
-      })
+        const multiplier = await (pricingService as any).getSeasonalMultiplier(date)
+        expect(multiplier).toBeLessThanOrEqual(1.0)
+      }
     })
   })
 
   describe("applyPricingRules", () => {
-    it("should apply early booking discount", () => {
+    it("should apply early booking discount", async () => {
       const basePrice = 3000
       const checkIn = new Date()
       checkIn.setDate(checkIn.getDate() + 60) // 60 days in advance
 
-      const rules = [
-        {
-          id: "early-bird",
-          name: "Early Bird Discount",
-          type: "discount" as const,
-          condition: {
-            advanceBookingDays: 30,
-          },
-          value: {
-            type: "percentage" as const,
-            amount: 10,
-          },
-          priority: 1,
-        },
-      ]
+      const request = {
+        listingId: "listing-123",
+        checkIn: checkIn.toISOString().split("T")[0],
+        guests: 2,
+      }
 
-      const discounts = (pricingService as any).applyPricingRules(basePrice, checkIn, 2, 2, rules)
+      const result = await (pricingService as any).applyPricingRules(basePrice, request, 2)
 
-      expect(discounts).toBeGreaterThan(0)
+      expect(result.discounts).toBeGreaterThan(0)
+      expect(result.adjustedPrice).toBeLessThan(basePrice)
     })
 
-    it("should apply long stay discount", () => {
+    it("should apply long stay discount", async () => {
       const basePrice = 3000
       const checkIn = new Date("2024-03-01")
       const nights = 7
 
-      const rules = [
-        {
-          id: "week-discount",
-          name: "Weekly Stay Discount",
-          type: "discount" as const,
-          condition: {
-            minNights: 7,
-          },
-          value: {
-            type: "percentage" as const,
-            amount: 15,
-          },
-          priority: 2,
-        },
-      ]
+      const request = {
+        listingId: "listing-123",
+        checkIn: checkIn.toISOString().split("T")[0],
+        guests: 2,
+      }
 
-      const discounts = (pricingService as any).applyPricingRules(basePrice, checkIn, 2, nights, rules)
+      const result = await (pricingService as any).applyPricingRules(basePrice, request, nights)
 
-      expect(discounts).toBeGreaterThan(0)
+      expect(result.discounts).toBeGreaterThan(0)
+      expect(result.adjustedPrice).toBeLessThan(basePrice)
     })
 
-    it("should not apply discount if conditions not met", () => {
+    it("should not apply discount if conditions not met", async () => {
       const basePrice = 3000
       const checkIn = new Date()
       const nights = 2
 
-      const rules = [
-        {
-          id: "week-discount",
-          name: "Weekly Stay Discount",
-          type: "discount" as const,
-          condition: {
-            minNights: 7, // Requires 7 nights, but booking is only 2
-          },
-          value: {
-            type: "percentage" as const,
-            amount: 15,
-          },
-          priority: 2,
-        },
-      ]
+      const request = {
+        listingId: "listing-123",
+        checkIn: checkIn.toISOString().split("T")[0],
+        guests: 2,
+      }
 
-      const discounts = (pricingService as any).applyPricingRules(basePrice, checkIn, 2, nights, rules)
+      const result = await (pricingService as any).applyPricingRules(basePrice, request, nights)
 
-      expect(discounts).toBe(0)
+      // 2 nights should not get weekly discount, so discounts should be 0 or minimal
+      expect(result.adjustedPrice).toBe(basePrice)
+      expect(result.discounts).toBe(0)
     })
   })
 

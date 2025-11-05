@@ -391,11 +391,11 @@ describe("BookingService", () => {
       }).not.toThrow()
 
       expect(() => {
-        ;(bookingService as any).validateStatusTransition("confirmed", "active")
+        ;(bookingService as any).validateStatusTransition("confirmed", "in_progress")
       }).not.toThrow()
 
       expect(() => {
-        ;(bookingService as any).validateStatusTransition("active", "completed")
+        ;(bookingService as any).validateStatusTransition("in_progress", "completed")
       }).not.toThrow()
     })
 
@@ -412,22 +412,26 @@ describe("BookingService", () => {
 
   describe("getBookingStatusHistory", () => {
     it("should return status history for a booking", async () => {
-      mockQueryBuilder.then = vi.fn().mockResolvedValueOnce([
-        {
-          id: "history-1",
-          bookingId: "booking-123",
-          fromStatus: null,
-          toStatus: "pending",
-          changedAt: new Date("2024-03-01"),
-        },
-        {
-          id: "history-2",
-          bookingId: "booking-123",
-          fromStatus: "pending",
-          toStatus: "confirmed",
-          changedAt: new Date("2024-03-02"),
-        },
-      ])
+      mockQueryBuilder.then = vi.fn((callback) =>
+        Promise.resolve(
+          callback([
+            {
+              id: "history-1",
+              bookingId: "booking-123",
+              fromStatus: null,
+              toStatus: "pending",
+              changedAt: new Date("2024-03-01"),
+            },
+            {
+              id: "history-2",
+              bookingId: "booking-123",
+              fromStatus: "pending",
+              toStatus: "confirmed",
+              changedAt: new Date("2024-03-02"),
+            },
+          ]),
+        ),
+      )
 
       const result = await bookingService.getBookingStatusHistory("booking-123")
 
