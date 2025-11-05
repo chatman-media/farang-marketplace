@@ -29,14 +29,47 @@ describe("Simple Database Schema Tests", () => {
 
   beforeEach(async () => {
     // Clean up test data before each test
-    await db.delete(vehicleCalendarPricing)
-    await db.delete(chatHistory)
-    await db.delete(vehicleRentals)
-    await db.delete(vehicleMaintenance)
-    await db.delete(vehicles)
-    await db.delete(listings)
-    await db.delete(users)
-    await db.delete(aiPromptTemplates)
+    // Wrapped in try-catch to handle cases where tables don't exist yet
+    try {
+      await db.delete(vehicleCalendarPricing)
+    } catch (e) {
+      // Table might not exist yet
+    }
+    try {
+      await db.delete(chatHistory)
+    } catch (e) {
+      // Table might not exist yet
+    }
+    try {
+      await db.delete(vehicleRentals)
+    } catch (e) {
+      // Table might not exist yet
+    }
+    try {
+      await db.delete(vehicleMaintenance)
+    } catch (e) {
+      // Table might not exist yet
+    }
+    try {
+      await db.delete(vehicles)
+    } catch (e) {
+      // Table might not exist yet
+    }
+    try {
+      await db.delete(listings)
+    } catch (e) {
+      // Table might not exist yet
+    }
+    try {
+      await db.delete(users)
+    } catch (e) {
+      // Table might not exist yet
+    }
+    try {
+      await db.delete(aiPromptTemplates)
+    } catch (e) {
+      // Table might not exist yet
+    }
   })
 
   describe("Users Table Extended Fields", () => {

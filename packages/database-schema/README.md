@@ -222,6 +222,15 @@ bun run vitest run src/__tests__/simple-schema.test.ts
 
 ## Environment Variables
 
+Create a `.env` file in the package directory:
+
+```bash
+# Copy example file
+cp .env.example .env
+```
+
+Required variables:
+
 ```env
 # Development database
 DATABASE_URL=postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace
@@ -229,6 +238,8 @@ DATABASE_URL=postgresql://marketplace_user:marketplace_pass@localhost:5432/marke
 # Test database
 TEST_DATABASE_URL=postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test
 ```
+
+The `.env` file is required for running migrations and database operations with Drizzle Kit.
 
 ## Categories and Listing Types
 
