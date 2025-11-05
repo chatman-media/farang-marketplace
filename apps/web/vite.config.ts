@@ -1,9 +1,17 @@
 import { fileURLToPath, URL } from "node:url"
+import { codecovVitePlugin } from "@codecov/vite-plugin"
 import react from "@vitejs/plugin-react-swc"
 import { defineConfig } from "vite"
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    codecovVitePlugin({
+      enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
+      bundleName: "web-app",
+      uploadToken: process.env.CODECOV_TOKEN,
+    }),
+  ],
   base: "/", // Для GitHub Pages с кастомным доменом используем "/"
   resolve: {
     alias: {

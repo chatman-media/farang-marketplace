@@ -139,6 +139,17 @@ ignore:
   - "**/migrations/**"
   - "**/drizzle/**"
 
+# Bundle Analysis Configuration
+bundle_analysis:
+  range: "10...100"
+  comparison:
+    type: "project"
+    show_bundle_analysis: true
+  comment:
+    enabled: true
+  report:
+    enabled: true
+
 # GitHub integration
 github_checks:
   annotations: true
