@@ -111,4 +111,6 @@ build/
 
 .history/
 
+# Uploaded files from tests
 services/user-service/uploads
+uploads/

@@ -460,6 +460,196 @@ describe("CommunicationService", () => {
     })
   })
 
+  describe("markAsResponded", () => {
+    it("should mark message as responded", async () => {
+      mockQuery.mockResolvedValueOnce({ rowCount: 1 })
+
+      const result = await communicationService.markAsResponded("history-123")
+
+      expect(result).toBe(true)
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining("UPDATE communication_history SET responded_at = NOW()"),
+        ["history-123"],
+      )
+    })
+
+    it("should return false if message not found", async () => {
+      mockQuery.mockResolvedValueOnce({ rowCount: 0 })
+
+      const result = await communicationService.markAsResponded("non-existent")
+
+      expect(result).toBe(false)
+    })
+
+    it("should handle errors when marking as responded", async () => {
+      mockQuery.mockRejectedValueOnce(new Error("Database error"))
+
+      const result = await communicationService.markAsResponded("history-123")
+
+      expect(result).toBe(false)
+    })
+  })
+
+  describe("getCommunicationHistory", () => {
+    const mockHistoryData = [
+      {
+        id: "history-1",
+        customer_id: "customer-123",
+        lead_id: null,
+        channel: "email",
+        direction: "outbound",
+        subject: "Test Subject",
+        content: "Test message",
+        template_id: null,
+        campaign_id: null,
+        status: "sent",
+        sent_at: "2023-01-01T12:00:00Z",
+        delivered_at: null,
+        read_at: null,
+        responded_at: null,
+        metadata: {},
+        created_at: "2023-01-01T12:00:00Z",
+      },
+    ]
+
+    it("should get communication history with default options", async () => {
+      mockQuery.mockResolvedValueOnce({ rows: mockHistoryData })
+
+      const history = await communicationService.getCommunicationHistory("customer-123")
+
+      expect(history).toHaveLength(1)
+      expect(history[0].id).toBe("history-1")
+      expect(history[0].customerId).toBe("customer-123")
+    })
+
+    it("should filter by channel", async () => {
+      mockQuery.mockResolvedValueOnce({ rows: mockHistoryData })
+
+      await communicationService.getCommunicationHistory("customer-123", {
+        channel: CommunicationChannel.EMAIL,
+      })
+
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining("AND channel = $2"),
+        expect.arrayContaining(["customer-123", CommunicationChannel.EMAIL]),
+      )
+    })
+
+    it("should filter by date range", async () => {
+      mockQuery.mockResolvedValueOnce({ rows: mockHistoryData })
+
+      const startDate = new Date("2023-01-01")
+      const endDate = new Date("2023-01-31")
+
+      await communicationService.getCommunicationHistory("customer-123", {
+        startDate,
+        endDate,
+      })
+
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining("AND created_at >= $2"),
+        expect.arrayContaining(["customer-123", startDate, endDate]),
+      )
+    })
+
+    it("should use custom limit and offset", async () => {
+      mockQuery.mockResolvedValueOnce({ rows: mockHistoryData })
+
+      await communicationService.getCommunicationHistory("customer-123", {
+        limit: 10,
+        offset: 20,
+      })
+
+      expect(mockQuery).toHaveBeenCalledWith(expect.any(String), expect.arrayContaining(["customer-123", 10, 20]))
+    })
+
+    it("should filter by channel and date range together", async () => {
+      mockQuery.mockResolvedValueOnce({ rows: mockHistoryData })
+
+      const startDate = new Date("2023-01-01")
+      const endDate = new Date("2023-01-31")
+
+      await communicationService.getCommunicationHistory("customer-123", {
+        channel: CommunicationChannel.EMAIL,
+        startDate,
+        endDate,
+        limit: 25,
+        offset: 5,
+      })
+
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining("AND channel = $2"),
+        expect.arrayContaining(["customer-123", CommunicationChannel.EMAIL, startDate, endDate, 25, 5]),
+      )
+    })
+  })
+
+  describe("getCommunicationStats", () => {
+    it("should get stats for day timeframe", async () => {
+      const mockStats = [
+        { channel: "email", direction: "outbound", status: "sent", count: "10" },
+        { channel: "telegram", direction: "inbound", status: "received", count: "5" },
+      ]
+
+      mockQuery.mockResolvedValueOnce({ rows: mockStats })
+
+      const stats = await communicationService.getCommunicationStats(undefined, "day")
+
+      expect(stats).toEqual({
+        email_outbound_sent: 10,
+        telegram_inbound_received: 5,
+      })
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("INTERVAL '1 day'"), [])
+    })
+
+    it("should get stats for week timeframe", async () => {
+      const mockStats = [{ channel: "email", direction: "outbound", status: "sent", count: "50" }]
+
+      mockQuery.mockResolvedValueOnce({ rows: mockStats })
+
+      const stats = await communicationService.getCommunicationStats(undefined, "week")
+
+      expect(stats).toEqual({
+        email_outbound_sent: 50,
+      })
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("INTERVAL '7 days'"), [])
+    })
+
+    it("should get stats for month timeframe (default)", async () => {
+      const mockStats = [{ channel: "email", direction: "outbound", status: "sent", count: "100" }]
+
+      mockQuery.mockResolvedValueOnce({ rows: mockStats })
+
+      const stats = await communicationService.getCommunicationStats(undefined, "month")
+
+      expect(stats).toEqual({
+        email_outbound_sent: 100,
+      })
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("INTERVAL '30 days'"), [])
+    })
+
+    it("should filter stats by customer", async () => {
+      const mockStats = [{ channel: "email", direction: "outbound", status: "sent", count: "10" }]
+
+      mockQuery.mockResolvedValueOnce({ rows: mockStats })
+
+      const stats = await communicationService.getCommunicationStats("customer-123", "day")
+
+      expect(stats).toEqual({
+        email_outbound_sent: 10,
+      })
+      expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining("AND customer_id = $1"), ["customer-123"])
+    })
+
+    it("should handle empty stats", async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] })
+
+      const stats = await communicationService.getCommunicationStats("customer-123")
+
+      expect(stats).toEqual({})
+    })
+  })
+
   describe("shutdown", () => {
     it("should shutdown all communication services", async () => {
       mockTelegramService.stopBot.mockResolvedValueOnce(undefined)
@@ -469,6 +659,14 @@ describe("CommunicationService", () => {
 
       expect(mockTelegramService.stopBot).toHaveBeenCalled()
       expect(mockWhatsAppService.destroy).toHaveBeenCalled()
+    })
+
+    it("should handle errors during shutdown", async () => {
+      mockTelegramService.stopBot.mockRejectedValueOnce(new Error("Telegram shutdown error"))
+      mockWhatsAppService.destroy.mockResolvedValueOnce(undefined)
+
+      // Should not throw error
+      await expect(communicationService.shutdown()).resolves.toBeUndefined()
     })
   })
 })
