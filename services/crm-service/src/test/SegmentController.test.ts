@@ -486,4 +486,271 @@ describe("SegmentController", () => {
       expect(body.data).toHaveProperty("largestSegment")
     })
   })
+
+  describe("POST /api/crm/segments/:id/recalculate", () => {
+    it("should recalculate segment membership successfully", async () => {
+      // First create a segment
+      const segmentData = {
+        name: "TestController Recalculate Segment",
+        criteria: [
+          {
+            field: "status",
+            operator: SegmentOperator.EQUALS,
+            value: "customer",
+            dataType: SegmentDataType.ENUM,
+          },
+        ],
+        operator: "AND",
+      }
+
+      const createResponse = await app.inject({
+        method: "POST",
+        url: "/api/crm/segments",
+        headers: {
+          authorization: `Bearer ${authToken}`,
+          "content-type": "application/json",
+        },
+        payload: segmentData,
+      })
+
+      const createBody = JSON.parse(createResponse.body)
+      testSegmentId = createBody.data.id
+
+      // Recalculate the segment
+      const recalcResponse = await app.inject({
+        method: "POST",
+        url: `/api/crm/segments/${testSegmentId}/recalculate`,
+        headers: {
+          authorization: `Bearer ${authToken}`,
+        },
+      })
+
+      expect(recalcResponse.statusCode).toBe(200)
+      const recalcBody = JSON.parse(recalcResponse.body)
+      expect(recalcBody.success).toBe(true)
+      expect(recalcBody.data).toHaveProperty("customerCount")
+      expect(typeof recalcBody.data.customerCount).toBe("number")
+    })
+
+    it("should return 404 for non-existent segment", async () => {
+      const nonExistentId = "00000000-0000-0000-0000-000000000000"
+      const response = await app.inject({
+        method: "POST",
+        url: `/api/crm/segments/${nonExistentId}/recalculate`,
+        headers: {
+          authorization: `Bearer ${authToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(404)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(false)
+      expect(body.error).toBe("Segment not found")
+    })
+  })
+
+  describe("GET /api/crm/segments/:id/customers", () => {
+    it("should return customers in segment with pagination", async () => {
+      // First create a segment
+      const segmentData = {
+        name: "TestController Customers Segment",
+        criteria: [
+          {
+            field: "status",
+            operator: SegmentOperator.EQUALS,
+            value: "customer",
+            dataType: SegmentDataType.ENUM,
+          },
+        ],
+        operator: "AND",
+      }
+
+      const createResponse = await app.inject({
+        method: "POST",
+        url: "/api/crm/segments",
+        headers: {
+          authorization: `Bearer ${authToken}`,
+          "content-type": "application/json",
+        },
+        payload: segmentData,
+      })
+
+      const createBody = JSON.parse(createResponse.body)
+      testSegmentId = createBody.data.id
+
+      // Get customers in segment
+      const response = await app.inject({
+        method: "GET",
+        url: `/api/crm/segments/${testSegmentId}/customers`,
+        headers: {
+          authorization: `Bearer ${authToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(true)
+      expect(body.data).toBeInstanceOf(Array)
+      expect(body.pagination).toBeDefined()
+      expect(body.pagination.page).toBe(1)
+      expect(body.pagination.limit).toBe(20)
+    })
+
+    it("should support pagination parameters", async () => {
+      // First create a segment
+      const segmentData = {
+        name: "TestController Pagination Segment",
+        criteria: [
+          {
+            field: "status",
+            operator: SegmentOperator.EQUALS,
+            value: "customer",
+            dataType: SegmentDataType.ENUM,
+          },
+        ],
+        operator: "AND",
+      }
+
+      const createResponse = await app.inject({
+        method: "POST",
+        url: "/api/crm/segments",
+        headers: {
+          authorization: `Bearer ${authToken}`,
+          "content-type": "application/json",
+        },
+        payload: segmentData,
+      })
+
+      const createBody = JSON.parse(createResponse.body)
+      testSegmentId = createBody.data.id
+
+      // Get customers with custom pagination
+      const response = await app.inject({
+        method: "GET",
+        url: `/api/crm/segments/${testSegmentId}/customers?page=2&limit=5`,
+        headers: {
+          authorization: `Bearer ${authToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.pagination.page).toBe(2)
+      expect(body.pagination.limit).toBe(5)
+    })
+  })
+
+  describe("POST /api/crm/segments/recalculate-all", () => {
+    it("should recalculate all segment memberships successfully", async () => {
+      const response = await app.inject({
+        method: "POST",
+        url: "/api/crm/segments/recalculate-all",
+        headers: {
+          authorization: `Bearer ${authToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(true)
+      expect(body.message).toContain("recalculated successfully")
+    })
+  })
+
+  describe("Error handling", () => {
+    it("should handle validation errors in update", async () => {
+      // First create a segment
+      const segmentData = {
+        name: "TestController Validation Segment",
+        criteria: [
+          {
+            field: "status",
+            operator: SegmentOperator.EQUALS,
+            value: "customer",
+            dataType: SegmentDataType.ENUM,
+          },
+        ],
+        operator: "AND",
+      }
+
+      const createResponse = await app.inject({
+        method: "POST",
+        url: "/api/crm/segments",
+        headers: {
+          authorization: `Bearer ${authToken}`,
+          "content-type": "application/json",
+        },
+        payload: segmentData,
+      })
+
+      const createBody = JSON.parse(createResponse.body)
+      testSegmentId = createBody.data.id
+
+      // Try to update with invalid data
+      const invalidUpdate = {
+        name: "", // Invalid: empty name
+      }
+
+      const updateResponse = await app.inject({
+        method: "PUT",
+        url: `/api/crm/segments/${testSegmentId}`,
+        headers: {
+          authorization: `Bearer ${authToken}`,
+          "content-type": "application/json",
+        },
+        payload: invalidUpdate,
+      })
+
+      expect(updateResponse.statusCode).toBe(400)
+      const updateBody = JSON.parse(updateResponse.body)
+      expect(updateBody.success).toBe(false)
+      expect(updateBody.error).toBe("Validation failed")
+    })
+
+    it("should handle errors in getSegments", async () => {
+      // Get segments with extremely large pagination values to potentially cause issues
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/crm/segments?page=999999&limit=999999",
+        headers: {
+          authorization: `Bearer ${authToken}`,
+        },
+      })
+
+      // Should still return successfully, even with large values
+      expect(response.statusCode).toBe(200)
+    })
+
+    it("should handle filtering by inactive status", async () => {
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/crm/segments?isActive=false",
+        headers: {
+          authorization: `Bearer ${authToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(true)
+      // All returned segments should be inactive
+      body.data.forEach((segment: any) => {
+        expect(segment.isActive).toBe(false)
+      })
+    })
+
+    it("should handle search with special characters", async () => {
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/crm/segments?search=%25test%25",
+        headers: {
+          authorization: `Bearer ${authToken}`,
+        },
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.success).toBe(true)
+    })
+  })
 })

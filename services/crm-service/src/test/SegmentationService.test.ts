@@ -410,5 +410,612 @@ describe("SegmentationService", () => {
       const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
       expect(Array.isArray(customerIds)).toBe(true)
     })
+
+    it("should handle NOT_CONTAINS operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceNOT_CONTAINS",
+        criteria: [
+          {
+            field: "email",
+            operator: SegmentOperator.NOT_CONTAINS,
+            value: "test",
+            dataType: SegmentDataType.STRING,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle STARTS_WITH operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceSTARTS_WITH",
+        criteria: [
+          {
+            field: "email",
+            operator: SegmentOperator.STARTS_WITH,
+            value: "admin",
+            dataType: SegmentDataType.STRING,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle ENDS_WITH operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceENDS_WITH",
+        criteria: [
+          {
+            field: "email",
+            operator: SegmentOperator.ENDS_WITH,
+            value: ".com",
+            dataType: SegmentDataType.STRING,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle GREATER_THAN_OR_EQUAL operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceGREATER_THAN_OR_EQUAL",
+        criteria: [
+          {
+            field: "lifetimeValue",
+            operator: SegmentOperator.GREATER_THAN_OR_EQUAL,
+            value: 100,
+            dataType: SegmentDataType.NUMBER,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle LESS_THAN_OR_EQUAL operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceLESS_THAN_OR_EQUAL",
+        criteria: [
+          {
+            field: "lifetimeValue",
+            operator: SegmentOperator.LESS_THAN_OR_EQUAL,
+            value: 1000,
+            dataType: SegmentDataType.NUMBER,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle IN operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceIN",
+        criteria: [
+          {
+            field: "status",
+            operator: SegmentOperator.IN,
+            value: ["lead", "customer", "partner"],
+            dataType: SegmentDataType.ENUM,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle NOT_IN operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceNOT_IN",
+        criteria: [
+          {
+            field: "status",
+            operator: SegmentOperator.NOT_IN,
+            value: ["archived", "deleted"],
+            dataType: SegmentDataType.ENUM,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle IS_NULL operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceIS_NULL",
+        criteria: [
+          {
+            field: "company",
+            operator: SegmentOperator.IS_NULL,
+            value: null,
+            dataType: SegmentDataType.STRING,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle IS_NOT_NULL operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceIS_NOT_NULL",
+        criteria: [
+          {
+            field: "company",
+            operator: SegmentOperator.IS_NOT_NULL,
+            value: null,
+            dataType: SegmentDataType.STRING,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle BETWEEN operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceBETWEEN",
+        criteria: [
+          {
+            field: "lifetimeValue",
+            operator: SegmentOperator.BETWEEN,
+            value: [100, 1000],
+            dataType: SegmentDataType.NUMBER,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle DATE_BEFORE operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceDATE_BEFORE",
+        criteria: [
+          {
+            field: "createdAt",
+            operator: SegmentOperator.DATE_BEFORE,
+            value: "2024-01-01",
+            dataType: SegmentDataType.DATE,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle DATE_AFTER operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceDATE_AFTER",
+        criteria: [
+          {
+            field: "createdAt",
+            operator: SegmentOperator.DATE_AFTER,
+            value: "2023-01-01",
+            dataType: SegmentDataType.DATE,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle DATE_BETWEEN operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceDATE_BETWEEN",
+        criteria: [
+          {
+            field: "createdAt",
+            operator: SegmentOperator.DATE_BETWEEN,
+            value: ["2023-01-01", "2024-12-31"],
+            dataType: SegmentDataType.DATE,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle DAYS_AGO operator", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceDAYS_AGO",
+        criteria: [
+          {
+            field: "createdAt",
+            operator: SegmentOperator.DAYS_AGO,
+            value: 30,
+            dataType: SegmentDataType.NUMBER,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+
+    it("should handle OR operator for multiple criteria", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceOR",
+        criteria: [
+          {
+            field: "status",
+            operator: SegmentOperator.EQUALS,
+            value: "lead",
+            dataType: SegmentDataType.ENUM,
+          },
+          {
+            field: "status",
+            operator: SegmentOperator.EQUALS,
+            value: "customer",
+            dataType: SegmentDataType.ENUM,
+          },
+        ],
+        operator: "OR",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      const customerIds = await segmentationService.getCustomersMatchingSegment(segment)
+      expect(Array.isArray(customerIds)).toBe(true)
+    })
+  })
+
+  describe("recalculateSegmentMembership", () => {
+    it("should recalculate membership for existing segment", async () => {
+      const segment = await segmentationService.createSegment(
+        {
+          name: "TestServiceRecalculate Membership",
+          criteria: [
+            {
+              field: "status",
+              operator: SegmentOperator.EQUALS,
+              value: "customer",
+              dataType: SegmentDataType.ENUM,
+            },
+          ],
+          operator: "AND",
+        },
+        testUserId,
+      )
+      testSegmentId = segment.id
+
+      const customerCount = await segmentationService.recalculateSegmentMembership(segment.id)
+      expect(typeof customerCount).toBe("number")
+      expect(customerCount).toBeGreaterThanOrEqual(0)
+    })
+
+    it("should throw error for non-existent segment", async () => {
+      const nonExistentId = "00000000-0000-0000-0000-000000000000"
+      await expect(segmentationService.recalculateSegmentMembership(nonExistentId)).rejects.toThrow("Segment not found")
+    })
+  })
+
+  describe("recalculateAllSegmentMemberships", () => {
+    it("should recalculate all active segments", async () => {
+      // Create a few test segments
+      const segment1 = await segmentationService.createSegment(
+        {
+          name: "TestServiceRecalcAll 1",
+          criteria: [
+            {
+              field: "status",
+              operator: SegmentOperator.EQUALS,
+              value: "customer",
+              dataType: SegmentDataType.ENUM,
+            },
+          ],
+          operator: "AND",
+          isActive: true,
+        },
+        testUserId,
+      )
+
+      const segment2 = await segmentationService.createSegment(
+        {
+          name: "TestServiceRecalcAll 2",
+          criteria: [
+            {
+              field: "status",
+              operator: SegmentOperator.EQUALS,
+              value: "lead",
+              dataType: SegmentDataType.ENUM,
+            },
+          ],
+          operator: "AND",
+          isActive: true,
+        },
+        testUserId,
+      )
+
+      await expect(segmentationService.recalculateAllSegmentMemberships()).resolves.toBeUndefined()
+
+      // Clean up
+      await query("DELETE FROM customer_segments WHERE id IN ($1, $2)", [segment1.id, segment2.id])
+    })
+  })
+
+  describe("getCustomersInSegment", () => {
+    it("should get customers in segment with pagination", async () => {
+      const segment = await segmentationService.createSegment(
+        {
+          name: "TestServiceGet Customers",
+          criteria: [
+            {
+              field: "status",
+              operator: SegmentOperator.EQUALS,
+              value: "customer",
+              dataType: SegmentDataType.ENUM,
+            },
+          ],
+          operator: "AND",
+        },
+        testUserId,
+      )
+      testSegmentId = segment.id
+
+      const result = await segmentationService.getCustomersInSegment(segment.id, {
+        limit: 10,
+        offset: 0,
+      })
+
+      expect(result).toHaveProperty("customers")
+      expect(result).toHaveProperty("total")
+      expect(Array.isArray(result.customers)).toBe(true)
+      expect(typeof result.total).toBe("number")
+    })
+
+    it("should support custom pagination", async () => {
+      const segment = await segmentationService.createSegment(
+        {
+          name: "TestServicePagination Customers",
+          criteria: [
+            {
+              field: "status",
+              operator: SegmentOperator.EQUALS,
+              value: "customer",
+              dataType: SegmentDataType.ENUM,
+            },
+          ],
+          operator: "AND",
+        },
+        testUserId,
+      )
+      testSegmentId = segment.id
+
+      const result = await segmentationService.getCustomersInSegment(segment.id, {
+        limit: 5,
+        offset: 10,
+      })
+
+      expect(result.customers.length).toBeLessThanOrEqual(5)
+    })
+  })
+
+  describe("edge cases", () => {
+    it("should handle update with no changes", async () => {
+      const segment = await segmentationService.createSegment(
+        {
+          name: "TestServiceNo Changes",
+          criteria: [
+            {
+              field: "status",
+              operator: SegmentOperator.EQUALS,
+              value: "customer",
+              dataType: SegmentDataType.ENUM,
+            },
+          ],
+          operator: "AND",
+        },
+        testUserId,
+      )
+      testSegmentId = segment.id
+
+      // Update with empty data
+      const result = await segmentationService.updateSegment(segment.id, {})
+      expect(result).toBeInstanceOf(Segment)
+      expect(result?.id).toBe(segment.id)
+    })
+
+    it("should handle update with criteria changes", async () => {
+      const segment = await segmentationService.createSegment(
+        {
+          name: "TestServiceCriteria Change",
+          criteria: [
+            {
+              field: "status",
+              operator: SegmentOperator.EQUALS,
+              value: "lead",
+              dataType: SegmentDataType.ENUM,
+            },
+          ],
+          operator: "AND",
+        },
+        testUserId,
+      )
+      testSegmentId = segment.id
+
+      const newCriteria = [
+        {
+          field: "status",
+          operator: SegmentOperator.EQUALS,
+          value: "customer",
+          dataType: SegmentDataType.ENUM,
+        },
+      ]
+
+      const result = await segmentationService.updateSegment(segment.id, {
+        criteria: newCriteria,
+      })
+
+      expect(result?.criteria).toEqual(newCriteria)
+    })
+
+    it("should reject update with conflicting name", async () => {
+      const segment1 = await segmentationService.createSegment(
+        {
+          name: "TestServiceConflict 1",
+          criteria: [
+            {
+              field: "status",
+              operator: SegmentOperator.EQUALS,
+              value: "customer",
+              dataType: SegmentDataType.ENUM,
+            },
+          ],
+          operator: "AND",
+        },
+        testUserId,
+      )
+
+      const segment2 = await segmentationService.createSegment(
+        {
+          name: "TestServiceConflict 2",
+          criteria: [
+            {
+              field: "status",
+              operator: SegmentOperator.EQUALS,
+              value: "lead",
+              dataType: SegmentDataType.ENUM,
+            },
+          ],
+          operator: "AND",
+        },
+        testUserId,
+      )
+
+      // Try to update segment2 with segment1's name
+      await expect(segmentationService.updateSegment(segment2.id, { name: segment1.name })).rejects.toThrow(
+        "already exists",
+      )
+
+      // Clean up
+      await query("DELETE FROM customer_segments WHERE id IN ($1, $2)", [segment1.id, segment2.id])
+    })
+
+    it("should handle query errors gracefully", async () => {
+      const segment = new Segment({
+        id: "test-id",
+        name: "TestServiceInvalid Field",
+        criteria: [
+          {
+            field: "invalid_field_that_does_not_exist",
+            operator: SegmentOperator.EQUALS,
+            value: "test",
+            dataType: SegmentDataType.STRING,
+          },
+        ],
+        operator: "AND",
+        is_active: true,
+        created_by: "test-user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+
+      // Should handle invalid field gracefully
+      await expect(segmentationService.getCustomersMatchingSegment(segment)).rejects.toThrow()
+    })
   })
 })
