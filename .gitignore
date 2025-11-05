@@ -107,6 +107,6 @@ build/
 .turbo
 
 # Bun
-bun.lockb
+# Note: bun.lockb should be committed to ensure consistent dependencies
 
 .history/

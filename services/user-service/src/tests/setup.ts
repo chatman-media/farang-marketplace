@@ -1,15 +1,16 @@
 // biome-ignore assist/source/organizeImports: fix
 import path from "path"
 
+// IMPORTANT: Set DATABASE_URL FIRST before any imports that might use it
+process.env.DATABASE_URL = "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace"
+process.env.NODE_ENV = "test"
+
 import dotenv from "dotenv"
 import { beforeEach, vi } from "vitest"
 
-// Load test environment variables
+// Load test environment variables (this will override if needed)
 dotenv.config({ path: path.join(__dirname, "../../../.env.test") })
-
-// Mock environment variables with correct values for local testing
-process.env.DATABASE_URL = "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace"
-process.env.NODE_ENV = "test"
+dotenv.config({ path: path.join(__dirname, "../../.env.test") })
 
 // Note: bcrypt is not mocked to allow real password hashing in tests
 

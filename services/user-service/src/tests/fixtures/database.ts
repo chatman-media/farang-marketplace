@@ -346,9 +346,16 @@ export async function setupTestDatabase(): Promise<void> {
  */
 export async function cleanupTestDatabase(): Promise<void> {
   try {
+    // Ensure DATABASE_URL is set (should be set in setup.ts but fallback just in case)
     const connectionString =
       process.env.DATABASE_URL ||
-      `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
+      "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace"
+
+    if (!connectionString || connectionString.includes("undefined")) {
+      logger.warn("Skipping test database cleanup - DATABASE_URL not properly configured")
+      return
+    }
+
     const db = createDatabaseConnection(connectionString)
 
     // Delete all test users (this will cascade to related tables)
