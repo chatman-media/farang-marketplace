@@ -7,33 +7,36 @@ import { afterAll, beforeAll } from "vitest"
 config({ path: path.resolve(__dirname, "../../.env.test"), debug: false })
 
 beforeAll(async () => {
-  // Set default test database URL if not provided
-  if (!process.env.TEST_DATABASE_URL) {
-    process.env.TEST_DATABASE_URL = "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test"
-  }
+  // Use DATABASE_URL from environment (set by CI) or fallback to test default
+  const testDbUrl = process.env.DATABASE_URL || "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace_test"
 
   console.log("Test setup started")
-  console.log("Test DB URL:", process.env.TEST_DATABASE_URL?.replace(/:[^:]*@/, ":***@"))
+  console.log("Test DB URL:", testDbUrl.replace(/:[^:]*@/, ":***@"))
 
-  try {
-    // Run database migrations using drizzle-kit push
-    console.log("Applying database schema...")
-    const rootDir = path.resolve(__dirname, "../../")
+  // Skip migration if already applied (CI pre-applies schema)
+  // This prevents double application and speeds up tests
+  if (!process.env.CI) {
+    try {
+      // Run database migrations using drizzle-kit push (local development only)
+      console.log("Applying database schema...")
+      const rootDir = path.resolve(__dirname, "../../")
 
-    // Use drizzle-kit push to sync schema with test database
-    execSync("bun run db:push", {
-      cwd: rootDir,
-      env: {
-        ...process.env,
-        DATABASE_URL: process.env.TEST_DATABASE_URL,
-      },
-      stdio: "inherit",
-    })
+      execSync("bun run db:push", {
+        cwd: rootDir,
+        env: {
+          ...process.env,
+          DATABASE_URL: testDbUrl,
+        },
+        stdio: "inherit",
+      })
 
-    console.log("Database schema applied successfully")
-  } catch (error) {
-    console.error("Failed to apply database schema:", error)
-    throw error
+      console.log("Database schema applied successfully")
+    } catch (error) {
+      console.error("Failed to apply database schema:", error)
+      throw error
+    }
+  } else {
+    console.log("CI detected - skipping schema application (already applied)")
   }
 
   console.log("Test setup completed")
