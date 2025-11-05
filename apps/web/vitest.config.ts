@@ -11,11 +11,11 @@ export default mergeConfig(
       setupFiles: ["./src/test/setup.ts"],
       testTimeout: 30000,
       hookTimeout: 30000,
-      // Use threads instead of forks for better CI compatibility
-      pool: "threads",
+      // Use forks for better CI stability (threads can timeout in CI)
+      pool: "forks",
       poolOptions: {
-        threads: {
-          singleThread: true,
+        forks: {
+          singleFork: true,
         },
       },
     },
