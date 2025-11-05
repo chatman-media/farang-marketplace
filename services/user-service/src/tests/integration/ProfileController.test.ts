@@ -1,7 +1,6 @@
 import { randomUUID } from "crypto"
 import { sql } from "@marketplace/database-schema"
 import { VerificationStatus } from "@marketplace/shared-types"
-import bcrypt from "bcryptjs"
 import { FastifyInstance } from "fastify"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import { createApp } from "../../app"
@@ -31,51 +30,63 @@ describe("ProfileController Integration Tests", () => {
   })
 
   beforeEach(async () => {
-    // Generate proper UUIDs for test users
-    const testUserId = randomUUID()
-    const adminUserId = randomUUID()
-
     // Get a direct database connection for setup
     const db = getTestConnection()
 
     // Ensure clean state
     await db.execute(sql`DELETE FROM users WHERE email LIKE '%@example.com'`)
 
-    // Create test users with direct database insertion to ensure persistence
-    const hashedPassword = await bcrypt.hash("password123", 12)
+    testEmail = `test-${randomUUID().slice(0, 8)}@example.com`
+    adminEmail = `admin-${randomUUID().slice(0, 8)}@example.com`
 
-    testEmail = "test@example.com"
-    adminEmail = "admin@example.com"
+    // Create users via registration endpoint to ensure proper password hashing
+    const userRegisterResponse = await app.inject({
+      method: "POST",
+      url: "/api/auth/register",
+      payload: {
+        email: testEmail,
+        password: "password123",
+        profile: {
+          firstName: "Test",
+          lastName: "User",
+        },
+      },
+    })
 
-    await db.execute(sql`
-      INSERT INTO users (id, email, password_hash, role, first_name, last_name, profile, is_active, is_verified, created_at, updated_at)
-      VALUES
-        (${testUserId}, ${testEmail}, ${hashedPassword}, 'user', 'Test', 'User',
-         ${JSON.stringify({
-           firstName: "Test",
-           lastName: "User",
-           rating: 0,
-           reviewsCount: 0,
-           verificationStatus: "unverified",
-           socialProfiles: [],
-           primaryAuthProvider: "email",
-         })}, true, false, NOW(), NOW()),
-        (${adminUserId}, ${adminEmail}, ${hashedPassword}, 'admin', 'Admin', 'User',
-         ${JSON.stringify({
-           firstName: "Admin",
-           lastName: "User",
-           rating: 0,
-           reviewsCount: 0,
-           verificationStatus: "verified",
-           socialProfiles: [],
-           primaryAuthProvider: "email",
-         })}, true, true, NOW(), NOW())
-    `)
+    const adminRegisterResponse = await app.inject({
+      method: "POST",
+      url: "/api/auth/register",
+      payload: {
+        email: adminEmail,
+        password: "password123",
+        profile: {
+          firstName: "Admin",
+          lastName: "User",
+        },
+      },
+    })
 
-    // Small delay to ensure data is fully persisted in CI environments
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    // Verify registrations succeeded
+    if (userRegisterResponse.statusCode !== 201) {
+      console.error("❌ User registration failed:", {
+        status: userRegisterResponse.statusCode,
+        body: userRegisterResponse.body,
+      })
+    }
+    if (adminRegisterResponse.statusCode !== 201) {
+      console.error("❌ Admin registration failed:", {
+        status: adminRegisterResponse.statusCode,
+        body: adminRegisterResponse.body,
+      })
+    }
 
-    // Now get tokens - users are guaranteed to exist
+    expect(userRegisterResponse.statusCode).toBe(201)
+    expect(adminRegisterResponse.statusCode).toBe(201)
+
+    // Update admin role via database
+    await db.execute(sql`UPDATE users SET role = 'admin', is_verified = true WHERE email = ${adminEmail}`)
+
+    // Now login to get tokens
     const userLoginResponse = await app.inject({
       method: "POST",
       url: "/api/auth/login",
