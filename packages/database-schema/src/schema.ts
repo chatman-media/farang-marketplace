@@ -793,6 +793,7 @@ export const customers = pgTable("customers", {
   // CRM fields
   lifetimeValue: decimal("lifetime_value", { precision: 10, scale: 2 }),
   leadScore: integer("lead_score").default(0),
+  totalInteractions: integer("total_interactions").default(0),
   lastInteractionAt: timestamp("last_interaction_at"),
   preferredChannel: varchar("preferred_channel", { length: 20 }).default("email"),
 
@@ -864,8 +865,25 @@ export const campaigns = pgTable("campaigns", {
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
 
+  // Status
+  isActive: boolean("is_active").notNull().default(true),
+
   // CRM fields
   contactCount: integer("contact_count").default(0),
+
+  // Metrics (calculated by CronService)
+  totalSent: integer("total_sent").default(0),
+  totalDelivered: integer("total_delivered").default(0),
+  totalOpened: integer("total_opened").default(0),
+  totalClicked: integer("total_clicked").default(0),
+  totalBounced: integer("total_bounced").default(0),
+  totalUnsubscribed: integer("total_unsubscribed").default(0),
+  conversionRate: decimal("conversion_rate", { precision: 5, scale: 2 }).default("0"),
+  openRate: decimal("open_rate", { precision: 5, scale: 2 }).default("0"),
+  clickRate: decimal("click_rate", { precision: 5, scale: 2 }).default("0"),
+  bounceRate: decimal("bounce_rate", { precision: 5, scale: 2 }).default("0"),
+  unsubscribeRate: decimal("unsubscribe_rate", { precision: 5, scale: 2 }).default("0"),
+  metricsUpdatedAt: timestamp("metrics_updated_at"),
 
   // Timestamps
   createdAt: timestamp("created_at").notNull().defaultNow(),

@@ -247,7 +247,7 @@ export class CronService {
         COUNT(CASE WHEN status = 'clicked' THEN 1 END) as total_clicked,
         COUNT(CASE WHEN status = 'bounced' THEN 1 END) as total_bounced,
         COUNT(CASE WHEN status = 'unsubscribed' THEN 1 END) as total_unsubscribed
-      FROM communications 
+      FROM communication_history
       WHERE campaign_id = $1
     `,
       [campaignId],
@@ -330,20 +330,20 @@ export class CronService {
     try {
       // Update total interactions for all customers
       await query(`
-        UPDATE customers 
+        UPDATE customers
         SET total_interactions = (
-          SELECT COUNT(*) 
-          FROM communications 
+          SELECT COUNT(*)
+          FROM communication_history
           WHERE customer_id = customers.id
         ),
         last_interaction_at = (
-          SELECT MAX(created_at) 
-          FROM communications 
+          SELECT MAX(created_at)
+          FROM communication_history
           WHERE customer_id = customers.id
         )
         WHERE id IN (
-          SELECT DISTINCT customer_id 
-          FROM communications 
+          SELECT DISTINCT customer_id
+          FROM communication_history
           WHERE created_at > NOW() - INTERVAL '5 minutes'
         )
       `)
@@ -392,18 +392,19 @@ export class CronService {
     try {
       // Delete old communications (older than 1 year)
       const oldCommsResult = await query(`
-        DELETE FROM communications 
+        DELETE FROM communication_history
         WHERE created_at < NOW() - INTERVAL '1 year'
       `)
 
       // Delete old automation executions (older than 3 months)
-      const oldExecutionsResult = await query(`
-        DELETE FROM automation_executions 
-        WHERE created_at < NOW() - INTERVAL '3 months'
-      `)
+      // TODO: Create automation_executions table
+      // const oldExecutionsResult = await query(`
+      //   DELETE FROM automation_executions
+      //   WHERE created_at < NOW() - INTERVAL '3 months'
+      // `)
 
       logger.info(
-        `🧹 Cleaned up ${oldCommsResult.rowCount} old communications and ${oldExecutionsResult.rowCount} old executions`,
+        `🧹 Cleaned up ${oldCommsResult.rowCount} old communications`,
       )
     } catch (error) {
       logger.error("Failed to cleanup old data:", error)

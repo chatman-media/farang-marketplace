@@ -10,8 +10,8 @@
     "services/*"
   ],
   "scripts": {
-    "dev": "turbo run dev",
-    "dev:ui": "turbo run dev --ui=tui",
+    "dev": "turbo run dev --concurrency=16",
+    "dev:ui": "turbo run dev --ui=tui --concurrency=16",
     "build": "turbo run build",
     "test": "turbo run test",
     "test:all": "./scripts/test-all.sh",

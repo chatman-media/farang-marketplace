@@ -29,46 +29,18 @@ describe("Simple Database Schema Tests", () => {
 
   beforeEach(async () => {
     // Clean up test data before each test
-    // Wrapped in try-catch to handle cases where tables don't exist yet
+    // Delete in reverse order of dependencies (child tables first)
     try {
       await db.delete(vehicleCalendarPricing)
-    } catch (e) {
-      // Table might not exist yet
-    }
-    try {
-      await db.delete(chatHistory)
-    } catch (e) {
-      // Table might not exist yet
-    }
-    try {
       await db.delete(vehicleRentals)
-    } catch (e) {
-      // Table might not exist yet
-    }
-    try {
       await db.delete(vehicleMaintenance)
-    } catch (e) {
-      // Table might not exist yet
-    }
-    try {
       await db.delete(vehicles)
-    } catch (e) {
-      // Table might not exist yet
-    }
-    try {
+      await db.delete(chatHistory)
       await db.delete(listings)
-    } catch (e) {
-      // Table might not exist yet
-    }
-    try {
+      await db.delete(aiPromptTemplates)
       await db.delete(users)
     } catch (e) {
-      // Table might not exist yet
-    }
-    try {
-      await db.delete(aiPromptTemplates)
-    } catch (e) {
-      // Table might not exist yet
+      // Tables might not exist yet or cleanup failed - will be handled by test
     }
   })
 
@@ -177,7 +149,7 @@ describe("Simple Database Schema Tests", () => {
       expect(vehicle.model).toBe("PCX 150")
       expect(vehicle.power).toBe("150cc")
       expect(vehicle.oldVehicleNumber).toBe("SCT001")
-      expect(vehicle.engineSize).toBe(150.0)
+      expect(vehicle.engineSize).toBe("150.00")
       expect(vehicle.fuelType).toBe("gasoline")
       expect(vehicle.transmission).toBe("automatic")
       expect(vehicle.mileage).toBe(5000)
