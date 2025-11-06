@@ -72,6 +72,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test_db
         options: >-
@@ -125,8 +126,13 @@ jobs:
           EOF
 
           # Setup CRM service .env.test with CI database credentials
+          # Copy the file and replace DATABASE_URL to ensure it uses CI credentials
           if [ -f services/crm-service/.env.test ]; then
-            sed -i 's|DATABASE_URL=.*|DATABASE_URL=${{ env.DATABASE_URL }}|g' services/crm-service/.env.test
+            # Create a temporary file with updated DATABASE_URL
+            grep -v '^DATABASE_URL=' services/crm-service/.env.test > services/crm-service/.env.test.tmp || true
+            echo "DATABASE_URL=${{ env.DATABASE_URL }}" >> services/crm-service/.env.test.tmp
+            mv services/crm-service/.env.test.tmp services/crm-service/.env.test
+            echo "Updated CRM service .env.test with DATABASE_URL=${{ env.DATABASE_URL }}"
           fi
 
       - name: ⏳ Wait for services to be ready
@@ -134,10 +140,17 @@ jobs:
           echo "Waiting for PostgreSQL..."
           timeout 30 bash -c 'until pg_isready -h localhost -p 5432 -U postgres; do sleep 1; done'
 
+          echo "Testing PostgreSQL connection..."
+          PGPASSWORD=postgres psql -h localhost -U postgres -d test_db -c "SELECT version();"
+
           echo "Waiting for Redis..."
           timeout 30 bash -c 'until redis-cli -h localhost -p 6379 ping; do sleep 1; done'
 
           echo "✅ All services are ready!"
+
+          # Verify CRM service .env.test
+          echo "CRM service .env.test DATABASE_URL:"
+          grep "^DATABASE_URL=" services/crm-service/.env.test || echo "DATABASE_URL not found"
 
       - name: 🗄️ Initialize test database
         run: |
