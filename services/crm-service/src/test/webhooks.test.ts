@@ -15,6 +15,9 @@ describe("Webhook Routes", () => {
       },
     }
 
+    // Initialize TelegramService before registering routes
+    setTelegramService(mockTelegramService)
+
     await fastify.register(webhookRoutes, { prefix: "/webhooks" })
     await fastify.ready()
   })

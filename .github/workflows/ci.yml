@@ -111,6 +111,7 @@ jobs:
 
       - name: 🔧 Setup test environment
         run: |
+          # Setup root .env.test
           cp .env.example .env.test || touch .env.test
           # Remove existing DATABASE_URL to avoid duplicates
           sed -i '/^DATABASE_URL=/d' .env.test || true
@@ -122,6 +123,11 @@ jobs:
           NODE_ENV=test
           LOG_LEVEL=error
           EOF
+
+          # Setup CRM service .env.test with CI database credentials
+          if [ -f services/crm-service/.env.test ]; then
+            sed -i 's|DATABASE_URL=.*|DATABASE_URL=${{ env.DATABASE_URL }}|g' services/crm-service/.env.test
+          fi
 
       - name: ⏳ Wait for services to be ready
         run: |
