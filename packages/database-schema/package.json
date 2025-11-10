@@ -33,7 +33,7 @@
     "drizzle-kit": "^0.31.6",
     "typescript": "^5.9.3",
     "vitest": "4.0.7",
-    "@vitest/coverage-v8": "4.0.7",
+    "@vitest/coverage-v8": "4.0.8",
     "dotenv": "17.2.3"
   },
   "exports": {
