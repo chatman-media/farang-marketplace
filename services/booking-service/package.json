@@ -49,7 +49,7 @@
     "@vitest/coverage-v8": "4.0.7",
     "supertest": "^7.1.4",
     "typescript": "^5.9.3",
-    "vitest": "4.0.7"
+    "vitest": "4.0.8"
   },
   "keywords": [
     "marketplace",
