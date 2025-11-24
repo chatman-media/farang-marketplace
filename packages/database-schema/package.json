@@ -29,10 +29,10 @@
     "postgres": "^3.4.7"
   },
   "devDependencies": {
-    "@types/node": "24.10.0",
+    "@types/node": "24.10.1",
     "drizzle-kit": "^0.31.6",
     "typescript": "^5.9.3",
-    "vitest": "4.0.7",
+    "vitest": "4.0.13",
     "@vitest/coverage-v8": "4.0.7",
     "dotenv": "17.2.3"
   },
