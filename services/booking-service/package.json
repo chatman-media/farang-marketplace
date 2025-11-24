@@ -34,7 +34,7 @@
     "fastify": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "4.2.1",
-    "redis": "5.9.0",
+    "redis": "5.10.0",
     "uuid": "13.0.0",
     "zod": "^4.1.12"
   },
