@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/nodemailer": "7.0.3",
+    "@types/nodemailer": "7.0.4",
     "@types/pg": "^8.15.6",
     "@types/handlebars": "^4.1.0",
     "@types/bull": "^4.10.4",
