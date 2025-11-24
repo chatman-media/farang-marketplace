@@ -44,7 +44,7 @@
     "@testing-library/react-hooks": "^8.0.1",
     "@types/node": "^24.10.0",
     "@types/react": "19.2.2",
-    "@types/react-dom": "19.2.2",
+    "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react-swc": "^4.2.0",
     "autoprefixer": "^10.4.21",
     "jsdom": "27.1.0",
