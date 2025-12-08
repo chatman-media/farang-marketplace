@@ -52,10 +52,10 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/bcryptjs": "3.0.0",
     "@types/uuid": "11.0.0",
-    "@types/node": "24.10.0",
+    "@types/node": "24.10.1",
     "@types/node-cron": "^3.0.11",
     "typescript": "^5.9.3",
-    "vitest": "4.0.7",
+    "vitest": "4.0.15",
     "@vitest/coverage-v8": "4.0.7",
     "supertest": "7.1.4",
     "@types/supertest": "^6.0.3"

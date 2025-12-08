@@ -44,7 +44,7 @@
     "@fastify/helmet": "^13.0.2",
     "@fastify/jwt": "^10.0.0",
     "@fastify/rate-limit": "^10.3.0",
-    "@types/node": "24.10.0",
+    "@types/node": "24.10.1",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "@vitejs/plugin-react": "^5.1.0",
@@ -58,8 +58,8 @@
     "react-dom": "19.2.0",
     "turbo": "2.6.0",
     "typescript": "^5.9.3",
-    "vite": "7.1.12",
-    "vitest": "4.0.7"
+    "vite": "7.2.7",
+    "vitest": "4.0.15"
   },
   "engines": {
     "bun": ">=1.2.0"
