@@ -1,357 +1,185 @@
-# Farang Marketplace
+<div align="center">
+
+**[🇬🇧 English](README.md) · [🇷🇺 Русский](README.ru.md) · [🇹🇭 ภาษาไทย](README.th.md)**
+
+# 🇹🇭 Farang Marketplace
 
 [![CI](https://github.com/chatman-media/farang-marketplace/workflows/CI/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
 [![Tests](https://github.com/chatman-media/farang-marketplace/workflows/Tests/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
 [![Coverage](https://github.com/chatman-media/farang-marketplace/workflows/%F0%9F%A7%AA%20Coverage%20Report/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
-[![codecov](https://codecov.io/gh/chatman-media/farang-marketplace/branch/main/graph/badge.svg?token=YOUR_TOKEN_HERE)](https://codecov.io/gh/chatman-media/farang-marketplace)
+[![codecov](https://codecov.io/gh/chatman-media/farang-marketplace/branch/main/graph/badge.svg)](https://codecov.io/gh/chatman-media/farang-marketplace)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-1.3-fbf0df?logo=bun&logoColor=black)](https://bun.sh/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg)](LICENSE)
 
-An intelligent marketplace platform designed for Thailand, connecting locals and
-foreigners to buy, sell, rent, and offer services. Supporting English and Thai
-as primary languages across web and Telegram platforms.
+**Premium multilingual marketplace platform for Thailand — real estate, vehicles, services and more.**
+
+</div>
+
+---
 
 ## Overview
 
-Farang Marketplace serves as a premium marketplace solution specifically
-designed for the Thai market, offering:
+Farang Marketplace is a microservices monorepo connecting Thai locals, expats, and tourists on a single bilingual platform. It ships with an integrated CRM, Telegram Mini App, TON blockchain payments, and PromptPay support out of the box.
 
-- **Universal Marketplace**: Buy, sell, rent anything - properties, vehicles,
-  equipment, services, and more
-- **Dual Primary Languages**: English and Thai (ไทย) as main languages, with
-  additional support for Russian (Русский), Chinese (中文), and Arabic (العربية)
-- **Integrated CRM**: Multi-channel communication (Email, Telegram, WhatsApp),
-  automated follow-ups, and customer relationship management
-- **Multi-Platform**: Responsive web application and Telegram bot/mini app
-- **Thailand-Focused**: Localized for Thai market with local payment methods,
-  regulations, and cultural preferences
-- **Premium Positioning**: International branding that appeals to
-  quality-conscious Thai and foreign users
+- **Universal listings** — real estate, vehicles, equipment, services, jobs, events
+- **Bilingual-first** — English + Thai (ไทย) as primary languages; Russian, Chinese, Arabic also supported
+- **Integrated CRM** — multi-channel inbox: Email · Telegram · WhatsApp with automated follow-ups
+- **Telegram Mini App** — browse and transact without leaving Telegram
+- **Thai payments** — PromptPay, local bank transfers, TON blockchain, Stripe
+- **Premium positioning** — international design standards trusted by both locals and expats
 
-## Key Features
-
-### Core Features
-
-- **Smart Search**: Search with filters by category, location, price in English
-  and Thai
-- **Multi-language Support**: Full functionality in English, Thai, and other
-  supported languages
-- **Listing Management**: Create, edit, and manage listings with image uploads
-
-### CRM & Communication
-
-- **Multi-Channel Messaging**: Integrated Email, Telegram, and WhatsApp
-  communication
-- **Automated Follow-ups**: Smart reminders and nurturing sequences for leads
-- **Customer Relationship Management**: Track interactions, preferences, and
-  transaction history
-- **Lead Warming**: Automated engagement campaigns to convert prospects
-- **Communication Hub**: Centralized inbox for all customer communications
-  across channels
-
-### Marketplace Categories
-
-- **Real Estate**: Houses, apartments, condos, land, commercial spaces
-- **Vehicles**: Cars, motorcycles, boats, trucks, bicycles
-- **Services**: Professional services, home services, tutoring, consulting
-- **Equipment**: Electronics, tools, furniture, appliances
-- **Jobs**: Job postings and freelance opportunities
-- **Events**: Event planning, venue rentals, entertainment services
-
-### Localization Features
-
-- **Thai Baht (฿)**: Primary currency with automatic conversion
-- **Thai Address System**: Proper Thai address formatting and validation
-- **Local Payment Methods**: PromptPay, Thai bank transfers, cash on delivery
-- **Thai Regulations**: Compliance with Thai e-commerce and rental laws
-- **Cultural Adaptation**: Interface and features adapted for both Thai and
-  international users
-- **Premium Appeal**: International design standards that convey quality and
-  trust
-
-## Target Audience
-
-### Primary Users
-
-- **Thai Locals**: Looking for premium marketplace experience with international
-  quality standards
-- **Expats & Foreigners**: Living in Thailand and needing reliable marketplace
-  services
-- **Thai Businesses**: Wanting to reach both local and international customers
-- **Tourists**: Short-term visitors needing rentals and services
-
-### Market Positioning
-
-- **Premium Quality**: International branding that signals higher quality and
-  reliability
-- **Bilingual Focus**: Equal emphasis on English and Thai to serve diverse user
-  base
-- **Trust & Safety**: Enhanced verification and quality controls
-- **Professional Services**: Emphasis on business and professional service
-  providers
+---
 
 ## Architecture
 
-This is a monorepo containing:
+```
+farang-marketplace/
+├── apps/
+│   ├── web/              # React + Vite — main storefront
+│   ├── admin/            # React + Vite — admin panel
+│   └── ton-app/          # TON wallet mini app
+├── services/
+│   ├── api-gateway/      # Main entry point — routing & auth
+│   ├── user-service/     # Registration, profiles, JWT auth      :3001
+│   ├── listing-service/  # Listings CRUD, search, categories     :3003
+│   ├── booking-service/  # Reservations & availability           :3004
+│   ├── payment-service/  # TON · Stripe · PromptPay + BullMQ    :3009
+│   ├── crm-service/      # Leads, inbox, automated follow-ups   :3007
+│   ├── storage-service/  # MinIO S3 file uploads                 :3008
+│   └── agency-service/   # Agency accounts & listings            :3005
+└── packages/
+    ├── shared-types/     # Shared TypeScript interfaces
+    ├── database-schema/  # Drizzle ORM schemas
+    ├── logger/           # Pino structured logging
+    └── i18n/             # i18next translations
+```
 
-- **Web Application** (`apps/web`) - Main web interface
-- **Admin Panel** (`apps/admin`) - Administrative interface
-- **TON App** (`apps/ton-app`) - TON wallet integration
-- **Telegram Bot** - Telegram bot for notifications and basic operations
-- **API Gateway** (`services/api-gateway`) - Main API entry point
-- **User Service** (`services/user-service`) - User management and
-  authentication
-- **Listing Service** (`services/listing-service`) - Marketplace listings
-  management
-- **Booking Service** (`services/booking-service`) - Booking and reservations
-- **Payment Service** (`services/payment-service`) - Payment processing (TON,
-  Stripe, PromptPay)
-- **CRM Service** (`services/crm-service`) - Customer relationship management
-  and multi-channel communication
-- **Shared Packages** (`packages/`) - Logger, shared types, i18n, database
-  schema
+---
 
 ## Tech Stack
 
-- **Build Tool**: Vite + Bun
-- **Frontend**: React 18 + TypeScript
-- **Backend**: Node.js + Fastify microservices
-- **Database**: PostgreSQL (Drizzle ORM) + Redis
-- **File Storage**: MinIO (S3-compatible)
-- **Payments**: TON blockchain, Stripe, PromptPay
-- **Communication**: Telegram Bot API, WhatsApp Business API, Nodemailer
-- **Telegram**: Telegram Bot + Mini App integration
-- **Logging**: Pino
-- **Internationalization**: i18next for multi-language support
-- **Monorepo**: Turborepo for task orchestration
+| Category | Technology |
+|---|---|
+| Runtime | [Bun](https://bun.sh/) 1.3+ |
+| Frontend | [React](https://react.dev/) 19 + [Vite](https://vitejs.dev/) 8 |
+| Backend | [Fastify](https://fastify.dev/) microservices |
+| Language | [TypeScript](https://www.typescriptlang.org/) 6 |
+| Database | [PostgreSQL](https://www.postgresql.org/) + [Drizzle ORM](https://orm.drizzle.team/) |
+| Cache / Queues | [Redis](https://redis.io/) + [BullMQ](https://bullmq.io/) |
+| File storage | [MinIO](https://min.io/) (S3-compatible) |
+| Payments | TON blockchain · [Stripe](https://stripe.com/) · PromptPay |
+| Messaging | Telegram Bot API · WhatsApp Business API · Nodemailer |
+| Monorepo | [Turborepo](https://turbo.build/) |
+| Linting | [Biome](https://biomejs.dev/) |
+| Testing | [Vitest](https://vitest.dev/) |
+| i18n | [i18next](https://www.i18next.com/) (EN · TH · RU · ZH · AR) |
 
-## Development Setup
+---
+
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 20+
-- Bun (recommended) or npm
-- Docker & Docker Compose (optional, for local database)
+- [Bun](https://bun.sh/) 1.3+
+- [Docker](https://www.docker.com/) & Docker Compose
 
 ### Installation
 
-1. Clone the repository:
-
-   ```bash
-   git clone git@github.com:chatman-media/farang-marketplace.git
-   cd farang-marketplace
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   bun install
-   ```
-
-3. Copy environment variables for each service:
-
-   ```bash
-   # Copy and configure .env files in each service directory
-   # See services/*/.env for configuration
-   ```
-
-4. Start all services with Turbo UI:
-   ```bash
-   bun run dev:ui
-   ```
-
-This will start:
-
-- Web app: http://localhost:5173
-- Admin panel: http://localhost:5174
-- API Gateway: http://localhost:3000
-- User Service: http://localhost:3001
-- Listing Service: http://localhost:3003
-- Booking Service: http://localhost:3004
-- Payment Service: http://localhost:3009
-- CRM Service: http://localhost:3007
-
-### Available Scripts
-
-- `bun run dev` - Start all services in development mode
-- `bun run dev:ui` - Start all services with Turbo UI panel
-- `bun run build` - Build all applications for production
-- `bun run test` - Run tests across all packages
-- `bun run lint` - Lint all code with Biome
-- `bun run lint:fix` - Fix linting issues automatically
-
-### Database
-
-PostgreSQL with Drizzle ORM. Each service manages its own database connection.
-
-**Option 1: Local Development with Docker** ⭐ Recommended
-
-**Important**: Stop any local PostgreSQL instance first to avoid port conflicts:
 ```bash
-brew services stop postgresql@14  # macOS
-# or
-sudo systemctl stop postgresql    # Linux
+git clone git@github.com:chatman-media/farang-marketplace.git
+cd farang-marketplace
+bun install
 ```
 
-Start PostgreSQL and Redis with Docker Compose:
+### Start infrastructure
+
 ```bash
-docker-compose up -d postgres redis
+# Stop any local PostgreSQL to avoid port conflicts
+brew services stop postgresql@14   # macOS
+
+# Launch PostgreSQL + Redis + MinIO
+docker-compose up -d
 ```
 
-Configure `DATABASE_URL` in each service's `.env` file:
-```
-DATABASE_URL=postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace
-```
+### Run all services
 
-All `.env.test` files are already configured for Docker PostgreSQL.
-
-**Option 2: Cloud Database (for testing/production)**
-
-Configure cloud PostgreSQL (e.g., Neon, Supabase, AWS RDS):
-```
-DATABASE_URL=postgresql://user:password@host:5432/dbname?sslmode=require
-```
-
-**Note**: Integration tests use Neon PostgreSQL cloud database for CI/CD compatibility.
-
-### Redis (for Job Queues)
-
-Payment Service uses Redis for job queues (BullMQ) to process background tasks like:
-- Transaction monitoring
-- Exchange rate updates
-- Payment lifecycle management
-
-**Option 1: Local Development with Docker**
 ```bash
-docker-compose up -d redis
+bun run dev:ui
 ```
 
-**Option 2: Local Redis (without Docker)**
-```bash
-# macOS
-brew install redis
-brew services start redis
+| Service | URL |
+|---|---|
+| Web app | http://localhost:5173 |
+| Admin panel | http://localhost:5174 |
+| API Gateway | http://localhost:3000 |
+| User Service | http://localhost:3001 |
+| Listing Service | http://localhost:3003 |
+| Booking Service | http://localhost:3004 |
+| CRM Service | http://localhost:3007 |
+| Storage Service | http://localhost:3008 |
+| Payment Service | http://localhost:3009 |
 
-# Ubuntu/Debian
-sudo apt-get install redis-server
-sudo systemctl start redis
-```
+### Environment variables
 
-Configure in `services/payment-service/.env`:
-```
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-REDIS_DB=0
-```
+Copy `.env.example` to `.env` in each service directory and fill in your credentials. All `.env.test` files are pre-configured for Docker Compose.
 
-### File Storage
+---
 
-MinIO (S3-compatible) for image and file uploads.
+## Available Scripts
 
-Configure in service `.env`:
+| Command | Description |
+|---|---|
+| `bun run dev` | Start all services in development mode |
+| `bun run dev:ui` | Start all services with Turborepo TUI panel |
+| `bun run build` | Build all apps and services for production |
+| `bun run test` | Run tests across all packages |
+| `bun run test:coverage` | Run tests with coverage report |
+| `bun run lint` | Lint all code with Biome |
+| `bun run lint:fix` | Auto-fix linting issues |
+| `bun run type-check` | TypeScript type checking |
+| `bun run docker:up` | Start Docker infrastructure |
+| `bun run docker:down` | Stop Docker infrastructure |
 
-```
-MINIO_ENDPOINT=http://localhost:9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin123
-```
+---
 
-## Project Structure
+## Roadmap
 
-```
-├── apps/
-│   ├── web/              # Main web application
-│   ├── admin/            # Admin panel
-│   └── ton-app/          # TON wallet integration
-├── services/
-│   ├── api-gateway/      # Main API gateway
-│   ├── user-service/     # User management and authentication
-│   ├── listing-service/  # Marketplace listings
-│   ├── booking-service/  # Booking and reservations
-│   ├── payment-service/  # Payment processing
-│   └── crm-service/      # CRM and multi-channel communication
-├── packages/
-│   ├── shared-types/     # Shared TypeScript types
-│   ├── database-schema/  # Drizzle schema
-│   ├── logger/           # Pino logger
-│   └── i18n/             # Internationalization
-└── telegram/             # Telegram bot and mini app (planned)
-```
+### Phase 1 — Foundation
 
-## Telegram Integration
+- [x] Monorepo with Turborepo
+- [x] Microservices: user, listing, booking, payment, CRM, storage, agency
+- [x] API Gateway with JWT auth
+- [x] PostgreSQL + Drizzle ORM
+- [x] MinIO file storage
+- [x] Redis + BullMQ job queues
+- [x] Multi-language i18n (EN · TH · RU · ZH · AR)
+- [x] CI/CD with GitHub Actions
+- [x] Test coverage with Codecov
 
-### Telegram Bot
+### Phase 2 — Product
 
-- Listing notifications and alerts
-- Booking confirmations
-- Payment status updates
-- Direct communication with sellers
+- [ ] Web storefront (React + Vite)
+- [ ] Admin panel
+- [ ] Telegram Bot notifications
+- [ ] Telegram Mini App
+- [ ] TON blockchain payments
+- [ ] PromptPay & Thai bank transfers
+- [ ] Stripe integration
+- [ ] CRM multi-channel inbox (Email · Telegram · WhatsApp)
+- [ ] Automated lead follow-ups
 
-### Telegram Mini App (Planned)
+### Phase 3 — Growth
 
-- Browse marketplace within Telegram
-- Create and manage listings
-- Process payments via TON
-- Chat with buyers/sellers
+- [ ] Mobile app (PWA / React Native)
+- [ ] AI-powered search & recommendations
+- [ ] Agency portal
+- [ ] Analytics dashboard
+- [ ] Multi-region deployment
+- [ ] Public API + marketplace SDK
 
-## Internationalization
+---
 
-### Supported Languages
+## License
 
-1. **English** - Primary international language
-2. **Thai (ไทย)** - Primary local language
-3. **Russian (Русский)** - Russian expat community
-4. **Chinese (中文)** - Chinese tourist and business community
-5. **Arabic (العربية)** - Middle Eastern community
-
-### Implementation
-
-- Complete UI translation for all languages
-- Right-to-left (RTL) support for Arabic
-- Currency and number formatting per locale
-- Date and time formatting per locale
-- Voice recognition in all supported languages
-- Bilingual content management system
-
-## Brand Positioning
-
-### "Farang" Concept
-
-- **International Appeal**: "Farang" (foreigner) suggests international quality
-  standards
-- **Local Recognition**: Term familiar to Thai users, implying premium foreign
-  service
-- **Quality Perception**: International branding often perceived as higher
-  quality in Thai market
-- **Inclusive Branding**: Appeals to both locals seeking premium experience and
-  foreigners needing familiar interface
-
-### Market Strategy
-
-- **Premium Positioning**: Higher quality standards and verification processes
-- **Bilingual Excellence**: Equal focus on English and Thai user experience
-- **Trust Building**: Enhanced security, verification, and customer service
-- **Professional Focus**: Emphasis on business services and professional
-  providers
-
-## Development Workflow
-
-1. Shared types defined in `packages/shared-types`
-2. Database schema in `packages/database-schema` (Drizzle ORM)
-3. Centralized logging with `packages/logger` (Pino)
-4. Internationalization in `packages/i18n`
-5. Each service independently deployable
-6. Turborepo orchestrates monorepo tasks
-7. Telegram bot integrates with all services for notifications
-
-## Next Steps
-
-This setup provides the foundation for:
-
-- Bilingual marketplace functionality (English/Thai primary)
-- Thailand-specific localization with international appeal
-- Scalable microservices architecture
-- Web application and Telegram bot integration
-- Integrated payment systems (TON, Stripe, PromptPay)
-- Multi-channel CRM with automated customer engagement
-- Telegram Mini App for in-app marketplace experience
-- Premium user experience and trust features
+[MIT](LICENSE) © 2025 [Chatman Media](https://github.com/chatman-media)
