@@ -1,189 +1,79 @@
 import logger from "@marketplace/logger"
-import { paymentLifecycleQueue, tonMonitoringQueue } from "../index"
+import { maintenanceQueue, paymentLifecycleQueue, reconciliationQueue, tonMonitoringQueue } from "../queues"
 
-// Schedule recurring jobs
-export const scheduleJobs = async () => {
+/**
+ * Registers all recurring jobs. Imports queues from `../queues` (not `../index`)
+ * to avoid an import cycle, and is invoked explicitly from `../index` after the
+ * workers are created — it is not a top-level side effect.
+ *
+ * BullMQ dedupes repeatable jobs by their repeat key, so calling this more than
+ * once is safe (no duplicate schedules).
+ */
+export const scheduleJobs = async (): Promise<void> => {
   logger.info("📅 Scheduling recurring jobs...")
 
-  // TON Monitoring Jobs
+  // --- TON monitoring ---
   await tonMonitoringQueue.add(
     "check-pending-transactions",
     { batchSize: 50 },
-    {
-      repeat: { pattern: "*/30 * * * * *" }, // Every 30 seconds
-      removeOnComplete: 10,
-      removeOnFail: 5,
-    },
+    { repeat: { pattern: "*/30 * * * * *" }, removeOnComplete: 10, removeOnFail: 5 },
   )
-
-  tonMonitoringQueue.add(
+  await tonMonitoringQueue.add(
     "update-exchange-rates",
     {},
-    {
-      repeat: { pattern: "0 */5 * * * *" }, // Every 5 minutes
-      removeOnComplete: 5,
-      removeOnFail: 3,
-    },
+    { repeat: { pattern: "0 */5 * * * *" }, removeOnComplete: 5, removeOnFail: 3 },
   )
-
-  tonMonitoringQueue.add(
+  await tonMonitoringQueue.add(
     "sync-jetton-balances",
     { walletAddress: process.env.TON_WALLET_ADDRESS },
-    {
-      repeat: { pattern: "0 */10 * * * *" }, // Every 10 minutes
-      removeOnComplete: 5,
-      removeOnFail: 3,
-    },
+    { repeat: { pattern: "0 */10 * * * *" }, removeOnComplete: 5, removeOnFail: 3 },
   )
-
-  tonMonitoringQueue.add(
+  await tonMonitoringQueue.add(
     "health-check-ton-network",
     {},
-    {
-      repeat: { pattern: "0 */5 * * * *" }, // Every 5 minutes
-      removeOnComplete: 3,
-      removeOnFail: 2,
-    },
+    { repeat: { pattern: "0 */5 * * * *" }, removeOnComplete: 3, removeOnFail: 2 },
   )
 
-  // Payment Lifecycle Jobs
-  paymentLifecycleQueue.add(
+  // --- Payment lifecycle ---
+  await paymentLifecycleQueue.add(
     "expire-old-payments",
     { batchSize: 100 },
-    {
-      repeat: { pattern: "0 0 * * * *" }, // Every hour
-      removeOnComplete: 5,
-      removeOnFail: 3,
-    },
+    { repeat: { pattern: "0 0 * * * *" }, removeOnComplete: 5, removeOnFail: 3 },
   )
-
-  paymentLifecycleQueue.add(
+  await paymentLifecycleQueue.add(
     "retry-failed-payments",
     { batchSize: 50, maxRetries: 3 },
-    {
-      repeat: { pattern: "0 */15 * * * *" }, // Every 15 minutes
-      removeOnComplete: 5,
-      removeOnFail: 3,
-    },
+    { repeat: { pattern: "0 */15 * * * *" }, removeOnComplete: 5, removeOnFail: 3 },
   )
-
-  paymentLifecycleQueue.add(
+  await paymentLifecycleQueue.add(
     "process-refunds",
     { batchSize: 50 },
-    {
-      repeat: { pattern: "0 */5 * * * *" }, // Every 5 minutes
-      removeOnComplete: 5,
-      removeOnFail: 3,
-    },
+    { repeat: { pattern: "0 */5 * * * *" }, removeOnComplete: 5, removeOnFail: 3 },
   )
-
-  paymentLifecycleQueue.add(
+  await paymentLifecycleQueue.add(
     "auto-complete-payments",
     { batchSize: 100, delayMinutes: 5 },
-    {
-      repeat: { pattern: "0 */2 * * * *" }, // Every 2 minutes
-      removeOnComplete: 5,
-      removeOnFail: 3,
-    },
+    { repeat: { pattern: "0 */2 * * * *" }, removeOnComplete: 5, removeOnFail: 3 },
   )
 
-  // TODO: Webhook Processing Jobs - implement processors first
-  // webhookQueue.add(
-  //   "retry-failed-webhooks",
-  //   { batchSize: 50, maxRetries: 5 },
-  //   {
-  //     repeat: { pattern: "0 */10 * * * *" }, // Every 10 minutes
-  //     removeOnComplete: 5,
-  //     removeOnFail: 3,
-  //   }
-  // )
+  // --- Reconciliation ---
+  await reconciliationQueue.add(
+    "reconcile-ton-transactions",
+    { hoursBack: 2, batchSize: 100 },
+    { repeat: { pattern: "0 0 * * * *" }, removeOnComplete: 5, removeOnFail: 3 },
+  )
 
-  // webhookQueue.add(
-  //   "cleanup-old-webhooks",
-  //   { olderThanDays: 30 },
-  //   {
-  //     repeat: { pattern: "0 0 2 * * *" }, // Daily at 2 AM
-  //     removeOnComplete: 3,
-  //     removeOnFail: 2,
-  //   }
-  // )
-
-  // TODO: Reconciliation Jobs - implement processors first
-  // reconciliationQueue.add(
-  //   "reconcile-stripe-payments",
-  //   { hoursBack: 24 },
-  //   {
-  //     repeat: { pattern: "0 0 */6 * * *" }, // Every 6 hours
-  //     removeOnComplete: 3,
-  //     removeOnFail: 2,
-  //   }
-  // )
-
-  // reconciliationQueue.add(
-  //   "reconcile-ton-transactions",
-  //   { hoursBack: 2 },
-  //   {
-  //     repeat: { pattern: "0 0 * * * *" }, // Every hour
-  //     removeOnComplete: 5,
-  //     removeOnFail: 3,
-  //   }
-  // )
-
-  // reconciliationQueue.add(
-  //   "generate-daily-reports",
-  //   {},
-  //   {
-  //     repeat: { pattern: "0 0 0 * * *" }, // Daily at midnight
-  //     removeOnComplete: 7,
-  //     removeOnFail: 3,
-  //   }
-  // )
-
-  // reconciliationQueue.add(
-  //   "generate-weekly-reports",
-  //   {},
-  //   {
-  //     repeat: { pattern: "0 0 0 * * 1" }, // Weekly on Monday
-  //     removeOnComplete: 4,
-  //     removeOnFail: 2,
-  //   }
-  // )
-
-  // TODO: Maintenance Jobs - implement processors first
-  // maintenanceQueue.add(
-  //   "cleanup-expired-payments",
-  //   { olderThanDays: 90 },
-  //   {
-  //     repeat: { pattern: "0 0 3 * * *" }, // Daily at 3 AM
-  //     removeOnComplete: 3,
-  //     removeOnFail: 2,
-  //   }
-  // )
-
-  // maintenanceQueue.add(
-  //   "archive-old-transactions",
-  //   { olderThanDays: 365 },
-  //   {
-  //     repeat: { pattern: "0 0 4 * * 0" }, // Weekly on Sunday at 4 AM
-  //     removeOnComplete: 2,
-  //     removeOnFail: 1,
-  //   }
-  // )
-
-  // maintenanceQueue.add(
-  //   "health-check-external-services",
-  //   {},
-  //   {
-  //     repeat: { pattern: "0 */5 * * * *" }, // Every 5 minutes
-  //     removeOnComplete: 3,
-  //     removeOnFail: 2,
-  //   }
-  // )
+  // --- Maintenance ---
+  await maintenanceQueue.add(
+    "cleanup-old-jobs",
+    { gracePeriodMs: 7 * 24 * 60 * 60 * 1000, limit: 1000 },
+    { repeat: { pattern: "0 0 3 * * *" }, removeOnComplete: 3, removeOnFail: 2 },
+  )
+  await maintenanceQueue.add(
+    "health-check-external-services",
+    {},
+    { repeat: { pattern: "0 */5 * * * *" }, removeOnComplete: 3, removeOnFail: 2 },
+  )
 
   logger.info("✅ All recurring jobs scheduled")
-}
-
-// Initialize job scheduling
-if (process.env.NODE_ENV !== "test") {
-  scheduleJobs()
 }

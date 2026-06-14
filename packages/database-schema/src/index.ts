@@ -3,7 +3,25 @@
 // Export commonly used types
 export type { InferInsertModel, InferSelectModel, SQL } from "drizzle-orm"
 // Export drizzle-orm operators
-export { and, asc, between, count, desc, eq, gte, ilike, inArray, lt, lte, ne, not, or, sql } from "drizzle-orm"
+export {
+  and,
+  asc,
+  between,
+  count,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  lt,
+  lte,
+  ne,
+  not,
+  or,
+  sql,
+} from "drizzle-orm"
 export type { PgTransaction } from "drizzle-orm/pg-core"
 export type { PostgresJsDatabase } from "drizzle-orm/postgres-js"
 // Export database connection utilities

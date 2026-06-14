@@ -1500,6 +1500,11 @@ export const payments = pgTable(
       }>()
       .default({}),
 
+    // Lifecycle: expiry + retry bookkeeping (used by the payment-lifecycle jobs)
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    retryCount: integer("retry_count").notNull().default(0),
+    nextRetryAt: timestamp("next_retry_at", { withTimezone: true }),
+
     // Timestamps
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

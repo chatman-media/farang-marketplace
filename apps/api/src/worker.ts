@@ -33,21 +33,16 @@ export async function startWorkers(): Promise<void> {
     logger.error("Failed to start CRM cron service:", error)
   }
 
-  // Payment BullMQ — off by default. The payment job system has pre-existing
-  // bugs (circular imports between queues/processors/schedulers cause a TDZ
-  // error, and several processors are still stubbed). Enable only after those
-  // are fixed by setting ENABLE_PAYMENT_JOBS=1.
-  if (process.env.ENABLE_PAYMENT_JOBS === "1") {
-    try {
-      paymentJobs = (await import("@marketplace/payment-service/jobs")) as unknown as {
-        shutdownJobs: () => Promise<void>
-      }
-      logger.info("⚙️  Payment BullMQ jobs started")
-    } catch (error) {
-      logger.error("Failed to start payment BullMQ jobs (continuing without them):", error)
+  // Payment BullMQ — importing the module creates its Redis connection, queues,
+  // workers (TON monitoring, payment lifecycle, reconciliation, maintenance) and
+  // registers the recurring schedules.
+  try {
+    paymentJobs = (await import("@marketplace/payment-service/jobs")) as unknown as {
+      shutdownJobs: () => Promise<void>
     }
-  } else {
-    logger.info("⏭️  Payment BullMQ jobs disabled (set ENABLE_PAYMENT_JOBS=1 to enable)")
+    logger.info("⚙️  Payment BullMQ jobs started")
+  } catch (error) {
+    logger.error("Failed to start payment BullMQ jobs (continuing without them):", error)
   }
 }
 
@@ -64,8 +59,15 @@ export async function stopWorkers(): Promise<void> {
 async function main(): Promise<void> {
   await startWorkers()
   logger.info("🛠️  Worker process ready")
+  let stopping = false
   const shutdown = async (signal: string) => {
+    if (stopping) return
+    stopping = true
     logger.info(`${signal} received, stopping workers`)
+    // Force-exit if graceful shutdown stalls (e.g. BullMQ timers keeping the
+    // event loop alive after resources are released).
+    const forceExit = setTimeout(() => process.exit(0), 5000)
+    forceExit.unref?.()
     await stopWorkers()
     process.exit(0)
   }
