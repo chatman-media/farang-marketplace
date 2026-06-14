@@ -1,5 +1,6 @@
 import React from "react"
 import { Link } from "react-router-dom"
+import { useFavorites } from "../../lib/FavoritesContext"
 import { Badge, Card } from "../ui"
 
 // Extended type to handle API data structure
@@ -33,6 +34,8 @@ interface ListingCardProps {
 }
 
 export const ListingCard: React.FC<ListingCardProps> = ({ listing, className = "" }) => {
+  const { has, toggle } = useFavorites()
+  const favorited = has(listing.id)
   const formatPrice = (
     price: number | { amount: number; currency: string; period?: string },
     currency: string = "THB",
@@ -145,6 +148,31 @@ export const ListingCard: React.FC<ListingCardProps> = ({ listing, className = "
             {listing.status === "active" ? "Active" : "Inactive"}
           </Badge>
         </div>
+
+        {/* Favorite button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault()
+            toggle(listing.id)
+          }}
+          className="absolute top-3 left-3 w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow transition-colors z-10"
+          aria-label={favorited ? "Убрать из избранного" : "В избранное"}
+        >
+          <svg
+            className={["h-4 w-4", favorited ? "text-red-500 fill-current" : "text-gray-400"].join(" ")}
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            fill={favorited ? "currentColor" : "none"}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            />
+          </svg>
+        </button>
 
         {/* Featured Badge */}
         {listing.featured && (

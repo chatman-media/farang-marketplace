@@ -2,7 +2,10 @@ import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { ListingsGrid } from "../components/listings"
 import { listingImageUrl } from "../components/listings/ImageUploader"
+import type { ReviewData } from "../components/reviews"
+import { ReviewCard } from "../components/reviews"
 import { Badge, Button } from "../components/ui"
+import { useFavorites } from "../lib/FavoritesContext"
 import { useFeaturedListings, useListing } from "../lib/query"
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -66,13 +69,13 @@ function Gallery({ images }: { images: string[] }) {
         {safeImages.length > 1 && (
           <>
             <button
-              onClick={() => setCurrent((c) => (c - 1 + safeImages.length) % safeImages.length)}
+              onClick={() => setCurrent((c: number) => (c - 1 + safeImages.length) % safeImages.length)}
               className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors"
             >
               ‹
             </button>
             <button
-              onClick={() => setCurrent((c) => (c + 1) % safeImages.length)}
+              onClick={() => setCurrent((c: number) => (c + 1) % safeImages.length)}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors"
             >
               ›
@@ -245,10 +248,30 @@ function DetailSkeleton() {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+// Demo reviews for the UI
+const DEMO_REVIEWS: ReviewData[] = [
+  {
+    id: "r1",
+    reviewerName: "Somchai W.",
+    rating: 5,
+    content: "Отличное состояние, всё как на фото. Продавец быстро вышел на связь.",
+    createdAt: "2026-05-20T10:00:00Z",
+    isVerified: true,
+  },
+  {
+    id: "r2",
+    reviewerName: "Maria K.",
+    rating: 4,
+    content: "Хорошее качество, рекомендую. Небольшие царапины, но цена соответствует.",
+    createdAt: "2026-04-15T14:30:00Z",
+  },
+]
+
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [favorited, setFavorited] = useState(false)
+  const { has, toggle } = useFavorites()
+  const favorited = has(id ?? "")
 
   const { data: listing, isLoading, error } = useListing(id ?? "")
   // Load a few similar listings (same category, later will be filtered by category)
@@ -312,7 +335,7 @@ export function ListingDetailPage() {
               formatPrice={formatPrice}
               locationStr={locationStr}
               favorited={favorited}
-              onFavorite={() => setFavorited((f) => !f)}
+              onFavorite={() => toggle(id ?? "")}
             />
             <div className="mt-4">
               <SellerCard owner={l.owner} phone={l.contactPhone} />
@@ -346,6 +369,19 @@ export function ListingDetailPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Характеристики</h2>
             <DetailsTable rows={detailRows} />
           </div>
+
+          {/* Reviews */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Отзывы</h2>
+              <span className="text-sm text-gray-400">{DEMO_REVIEWS.length} отзыва</span>
+            </div>
+            <div className="space-y-3">
+              {DEMO_REVIEWS.map((r) => (
+                <ReviewCard key={r.id} review={r} />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Right: price + seller (desktop) */}
@@ -355,7 +391,7 @@ export function ListingDetailPage() {
             formatPrice={formatPrice}
             locationStr={locationStr}
             favorited={favorited}
-            onFavorite={() => setFavorited((f) => !f)}
+            onFavorite={() => toggle(id ?? "")}
           />
           <SellerCard owner={l.owner} phone={l.contactPhone} />
         </div>
