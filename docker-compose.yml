@@ -87,5 +87,6 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  listing_uploads:
   # minio_data:  # Uncomment if using MinIO
   pgadmin_data:

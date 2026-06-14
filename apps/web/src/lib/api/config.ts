@@ -44,6 +44,7 @@ export const API_CONFIG = {
       SEARCH: "/api/listings/search",
       FEATURED: "/api/listings/featured",
       USER_LISTINGS: (userId: string) => `/api/listings/user/${userId}`,
+      IMAGES: "/api/listings/images",
     },
 
     // Real Estate
