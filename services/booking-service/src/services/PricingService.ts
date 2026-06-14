@@ -1,6 +1,6 @@
 import { and, count, eq, gte, lte } from "@marketplace/database-schema"
+import { getListingPricing, getServicePricing } from "@marketplace/listing-service/pricing"
 import { logger } from "@marketplace/logger"
-import { ListingServiceClient } from "../clients/ListingServiceClient"
 import { db, schema } from "../db/connection"
 
 const { bookings } = schema
@@ -84,7 +84,6 @@ export class PricingService {
   private readonly PAYMENT_PROCESSING_FEE_PERCENTAGE = 0.029 // 2.9%
   private readonly VAT_PERCENTAGE = 0.07 // 7% VAT in Thailand
   private readonly DEFAULT_CURRENCY = "THB"
-  private readonly listingClient: ListingServiceClient
 
   // Cache configuration
   private readonly CACHE_TTL = {
@@ -103,8 +102,6 @@ export class PricingService {
   }
 
   constructor() {
-    this.listingClient = new ListingServiceClient()
-
     // Clean up expired cache entries every 5 minutes
     setInterval(
       () => {
@@ -342,7 +339,7 @@ export class PricingService {
 
     return this.getCachedData(this.cache.listingPrices, cacheKey, this.CACHE_TTL.LISTING_PRICE, async () => {
       try {
-        const priceData = await this.listingClient.getListingPrice(listingId)
+        const priceData = await getListingPricing(listingId)
 
         return {
           nightlyRate: priceData.nightlyRate,
@@ -379,7 +376,7 @@ export class PricingService {
 
     return this.getCachedData(this.cache.servicePrices, cacheKey, this.CACHE_TTL.SERVICE_PRICE, async () => {
       try {
-        const priceData = await this.listingClient.getServicePrice(listingId, serviceType)
+        const priceData = await getServicePricing(listingId, serviceType)
 
         return {
           priceType: priceData.priceType,

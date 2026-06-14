@@ -1,11 +1,9 @@
-import { and, count, createDatabaseConnection, eq, gte, ilike, ne, users } from "@marketplace/database-schema"
+import { and, count, eq, gte, ilike, ne, sharedDb, users } from "@marketplace/database-schema"
 import { UserProfile, UserRole } from "@marketplace/shared-types"
 import { UserEntity } from "../models/User"
 
-// Database connection
-const connectionString =
-  process.env.DATABASE_URL || "postgresql://marketplace_user:marketplace_pass@localhost:5432/marketplace"
-const db = createDatabaseConnection(connectionString)
+// Single shared connection for the whole process (one pool in the monolith).
+const db = sharedDb()
 
 export interface UserFilters {
   role?: UserRole

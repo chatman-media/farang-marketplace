@@ -69,5 +69,19 @@
     "products"
   ],
   "author": "Thailand Marketplace Team",
-  "license": "MIT"
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./routes": {
+      "types": "./src/routes/index.ts",
+      "default": "./dist/routes/index.js"
+    },
+    "./pricing": {
+      "types": "./src/pricing/index.ts",
+      "default": "./dist/pricing/index.js"
+    }
+  }
 }

@@ -12,7 +12,8 @@ const redisConfig = {
   port: Number.parseInt(process.env.REDIS_PORT || "6379", 10),
   password: process.env.REDIS_PASSWORD,
   db: Number.parseInt(process.env.REDIS_DB || "0", 10),
-  maxRetriesPerRequest: 3,
+  // BullMQ requires maxRetriesPerRequest to be null for blocking workers.
+  maxRetriesPerRequest: null,
   retryDelayOnFailover: 100,
   enableReadyCheck: false,
   maxLoadingTimeout: 1000,

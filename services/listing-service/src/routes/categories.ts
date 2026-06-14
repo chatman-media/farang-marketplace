@@ -6,7 +6,7 @@ import { getAvailableCategories, getCategoryConfig, getEnabledCategories } from 
 export default async function categoriesRoutes(fastify: FastifyInstance) {
   // Get all available categories (enabled and disabled)
   fastify.get(
-    "/categories",
+    "/",
     {
       schema: {
         description: "Get all available listing categories with their configuration",
@@ -72,7 +72,7 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
 
   // Get enabled categories only
   fastify.get(
-    "/categories/enabled",
+    "/enabled",
     {
       schema: {
         description: "Get only enabled listing categories",
@@ -124,7 +124,7 @@ export default async function categoriesRoutes(fastify: FastifyInstance) {
 
   // Get specific category info
   fastify.get(
-    "/categories/:category",
+    "/:category",
     {
       schema: {
         description: "Get information about a specific category",

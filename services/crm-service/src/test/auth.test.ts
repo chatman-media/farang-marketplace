@@ -51,6 +51,7 @@ describe("Auth Middleware", () => {
         id: "user-123",
         role: "admin",
         email: "test@test.com",
+        verified: false,
       })
       expect(mockReply.code).not.toHaveBeenCalled()
     })
@@ -73,6 +74,7 @@ describe("Auth Middleware", () => {
         id: "user-456",
         role: "user",
         email: "test@test.com",
+        verified: false,
       })
     })
 

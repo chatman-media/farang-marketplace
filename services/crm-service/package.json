@@ -53,5 +53,19 @@
     "tsx": "^4.20.6",
     "vitest": "4.0.7",
     "typescript": "^5.9.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./routes": {
+      "types": "./src/routes/index.ts",
+      "default": "./dist/routes/index.js"
+    },
+    "./cron": {
+      "types": "./src/services/CronService.ts",
+      "default": "./dist/services/CronService.js"
+    }
   }
 }

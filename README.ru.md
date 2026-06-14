@@ -20,7 +20,7 @@
 
 ## Обзор
 
-Farang Marketplace — это монорепозиторий на микросервисах, объединяющий тайских жителей, экспатов и туристов на единой двуязычной платформе. Из коробки включает интегрированную CRM, Telegram Mini App, платежи в блокчейне TON и поддержку PromptPay.
+Farang Marketplace — это монорепозиторий на **модульном монолите**, объединяющий тайских жителей, экспатов и туристов на единой двуязычной платформе. Одно Fastify-приложение (`apps/api`) собирает инкапсулированные доменные модули (user, listing, booking, payment, CRM, agency), которые делят один пул подключений к PostgreSQL; фоновые задачи выполняются в отдельном worker-процессе. Из коробки включает интегрированную CRM, Telegram Mini App, платежи в блокчейне TON и поддержку PromptPay.
 
 - **Универсальные объявления** — недвижимость, транспорт, оборудование, услуги, вакансии, мероприятия
 - **Двуязычность прежде всего** — английский + тайский (ไทย) как основные языки; также поддерживаются русский, китайский и арабский
@@ -33,27 +33,37 @@ Farang Marketplace — это монорепозиторий на микросе
 
 ## Архитектура
 
+Единое разворачиваемое API собирает доменные модули; каждый модуль по-прежнему живёт в своём workspace-пакете и экспортирует инкапсулированный Fastify-плагин роутов (`registerXRoutes`), который монтирует корневое приложение.
+
 ```
 farang-marketplace/
 ├── apps/
+│   ├── api/              # ← модульный монолит: собирает все модули в одно Fastify-приложение (:3000)
+│   │   └── src/
+│   │       ├── app.ts        # сквозные плагины (один раз) + монтирование всех модулей
+│   │       ├── server.ts     # HTTP-точка входа
+│   │       ├── worker.ts     # фоновые задачи (BullMQ + CRM cron) — отдельный процесс
+│   │       └── plugins/      # общие декораторы auth + db (fastify-plugin)
 │   ├── web/              # React + Vite — основной каталог
 │   ├── admin/            # React + Vite — панель администратора
 │   └── ton-app/          # TON-кошелёк / мини-приложение
-├── services/
-│   ├── api-gateway/      # Основная точка входа — роутинг и авторизация
-│   ├── user-service/     # Регистрация, профили, JWT-аутентификация   :3001
-│   ├── listing-service/  # CRUD объявлений, поиск, категории          :3003
-│   ├── booking-service/  # Бронирования и управление доступностью     :3004
-│   ├── payment-service/  # TON · Stripe · PromptPay + BullMQ          :3009
-│   ├── crm-service/      # Лиды, inbox, автоматические follow-up      :3007
-│   ├── storage-service/  # Загрузка файлов через MinIO S3             :3008
-│   └── agency-service/   # Агентские аккаунты и объявления            :3005
+├── services/            # доменные модули (библиотеки для apps/api, не отдельные серверы)
+│   ├── user-service/     # Регистрация, профили, JWT      → /api/auth, /api/profile, /api/oauth
+│   ├── listing-service/  # Объявления, категории, провайдеры → /api/listings, /api/categories, …
+│   ├── booking-service/  # Бронирования, доступность, цены → /api/bookings, /api/availability, …
+│   ├── payment-service/  # TON · Stripe · PromptPay + BullMQ → /api/v1/payments, /api/v1/webhooks
+│   ├── crm-service/      # Лиды, inbox, follow-up         → /api/crm, /webhook
+│   ├── agency-service/   # Агентства и объявления          → /api/agencies, /api/services, …
+│   └── storage-service/  # Загрузка файлов (Vercel Blob, библиотека)
 └── packages/
     ├── shared-types/     # Общие TypeScript-интерфейсы
-    ├── database-schema/  # Схемы Drizzle ORM
+    ├── database-schema/  # Схемы Drizzle ORM + общий пул подключений (sharedDb)
+    ├── auth/             # Общий JWT-middleware (request.user, app.authenticate)
     ├── logger/           # Структурированные логи Pino
     └── i18n/             # Переводы i18next
 ```
+
+> **Почему монолит?** Разрезать на отдельные сервисы, но делить одну базу и одну схему — значит платить полную цену микросервисов (N деплоев, сетевые хопы, нет общих транзакций) и не получить их плюсов. Модули изолированы инкапсуляцией Fastify, поэтому любой можно вынести в отдельный сервис позже — когда реальная нагрузка этого потребует.
 
 ---
 
@@ -63,7 +73,7 @@ farang-marketplace/
 |---|---|
 | Runtime | [Bun](https://bun.sh/) 1.3+ |
 | Фронтенд | [React](https://react.dev/) 19 + [Vite](https://vitejs.dev/) 8 |
-| Бэкенд | Микросервисы [Fastify](https://fastify.dev/) |
+| Бэкенд | Модульный монолит на [Fastify](https://fastify.dev/) |
 | Язык | [TypeScript](https://www.typescriptlang.org/) 6 |
 | База данных | [PostgreSQL](https://www.postgresql.org/) + [Drizzle ORM](https://orm.drizzle.team/) |
 | Кэш / Очереди | [Redis](https://redis.io/) + [BullMQ](https://bullmq.io/) |
@@ -102,27 +112,25 @@ brew services stop postgresql@14   # macOS
 docker-compose up -d
 ```
 
-### Запуск всех сервисов
+### Запуск приложения
 
 ```bash
-bun run dev:ui
+bun run dev            # собирает модули и запускает единое API (http://localhost:3000)
+bun run worker         # (опционально, в отдельном терминале) фоновые задачи: CRM cron + BullMQ
 ```
 
-| Сервис | URL |
+| Поверхность | URL |
 |---|---|
+| API (все модули) | http://localhost:3000 |
+| Health-check | http://localhost:3000/health |
 | Веб-приложение | http://localhost:5173 |
 | Панель администратора | http://localhost:5174 |
-| API Gateway | http://localhost:3000 |
-| User Service | http://localhost:3001 |
-| Listing Service | http://localhost:3003 |
-| Booking Service | http://localhost:3004 |
-| CRM Service | http://localhost:3007 |
-| Storage Service | http://localhost:3008 |
-| Payment Service | http://localhost:3009 |
+
+Все доменные роуты (`/api/auth`, `/api/listings`, `/api/bookings`, `/api/v1/payments`, `/api/crm`, `/api/agencies`, …) обслуживает единое API на порту `3000` — отдельных портов по сервисам больше нет.
 
 ### Переменные окружения
 
-Скопируйте `.env.example` в `.env` в каждой директории сервиса и заполните ваши данные. Все файлы `.env.test` предварительно настроены для Docker Compose.
+Скопируйте корневой `.env.example` в `.env` и заполните данные — монолит читает один `.env`. Все файлы `.env.test` предварительно настроены для Docker Compose.
 
 ---
 
@@ -130,9 +138,11 @@ bun run dev:ui
 
 | Команда | Описание |
 |---|---|
-| `bun run dev` | Запуск всех сервисов в режиме разработки |
-| `bun run dev:ui` | Запуск всех сервисов с TUI-панелью Turborepo |
-| `bun run build` | Сборка всех приложений для продакшена |
+| `bun run dev` | Сборка модулей и запуск API (модульный монолит) |
+| `bun run dev:ui` | То же, с TUI-панелью Turborepo |
+| `bun run worker` | Запуск worker-процесса фоновых задач (CRM cron + BullMQ) |
+| `bun run start` | Сборка и запуск API в продакшен-режиме |
+| `bun run build` | Сборка всех приложений и модулей для продакшена |
 | `bun run test` | Запуск тестов по всем пакетам |
 | `bun run test:coverage` | Запуск тестов с отчётом о покрытии |
 | `bun run lint` | Линтинг кода с Biome |
@@ -148,10 +158,10 @@ bun run dev:ui
 ### Фаза 1 — Фундамент
 
 - [x] Монорепозиторий с Turborepo
-- [x] Микросервисы: user, listing, booking, payment, CRM, storage, agency
-- [x] API Gateway с JWT-авторизацией
+- [x] Доменные модули: user, listing, booking, payment, CRM, agency (+ storage как библиотека)
+- [x] **Модульный монолит** (`apps/api`) — единое Fastify-приложение, общий JWT-auth, один пул PostgreSQL
+- [x] Отдельный worker-процесс (CRM cron; BullMQ payment jobs за флагом)
 - [x] PostgreSQL + Drizzle ORM
-- [x] Файловое хранилище MinIO
 - [x] Redis + очереди BullMQ
 - [x] Многоязычный i18n (EN · TH · RU · ZH · AR)
 - [x] CI/CD с GitHub Actions
@@ -159,15 +169,17 @@ bun run dev:ui
 
 ### Фаза 2 — Продукт
 
-- [ ] Веб-витрина (React + Vite)
-- [ ] Панель администратора
+- [x] Бэкенд-модули с HTTP-роутами и тестами (auth, listings, bookings, payments, CRM, agencies)
+- [~] Веб-витрина (React + Vite) — страницы auth, объявлений, профиля; детали/создание/оплата в работе
+- [ ] Панель администратора (пока заглушка)
 - [ ] Уведомления через Telegram Bot
-- [ ] Telegram Mini App
-- [ ] Платежи в блокчейне TON
-- [ ] PromptPay и тайские банковские переводы
-- [ ] Интеграция со Stripe
-- [ ] Многоканальный CRM-inbox (Email · Telegram · WhatsApp)
-- [ ] Автоматические follow-up для лидов
+- [ ] Telegram Mini App (TON-приложение пока заглушка)
+- [~] Платежи TON · Stripe · PromptPay — сервисы подключены, часть сценариев ещё заглушки
+- [ ] Создание/редактирование объявлений (контроллеры vehicle/product пока возвращают placeholder)
+- [~] Многоканальный CRM-inbox (Email · Telegram · WhatsApp) — слой сервисов готов
+- [~] Автоматические follow-up для лидов — cron и движок автоматизаций готовы
+
+> Легенда: `[x]` готово · `[~]` частично / подключено, но не завершено · `[ ]` не начато.
 
 ### Фаза 3 — Рост
 

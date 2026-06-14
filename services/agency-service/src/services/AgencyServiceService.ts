@@ -3,18 +3,18 @@ import {
   agencyServices,
   and,
   asc,
-  createDatabaseConnection,
   desc,
   eq,
   type InferInsertModel,
   type InferSelectModel,
   ilike,
   productTypeEnum,
+  sharedDb,
   sql,
 } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
 
-const db = createDatabaseConnection(process.env.DATABASE_URL!)
+const db = sharedDb()
 
 // Type definitions
 type AgencyService = InferSelectModel<typeof agencyServices>

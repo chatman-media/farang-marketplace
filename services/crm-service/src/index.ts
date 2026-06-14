@@ -65,9 +65,9 @@ const createApp = async () => {
     }
   })
 
-  // Register routes
-  await app.register(import("./routes/crm"), { prefix: "/api/crm" })
-  await app.register(import("./routes/webhooks"), { prefix: "/webhook" })
+  // Register routes (shared with the modular-monolith root)
+  const { registerCrmRoutes } = await import("./routes")
+  await registerCrmRoutes(app)
 
   // Global error handler
   app.setErrorHandler(async (error, _request, reply) => {

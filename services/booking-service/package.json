@@ -26,9 +26,10 @@
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.0.2",
     "@fastify/rate-limit": "^10.3.0",
-    "@marketplace/shared-types": "workspace:*",
     "@marketplace/database-schema": "workspace:*",
+    "@marketplace/listing-service": "workspace:*",
     "@marketplace/logger": "workspace:*",
+    "@marketplace/shared-types": "workspace:*",
     "bcryptjs": "3.0.3",
     "dotenv": "17.2.3",
     "fastify": "^5.6.1",
@@ -60,5 +61,15 @@
     "payments"
   ],
   "author": "Thailand Marketplace Team",
-  "license": "MIT"
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./routes": {
+      "types": "./src/routes/index.ts",
+      "default": "./dist/routes/index.js"
+    }
+  }
 }

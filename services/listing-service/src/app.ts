@@ -70,20 +70,9 @@ export const createApp = async (): Promise<FastifyInstance> => {
     }
   })
 
-  // Register routes
-  await app.register(import("./routes/listings"), { prefix: "/api/listings" })
-  await app.register(import("./routes/categories"), { prefix: "/api" })
-  await app.register(import("./routes/ai"), { prefix: "/api/ai" })
-
-  // Import controllers for Fastify routes
-  const { ServiceProviderController } = await import("./controllers/ServiceProviderController")
-
-  const serviceProviderController = new ServiceProviderController()
-
-  await app.register((await import("./routes/serviceProviders")).default, {
-    prefix: "/api/service-providers",
-    serviceProviderController,
-  })
+  // Register routes (shared with the modular-monolith root)
+  const { registerListingRoutes } = await import("./routes")
+  await registerListingRoutes(app)
 
   // Static file serving for uploads
   await app.register(import("@fastify/static"), {
