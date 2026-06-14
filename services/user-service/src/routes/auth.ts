@@ -32,4 +32,4 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
 }
 
 export default authRoutes
-export { authService, authMiddleware }
+export { authMiddleware, authService }

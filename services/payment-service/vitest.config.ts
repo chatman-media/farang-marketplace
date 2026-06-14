@@ -10,6 +10,15 @@ export default defineConfig({
     exclude: ["node_modules", "dist"],
     testTimeout: 30000,
     hookTimeout: 30000,
+    // Real-DB tests (PaymentLifecycle) share the test DB — run files serially in
+    // a single thread so they don't race each other (mirrors crm-service).
+    maxConcurrency: 1,
+    pool: "threads",
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
