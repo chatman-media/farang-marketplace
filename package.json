@@ -82,7 +82,10 @@
     "follow-redirects": "^1.16.0",
     "path-to-regexp": "^0.1.13",
     "ajv": "^8.18.0",
-    "node-jws": "^4.0.1"
+    "jws": "^3.2.3",
+    "qs": "^6.15.2",
+    "turbo-stream": "^3.0.0",
+    "uuid": "^14.0.0"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
