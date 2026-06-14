@@ -32,7 +32,7 @@
     "@marketplace/shared-types": "workspace:*",
     "bcryptjs": "3.0.3",
     "dotenv": "17.2.3",
-    "fastify": "^5.6.1",
+    "fastify": "^5.8.5",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "4.2.1",
     "redis": "5.9.0",

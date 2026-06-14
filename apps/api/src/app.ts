@@ -8,7 +8,7 @@ import { createPinoLoggerOptions } from "@marketplace/logger"
 import { registerPaymentRoutes } from "@marketplace/payment-service/routes"
 import { registerUserRoutes } from "@marketplace/user-service/routes"
 import { registerAgencyRoutes } from "@thailand-marketplace/agency-service/routes"
-import Fastify, { type FastifyInstance } from "fastify"
+import Fastify, { type FastifyError, type FastifyInstance } from "fastify"
 import { env } from "./env"
 import authDecorator from "./plugins/auth"
 import dbPlugin from "./plugins/db"
@@ -85,7 +85,7 @@ export async function createApp(): Promise<FastifyInstance> {
   await app.register(registerBookingRoutes)
 
   // --- Unified error / 404 handlers ---
-  app.setErrorHandler(async (error, _request, reply) => {
+  app.setErrorHandler(async (error: FastifyError, _request, reply) => {
     app.log.error(error)
 
     if (error.validation) {
