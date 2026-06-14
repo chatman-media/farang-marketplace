@@ -51,9 +51,6 @@ export class CommunicationService {
 
   async initialize(): Promise<void> {
     try {
-      // Initialize WhatsApp service
-      await this.whatsappService.initialize()
-
       // Start Telegram bot
       await this.telegramService.startBot()
 
@@ -419,7 +416,6 @@ export class CommunicationService {
   async shutdown(): Promise<void> {
     try {
       await this.telegramService.stopBot()
-      await this.whatsappService.destroy()
       logger.info("Communication services shut down")
     } catch (error) {
       logger.error("Error shutting down communication services:", error)
