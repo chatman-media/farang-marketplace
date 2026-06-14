@@ -126,6 +126,17 @@ export const Header: React.FC<HeaderProps> = ({ isAuthenticated = false, user, o
               </div>
             )}
 
+            {/* Post listing CTA — always visible */}
+            <Link
+              to="/listings/new"
+              className="hidden sm:inline-flex items-center gap-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Подать объявление
+            </Link>
+
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
