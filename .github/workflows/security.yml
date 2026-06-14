@@ -67,20 +67,23 @@ jobs:
     name: trivy — dependency vulnerabilities + misconfig
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write # upload SARIF to the Security tab
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 1
       # scanners vuln,misconfig = both dependencies (bun.lock etc.) and
-      # Dockerfile/compose misconfigs. --ignore-unfixed doesn't report
-      # vulnerabilities that have no patch yet.
-      # advisory for now: the repo still carries a backlog of fixable HIGH/
-      # CRITICAL transitive CVEs. Trivy reports them on every PR (visible in the
-      # check logs); flip `continue-on-error` off to make it a hard gate once the
-      # backlog is cleared.
-      - name: Run trivy
-        continue-on-error: true
+      # Dockerfile/compose misconfigs. --ignore-unfixed keeps only CVEs that
+      # have an upstream patch, so the Security tab stays actionable (and a fresh
+      # upload supersedes stale alerts from the old, removed trivy workflow).
+      - name: Run trivy (SARIF)
         run: |
           docker run --rm -v "$PWD:/repo" aquasec/trivy:latest \
             fs /repo --scanners vuln,misconfig --severity HIGH,CRITICAL \
-            --ignore-unfixed --exit-code 1 --no-progress
+            --ignore-unfixed --format sarif --output /repo/trivy.sarif --no-progress
+      - name: Upload SARIF to the Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy.sarif

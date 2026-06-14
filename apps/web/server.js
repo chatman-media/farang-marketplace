@@ -9,6 +9,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 async function createServer(root = process.cwd(), isProd = process.env.NODE_ENV === "production", hmrPort = undefined) {
   const fastify = Fastify({ logger: true })
 
+  // Rate-limit every route — the SSR catch-all reads templates from disk.
+  await fastify.register(import("@fastify/rate-limit"), {
+    max: 300,
+    timeWindow: "1 minute",
+  })
+
   // Create Vite server in middleware mode and configure the app type as
   // 'custom', disabling Vite's own HTML serving logic so parent server
   // can take control
