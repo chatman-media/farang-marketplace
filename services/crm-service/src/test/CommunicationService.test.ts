@@ -87,21 +87,19 @@ describe("CommunicationService", () => {
 
   describe("initialize", () => {
     it("should initialize all communication services", async () => {
-      mockWhatsAppService.initialize.mockResolvedValueOnce(undefined)
       mockTelegramService.startBot.mockResolvedValueOnce(undefined)
       mockEmailService.verifyConnection.mockResolvedValueOnce(true)
 
       await communicationService.initialize()
 
-      expect(mockWhatsAppService.initialize).toHaveBeenCalled()
       expect(mockTelegramService.startBot).toHaveBeenCalled()
       expect(mockEmailService.verifyConnection).toHaveBeenCalled()
     })
 
     it("should handle initialization failure", async () => {
-      mockWhatsAppService.initialize.mockRejectedValueOnce(new Error("WhatsApp init failed"))
+      mockTelegramService.startBot.mockRejectedValueOnce(new Error("Telegram init failed"))
 
-      await expect(communicationService.initialize()).rejects.toThrow("WhatsApp init failed")
+      await expect(communicationService.initialize()).rejects.toThrow("Telegram init failed")
     })
   })
 
@@ -653,12 +651,10 @@ describe("CommunicationService", () => {
   describe("shutdown", () => {
     it("should shutdown all communication services", async () => {
       mockTelegramService.stopBot.mockResolvedValueOnce(undefined)
-      mockWhatsAppService.destroy.mockResolvedValueOnce(undefined)
 
       await communicationService.shutdown()
 
       expect(mockTelegramService.stopBot).toHaveBeenCalled()
-      expect(mockWhatsAppService.destroy).toHaveBeenCalled()
     })
 
     it("should handle errors during shutdown", async () => {

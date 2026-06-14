@@ -169,6 +169,7 @@ describe("Webhook Routes", () => {
         status: "healthy",
         webhooks: {
           telegram: "initialized",
+          whatsapp: "configured",
         },
       })
     })
@@ -186,6 +187,7 @@ describe("Webhook Routes", () => {
         status: "healthy",
         webhooks: {
           telegram: "not initialized",
+          whatsapp: "configured",
         },
       })
     })
