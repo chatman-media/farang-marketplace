@@ -4,9 +4,10 @@
 
 # 🇹🇭 Farang Marketplace
 
-[![CI](https://github.com/chatman-media/farang-marketplace/workflows/CI/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
-[![Tests](https://github.com/chatman-media/farang-marketplace/workflows/Tests/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
-[![Coverage](https://github.com/chatman-media/farang-marketplace/workflows/%F0%9F%A7%AA%20Coverage%20Report/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
+[![CI](https://github.com/chatman-media/farang-marketplace/actions/workflows/ci.yml/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/chatman-media/farang-marketplace/actions/workflows/codeql.yml/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions/workflows/codeql.yml)
+[![Security](https://github.com/chatman-media/farang-marketplace/actions/workflows/security.yml/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions/workflows/security.yml)
+[![Coverage](https://github.com/chatman-media/farang-marketplace/actions/workflows/coverage.yml/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions/workflows/coverage.yml)
 [![codecov](https://codecov.io/gh/chatman-media/farang-marketplace/branch/main/graph/badge.svg)](https://codecov.io/gh/chatman-media/farang-marketplace)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.3-fbf0df?logo=bun&logoColor=black)](https://bun.sh/)
@@ -150,6 +151,21 @@ Copy the root `.env.example` to `.env` and fill in your credentials — the mono
 | `bun run type-check` | TypeScript type checking |
 | `bun run docker:up` | Start Docker infrastructure |
 | `bun run docker:down` | Stop Docker infrastructure |
+
+---
+
+## Security
+
+Every push to `main` and every PR is scanned by free OSS tooling (no tokens or paid licenses required):
+
+| Workflow | Tool | What it catches |
+|---|---|---|
+| `codeql.yml` | [CodeQL](https://codeql.github.com/) (`security-extended`) | SAST — vulnerable code patterns |
+| `security.yml` | [gitleaks](https://github.com/gitleaks/gitleaks) | leaked secrets / tokens |
+| `security.yml` | [Semgrep](https://semgrep.dev/) (`p/default`) | additional SAST rules |
+| `security.yml` | [Trivy](https://trivy.dev/) (`--ignore-unfixed`) | dependency CVEs + Dockerfile/compose misconfig |
+
+Trivy reports **fixable** HIGH/CRITICAL issues on every PR (advisory while the existing CVE backlog is cleared — flip `continue-on-error` off in `security.yml` to make it a hard gate). Run `bun audit` locally for the full dependency picture.
 
 ---
 

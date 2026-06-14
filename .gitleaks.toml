@@ -1,0 +1,12 @@
+# Extend gitleaks' default ruleset with our own allowlist.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fake credentials in test fixtures and env templates — not real secrets"
+paths = [
+  '''.*\.test\.ts$''',
+  '''.*\.spec\.ts$''',
+  '''.*\.env\.test$''',
+  '''.*\.env\.example$''',
+]

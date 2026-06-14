@@ -1,0 +1,86 @@
+name: Security
+
+# Free OSS scanners on every PR (and push to main). All run via public images:
+# no tokens, no licenses, no cost. No secrets are needed, so PRs from forks are
+# scanned too.
+#
+# Images are pinned to :latest on purpose — for security scanners fresh
+# rules/DBs matter more than reproducibility. Need determinism? Pin a version
+# (ghcr.io/gitleaks/gitleaks:vX.Y.Z, etc.).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel stale runs on the same ref (like ci.yml). Don't cancel on main — it
+# doesn't matter there (scanners are idempotent), but keep a single style.
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Jobs only need to read the code.
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: gitleaks — leaked secrets/tokens
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      # Via the image, NOT gitleaks-action@v2: that one requires a (free) but
+      # mandatory GITLEAKS_LICENSE key for GitHub orgs. The image has no license.
+      # `dir` scans the working tree; to scan the whole git history use `git`
+      # (then set fetch-depth: 0).
+      - name: Run gitleaks
+        # advisory: report leaks in the logs but don't block the merge on a
+        # false positive — committed secrets should be caught at commit time.
+        continue-on-error: true
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest \
+            dir /repo --config /repo/.gitleaks.toml --redact --verbose --exit-code 1
+
+  semgrep:
+    name: semgrep — SAST with community rules
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      # p/default — the free, curated ruleset from the Semgrep registry (no
+      # token/login needed). --severity=ERROR keeps the gate quiet, --error
+      # fails the job on a finding, --metrics=off silences telemetry. Semgrep
+      # skips node_modules/dist on its own.
+      # advisory: SAST is already gated by CodeQL — this is only a log signal.
+      - name: Run semgrep
+        continue-on-error: true
+        run: |
+          docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:latest \
+            semgrep scan --config=p/default --severity=ERROR --error --metrics=off
+
+  trivy:
+    name: trivy — dependency vulnerabilities + misconfig
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      # scanners vuln,misconfig = both dependencies (bun.lock etc.) and
+      # Dockerfile/compose misconfigs. --ignore-unfixed doesn't report
+      # vulnerabilities that have no patch yet.
+      # advisory for now: the repo still carries a backlog of fixable HIGH/
+      # CRITICAL transitive CVEs. Trivy reports them on every PR (visible in the
+      # check logs); flip `continue-on-error` off to make it a hard gate once the
+      # backlog is cleared.
+      - name: Run trivy
+        continue-on-error: true
+        run: |
+          docker run --rm -v "$PWD:/repo" aquasec/trivy:latest \
+            fs /repo --scanners vuln,misconfig --severity HIGH,CRITICAL \
+            --ignore-unfixed --exit-code 1 --no-progress

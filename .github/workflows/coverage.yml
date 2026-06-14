@@ -110,10 +110,12 @@ jobs:
       - name: 🗄️ Setup database schema
         run: |
           cd packages/database-schema
-          # Push schema, ignore if it already exists
-          bun run db:push 2>&1 || true
+          bun run db:push
         env:
+          # drizzle.config prefers TEST_DATABASE_URL — set it (not just
+          # DATABASE_URL) so the schema is pushed to the CI test_db.
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
       - name: 🧪 Run tests with coverage
         run: bun run test:coverage
