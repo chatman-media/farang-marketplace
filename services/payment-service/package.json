@@ -46,7 +46,7 @@
     "ton": "^13.9.0",
     "ton-core": "^0.53.0",
     "ton-crypto": "^3.2.0",
-    "uuid": "13.0.0",
+    "uuid": "14.0.0",
     "zod": "4.1.12"
   },
   "devDependencies": {
