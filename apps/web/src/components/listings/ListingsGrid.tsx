@@ -8,6 +8,14 @@ interface ListingsGridProps {
   error?: string | null
   emptyMessage?: string
   className?: string
+  columns?: 1 | 2 | 3 | 4
+}
+
+const COLS_CLASS: Record<number, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-1 sm:grid-cols-2",
+  3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+  4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
 }
 
 export const ListingsGrid: React.FC<ListingsGridProps> = ({
@@ -16,10 +24,11 @@ export const ListingsGrid: React.FC<ListingsGridProps> = ({
   error = null,
   emptyMessage = "No listings found",
   className = "",
+  columns = 3,
 }) => {
   if (loading) {
     return (
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${className}`}>
+      <div className={`grid ${COLS_CLASS[columns]} gap-6 ${className}`}>
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="animate-pulse">
             <div className="bg-gray-200 rounded-lg h-48 mb-4" />
@@ -74,7 +83,7 @@ export const ListingsGrid: React.FC<ListingsGridProps> = ({
   }
 
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ${className}`}>
+    <div className={`grid ${COLS_CLASS[columns]} gap-6 ${className}`}>
       {listings.map((listing) => (
         <ListingCard key={listing.id} listing={listing} />
       ))}
