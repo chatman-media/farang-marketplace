@@ -4,9 +4,10 @@
 
 # 🇹🇭 Farang Marketplace
 
-[![CI](https://github.com/chatman-media/farang-marketplace/workflows/CI/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
-[![Tests](https://github.com/chatman-media/farang-marketplace/workflows/Tests/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
-[![Coverage](https://github.com/chatman-media/farang-marketplace/workflows/%F0%9F%A7%AA%20Coverage%20Report/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions)
+[![CI](https://github.com/chatman-media/farang-marketplace/actions/workflows/ci.yml/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/chatman-media/farang-marketplace/actions/workflows/codeql.yml/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions/workflows/codeql.yml)
+[![Security](https://github.com/chatman-media/farang-marketplace/actions/workflows/security.yml/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions/workflows/security.yml)
+[![Coverage](https://github.com/chatman-media/farang-marketplace/actions/workflows/coverage.yml/badge.svg)](https://github.com/chatman-media/farang-marketplace/actions/workflows/coverage.yml)
 [![codecov](https://codecov.io/gh/chatman-media/farang-marketplace/branch/main/graph/badge.svg)](https://codecov.io/gh/chatman-media/farang-marketplace)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-1.3-fbf0df?logo=bun&logoColor=black)](https://bun.sh/)
