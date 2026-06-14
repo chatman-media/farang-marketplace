@@ -1,6 +1,6 @@
 import logger, { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
-import Fastify, { FastifyInstance } from "fastify"
+import Fastify, { FastifyError, FastifyInstance } from "fastify"
 import { z } from "zod"
 
 // Load environment variables
@@ -63,7 +63,7 @@ export const createApp = async (): Promise<FastifyInstance> => {
   await registerUserRoutes(app)
 
   // Global error handler
-  app.setErrorHandler(async (error, _request, reply) => {
+  app.setErrorHandler(async (error: FastifyError, _request, reply) => {
     app.log.error(error)
 
     if (error.validation) {

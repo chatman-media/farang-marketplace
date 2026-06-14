@@ -1,6 +1,6 @@
 import logger, { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
-import Fastify from "fastify"
+import Fastify, { type FastifyError } from "fastify"
 import { z } from "zod"
 import { setTelegramService } from "./routes/webhooks"
 import { CronService } from "./services/CronService"
@@ -70,7 +70,7 @@ const createApp = async () => {
   await registerCrmRoutes(app)
 
   // Global error handler
-  app.setErrorHandler(async (error, _request, reply) => {
+  app.setErrorHandler(async (error: FastifyError, _request, reply) => {
     app.log.error(error)
 
     if (error.validation) {

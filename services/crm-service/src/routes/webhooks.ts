@@ -12,6 +12,12 @@ const whatsappService = new WhatsAppService()
 const WHATSAPP_VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN ?? ""
 
 const webhookRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
+  await fastify.register(import("@fastify/rate-limit"), {
+    max: 100,
+    timeWindow: "1 minute",
+    keyGenerator: (request) => request.headers["x-forwarded-for"]?.toString() ?? request.ip,
+  })
+
   // Telegram webhook
   fastify.post("/telegram", async (request, reply) => {
     try {

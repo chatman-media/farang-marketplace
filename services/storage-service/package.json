@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@vercel/blob": "2.0.0",
-    "fastify": "^5.2.0"
+    "fastify": "^5.8.5"
   },
   "devDependencies": {
     "@types/bun": "latest",
