@@ -150,18 +150,25 @@ export const cleanupImages = async (imagePaths: string[]) => {
 // Serve static images for Fastify
 export const serveImages = async (request: FastifyRequest, reply: FastifyReply) => {
   const params = request.params as { "*": string }
-  const imagePath = path.join(process.cwd(), "uploads", params["*"])
+  const uploadsDir = path.join(process.cwd(), "uploads")
+  // Resolve and confine to the uploads dir — prevents path traversal (`../`).
+  const imagePath = path.resolve(uploadsDir, params["*"])
+  if (imagePath !== uploadsDir && !imagePath.startsWith(uploadsDir + path.sep)) {
+    return reply.status(400).send({
+      error: { code: "INVALID_PATH", message: "Invalid image path" },
+    })
+  }
 
   try {
-    // Check if file exists
-    await fs.access(imagePath)
+    // Read directly — a missing file throws and is handled below. No separate
+    // fs.access() check, which would introduce a time-of-check/time-of-use race.
+    const fileStream = await fs.readFile(imagePath)
 
     // Set appropriate headers
     reply.header("Cache-Control", "public, max-age=31536000") // 1 year
     reply.type("image/webp")
 
     // Send file
-    const fileStream = await fs.readFile(imagePath)
     reply.send(fileStream)
   } catch {
     reply.status(404).send({
