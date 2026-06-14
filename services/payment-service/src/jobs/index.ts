@@ -1,76 +1,44 @@
 import logger from "@marketplace/logger"
-import { Queue, QueueEvents } from "bullmq"
-import { config } from "dotenv"
-import { Redis } from "ioredis"
-
-// Load environment variables
-config()
-
-// Redis connection configuration
-const redisConfig = {
-  host: process.env.REDIS_HOST || "localhost",
-  port: Number.parseInt(process.env.REDIS_PORT || "6379", 10),
-  password: process.env.REDIS_PASSWORD,
-  db: Number.parseInt(process.env.REDIS_DB || "0", 10),
-  // BullMQ requires maxRetriesPerRequest to be null for blocking workers.
-  maxRetriesPerRequest: null,
-  retryDelayOnFailover: 100,
-  enableReadyCheck: false,
-  maxLoadingTimeout: 1000,
-}
-
-// Create Redis connection
-export const redis = new Redis(redisConfig)
-
-// Job queues with modern BullMQ
-export const tonMonitoringQueue = new Queue("ton-monitoring", { connection: redis })
-export const paymentLifecycleQueue = new Queue("payment-lifecycle", { connection: redis })
-export const webhookQueue = new Queue("webhook-processing", { connection: redis })
-export const reconciliationQueue = new Queue("reconciliation", { connection: redis })
-export const maintenanceQueue = new Queue("maintenance", { connection: redis })
-
-// Queue events for monitoring
-export const tonMonitoringEvents = new QueueEvents("ton-monitoring", { connection: redis })
-export const paymentLifecycleEvents = new QueueEvents("payment-lifecycle", { connection: redis })
-export const webhookEvents = new QueueEvents("webhook-processing", { connection: redis })
-export const reconciliationEvents = new QueueEvents("reconciliation", { connection: redis })
-export const maintenanceEvents = new QueueEvents("maintenance", { connection: redis })
-
-// Initialize job processors after Redis connection is ready
+import { createMaintenanceWorker } from "./processors/maintenance"
 import { createPaymentLifecycleWorker } from "./processors/paymentLifecycle"
+import { createReconciliationWorker } from "./processors/reconciliation"
 import { createTonMonitoringWorker } from "./processors/tonMonitoring"
-// TODO: Implement these processors
-// import "./processors/webhookProcessing"
-// import "./processors/reconciliation"
-// import "./processors/maintenance"
+import { allQueueEvents, allQueues, redis } from "./queues"
+import { scheduleJobs } from "./schedulers"
 
-// Create workers
+// Re-export queues/connection for consumers (e.g. routes) that need them.
+export * from "./queues"
+
+// Create workers — one per queue. They start consuming immediately.
 export const tonMonitoringWorker = createTonMonitoringWorker(redis)
 export const paymentLifecycleWorker = createPaymentLifecycleWorker(redis)
+export const reconciliationWorker = createReconciliationWorker(redis)
+export const maintenanceWorker = createMaintenanceWorker(redis)
 
-// Job schedulers
-import "./schedulers/index"
+const workers = [tonMonitoringWorker, paymentLifecycleWorker, reconciliationWorker, maintenanceWorker]
 
-// Graceful shutdown
+// Register the recurring schedules (no-op in tests).
+if (process.env.NODE_ENV !== "test") {
+  scheduleJobs().catch((error) => logger.error("Failed to schedule recurring jobs:", error))
+}
+
+// Graceful shutdown — closes workers, then queues, then the Redis connection.
+// Idempotent: the owner of the process (the worker entrypoint) calls this; the
+// guard makes a second call (e.g. from a signal handler) a no-op rather than a
+// "Connection is closed" error.
+let shuttingDown = false
 const gracefulShutdown = async () => {
+  if (shuttingDown) return
+  shuttingDown = true
+
   logger.info("🔄 Shutting down job queues and workers...")
 
-  await Promise.all([
-    tonMonitoringQueue.close(),
-    paymentLifecycleQueue.close(),
-    webhookQueue.close(),
-    reconciliationQueue.close(),
-    maintenanceQueue.close(),
-    tonMonitoringWorker.close(),
-    paymentLifecycleWorker.close(),
-  ])
-
+  await Promise.all(workers.map((w) => w.close()))
+  await Promise.all(allQueueEvents.map((e) => e.close()))
+  await Promise.all(allQueues.map((q) => q.close()))
   await redis.quit()
 
   logger.info("✅ Job queues and workers shut down successfully")
 }
-
-process.on("SIGTERM", gracefulShutdown)
-process.on("SIGINT", gracefulShutdown)
 
 export { gracefulShutdown as shutdownJobs }

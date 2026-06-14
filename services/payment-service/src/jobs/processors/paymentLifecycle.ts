@@ -1,58 +1,90 @@
-import { and, eq, lt, sql } from "@marketplace/database-schema"
+import { and, eq, inArray, isNull, lt, lte, or } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
 import { PaymentStatus } from "@marketplace/shared-types"
 import { Job, Worker } from "bullmq"
 import { db, schema } from "../../db/connection"
+import { PaymentService } from "../../services/PaymentService"
+import { StripeService } from "../../services/StripeService"
 
 const { payments, refunds } = schema
 
-import { PaymentService } from "../../services/PaymentService"
-
 const paymentService = new PaymentService()
+const stripeService = new StripeService()
 
-// Process expired payments
+// Cap exponential backoff at 60 minutes.
+const MAX_BACKOFF_MS = 60 * 60 * 1000
+
+/** Cancel payments that are still pending/processing past their expiry. */
 async function expireOldPayments(job: Job) {
   const { batchSize = 100 } = job.data
+  const now = new Date()
 
   try {
     logger.info("⏰ Processing expired payments...")
 
-    // TODO: expiresAt field not in schema yet - implement when schema is updated
-    // For now, skip expiration logic
-    logger.warn("Expiration logic disabled - expiresAt field not in schema")
+    // `lt(expiresAt, now)` excludes rows where expiresAt is NULL.
+    const expired = await db
+      .select()
+      .from(payments)
+      .where(
+        and(inArray(payments.status, [PaymentStatus.PENDING, PaymentStatus.PROCESSING]), lt(payments.expiresAt, now)),
+      )
+      .limit(batchSize)
 
-    return { expired: 0 }
+    let count = 0
+    for (const payment of expired) {
+      try {
+        await paymentService.updatePaymentStatus(payment.id, PaymentStatus.CANCELLED, "Payment expired")
+        count++
+      } catch (error) {
+        logger.error(`Failed to expire payment ${payment.id}:`, error)
+      }
+    }
+
+    logger.info(`⏰ Expired ${count} payment(s)`)
+    return { expired: count }
   } catch (error) {
     logger.error("Failed to process expired payments:", error)
     throw error
   }
 }
 
-// Retry failed payments
+/** Re-queue failed payments that still have retry budget and are due for a retry. */
 async function retryFailedPayments(job: Job) {
-  const { batchSize = 50 } = job.data
+  const { batchSize = 50, maxRetries = 3 } = job.data
+  const now = new Date()
 
   try {
     logger.info("🔄 Retrying failed payments...")
 
-    // Find failed payments that can be retried
     const failedPayments = await db
       .select()
       .from(payments)
       .where(
         and(
           eq(payments.status, PaymentStatus.FAILED),
-          // Note: retryCount and retryAfter fields need to be added to schema
+          lt(payments.retryCount, maxRetries),
+          // Due for retry: never scheduled, or the scheduled time has passed.
+          or(isNull(payments.nextRetryAt), lte(payments.nextRetryAt, now)),
         ),
       )
       .limit(batchSize)
 
     let retried = 0
-
     for (const payment of failedPayments) {
       try {
-        // Reset to pending for retry
-        await paymentService.updatePaymentStatus(payment.id, PaymentStatus.PENDING, "Retry attempt")
+        const nextRetryCount = (payment.retryCount ?? 0) + 1
+        const backoffMs = Math.min(2 ** nextRetryCount * 60 * 1000, MAX_BACKOFF_MS)
+
+        await db
+          .update(payments)
+          .set({
+            status: PaymentStatus.PENDING,
+            retryCount: nextRetryCount,
+            nextRetryAt: new Date(now.getTime() + backoffMs),
+            updatedAt: now,
+          })
+          .where(eq(payments.id, payment.id))
 
         retried++
       } catch (error) {
@@ -60,7 +92,7 @@ async function retryFailedPayments(job: Job) {
       }
     }
 
-    logger.info(`🔄 Retried ${retried} failed payments`)
+    logger.info(`🔄 Retried ${retried} failed payment(s)`)
     return { retried }
   } catch (error) {
     logger.error("Failed to retry failed payments:", error)
@@ -68,42 +100,67 @@ async function retryFailedPayments(job: Job) {
   }
 }
 
-// Process pending refunds
+/** Process pending refunds through their payment gateway and advance their state. */
 async function processRefunds(job: Job) {
   const { batchSize = 50 } = job.data
 
   try {
     logger.info("💸 Processing pending refunds...")
 
-    // Find pending refunds
     const pendingRefunds = await db.select().from(refunds).where(eq(refunds.status, "pending")).limit(batchSize)
 
     let processed = 0
-
     for (const refund of pendingRefunds) {
+      // Claim the refund so a concurrent run won't pick it up.
+      await db.update(refunds).set({ status: "processing", updatedAt: new Date() }).where(eq(refunds.id, refund.id))
+
       try {
-        // Process refund based on original payment method
-        const payment = await db.select().from(payments).where(eq(payments.id, refund.paymentId)).limit(1)
+        const paymentRows = await db.select().from(payments).where(eq(payments.id, refund.paymentId)).limit(1)
+        const payment = paymentRows[0]
+        if (!payment) {
+          throw new Error(`Refund ${refund.id} references a missing payment`)
+        }
 
-        if (payment.length > 0) {
-          const originalPayment = payment[0]
-
-          if (originalPayment.paymentMethod.includes("ton")) {
-            // Process TON refund - would need to implement this method
-            logger.info(`Processing TON refund for ${refund.id}`)
-          } else if (originalPayment.paymentMethod.includes("stripe")) {
-            // Process Stripe refund - would need to implement this method
-            logger.info(`Processing Stripe refund for ${refund.id}`)
+        if (payment.paymentMethod.includes("stripe")) {
+          if (!payment.providerPaymentId) {
+            throw new Error(`Stripe payment ${payment.id} has no provider payment id`)
           }
+          // Stripe expects the amount in the minor currency unit (e.g. satang).
+          const amountMinor = Math.round(Number.parseFloat(refund.amount) * 100)
+          const stripeRefund = await stripeService.createRefund({
+            paymentIntentId: payment.providerPaymentId,
+            amount: amountMinor,
+            reason: "requested_by_customer",
+          })
 
+          await db
+            .update(refunds)
+            .set({
+              status: "completed",
+              providerRefundId: stripeRefund.id,
+              processedAt: new Date(),
+              completedAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(refunds.id, refund.id))
+          await db
+            .update(payments)
+            .set({ status: PaymentStatus.REFUNDED, updatedAt: new Date() })
+            .where(eq(payments.id, payment.id))
           processed++
+        } else {
+          // TON / PromptPay refunds are handled manually for now — leave pending.
+          logger.warn(`Refund ${refund.id} (${payment.paymentMethod}) needs manual processing — leaving pending`)
+          await db.update(refunds).set({ status: "pending", updatedAt: new Date() }).where(eq(refunds.id, refund.id))
         }
       } catch (error) {
         logger.error(`Failed to process refund ${refund.id}:`, error)
+        // Revert the claim so it can be retried next run.
+        await db.update(refunds).set({ status: "pending", updatedAt: new Date() }).where(eq(refunds.id, refund.id))
       }
     }
 
-    logger.info(`💸 Processed ${processed} refunds`)
+    logger.info(`💸 Processed ${processed} refund(s)`)
     return { processed }
   } catch (error) {
     logger.error("Failed to process refunds:", error)
@@ -111,7 +168,7 @@ async function processRefunds(job: Job) {
   }
 }
 
-// Auto-complete confirmed payments
+/** Complete payments that have been in `processing` longer than the delay window. */
 async function autoCompletePayments(job: Job) {
   const { batchSize = 100, delayMinutes = 5 } = job.data
 
@@ -120,20 +177,13 @@ async function autoCompletePayments(job: Job) {
 
     const cutoffTime = new Date(Date.now() - delayMinutes * 60 * 1000)
 
-    // Find processing payments that should be completed
     const processingPayments = await db
       .select()
       .from(payments)
-      .where(
-        and(
-          eq(payments.status, "processing" as any),
-          payments.processedAt ? lt(payments.processedAt, cutoffTime) : sql`false`,
-        ),
-      )
+      .where(and(eq(payments.status, PaymentStatus.PROCESSING), lt(payments.processedAt, cutoffTime)))
       .limit(batchSize)
 
     let completed = 0
-
     for (const payment of processingPayments) {
       try {
         await paymentService.updatePaymentStatus(
@@ -147,7 +197,7 @@ async function autoCompletePayments(job: Job) {
       }
     }
 
-    logger.info(`✅ Auto-completed ${completed} payments`)
+    logger.info(`✅ Auto-completed ${completed} payment(s)`)
     return { completed }
   } catch (error) {
     logger.error("Failed to auto-complete payments:", error)
@@ -155,7 +205,7 @@ async function autoCompletePayments(job: Job) {
   }
 }
 
-// Create worker for payment lifecycle jobs
+/** Create the worker that runs payment-lifecycle jobs. */
 export function createPaymentLifecycleWorker(redisConnection: any) {
   const worker = new Worker(
     "payment-lifecycle",
@@ -179,3 +229,6 @@ export function createPaymentLifecycleWorker(redisConnection: any) {
   logger.info("🔄 Payment lifecycle job processors loaded")
   return worker
 }
+
+// Exported for unit testing.
+export const __testables = { expireOldPayments, retryFailedPayments, processRefunds, autoCompletePayments }
