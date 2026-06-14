@@ -210,7 +210,5 @@ export const api = {
 }
 
 // Export token manager for use in other parts of the app
-export { TokenManager }
-
 // Export the axios instance for direct use if needed
-export { apiClient }
+export { apiClient, TokenManager }

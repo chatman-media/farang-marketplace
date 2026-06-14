@@ -47,10 +47,10 @@ if (process.argv[1] && process.argv[1].endsWith("index")) {
   start()
 }
 
-// Export for testing and external use
-export { createApp, env }
 export { UserEntity } from "./models/User"
 export { UserRepository } from "./repositories/UserRepository"
 export { AuthService } from "./services/AuthService"
 export { OAuthService } from "./services/OAuthService"
 export { UserService } from "./services/UserService"
+// Export for testing and external use
+export { createApp, env }
