@@ -2,6 +2,31 @@ import logger from "@marketplace/logger"
 import { FastifyReply, FastifyRequest } from "fastify"
 
 export class ListingController {
+  // Create general listing (generic endpoint used by the web form)
+  createListing = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    try {
+      const body = request.body as Record<string, unknown>
+      return reply.code(201).send({
+        success: true,
+        data: {
+          id: crypto.randomUUID(),
+          ...body,
+          status: "active",
+          viewCount: 0,
+          favoriteCount: 0,
+          isActive: true,
+          isVerified: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        message: "Listing created successfully",
+      })
+    } catch (error) {
+      logger.error("Create listing error:", error)
+      return reply.code(500).send({ success: false, message: "Failed to create listing" })
+    }
+  }
+
   // Create vehicle listing
   createVehicle = async (_request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {

@@ -10,6 +10,7 @@ import { FastifyInstance } from "fastify"
  */
 export async function registerListingRoutes(app: FastifyInstance): Promise<void> {
   await app.register(import("./listings"), { prefix: "/api/listings" })
+  await app.register(import("./uploads"), { prefix: "/api/listings" })
   await app.register(import("./categories"), { prefix: "/api/categories" })
   await app.register(import("./ai"), { prefix: "/api/ai" })
 

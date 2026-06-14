@@ -6,7 +6,7 @@ import { Layout } from "./components/layout"
 import { Badge, Button, Card } from "./components/ui"
 import { FEATURES_CONFIG, getEnabledCategories, HERO_CONFIG } from "./config/marketplace"
 import { queryClient } from "./lib/query"
-import { ListingsPage, LoginPage, ProfilePage, RegisterPage } from "./pages"
+import { CreateListingPage, ListingsPage, LoginPage, ProfilePage, RegisterPage } from "./pages"
 import { CategoryPage } from "./pages/CategoryPage"
 import DebugAPI from "./test/DebugAPI"
 import ReactQueryTest from "./test/ReactQueryTest"
@@ -147,6 +147,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/listings" element={<ListingsPage />} />
+            <Route path="/listings/new" element={<CreateListingPage />} />
             <Route path="/transportation" element={<CategoryPage />} />
             <Route path="/tours" element={<CategoryPage />} />
             <Route path="/services" element={<CategoryPage />} />

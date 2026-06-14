@@ -97,7 +97,24 @@ export const listingsService = {
     return await api.get<Listing[]>(config.ENDPOINTS.LISTINGS.USER_LISTINGS(userId))
   },
 
-  // Upload listing images
+  // Upload images to server (standalone, before listing is created)
+  // Returns { success: true, images: ["/uploads/listings/xxx.webp", ...] }
+  uploadImages: async (files: File[]): Promise<{ success: boolean; images: string[] }> => {
+    const formData = new FormData()
+    files.forEach((file) => formData.append("images", file))
+    return await api.post<{ success: boolean; images: string[] }>(config.ENDPOINTS.LISTINGS.IMAGES, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  },
+
+  // Delete a single image from the server by its path
+  deleteImage: async (imgPath: string): Promise<{ success: boolean }> => {
+    return await api.delete<{ success: boolean }>(config.ENDPOINTS.LISTINGS.IMAGES, {
+      data: { path: imgPath },
+    })
+  },
+
+  // Legacy per-listing upload (kept for backwards compatibility)
   uploadListingImages: async (listingId: string, files: File[]): Promise<{ images: string[] }> => {
     const formData = new FormData()
     files.forEach((file, index) => {
