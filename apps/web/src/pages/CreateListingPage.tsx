@@ -52,7 +52,7 @@ const CATEGORIES: { id: Category; label: string; icon: string; comingSoon?: bool
   { id: "vehicles", label: "Транспорт", icon: "🚗" },
   { id: "products", label: "Товары", icon: "📦" },
   { id: "services", label: "Услуги", icon: "🛠️" },
-  { id: "real_estate", label: "Недвижимость", icon: "🏠", comingSoon: true },
+  { id: "real_estate", label: "Недвижимость", icon: "🏠" },
 ]
 
 const PROVINCES = [
@@ -335,6 +335,7 @@ function Step4({
   submitting: boolean
 }) {
   const showCondition = data.category === "vehicles" || data.category === "products"
+  const showRealEstate = data.category === "real_estate"
 
   return (
     <div className="space-y-5">
@@ -370,6 +371,43 @@ function Step4({
             { value: "used", label: "Б/у" },
           ]}
         />
+      )}
+
+      {showRealEstate && (
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="Площадь (м²)"
+            type="number"
+            placeholder="45"
+            value={(data as any).area ?? ""}
+            onChange={(e) => onChange({ ...(data as any), area: e.target.value })}
+          />
+          <Input
+            label="Комнат"
+            type="number"
+            placeholder="2"
+            value={(data as any).rooms ?? ""}
+            onChange={(e) => onChange({ ...(data as any), rooms: e.target.value })}
+          />
+          <Input
+            label="Этаж"
+            type="number"
+            placeholder="3"
+            value={(data as any).floor ?? ""}
+            onChange={(e) => onChange({ ...(data as any), floor: e.target.value })}
+          />
+          <Select
+            label="Мебель"
+            placeholder="Наличие"
+            value={(data as any).furnished ?? ""}
+            onChange={(e) => onChange({ ...(data as any), furnished: e.target.value })}
+            options={[
+              { value: "yes", label: "С мебелью" },
+              { value: "partial", label: "Частично" },
+              { value: "no", label: "Без мебели" },
+            ]}
+          />
+        </div>
       )}
 
       <Input

@@ -5,8 +5,20 @@ import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom"
 import { Layout } from "./components/layout"
 import { Badge, Button, Card } from "./components/ui"
 import { FEATURES_CONFIG, getEnabledCategories, HERO_CONFIG } from "./config/marketplace"
+import { FavoritesProvider } from "./lib/FavoritesContext"
 import { queryClient } from "./lib/query"
-import { CreateListingPage, ListingsPage, LoginPage, ProfilePage, RegisterPage } from "./pages"
+import {
+  AdminPage,
+  CreateListingPage,
+  DashboardPage,
+  FavoritesPage,
+  ListingDetailPage,
+  ListingsPage,
+  LoginPage,
+  MessagesPage,
+  ProfilePage,
+  RegisterPage,
+} from "./pages"
 import { CategoryPage } from "./pages/CategoryPage"
 import DebugAPI from "./test/DebugAPI"
 import ReactQueryTest from "./test/ReactQueryTest"
@@ -142,26 +154,33 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/listings" element={<ListingsPage />} />
-            <Route path="/listings/new" element={<CreateListingPage />} />
-            <Route path="/transportation" element={<CategoryPage />} />
-            <Route path="/tours" element={<CategoryPage />} />
-            <Route path="/services" element={<CategoryPage />} />
-            <Route path="/vehicles" element={<CategoryPage />} />
-            <Route path="/products" element={<CategoryPage />} />
-            <Route path="/about" element={<div className="p-8 text-center">About page coming soon...</div>} />
-            <Route path="/test-react-query" element={<ReactQueryTest />} />
-            <Route path="/debug-api" element={<DebugAPI />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-          </Routes>
-        </Layout>
-      </Router>
+      <FavoritesProvider>
+        <Router>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/listings" element={<ListingsPage />} />
+              <Route path="/listings/new" element={<CreateListingPage />} />
+              <Route path="/listings/:id" element={<ListingDetailPage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
+              <Route path="/messages" element={<MessagesPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/transportation" element={<CategoryPage />} />
+              <Route path="/tours" element={<CategoryPage />} />
+              <Route path="/services" element={<CategoryPage />} />
+              <Route path="/vehicles" element={<CategoryPage />} />
+              <Route path="/products" element={<CategoryPage />} />
+              <Route path="/about" element={<div className="p-8 text-center">About page coming soon...</div>} />
+              <Route path="/test-react-query" element={<ReactQueryTest />} />
+              <Route path="/debug-api" element={<DebugAPI />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Routes>
+          </Layout>
+        </Router>
+      </FavoritesProvider>
       <DevtoolsWrapper />
     </QueryClientProvider>
   )

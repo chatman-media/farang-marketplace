@@ -296,7 +296,7 @@ export const ListingsPage: React.FC = () => {
   const [localFilters, setLocalFilters] = useState<Filters>(() => paramsToFilters(searchParams)[0])
   const [page, setPage] = useState<number>(() => paramsToFilters(searchParams)[1])
   const [appliedFilters, setAppliedFilters] = useState<Filters>(localFilters)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid")
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const { data, isLoading, error } = useListings({
@@ -436,7 +436,7 @@ export const ListingsPage: React.FC = () => {
                 className="text-sm py-1.5"
               />
 
-              {/* Grid/List toggle */}
+              {/* Grid/List/Map toggle */}
               <div className="flex rounded-lg border border-gray-200 overflow-hidden">
                 <button
                   onClick={() => setViewMode("grid")}
@@ -466,22 +466,55 @@ export const ListingsPage: React.FC = () => {
                     />
                   </svg>
                 </button>
+                <button
+                  onClick={() => setViewMode("map")}
+                  title="Карта"
+                  className={[
+                    "p-2 transition-colors",
+                    viewMode === "map" ? "bg-primary-600 text-white" : "text-gray-500 hover:bg-gray-50",
+                  ].join(" ")}
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                    />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
 
           {/* Listings */}
-          <ListingsGrid
-            listings={listings}
-            loading={isLoading}
-            error={error?.message ?? null}
-            columns={viewMode === "list" ? 1 : 3}
-            emptyMessage={
-              appliedFilters.query
-                ? `Ничего не найдено по запросу «${appliedFilters.query}». Попробуйте изменить фильтры.`
-                : "Объявлений пока нет. Будьте первым!"
-            }
-          />
+          {viewMode === "map" ? (
+            <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white">
+              <div className="relative">
+                <iframe
+                  title="Карта объявлений Таиланд"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=97.34%2C5.61%2C105.64%2C20.46&amp;layer=mapnik"
+                  className="w-full h-[500px] border-0"
+                  loading="lazy"
+                />
+                <div className="absolute bottom-3 left-3 bg-white/90 rounded-xl shadow-sm px-3 py-2 text-xs text-gray-600">
+                  <p className="font-medium mb-1">Объявлений на карте: {listings.length}</p>
+                  <p className="text-gray-400">Интерактивная карта с пинами — в разработке</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <ListingsGrid
+              listings={listings}
+              loading={isLoading}
+              error={error?.message ?? null}
+              columns={viewMode === "list" ? 1 : 3}
+              emptyMessage={
+                appliedFilters.query
+                  ? `Ничего не найдено по запросу «${appliedFilters.query}». Попробуйте изменить фильтры.`
+                  : "Объявлений пока нет. Будьте первым!"
+              }
+            />
+          )}
 
           {/* Pagination */}
           <Pagination
