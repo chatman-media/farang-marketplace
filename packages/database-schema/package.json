@@ -49,6 +49,10 @@
       "types": "./dist/connection.d.ts",
       "default": "./dist/connection.js"
     },
+    "./shared-db": {
+      "types": "./dist/shared-db.d.ts",
+      "default": "./dist/shared-db.js"
+    },
     "./migrations": {
       "types": "./dist/migrations.d.ts",
       "default": "./dist/migrations.js"

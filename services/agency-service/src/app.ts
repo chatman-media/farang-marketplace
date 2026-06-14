@@ -66,15 +66,9 @@ export const createApp = async (): Promise<FastifyInstance> => {
     }
   })
 
-  // Register routes
-  await app.register(import("./routes/agencies"), { prefix: "/api/agencies" })
-  await app.register(import("./routes/services"), { prefix: "/api/services" })
-  await app.register(import("./routes/assignments"), { prefix: "/api/assignments" })
-  await app.register(import("./routes/agency-services"), { prefix: "/api/agency-services" })
-  await app.register(import("./routes/service-assignments"), { prefix: "/api/service-assignments" })
-  await app.register(import("./routes/booking-integration"), {
-    prefix: "/api/booking-integration",
-  })
+  // Register routes (shared with the modular-monolith root)
+  const { registerAgencyRoutes } = await import("./routes")
+  await registerAgencyRoutes(app)
 
   // Global error handler
   app.setErrorHandler(async (error, _request, reply) => {

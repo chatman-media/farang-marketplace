@@ -1,21 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { PricingService } from "../services/PricingService"
 
-// Mock ListingServiceClient
-vi.mock("../clients/ListingServiceClient", () => ({
-  ListingServiceClient: class {
-    getListingById = vi.fn().mockResolvedValue({
-      id: "listing-123",
-      price: 3000,
-      currency: "THB",
-      cleaningFee: 500,
-    })
-    getServicePricing = vi.fn().mockResolvedValue({
-      basePrice: 2000,
-      currency: "THB",
-    })
-  },
-}))
+// Listing pricing is now a pure in-process import (@marketplace/listing-service/pricing)
+// returning THB defaults, so no client mock is needed.
 
 // Mock database connection
 const mockQueryBuilder = {

@@ -14,3 +14,5 @@ export { default as postgres } from "postgres"
 // Export connection utilities
 export { createDatabaseConnection, type Database } from "./connection"
 export * from "./schema"
+// Export shared process-wide connection singletons
+export { closeSharedConnection, sharedClient, sharedDb } from "./shared-db"

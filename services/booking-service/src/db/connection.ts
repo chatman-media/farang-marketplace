@@ -1,26 +1,9 @@
 import * as schema from "@marketplace/database-schema"
-import { drizzle, postgres } from "@marketplace/database-schema"
+import { closeSharedConnection, sharedClient, sharedDb } from "@marketplace/database-schema"
 import logger from "@marketplace/logger"
-import { config } from "dotenv"
 
-// Load environment variables
-config()
-
-const connectionString = process.env.DATABASE_URL
-
-if (!connectionString) {
-  throw new Error("DATABASE_URL environment variable is required")
-}
-
-// Create postgres client
-const client = postgres(connectionString, {
-  max: 10,
-  idle_timeout: 20,
-  connect_timeout: 10,
-})
-
-// Create drizzle instance
-export const db = drizzle(client, { schema })
+// Single shared connection for the whole process (one pool in the monolith).
+export const db = sharedDb()
 
 // Export types
 export type Database = typeof db
@@ -31,7 +14,7 @@ export { schema }
 // Health check function
 export async function checkDatabaseConnection(): Promise<boolean> {
   try {
-    await client`SELECT 1`
+    await sharedClient()`SELECT 1`
     return true
   } catch (error) {
     logger.error("Database connection failed:", error)
@@ -42,7 +25,7 @@ export async function checkDatabaseConnection(): Promise<boolean> {
 // Graceful shutdown
 export async function closeDatabaseConnection(): Promise<void> {
   try {
-    await client.end()
+    await closeSharedConnection()
     logger.info("Database connection closed")
   } catch (error) {
     logger.error("Error closing database connection:", error)

@@ -2,13 +2,8 @@ import logger, { createPinoLoggerOptions } from "@marketplace/logger"
 import { config } from "dotenv"
 import Fastify, { FastifyInstance } from "fastify"
 import { z } from "zod"
-import { AvailabilityController } from "./controllers/AvailabilityController"
-import { BookingController } from "./controllers/BookingController"
-import { PricingController } from "./controllers/PricingController"
 import { checkDatabaseConnection } from "./db/connection"
 import { authMiddleware } from "./middleware/auth"
-import { AvailabilityService } from "./services/AvailabilityService"
-import { PricingService } from "./services/PricingService"
 
 // Load environment variables
 config()
@@ -99,22 +94,9 @@ export const createApp = async (): Promise<FastifyInstance> => {
   // Register authentication decorator
   app.decorate("authenticate", authMiddleware)
 
-  // Initialize services
-  const availabilityService = new AvailabilityService()
-  const pricingService = new PricingService()
-
-  // Initialize controllers
-  const bookingController = new BookingController()
-  const availabilityController = new AvailabilityController(availabilityService)
-  const pricingController = new PricingController(pricingService)
-
-  // Register routes
-  await app.register(import("./routes/bookings"), { prefix: "/api/bookings", bookingController })
-  await app.register(import("./routes/availability"), {
-    prefix: "/api/availability",
-    availabilityController,
-  })
-  await app.register(import("./routes/pricing"), { prefix: "/api/pricing", pricingController })
+  // Register routes (shared with the modular-monolith root)
+  const { registerBookingRoutes } = await import("./routes")
+  await registerBookingRoutes(app)
 
   return app
 }

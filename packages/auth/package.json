@@ -1,0 +1,40 @@
+{
+  "name": "@marketplace/auth",
+  "version": "1.0.0",
+  "description": "Shared JWT authentication middleware for marketplace Fastify modules",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --write src/",
+    "format": "biome format src/",
+    "format:fix": "biome format --write src/",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@marketplace/shared-types": "workspace:*",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "peerDependencies": {
+    "fastify": "^5.6.1"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "24.10.0",
+    "fastify": "^5.6.1",
+    "typescript": "^5.9.3"
+  },
+  "files": [
+    "dist"
+  ]
+}

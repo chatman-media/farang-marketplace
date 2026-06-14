@@ -85,12 +85,23 @@ export class AIClient {
 
   constructor(baseURL: string = process.env.AI_SERVICE_URL || "http://localhost:3006") {
     this.baseURL = baseURL
+    // When AI_SERVICE_URL is not configured (e.g. the monolith runs without a
+    // separate AI service), short-circuit every request to its fallback path
+    // instead of making doomed network calls.
+    const aiEnabled = Boolean(process.env.AI_SERVICE_URL)
     this.client = axios.create({
       baseURL: this.baseURL,
       timeout: 30000,
       headers: {
         "Content-Type": "application/json",
       },
+      ...(aiEnabled
+        ? {}
+        : {
+            adapter: async () => {
+              throw new Error("AI service disabled: AI_SERVICE_URL is not set")
+            },
+          }),
     })
 
     // Add request interceptor for logging

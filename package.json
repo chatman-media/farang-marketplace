@@ -10,8 +10,10 @@
     "services/*"
   ],
   "scripts": {
-    "dev": "turbo run dev --concurrency=16",
-    "dev:ui": "turbo run dev --ui=tui --concurrency=16",
+    "dev": "turbo run dev --filter=@marketplace/api",
+    "dev:ui": "turbo run dev --ui=tui --filter=@marketplace/api",
+    "worker": "turbo run worker --filter=@marketplace/api",
+    "start": "turbo run build --filter=@marketplace/api && bun run --filter @marketplace/api start",
     "build": "turbo run build",
     "test": "turbo run test",
     "test:all": "./scripts/test-all.sh",

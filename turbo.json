@@ -22,6 +22,11 @@
       "persistent": true,
       "dependsOn": ["^build"]
     },
+    "worker": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
     "lint": {
       "dependsOn": ["^build"],
       "inputs": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx", "biome.json", "package.json"],

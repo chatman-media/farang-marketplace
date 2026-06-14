@@ -1,0 +1,49 @@
+{
+  "name": "@marketplace/api",
+  "version": "1.0.0",
+  "description": "Modular-monolith API — composes all marketplace modules into a single Fastify app",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "worker": "tsx watch src/worker.ts",
+    "build": "tsc",
+    "start": "bun dist/server.js",
+    "start:worker": "bun dist/worker.js",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --write src/",
+    "format": "biome format src/",
+    "format:fix": "biome format --write src/",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/compress": "^8.1.0",
+    "@fastify/cors": "^11.1.0",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/multipart": "^9.3.0",
+    "@fastify/rate-limit": "^10.3.0",
+    "@fastify/static": "^8.3.0",
+    "@thailand-marketplace/agency-service": "workspace:*",
+    "@marketplace/auth": "workspace:*",
+    "@marketplace/booking-service": "workspace:*",
+    "@marketplace/crm-service": "workspace:*",
+    "@marketplace/database-schema": "workspace:*",
+    "@marketplace/listing-service": "workspace:*",
+    "@marketplace/logger": "workspace:*",
+    "@marketplace/payment-service": "workspace:*",
+    "@marketplace/shared-types": "workspace:*",
+    "@marketplace/user-service": "workspace:*",
+    "dotenv": "17.2.3",
+    "fastify": "^5.6.1",
+    "fastify-plugin": "^5.0.1",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "4.0.7"
+  }
+}

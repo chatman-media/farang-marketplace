@@ -58,10 +58,9 @@ export const createApp = async (): Promise<FastifyInstance> => {
     }
   })
 
-  // Register routes
-  await app.register(import("./routes/auth"), { prefix: "/api/auth" })
-  await app.register(import("./routes/profile"), { prefix: "/api/profile" })
-  await app.register(import("./routes/oauth"), { prefix: "/api/oauth" })
+  // Register routes (shared with the modular-monolith root)
+  const { registerUserRoutes } = await import("./routes")
+  await registerUserRoutes(app)
 
   // Global error handler
   app.setErrorHandler(async (error, _request, reply) => {

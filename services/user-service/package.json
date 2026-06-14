@@ -39,5 +39,15 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vitest": "4.0.7"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./routes": {
+      "types": "./src/routes/index.ts",
+      "default": "./dist/routes/index.js"
+    }
   }
 }

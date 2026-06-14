@@ -1,12 +1,9 @@
+import { type AuthenticatedUser, UserRole } from "@marketplace/shared-types"
 import { FastifyReply, FastifyRequest } from "fastify"
 import jwt from "jsonwebtoken"
 
 interface AuthenticatedRequest extends FastifyRequest {
-  user?: {
-    id: string
-    role: "user" | "admin" | "agency_owner" | "agency_manager"
-    email: string
-  }
+  user?: AuthenticatedUser
 }
 
 export const authenticateToken = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
@@ -24,8 +21,9 @@ export const authenticateToken = async (request: FastifyRequest, reply: FastifyR
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret") as any
     ;(request as AuthenticatedRequest).user = {
       id: decoded.id || decoded.userId,
-      role: (decoded.role || "user") as "user" | "admin" | "agency_owner" | "agency_manager",
+      role: (decoded.role || UserRole.USER) as UserRole,
       email: decoded.email,
+      verified: decoded.verified ?? false,
     }
   } catch {
     return reply.code(403).send({

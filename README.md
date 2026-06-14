@@ -20,7 +20,7 @@
 
 ## Overview
 
-Farang Marketplace is a microservices monorepo connecting Thai locals, expats, and tourists on a single bilingual platform. It ships with an integrated CRM, Telegram Mini App, TON blockchain payments, and PromptPay support out of the box.
+Farang Marketplace is a **modular-monolith** monorepo connecting Thai locals, expats, and tourists on a single bilingual platform. A single Fastify app (`apps/api`) composes encapsulated domain modules (user, listing, booking, payment, CRM, agency) that share one PostgreSQL connection pool; background jobs run in a separate worker process. It ships with an integrated CRM, Telegram Mini App, TON blockchain payments, and PromptPay support out of the box.
 
 - **Universal listings** — real estate, vehicles, equipment, services, jobs, events
 - **Bilingual-first** — English + Thai (ไทย) as primary languages; Russian, Chinese, Arabic also supported
@@ -33,27 +33,37 @@ Farang Marketplace is a microservices monorepo connecting Thai locals, expats, a
 
 ## Architecture
 
+A single deployable API composes the domain modules; each module still lives in its own workspace package and exposes an encapsulated Fastify route plugin (`registerXRoutes`) that the root app mounts.
+
 ```
 farang-marketplace/
 ├── apps/
+│   ├── api/              # ← the modular monolith: composes all modules into one Fastify app (:3000)
+│   │   └── src/
+│   │       ├── app.ts        # cross-cutting plugins (once) + mounts every module
+│   │       ├── server.ts     # HTTP entrypoint
+│   │       ├── worker.ts     # background jobs (BullMQ + CRM cron) — separate process
+│   │       └── plugins/      # shared auth + db decorators (fastify-plugin)
 │   ├── web/              # React + Vite — main storefront
 │   ├── admin/            # React + Vite — admin panel
 │   └── ton-app/          # TON wallet mini app
-├── services/
-│   ├── api-gateway/      # Main entry point — routing & auth
-│   ├── user-service/     # Registration, profiles, JWT auth      :3001
-│   ├── listing-service/  # Listings CRUD, search, categories     :3003
-│   ├── booking-service/  # Reservations & availability           :3004
-│   ├── payment-service/  # TON · Stripe · PromptPay + BullMQ    :3009
-│   ├── crm-service/      # Leads, inbox, automated follow-ups   :3007
-│   ├── storage-service/  # MinIO S3 file uploads                 :3008
-│   └── agency-service/   # Agency accounts & listings            :3005
+├── services/            # domain modules (libraries consumed by apps/api, not standalone servers)
+│   ├── user-service/     # Registration, profiles, JWT auth        → /api/auth, /api/profile, /api/oauth
+│   ├── listing-service/  # Listings, categories, service providers → /api/listings, /api/categories, …
+│   ├── booking-service/  # Reservations, availability, pricing     → /api/bookings, /api/availability, …
+│   ├── payment-service/  # TON · Stripe · PromptPay + BullMQ jobs   → /api/v1/payments, /api/v1/webhooks
+│   ├── crm-service/      # Leads, inbox, automated follow-ups       → /api/crm, /webhook
+│   ├── agency-service/   # Agency accounts & listings               → /api/agencies, /api/services, …
+│   └── storage-service/  # Vercel Blob file uploads (library)
 └── packages/
     ├── shared-types/     # Shared TypeScript interfaces
-    ├── database-schema/  # Drizzle ORM schemas
+    ├── database-schema/  # Drizzle ORM schemas + the shared connection pool (sharedDb)
+    ├── auth/             # Shared JWT auth middleware (request.user, app.authenticate)
     ├── logger/           # Pino structured logging
     └── i18n/             # i18next translations
 ```
+
+> **Why a monolith?** Splitting into separate services while sharing one database and one schema gives all the cost of microservices (N deploys, network hops, no cross-module transactions) and none of the benefits. Modules stay isolated via Fastify encapsulation, so any one can be extracted into its own service later — when real, independent scaling actually demands it.
 
 ---
 
@@ -63,7 +73,7 @@ farang-marketplace/
 |---|---|
 | Runtime | [Bun](https://bun.sh/) 1.3+ |
 | Frontend | [React](https://react.dev/) 19 + [Vite](https://vitejs.dev/) 8 |
-| Backend | [Fastify](https://fastify.dev/) microservices |
+| Backend | [Fastify](https://fastify.dev/) modular monolith |
 | Language | [TypeScript](https://www.typescriptlang.org/) 6 |
 | Database | [PostgreSQL](https://www.postgresql.org/) + [Drizzle ORM](https://orm.drizzle.team/) |
 | Cache / Queues | [Redis](https://redis.io/) + [BullMQ](https://bullmq.io/) |
@@ -102,27 +112,25 @@ brew services stop postgresql@14   # macOS
 docker-compose up -d
 ```
 
-### Run all services
+### Run the app
 
 ```bash
-bun run dev:ui
+bun run dev            # builds the modules, then runs the single API (http://localhost:3000)
+bun run worker         # (optional, separate terminal) background jobs: CRM cron + BullMQ
 ```
 
-| Service | URL |
+| Surface | URL |
 |---|---|
+| API (all modules) | http://localhost:3000 |
+| Health check | http://localhost:3000/health |
 | Web app | http://localhost:5173 |
 | Admin panel | http://localhost:5174 |
-| API Gateway | http://localhost:3000 |
-| User Service | http://localhost:3001 |
-| Listing Service | http://localhost:3003 |
-| Booking Service | http://localhost:3004 |
-| CRM Service | http://localhost:3007 |
-| Storage Service | http://localhost:3008 |
-| Payment Service | http://localhost:3009 |
+
+All domain routes (`/api/auth`, `/api/listings`, `/api/bookings`, `/api/v1/payments`, `/api/crm`, `/api/agencies`, …) are served by the single API on port `3000` — there are no per-service ports anymore.
 
 ### Environment variables
 
-Copy `.env.example` to `.env` in each service directory and fill in your credentials. All `.env.test` files are pre-configured for Docker Compose.
+Copy the root `.env.example` to `.env` and fill in your credentials — the monolith reads one `.env`. All `.env.test` files are pre-configured for Docker Compose.
 
 ---
 
@@ -130,9 +138,11 @@ Copy `.env.example` to `.env` in each service directory and fill in your credent
 
 | Command | Description |
 |---|---|
-| `bun run dev` | Start all services in development mode |
-| `bun run dev:ui` | Start all services with Turborepo TUI panel |
-| `bun run build` | Build all apps and services for production |
+| `bun run dev` | Build the modules and run the API (modular monolith) |
+| `bun run dev:ui` | Same, with the Turborepo TUI panel |
+| `bun run worker` | Run the background-worker process (CRM cron + BullMQ jobs) |
+| `bun run start` | Build and run the API in production mode |
+| `bun run build` | Build all apps and modules for production |
 | `bun run test` | Run tests across all packages |
 | `bun run test:coverage` | Run tests with coverage report |
 | `bun run lint` | Lint all code with Biome |
@@ -148,10 +158,10 @@ Copy `.env.example` to `.env` in each service directory and fill in your credent
 ### Phase 1 — Foundation
 
 - [x] Monorepo with Turborepo
-- [x] Microservices: user, listing, booking, payment, CRM, storage, agency
-- [x] API Gateway with JWT auth
+- [x] Domain modules: user, listing, booking, payment, CRM, agency (+ storage library)
+- [x] **Modular-monolith composition** (`apps/api`) — one Fastify app, shared JWT auth, single Postgres pool
+- [x] Separate worker process (CRM cron; BullMQ payment jobs behind a flag)
 - [x] PostgreSQL + Drizzle ORM
-- [x] MinIO file storage
 - [x] Redis + BullMQ job queues
 - [x] Multi-language i18n (EN · TH · RU · ZH · AR)
 - [x] CI/CD with GitHub Actions
@@ -159,15 +169,17 @@ Copy `.env.example` to `.env` in each service directory and fill in your credent
 
 ### Phase 2 — Product
 
-- [ ] Web storefront (React + Vite)
-- [ ] Admin panel
+- [x] Backend modules with HTTP routes + tests (auth, listings, bookings, payments, CRM, agencies)
+- [~] Web storefront (React + Vite) — auth, listings, profile pages; detail/create/checkout pending
+- [ ] Admin panel (currently a placeholder)
 - [ ] Telegram Bot notifications
-- [ ] Telegram Mini App
-- [ ] TON blockchain payments
-- [ ] PromptPay & Thai bank transfers
-- [ ] Stripe integration
-- [ ] CRM multi-channel inbox (Email · Telegram · WhatsApp)
-- [ ] Automated lead follow-ups
+- [ ] Telegram Mini App (TON app is currently a placeholder)
+- [~] TON · Stripe · PromptPay payments — services wired; some flows still stubbed
+- [ ] Listing create/update flows (vehicle/product controllers still return placeholders)
+- [~] CRM multi-channel inbox (Email · Telegram · WhatsApp) — service layer in place
+- [~] Automated lead follow-ups — cron + automation engine in place
+
+> Legend: `[x]` done · `[~]` partial / wired but incomplete · `[ ]` not started.
 
 ### Phase 3 — Growth
 
