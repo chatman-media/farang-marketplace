@@ -33,12 +33,12 @@
     "@types/bcryptjs": "3.0.0",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.0.0",
+    "@types/multer": "^2.1.0",
     "@types/supertest": "^6.0.3",
     "supertest": "^7.1.4",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
-    "vitest": "4.1.7"
+    "vitest": "4.1.8"
   },
   "exports": {
     ".": {
