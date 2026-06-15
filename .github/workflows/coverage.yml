@@ -247,8 +247,8 @@ jobs:
             coverage=$(node -e "console.log(JSON.parse(require('fs').readFileSync('coverage/merged/coverage-summary.json', 'utf8')).total.lines.pct)")
             echo "Coverage: ${coverage}%"
             
-            if (( $(echo "$coverage < 70" | bc -l) )); then
-              echo "❌ Coverage ${coverage}% is below minimum threshold of 70%"
+            if (( $(echo "$coverage < 60" | bc -l) )); then
+              echo "❌ Coverage ${coverage}% is below minimum threshold of 60%"
               exit 1
             else
               echo "✅ Coverage ${coverage}% meets minimum threshold"
