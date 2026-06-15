@@ -1,14 +1,17 @@
 import { useCallback, useRef, useState } from "react"
+import { getApiConfig } from "../../lib/api/config"
 import { listingsService } from "../../lib/api/services/listings"
 
-// Images are served by the listing-service. In local dev it's on port 3003.
-// Set VITE_LISTING_SERVICE_URL in .env to override (e.g. https://api.example.com).
-const LISTING_SERVICE_URL = import.meta.env.VITE_LISTING_SERVICE_URL ?? "http://localhost:3003"
+// Images are served by the same backend that handles uploads — in the modular
+// monolith that's `apps/api`, the same origin as every other API call. Default to
+// the API base URL; set VITE_LISTING_SERVICE_URL only to host images elsewhere
+// (e.g. a CDN).
+const IMAGE_BASE_URL = import.meta.env.VITE_LISTING_SERVICE_URL ?? getApiConfig().BASE_URL
 
 /** Build a displayable URL for a server-side image path like /uploads/listings/xxx.webp */
 export function listingImageUrl(serverPath: string): string {
   if (serverPath.startsWith("http")) return serverPath
-  return `${LISTING_SERVICE_URL}${serverPath}`
+  return `${IMAGE_BASE_URL}${serverPath}`
 }
 
 interface ImageUploaderProps {
@@ -33,13 +36,18 @@ export function ImageUploader({ value, onChange, max = 20, className = "" }: Ima
   // Local previews while uploading (blob URLs, discarded after server responds)
   const [pending, setPending] = useState<PendingPreview[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+  // Always points at the latest value so async callbacks that resolve later
+  // (an in-flight upload, a concurrent remove) don't operate on a stale snapshot
+  // captured when the callback was created.
+  const valueRef = useRef(value)
+  valueRef.current = value
 
   const handleFiles = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return
       setError(null)
 
-      const slots = max - value.length
+      const slots = max - valueRef.current.length
       if (slots <= 0) {
         setError(`Максимум ${max} фото`)
         return
@@ -57,7 +65,9 @@ export function ImageUploader({ value, onChange, max = 20, className = "" }: Ima
 
       try {
         const result = await listingsService.uploadImages(toUpload)
-        onChange([...value, ...result.images])
+        // Re-read the latest value: the user may have removed photos while the
+        // upload was in flight.
+        onChange([...valueRef.current, ...result.images])
       } catch {
         setError("Ошибка при загрузке. Проверьте формат и размер файлов (макс. 10 МБ).")
       } finally {
@@ -68,19 +78,20 @@ export function ImageUploader({ value, onChange, max = 20, className = "" }: Ima
         if (inputRef.current) inputRef.current.value = ""
       }
     },
-    [value, onChange, max],
+    [onChange, max],
   )
 
   const handleRemove = useCallback(
     async (imgPath: string) => {
-      onChange(value.filter((p) => p !== imgPath))
+      onChange(valueRef.current.filter((p) => p !== imgPath))
       try {
         await listingsService.deleteImage(imgPath)
-      } catch {
-        // best-effort — file might already be gone
+      } catch (err) {
+        // best-effort — the path is already dropped from the form; surface for debugging
+        console.warn("Failed to delete image from server:", imgPath, err)
       }
     },
-    [value, onChange],
+    [onChange],
   )
 
   const handleDrop = useCallback(
@@ -147,7 +158,8 @@ export function ImageUploader({ value, onChange, max = 20, className = "" }: Ima
               </svg>
               <p className="text-sm font-medium text-gray-700">Перетащите фото сюда или нажмите для выбора</p>
               <p className="mt-1 text-xs text-gray-400">
-                JPG, PNG, WebP · до 10 МБ · максимум {max} фото · осталось {max - value.length}
+                JPG, PNG, WebP · до 10 МБ · максимум {max} фото · осталось{" "}
+                {Math.max(0, max - value.length - pending.length)}
               </p>
             </>
           )}
