@@ -1,14 +1,17 @@
 import { useCallback, useRef, useState } from "react"
+import { getApiConfig } from "../../lib/api/config"
 import { listingsService } from "../../lib/api/services/listings"
 
-// Images are served by the listing-service. In local dev it's on port 3003.
-// Set VITE_LISTING_SERVICE_URL in .env to override (e.g. https://api.example.com).
-const LISTING_SERVICE_URL = import.meta.env.VITE_LISTING_SERVICE_URL ?? "http://localhost:3003"
+// Images are served by the same backend that handles uploads — in the modular
+// monolith that's `apps/api`, the same origin as every other API call. Default to
+// the API base URL; set VITE_LISTING_SERVICE_URL only to host images elsewhere
+// (e.g. a CDN).
+const IMAGE_BASE_URL = import.meta.env.VITE_LISTING_SERVICE_URL ?? getApiConfig().BASE_URL
 
 /** Build a displayable URL for a server-side image path like /uploads/listings/xxx.webp */
 export function listingImageUrl(serverPath: string): string {
   if (serverPath.startsWith("http")) return serverPath
-  return `${LISTING_SERVICE_URL}${serverPath}`
+  return `${IMAGE_BASE_URL}${serverPath}`
 }
 
 interface ImageUploaderProps {
