@@ -33,13 +33,18 @@ export function ImageUploader({ value, onChange, max = 20, className = "" }: Ima
   // Local previews while uploading (blob URLs, discarded after server responds)
   const [pending, setPending] = useState<PendingPreview[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+  // Always points at the latest value so async callbacks that resolve later
+  // (an in-flight upload, a concurrent remove) don't operate on a stale snapshot
+  // captured when the callback was created.
+  const valueRef = useRef(value)
+  valueRef.current = value
 
   const handleFiles = useCallback(
     async (files: FileList | null) => {
       if (!files || files.length === 0) return
       setError(null)
 
-      const slots = max - value.length
+      const slots = max - valueRef.current.length
       if (slots <= 0) {
         setError(`Максимум ${max} фото`)
         return
@@ -57,7 +62,9 @@ export function ImageUploader({ value, onChange, max = 20, className = "" }: Ima
 
       try {
         const result = await listingsService.uploadImages(toUpload)
-        onChange([...value, ...result.images])
+        // Re-read the latest value: the user may have removed photos while the
+        // upload was in flight.
+        onChange([...valueRef.current, ...result.images])
       } catch {
         setError("Ошибка при загрузке. Проверьте формат и размер файлов (макс. 10 МБ).")
       } finally {
@@ -68,19 +75,20 @@ export function ImageUploader({ value, onChange, max = 20, className = "" }: Ima
         if (inputRef.current) inputRef.current.value = ""
       }
     },
-    [value, onChange, max],
+    [onChange, max],
   )
 
   const handleRemove = useCallback(
     async (imgPath: string) => {
-      onChange(value.filter((p) => p !== imgPath))
+      onChange(valueRef.current.filter((p) => p !== imgPath))
       try {
         await listingsService.deleteImage(imgPath)
-      } catch {
-        // best-effort — file might already be gone
+      } catch (err) {
+        // best-effort — the path is already dropped from the form; surface for debugging
+        console.warn("Failed to delete image from server:", imgPath, err)
       }
     },
-    [value, onChange],
+    [onChange],
   )
 
   const handleDrop = useCallback(
@@ -147,7 +155,8 @@ export function ImageUploader({ value, onChange, max = 20, className = "" }: Ima
               </svg>
               <p className="text-sm font-medium text-gray-700">Перетащите фото сюда или нажмите для выбора</p>
               <p className="mt-1 text-xs text-gray-400">
-                JPG, PNG, WebP · до 10 МБ · максимум {max} фото · осталось {max - value.length}
+                JPG, PNG, WebP · до 10 МБ · максимум {max} фото · осталось{" "}
+                {Math.max(0, max - value.length - pending.length)}
               </p>
             </>
           )}
