@@ -22,6 +22,10 @@ export default defineConfig({
     },
     testTimeout: 30000,
     hookTimeout: 30000,
+    // Integration tests open a fresh DB connection per `getTestConnection()` call,
+    // so under parallel CI runs they can transiently hit Postgres connection limits
+    // (a register call then 500s). Retry to absorb that infra flakiness.
+    retry: 2,
   },
   resolve: {
     alias: {

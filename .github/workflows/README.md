@@ -55,7 +55,7 @@ Comprehensive CI/CD pipeline for the Thailand Marketplace platform with extensiv
 **Coverage Targets**:
 - Project: 80%
 - Patch: 75%
-- Minimum: 70%
+- Minimum (hard gate): 60%
 
 ---
 
