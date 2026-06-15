@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "marketplace-rental-platform",
@@ -259,7 +258,7 @@
         "fastify": "^5.8.5",
         "jsonwebtoken": "^9.0.2",
         "node-cron": "4.2.1",
-        "redis": "5.9.0",
+        "redis": "5.12.1",
         "uuid": "14.0.0",
         "zod": "^4.1.12",
       },
@@ -295,7 +294,7 @@
         "jsonwebtoken": "^9.0.2",
         "nodemailer": "8.0.5",
         "pg": "^8.16.3",
-        "redis": "5.9.0",
+        "redis": "5.12.1",
         "telegraf": "^4.16.3",
         "zod": "4.1.12",
       },
@@ -337,7 +336,7 @@
         "multer": "^2.1.1",
         "node-cron": "4.2.1",
         "pg": "^8.16.3",
-        "redis": "5.9.0",
+        "redis": "5.12.1",
         "sharp": "^0.34.4",
         "uuid": "14.0.0",
         "zod": "4.1.12",
@@ -422,7 +421,7 @@
         "fastify": "^5.8.5",
         "jsonwebtoken": "^9.0.2",
         "multer": "^2.1.1",
-        "redis": "5.9.0",
+        "redis": "5.12.1",
         "zod": "4.1.12",
       },
       "devDependencies": {
@@ -853,15 +852,15 @@
 
     "@pinojs/redact": ["@pinojs/redact@0.4.0", "", {}, "sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg=="],
 
-    "@redis/bloom": ["@redis/bloom@5.9.0", "", { "peerDependencies": { "@redis/client": "^5.9.0" } }, "sha512-W9D8yfKTWl4tP8lkC3MRYkMz4OfbuzE/W8iObe0jFgoRmgMfkBV+Vj38gvIqZPImtY0WB34YZkX3amYuQebvRQ=="],
+    "@redis/bloom": ["@redis/bloom@5.12.1", "", { "peerDependencies": { "@redis/client": "^5.12.1" } }, "sha512-PUUfv+ms7jgPSBVoo/DN4AkPHj4D5TZSd6SbJX7egzBplkYUcKmHRE8RKia7UtZ8bSQbLguLvxVO+asKtQfZWA=="],
 
-    "@redis/client": ["@redis/client@5.9.0", "", { "dependencies": { "cluster-key-slot": "1.1.2" } }, "sha512-EI0Ti5pojD2p7TmcS7RRa+AJVahdQvP/urpcSbK/K9Rlk6+dwMJTQ354pCNGCwfke8x4yKr5+iH85wcERSkwLQ=="],
+    "@redis/client": ["@redis/client@5.12.1", "", { "dependencies": { "cluster-key-slot": "1.1.2" }, "peerDependencies": { "@node-rs/xxhash": "^1.1.0", "@opentelemetry/api": ">=1 <2" }, "optionalPeers": ["@node-rs/xxhash", "@opentelemetry/api"] }, "sha512-7aPGWeqA3uFm43o19umzdl16CEjK/JQGtSXVPevplTaOU3VJA/rseBC1QvYUz9lLDIMBimc4SW/zrW4S89BaCA=="],
 
-    "@redis/json": ["@redis/json@5.9.0", "", { "peerDependencies": { "@redis/client": "^5.9.0" } }, "sha512-Bm2jjLYaXdUWPb9RaEywxnjmzw7dWKDZI4MS79mTWPV16R982jVWBj6lY2ZGelJbwxHtEVg4/FSVgYDkuO/MxA=="],
+    "@redis/json": ["@redis/json@5.12.1", "", { "peerDependencies": { "@redis/client": "^5.12.1" } }, "sha512-eOze75esLve4vfqDel7aMX08CNaiLLQS2fV8mpRN9NxPe1rVR4vQyYiW/OgtGUysF6QOr9ANhfxABKNOJfXdKg=="],
 
-    "@redis/search": ["@redis/search@5.9.0", "", { "peerDependencies": { "@redis/client": "^5.9.0" } }, "sha512-jdk2csmJ29DlpvCIb2ySjix2co14/0iwIT3C0I+7ZaToXgPbgBMB+zfEilSuncI2F9JcVxHki0YtLA0xX3VdpA=="],
+    "@redis/search": ["@redis/search@5.12.1", "", { "peerDependencies": { "@redis/client": "^5.12.1" } }, "sha512-ItlxbxC9cKI6IU1TLWoczwJCRb6TdmkEpWv05UrPawqaAnWGRu3rcIqsc5vN483T2fSociuyV1UkWIL5I4//2w=="],
 
-    "@redis/time-series": ["@redis/time-series@5.9.0", "", { "peerDependencies": { "@redis/client": "^5.9.0" } }, "sha512-W6ILxcyOqhnI7ELKjJXOktIg3w4+aBHugDbVpgVLPZ+YDjObis1M0v7ZzwlpXhlpwsfePfipeSK+KWNuymk52w=="],
+    "@redis/time-series": ["@redis/time-series@5.12.1", "", { "peerDependencies": { "@redis/client": "^5.12.1" } }, "sha512-c6JL6E3EcZJuNqKFz+KM+l9l5mpcQiKvTwgA3blt5glWJ8hjDk0yeHN3beE/MpqYIQ8UEX44ItQzgkE/gCBELQ=="],
 
     "@remix-run/express": ["@remix-run/express@2.17.5", "", { "dependencies": { "@remix-run/node": "2.17.5" }, "peerDependencies": { "express": "^4.20.0", "typescript": "^5.1.0" }, "optionalPeers": ["typescript"] }, "sha512-R4G22lXN4oRWusxdTsdnDYfjmnVaNUkWU6zg1OQZD15EJ5gZlx8psO62Tv77vXKN5XMhJ6YdODQ8179isvkNpw=="],
 
@@ -2081,7 +2080,7 @@
 
     "redent": ["redent@3.0.0", "", { "dependencies": { "indent-string": "^4.0.0", "strip-indent": "^3.0.0" } }, "sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg=="],
 
-    "redis": ["redis@5.9.0", "", { "dependencies": { "@redis/bloom": "5.9.0", "@redis/client": "5.9.0", "@redis/json": "5.9.0", "@redis/search": "5.9.0", "@redis/time-series": "5.9.0" } }, "sha512-E8dQVLSyH6UE/C9darFuwq4usOPrqfZ1864kI4RFbr5Oj9ioB9qPF0oJMwX7s8mf6sPYrz84x/Dx1PGF3/0EaQ=="],
+    "redis": ["redis@5.12.1", "", { "dependencies": { "@redis/bloom": "5.12.1", "@redis/client": "5.12.1", "@redis/json": "5.12.1", "@redis/search": "5.12.1", "@redis/time-series": "5.12.1" } }, "sha512-LDsoVvb/CpoV9EN3FXvgvSHNJWuCIzl9MiO3ppOevuGLpSGJhwfQjpEwfFJcQvNSddHADDdZaWx0HnmMxRXG7g=="],
 
     "redis-errors": ["redis-errors@1.2.0", "", {}, "sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w=="],
 
