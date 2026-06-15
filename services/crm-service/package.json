@@ -32,7 +32,7 @@
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "8.0.5",
     "pg": "^8.16.3",
-    "redis": "5.9.0",
+    "redis": "5.12.1",
     "telegraf": "^4.16.3",
     "handlebars": "^4.7.9",
     "bull": "^4.16.5",
