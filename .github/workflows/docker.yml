@@ -112,9 +112,6 @@ jobs:
           echo "=== Redis Health ==="
           docker compose exec -T redis redis-cli ping || exit 1
 
-          echo "=== MinIO Health ==="
-          curl -f http://localhost:9000/minio/health/live || exit 1
-
           echo "✅ All services are healthy!"
 
       - name: 🧪 Test database connectivity
@@ -128,16 +125,6 @@ jobs:
           docker compose exec -T redis redis-cli GET test_key
           docker compose exec -T redis redis-cli DEL test_key
 
-      - name: 🧪 Test MinIO connectivity
-        run: |
-          # Install MinIO client
-          wget -q https://dl.min.io/client/mc/release/linux-amd64/mc
-          chmod +x mc
-
-          # Configure and test
-          ./mc alias set testminio http://localhost:9000 minioadmin minioadmin123
-          ./mc admin info testminio
-
       - name: 📊 Show service logs
         if: always()
         run: |
@@ -146,9 +133,6 @@ jobs:
 
           echo "=== Redis Logs ==="
           docker compose logs redis | tail -50
-
-          echo "=== MinIO Logs ==="
-          docker compose logs minio | tail -50
 
       - name: 🛑 Stop Docker Compose
         if: always()
