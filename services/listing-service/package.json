@@ -23,7 +23,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@fastify/compress": "^8.1.0",
+    "@fastify/compress": "^9.0.0",
     "@fastify/cors": "11.1.0",
     "@fastify/helmet": "13.0.2",
     "@fastify/multipart": "^9.3.0",
