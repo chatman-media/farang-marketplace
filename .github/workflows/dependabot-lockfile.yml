@@ -1,0 +1,61 @@
+name: 🔒 Sync Bun lockfile (Dependabot)
+
+# Dependabot bumps package.json but cannot update Bun's bun.lock, so CI's
+# `bun install --frozen-lockfile` fails on every npm dependency PR. This job
+# regenerates bun.lock from the bumped package.json and commits it back to the
+# PR branch, so the rest of CI can install and the merge keeps main consistent.
+#
+# Safety: runs only for Dependabot PRs. Uses `bun install --lockfile-only`,
+# which resolves the lockfile WITHOUT installing dependencies or running any
+# lifecycle scripts — so no untrusted PR code executes, even though
+# pull_request_target grants a write token. The workflow file itself is always
+# taken from the base branch (main), not the PR.
+
+on:
+  pull_request_target:
+    branches: [main]
+    paths:
+      - "**/package.json"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dependabot-lockfile-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  sync-lockfile:
+    name: 🔄 Regenerate & commit bun.lock
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout PR branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          # A PAT (if configured) lets the lockfile commit re-trigger the PR's
+          # CI checks; otherwise GITHUB_TOKEN is used — the lockfile still lands,
+          # but checks need one nudge (`@dependabot rebase`) to re-run.
+          token: ${{ secrets.DEPENDABOT_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: 🥟 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.1"
+
+      - name: 🔄 Regenerate bun.lock from package.json (no install, no scripts)
+        run: bun install --lockfile-only
+
+      - name: 💾 Commit & push if the lockfile changed
+        run: |
+          if git diff --quiet -- bun.lock; then
+            echo "bun.lock already in sync — nothing to do."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bun.lock
+          git commit -m "chore(deps): sync bun.lock [dependabot skip]"
+          git push
