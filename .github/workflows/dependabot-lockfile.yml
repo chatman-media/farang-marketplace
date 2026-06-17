@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: 📥 Checkout PR branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           # A PAT (if configured) lets the lockfile commit re-trigger the PR's
