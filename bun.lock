@@ -66,7 +66,7 @@
         "@marketplace/shared-types": "workspace:*",
         "@marketplace/user-service": "workspace:*",
         "@thailand-marketplace/agency-service": "workspace:*",
-        "dotenv": "17.2.3",
+        "dotenv": "17.4.2",
         "fastify": "^5.8.5",
         "fastify-plugin": "^5.0.1",
         "zod": "4.1.12",
@@ -164,7 +164,7 @@
       "devDependencies": {
         "@types/node": "24.10.0",
         "@vitest/coverage-v8": "4.1.7",
-        "dotenv": "17.2.3",
+        "dotenv": "17.4.2",
         "drizzle-kit": "^0.31.6",
         "typescript": "^5.9.3",
         "vitest": "4.1.7",
@@ -220,7 +220,7 @@
         "@marketplace/logger": "workspace:*",
         "@marketplace/shared-types": "workspace:*",
         "bcryptjs": "3.0.3",
-        "dotenv": "17.2.3",
+        "dotenv": "17.4.2",
         "fastify": "^5.8.5",
         "jsonwebtoken": "^9.0.2",
         "multer": "2.1.1",
@@ -254,7 +254,7 @@
         "@marketplace/logger": "workspace:*",
         "@marketplace/shared-types": "workspace:*",
         "bcryptjs": "3.0.3",
-        "dotenv": "17.2.3",
+        "dotenv": "17.4.2",
         "fastify": "^5.8.5",
         "jsonwebtoken": "^9.0.2",
         "node-cron": "4.2.1",
@@ -288,7 +288,7 @@
         "@marketplace/logger": "workspace:*",
         "@marketplace/shared-types": "workspace:*",
         "bull": "^4.16.5",
-        "dotenv": "17.2.3",
+        "dotenv": "17.4.2",
         "fastify": "^5.8.5",
         "handlebars": "^4.7.9",
         "jsonwebtoken": "^9.0.2",
@@ -305,7 +305,7 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@types/nodemailer": "7.0.3",
         "@types/pg": "^8.15.6",
-        "@types/supertest": "^6.0.3",
+        "@types/supertest": "^7.2.0",
         "@vitest/coverage-v8": "4.1.7",
         "drizzle-kit": "^0.31.6",
         "supertest": "^7.1.4",
@@ -329,7 +329,7 @@
         "@marketplace/shared-types": "workspace:*",
         "axios": "^1.16.0",
         "bcryptjs": "3.0.3",
-        "dotenv": "17.2.3",
+        "dotenv": "17.4.2",
         "drizzle-kit": "^0.31.6",
         "fastify": "^5.8.5",
         "jsonwebtoken": "^9.0.2",
@@ -368,7 +368,7 @@
         "bullmq": "^5.63.0",
         "compression": "^1.8.1",
         "cors": "^2.8.5",
-        "dotenv": "17.2.3",
+        "dotenv": "17.4.2",
         "fastify": "^5.8.5",
         "helmet": "^8.1.0",
         "ioredis": "^5.8.2",
@@ -417,7 +417,7 @@
         "@marketplace/logger": "workspace:*",
         "@marketplace/shared-types": "workspace:*",
         "bcryptjs": "3.0.3",
-        "dotenv": "17.2.3",
+        "dotenv": "17.4.2",
         "fastify": "^5.8.5",
         "jsonwebtoken": "^9.0.2",
         "multer": "^2.1.1",
@@ -1484,7 +1484,7 @@
 
     "dom-accessibility-api": ["dom-accessibility-api@0.6.3", "", {}, "sha512-7ZgogeTnjuHbo+ct10G9Ffp0mif17idi0IyWNVA/wcwcm7NPOD/WEHVP3n7n3MhXqxoIYm8d6MuZohYWIZ4T3w=="],
 
-    "dotenv": ["dotenv@17.2.3", "", {}, "sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w=="],
+    "dotenv": ["dotenv@17.4.2", "", {}, "sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw=="],
 
     "drizzle-kit": ["drizzle-kit@0.31.6", "", { "dependencies": { "@drizzle-team/brocli": "^0.10.2", "@esbuild-kit/esm-loader": "^2.5.5", "esbuild": "^0.25.4", "esbuild-register": "^3.5.0" }, "bin": { "drizzle-kit": "bin.cjs" } }, "sha512-/B4e/4pwnx25QwD5xXgdpo1S+077a2VZdosXbItE/oNmUgQwZydGDz9qJYmnQl/b+5IX0rLfwRhrPnroGtrg8Q=="],
 
@@ -2473,6 +2473,8 @@
     "@marketplace/booking-service/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "@marketplace/crm-service/@fastify/cors": ["@fastify/cors@11.1.0", "", { "dependencies": { "fastify-plugin": "^5.0.0", "toad-cache": "^3.7.0" } }, "sha512-sUw8ed8wP2SouWZTIbA7V2OQtMNpLj2W6qJOYhNdcmINTu6gsxVYXjQiM9mdi8UUDlcoDDJ/W2syPo1WB2QjYA=="],
+
+    "@marketplace/crm-service/@types/supertest": ["@types/supertest@7.2.0", "", { "dependencies": { "@types/methods": "^1.1.4", "@types/superagent": "^8.1.0" } }, "sha512-uh2Lv57xvggst6lCqNdFAmDSvoMG7M/HDtX4iUCquxQ5EGPtaPM5PL5Hmi7LCvOG8db7YaCPNJEeoI8s/WzIQw=="],
 
     "@marketplace/crm-service/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
