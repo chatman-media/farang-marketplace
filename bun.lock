@@ -69,7 +69,7 @@
         "dotenv": "17.2.3",
         "fastify": "^5.8.5",
         "fastify-plugin": "^5.0.1",
-        "zod": "4.1.12",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@types/node": "24.10.0",
@@ -226,7 +226,7 @@
         "multer": "2.1.1",
         "sharp": "^0.34.4",
         "uuid": "14.0.0",
-        "zod": "^4.1.12",
+        "zod": "^4.4.3",
       },
       "devDependencies": {
         "@types/bcryptjs": "3.0.0",
@@ -260,7 +260,7 @@
         "node-cron": "4.2.1",
         "redis": "5.9.0",
         "uuid": "14.0.0",
-        "zod": "^4.1.12",
+        "zod": "^4.4.3",
       },
       "devDependencies": {
         "@types/bcryptjs": "3.0.0",
@@ -296,7 +296,7 @@
         "pg": "^8.16.3",
         "redis": "5.9.0",
         "telegraf": "^4.16.3",
-        "zod": "4.1.12",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@types/bull": "^4.10.4",
@@ -305,7 +305,7 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@types/nodemailer": "7.0.3",
         "@types/pg": "^8.15.6",
-        "@types/supertest": "^6.0.3",
+        "@types/supertest": "^7.2.0",
         "@vitest/coverage-v8": "4.1.7",
         "drizzle-kit": "^0.31.6",
         "supertest": "^7.1.4",
@@ -339,7 +339,7 @@
         "redis": "5.9.0",
         "sharp": "^0.34.4",
         "uuid": "14.0.0",
-        "zod": "4.1.12",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@types/bcryptjs": "3.0.0",
@@ -378,7 +378,7 @@
         "ton-core": "^0.53.0",
         "ton-crypto": "^3.2.0",
         "uuid": "14.0.0",
-        "zod": "4.1.12",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@types/compression": "^1.8.1",
@@ -422,7 +422,7 @@
         "jsonwebtoken": "^9.0.2",
         "multer": "^2.1.1",
         "redis": "5.9.0",
-        "zod": "4.1.12",
+        "zod": "4.4.3",
       },
       "devDependencies": {
         "@types/bcryptjs": "3.0.0",
@@ -2398,7 +2398,7 @@
 
     "yocto-queue": ["yocto-queue@0.1.0", "", {}, "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="],
 
-    "zod": ["zod@4.1.12", "", {}, "sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ=="],
+    "zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
 
     "@actions/github/@actions/http-client": ["@actions/http-client@3.0.2", "", { "dependencies": { "tunnel": "^0.0.6", "undici": "^6.23.0" } }, "sha512-JP38FYYpyqvUsz+Igqlc/JG6YO9PaKuvqjM3iGvaLqFnJ7TFmcLyy2IDrY0bI0qCQug8E9K+elv5ZNfw62ZJzA=="],
 
@@ -2473,6 +2473,8 @@
     "@marketplace/booking-service/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "@marketplace/crm-service/@fastify/cors": ["@fastify/cors@11.1.0", "", { "dependencies": { "fastify-plugin": "^5.0.0", "toad-cache": "^3.7.0" } }, "sha512-sUw8ed8wP2SouWZTIbA7V2OQtMNpLj2W6qJOYhNdcmINTu6gsxVYXjQiM9mdi8UUDlcoDDJ/W2syPo1WB2QjYA=="],
+
+    "@marketplace/crm-service/@types/supertest": ["@types/supertest@7.2.0", "", { "dependencies": { "@types/methods": "^1.1.4", "@types/superagent": "^8.1.0" } }, "sha512-uh2Lv57xvggst6lCqNdFAmDSvoMG7M/HDtX4iUCquxQ5EGPtaPM5PL5Hmi7LCvOG8db7YaCPNJEeoI8s/WzIQw=="],
 
     "@marketplace/crm-service/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
