@@ -38,7 +38,7 @@
     "drizzle-kit": "^0.31.6",
     "fastify": "^5.8.5",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.1.1",
+    "multer": "^2.2.0",
     "node-cron": "4.2.1",
     "pg": "^8.16.3",
     "redis": "6.0.0",
