@@ -4,6 +4,20 @@ import { dirname } from "node:path"
 import type { Logger as PinoLogger } from "pino"
 import pino from "pino"
 
+// Strip CR/LF and other control characters from a log message so user-provided
+// values cannot forge new log entries (CodeQL js/log-injection).
+function sanitizeLogMessage(message: string): string {
+  if (typeof message !== "string") return message
+  // Replace control characters (incl. CR/LF) so user-provided values
+  // cannot forge new log entries (CodeQL js/log-injection).
+  let out = ""
+  for (let i = 0; i < message.length; i++) {
+    const code = message.charCodeAt(i)
+    out += code < 0x20 || code === 0x7f ? " " : message[i]
+  }
+  return out
+}
+
 // Log level types
 export type LogLevel = "error" | "warn" | "info" | "debug" | "trace"
 
@@ -129,61 +143,66 @@ class UniversalLogger implements ILogger {
   }
 
   error(message: string, meta?: any): void {
+    const safe = sanitizeLogMessage(message)
     if (this.isBrowser) {
-      console.error(`[${this.category}]`, message, meta)
+      console.error(`[${this.category}]`, safe, meta)
     } else if (this.logger) {
       if (meta) {
-        this.logger.error(meta, message)
+        this.logger.error(meta, safe)
       } else {
-        this.logger.error(message)
+        this.logger.error(safe)
       }
     }
   }
 
   warn(message: string, meta?: any): void {
+    const safe = sanitizeLogMessage(message)
     if (this.isBrowser) {
-      console.warn(`[${this.category}]`, message, meta)
+      console.warn(`[${this.category}]`, safe, meta)
     } else if (this.logger) {
       if (meta) {
-        this.logger.warn(meta, message)
+        this.logger.warn(meta, safe)
       } else {
-        this.logger.warn(message)
+        this.logger.warn(safe)
       }
     }
   }
 
   info(message: string, meta?: any): void {
+    const safe = sanitizeLogMessage(message)
     if (this.isBrowser) {
-      console.info(`[${this.category}]`, message, meta)
+      console.info(`[${this.category}]`, safe, meta)
     } else if (this.logger) {
       if (meta) {
-        this.logger.info(meta, message)
+        this.logger.info(meta, safe)
       } else {
-        this.logger.info(message)
+        this.logger.info(safe)
       }
     }
   }
 
   debug(message: string, meta?: any): void {
+    const safe = sanitizeLogMessage(message)
     if (this.isBrowser) {
-      console.debug(`[${this.category}]`, message, meta)
+      console.debug(`[${this.category}]`, safe, meta)
     } else if (this.logger) {
       if (meta) {
-        this.logger.debug(meta, message)
+        this.logger.debug(meta, safe)
       } else {
-        this.logger.debug(message)
+        this.logger.debug(safe)
       }
     }
   }
 
   trace(message: string, meta?: any): void {
+    const safe = sanitizeLogMessage(message)
     if (this.isBrowser) {
-      console.debug(`[${this.category}] [TRACE]`, message, meta)
+      console.debug(`[${this.category}] [TRACE]`, safe, meta)
     } else if (this.logger) {
       if (meta) {
-        this.logger.trace(meta, message)
+        this.logger.trace(meta, safe)
       } else {
-        this.logger.trace(message)
+        this.logger.trace(safe)
       }
     }
   }

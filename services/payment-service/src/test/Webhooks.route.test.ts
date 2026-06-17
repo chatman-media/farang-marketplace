@@ -133,14 +133,23 @@ describe("webhook routes", () => {
       expect(tonServiceMock.verifyTransaction).not.toHaveBeenCalled()
     })
 
-    it("ignores unconfirmed transactions", async () => {
+    it("does not trust the client-supplied confirmed flag and re-verifies on-chain", async () => {
+      // confirmed: false must NOT short-circuit; the server always re-verifies
+      // the transaction itself (CodeQL js/user-controlled-bypass hardening).
+      paymentServiceMock.findPaymentByTonTransaction.mockResolvedValue({ id: "pay-3" })
+      tonServiceMock.verifyTransaction.mockResolvedValue(true)
+      paymentServiceMock.updatePaymentStatus.mockResolvedValue({ id: "pay-3" })
+
       const res = await app.inject({
         method: "POST",
         url: "/webhooks/ton",
         payload: { ...baseBody, confirmed: false },
       })
+
       expect(res.statusCode).toBe(200)
-      expect(paymentServiceMock.findPaymentByTonTransaction).not.toHaveBeenCalled()
+      expect(paymentServiceMock.findPaymentByTonTransaction).toHaveBeenCalled()
+      expect(tonServiceMock.verifyTransaction).toHaveBeenCalledWith("hash-abc")
+      expect(paymentServiceMock.updatePaymentStatus).toHaveBeenCalled()
     })
 
     it("returns 500 when the service throws", async () => {
