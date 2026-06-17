@@ -47,7 +47,7 @@
     "ton-core": "^0.53.0",
     "ton-crypto": "^3.2.0",
     "uuid": "14.0.0",
-    "zod": "4.1.12"
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",
