@@ -57,7 +57,7 @@
     "@types/supertest": "^6.0.3",
     "@types/uuid": "11.0.0",
     "drizzle-kit": "^0.31.6",
-    "supertest": "^7.1.4",
+    "supertest": "^7.2.2",
     "typescript": "5.9.3",
     "vitest": "4.1.7"
   },
