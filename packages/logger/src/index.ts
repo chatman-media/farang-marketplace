@@ -8,14 +8,9 @@ import pino from "pino"
 // values cannot forge new log entries (CodeQL js/log-injection).
 function sanitizeLogMessage(message: string): string {
   if (typeof message !== "string") return message
-  // Replace control characters (incl. CR/LF) so user-provided values
-  // cannot forge new log entries (CodeQL js/log-injection).
-  let out = ""
-  for (let i = 0; i < message.length; i++) {
-    const code = message.charCodeAt(i)
-    out += code < 0x20 || code === 0x7f ? " " : message[i]
-  }
-  return out
+  // Remove CR/LF so user-provided values cannot forge new log entries
+  // (CodeQL js/log-injection).
+  return message.replace(/[\r\n]+/g, " ")
 }
 
 // Log level types
