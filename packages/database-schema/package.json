@@ -34,7 +34,7 @@
     "typescript": "^5.9.3",
     "vitest": "4.1.7",
     "@vitest/coverage-v8": "4.1.7",
-    "dotenv": "17.2.3"
+    "dotenv": "17.4.2"
   },
   "exports": {
     ".": {

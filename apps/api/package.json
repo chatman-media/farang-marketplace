@@ -35,7 +35,7 @@
     "@marketplace/payment-service": "workspace:*",
     "@marketplace/shared-types": "workspace:*",
     "@marketplace/user-service": "workspace:*",
-    "dotenv": "17.2.3",
+    "dotenv": "17.4.2",
     "fastify": "^5.8.5",
     "fastify-plugin": "^5.0.1",
     "zod": "4.1.12"

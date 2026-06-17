@@ -27,7 +27,7 @@
     "@fastify/cors": "11.1.0",
     "@fastify/helmet": "13.0.2",
     "@fastify/multipart": "^9.3.0",
-    "dotenv": "17.2.3",
+    "dotenv": "17.4.2",
     "fastify": "^5.8.5",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "8.0.5",
