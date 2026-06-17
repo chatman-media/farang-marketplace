@@ -45,6 +45,9 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/webhooks/ton",
     {
+      config: {
+        rateLimit: { max: 30, timeWindow: "1 minute" },
+      },
       schema: {
         body: tonWebhookSchema,
       },
@@ -53,30 +56,30 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
       try {
         const { transaction_hash, comment, confirmed } = request.body
 
-        fastify.log.info({ transaction_hash }, "Received TON webhook")
+        fastify.log.info({ transaction_hash, confirmed }, "Received TON webhook")
 
-        if (confirmed) {
-          // Find payment by transaction hash or comment
-          const payment = await paymentService.findPaymentByTonTransaction(transaction_hash, comment)
+        // The client-supplied `confirmed` flag is not trusted to gate the status
+        // update; the payment is only completed after server-side on-chain
+        // verification of the transaction (CodeQL js/user-controlled-bypass).
+        const payment = await paymentService.findPaymentByTonTransaction(transaction_hash, comment)
 
-          if (payment) {
-            // Verify transaction on blockchain
-            const isValid = await tonService.verifyTransaction(transaction_hash)
+        if (payment) {
+          // Verify transaction on blockchain
+          const isValid = await tonService.verifyTransaction(transaction_hash)
 
-            if (isValid) {
-              await paymentService.updatePaymentStatus(
-                payment.id,
-                PaymentStatus.COMPLETED,
-                `TON transaction confirmed: ${transaction_hash}`,
-              )
+          if (isValid) {
+            await paymentService.updatePaymentStatus(
+              payment.id,
+              PaymentStatus.COMPLETED,
+              `TON transaction confirmed: ${transaction_hash}`,
+            )
 
-              fastify.log.info({ paymentId: payment.id }, "Payment confirmed via TON webhook")
-            } else {
-              fastify.log.warn({ transaction_hash }, "Invalid TON transaction in webhook")
-            }
+            fastify.log.info({ paymentId: payment.id }, "Payment confirmed via TON webhook")
           } else {
-            fastify.log.warn({ transaction_hash }, "No payment found for TON transaction")
+            fastify.log.warn({ transaction_hash }, "Invalid TON transaction in webhook")
           }
+        } else {
+          fastify.log.warn({ transaction_hash }, "No payment found for TON transaction")
         }
 
         return reply.send({ success: true, processed: true })
@@ -94,6 +97,9 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/webhooks/stripe",
     {
+      config: {
+        rateLimit: { max: 30, timeWindow: "1 minute" },
+      },
       preHandler: async (request, reply) => {
         // Verify Stripe webhook signature
         const signature = request.headers["stripe-signature"] as string
@@ -166,6 +172,9 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/webhooks/payment",
     {
+      config: {
+        rateLimit: { max: 30, timeWindow: "1 minute" },
+      },
       schema: {
         body: z.object({
           payment_id: z.string().uuid(),
@@ -214,6 +223,9 @@ export default async function webhooksRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/webhooks/refund",
     {
+      config: {
+        rateLimit: { max: 30, timeWindow: "1 minute" },
+      },
       schema: {
         body: refundWebhookSchema,
       },
