@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import fs from "node:fs/promises"
 import path from "node:path"
 import logger from "@marketplace/logger"
@@ -46,7 +47,7 @@ const uploadRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
           continue
         }
 
-        const uid = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+        const uid = `${Date.now()}-${randomUUID()}`
         const outFile = path.join(uploadDir, `${uid}.webp`)
 
         try {
