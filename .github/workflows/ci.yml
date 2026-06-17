@@ -181,7 +181,9 @@ jobs:
           TEST_DATABASE_URL: ${{ env.DATABASE_URL }}
 
       - name: 🧪 Run unit tests
-        run: bun run test
+        # --concurrency=1 (via test:ci): suites run sequentially so they don't
+        # race on the shared CI database. See test:ci in root package.json.
+        run: bun run test:ci
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           REDIS_URL: ${{ env.REDIS_URL }}
