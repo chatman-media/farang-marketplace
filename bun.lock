@@ -51,7 +51,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@fastify/compress": "^8.1.0",
-        "@fastify/cors": "^11.1.0",
+        "@fastify/cors": "^11.2.0",
         "@fastify/helmet": "^13.0.2",
         "@fastify/multipart": "^9.3.0",
         "@fastify/rate-limit": "^10.3.0",
@@ -212,7 +212,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@fastify/compress": "^8.1.0",
-        "@fastify/cors": "^11.1.0",
+        "@fastify/cors": "^11.2.0",
         "@fastify/helmet": "^13.0.2",
         "@fastify/multipart": "^9.3.0",
         "@fastify/rate-limit": "^10.3.0",
@@ -246,7 +246,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@fastify/compress": "^8.1.0",
-        "@fastify/cors": "^11.1.0",
+        "@fastify/cors": "^11.2.0",
         "@fastify/helmet": "^13.0.2",
         "@fastify/rate-limit": "^10.3.0",
         "@marketplace/database-schema": "workspace:*",
@@ -280,7 +280,7 @@
       "name": "@marketplace/crm-service",
       "version": "1.0.0",
       "dependencies": {
-        "@fastify/cors": "11.1.0",
+        "@fastify/cors": "11.2.0",
         "@fastify/helmet": "13.0.2",
         "@fastify/multipart": "^9.3.0",
         "@line/bot-sdk": "^10.4.0",
@@ -305,7 +305,7 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@types/nodemailer": "7.0.3",
         "@types/pg": "^8.15.6",
-        "@types/supertest": "^6.0.3",
+        "@types/supertest": "^7.2.0",
         "@vitest/coverage-v8": "4.1.7",
         "drizzle-kit": "^0.31.6",
         "supertest": "^7.1.4",
@@ -319,7 +319,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@fastify/compress": "^8.1.0",
-        "@fastify/cors": "11.1.0",
+        "@fastify/cors": "11.2.0",
         "@fastify/helmet": "13.0.2",
         "@fastify/multipart": "^9.3.0",
         "@fastify/rate-limit": "^10.3.0",
@@ -410,7 +410,7 @@
       "name": "@marketplace/user-service",
       "version": "1.0.0",
       "dependencies": {
-        "@fastify/cors": "11.1.0",
+        "@fastify/cors": "11.2.0",
         "@fastify/helmet": "13.0.2",
         "@fastify/multipart": "^9.3.0",
         "@marketplace/database-schema": "workspace:*",
@@ -2472,7 +2472,7 @@
 
     "@marketplace/booking-service/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
-    "@marketplace/crm-service/@fastify/cors": ["@fastify/cors@11.1.0", "", { "dependencies": { "fastify-plugin": "^5.0.0", "toad-cache": "^3.7.0" } }, "sha512-sUw8ed8wP2SouWZTIbA7V2OQtMNpLj2W6qJOYhNdcmINTu6gsxVYXjQiM9mdi8UUDlcoDDJ/W2syPo1WB2QjYA=="],
+    "@marketplace/crm-service/@types/supertest": ["@types/supertest@7.2.0", "", { "dependencies": { "@types/methods": "^1.1.4", "@types/superagent": "^8.1.0" } }, "sha512-uh2Lv57xvggst6lCqNdFAmDSvoMG7M/HDtX4iUCquxQ5EGPtaPM5PL5Hmi7LCvOG8db7YaCPNJEeoI8s/WzIQw=="],
 
     "@marketplace/crm-service/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
@@ -2483,8 +2483,6 @@
     "@marketplace/i18n/@types/react": ["@types/react@19.2.2", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-6mDvHUFSjyT2B2yeNx2nUgMxh9LtOWvkhIU3uePn2I2oyNymUAX1NIsdgviM4CH+JSrp2D2hsMvJOkxY+0wNRA=="],
 
     "@marketplace/i18n/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
-
-    "@marketplace/listing-service/@fastify/cors": ["@fastify/cors@11.1.0", "", { "dependencies": { "fastify-plugin": "^5.0.0", "toad-cache": "^3.7.0" } }, "sha512-sUw8ed8wP2SouWZTIbA7V2OQtMNpLj2W6qJOYhNdcmINTu6gsxVYXjQiM9mdi8UUDlcoDDJ/W2syPo1WB2QjYA=="],
 
     "@marketplace/listing-service/@types/node": ["@types/node@24.10.0", "", { "dependencies": { "undici-types": "~7.16.0" } }, "sha512-qzQZRBqkFsYyaSWXuEHc2WR9c0a0CXwiE5FWUvn7ZM+vdy1uZLfCunD38UzhuB7YN/J11ndbDBcTmOdxJo9Q7A=="],
 
@@ -2513,8 +2511,6 @@
     "@marketplace/ton-app/react-dom": ["react-dom@19.2.0", "", { "dependencies": { "scheduler": "^0.27.0" }, "peerDependencies": { "react": "^19.2.0" } }, "sha512-UlbRu4cAiGaIewkPyiRGJk0imDN2T3JjieT6spoL2UeSf5od4n5LB/mQ4ejmxhCFT1tYe8IvaFulzynWovsEFQ=="],
 
     "@marketplace/ton-app/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
-
-    "@marketplace/user-service/@fastify/cors": ["@fastify/cors@11.1.0", "", { "dependencies": { "fastify-plugin": "^5.0.0", "toad-cache": "^3.7.0" } }, "sha512-sUw8ed8wP2SouWZTIbA7V2OQtMNpLj2W6qJOYhNdcmINTu6gsxVYXjQiM9mdi8UUDlcoDDJ/W2syPo1WB2QjYA=="],
 
     "@marketplace/user-service/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
