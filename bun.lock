@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "marketplace-rental-platform",
@@ -131,7 +130,7 @@
         "postcss": "^8.5.6",
         "tailwindcss": "^4.1.16",
         "typescript": "^5.9.3",
-        "undici": "^7.24.0",
+        "undici": "^8.5.0",
         "vite": "7.3.5",
         "vitest": "4.1.9",
       },
