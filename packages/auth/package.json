@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "24.10.0",
+    "@types/node": "25.9.3",
     "fastify": "^5.6.1",
     "typescript": "^5.9.3"
   },
