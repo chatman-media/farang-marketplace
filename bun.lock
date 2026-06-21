@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "marketplace-rental-platform",
@@ -294,7 +293,7 @@
         "fastify": "^5.8.5",
         "handlebars": "^4.7.9",
         "jsonwebtoken": "^9.0.2",
-        "nodemailer": "8.0.9",
+        "nodemailer": "9.0.1",
         "pg": "^8.16.3",
         "redis": "6.0.0",
         "telegraf": "^4.16.3",
