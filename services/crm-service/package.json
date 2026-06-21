@@ -30,7 +30,7 @@
     "dotenv": "17.4.2",
     "fastify": "^5.8.5",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "8.0.9",
+    "nodemailer": "9.0.1",
     "pg": "^8.16.3",
     "redis": "6.0.0",
     "telegraf": "^4.16.3",
