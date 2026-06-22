@@ -37,7 +37,7 @@
     "@types/supertest": "^6.0.3",
     "supertest": "^7.2.2",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vitest": "4.1.9"
   },
   "exports": {
