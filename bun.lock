@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "marketplace-rental-platform",
@@ -227,7 +226,7 @@
         "jsonwebtoken": "^9.0.2",
         "multer": "2.2.0",
         "sharp": "^0.35.1",
-        "uuid": "14.0.0",
+        "uuid": "14.0.1",
         "zod": "^4.4.3",
       },
       "devDependencies": {
@@ -261,7 +260,7 @@
         "jsonwebtoken": "^9.0.2",
         "node-cron": "4.2.1",
         "redis": "6.0.0",
-        "uuid": "14.0.0",
+        "uuid": "14.0.1",
         "zod": "^4.4.3",
       },
       "devDependencies": {
@@ -340,7 +339,7 @@
         "pg": "^8.16.3",
         "redis": "6.0.0",
         "sharp": "^0.35.1",
-        "uuid": "14.0.0",
+        "uuid": "14.0.1",
         "zod": "4.4.3",
       },
       "devDependencies": {
@@ -379,7 +378,7 @@
         "ton": "^13.9.0",
         "ton-core": "^0.53.0",
         "ton-crypto": "^3.2.0",
-        "uuid": "14.0.0",
+        "uuid": "14.0.1",
         "zod": "4.4.3",
       },
       "devDependencies": {
