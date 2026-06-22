@@ -20,7 +20,7 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@line/bot-sdk": "^10.4.0",
+    "@line/bot-sdk": "^11.0.2",
     "@marketplace/shared-types": "workspace:*",
     "@marketplace/database-schema": "workspace:*",
     "@marketplace/logger": "workspace:*",
