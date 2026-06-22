@@ -32,7 +32,7 @@
     "@marketplace/shared-types": "workspace:*",
     "@marketplace/database-schema": "workspace:*",
     "@marketplace/logger": "workspace:*",
-    "@tonconnect/sdk": "^3.3.1",
+    "@tonconnect/sdk": "^4.0.0",
     "axios": "^1.16.0",
     "bullmq": "^5.63.0",
     "compression": "^1.8.1",
