@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "marketplace-rental-platform",
@@ -178,7 +177,7 @@
       "dependencies": {
         "i18next": "25.10.10",
         "i18next-browser-languagedetector": "^8.2.0",
-        "i18next-http-backend": "3.0.5",
+        "i18next-http-backend": "3.0.6",
         "react-i18next": "16.2.4",
       },
       "devDependencies": {
@@ -1692,7 +1691,7 @@
 
     "i18next-browser-languagedetector": ["i18next-browser-languagedetector@8.2.0", "", { "dependencies": { "@babel/runtime": "^7.23.2" } }, "sha512-P+3zEKLnOF0qmiesW383vsLdtQVyKtCNA9cjSoKCppTKPQVfKd2W8hbVo5ZhNJKDqeM7BOcvNoKJOjpHh4Js9g=="],
 
-    "i18next-http-backend": ["i18next-http-backend@3.0.5", "", { "dependencies": { "cross-fetch": "4.1.0" } }, "sha512-QaWHnsxieEDcqKe+vo/RFqpiIFRi/KBqlOSPcUlvinBaISCeiTRCbtrazHAjtHtsLC66oDsROAH8frWkQzfMMQ=="],
+    "i18next-http-backend": ["i18next-http-backend@3.0.6", "", { "dependencies": { "cross-fetch": "4.1.0" } }, "sha512-mBOqy8993jtqAoj6XaI1XeC/8/9v6EPS+681ziegrPvTB0DoaCY7PpTS0SpY56qLMoS4OI1TZEM2Zf59zNh05w=="],
 
     "iconv-lite": ["iconv-lite@0.4.24", "", { "dependencies": { "safer-buffer": ">= 2.1.2 < 3" } }, "sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA=="],
 
