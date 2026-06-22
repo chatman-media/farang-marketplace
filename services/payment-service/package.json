@@ -54,7 +54,7 @@
     "@types/cors": "^2.8.19",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.9.3",
-    "@types/supertest": "^6.0.3",
+    "@types/supertest": "^7.2.0",
     "@types/uuid": "11.0.0",
     "drizzle-kit": "^0.31.6",
     "supertest": "^7.2.2",
