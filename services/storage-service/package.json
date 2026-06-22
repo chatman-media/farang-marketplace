@@ -14,7 +14,7 @@
     "lint": "echo 'No linting configured'"
   },
   "dependencies": {
-    "@vercel/blob": "2.0.0",
+    "@vercel/blob": "2.4.1",
     "fastify": "^5.8.5"
   },
   "devDependencies": {
