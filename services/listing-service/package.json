@@ -47,12 +47,12 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@types/multer": "^2.0.0",
+    "@types/multer": "^2.1.0",
     "@types/pg": "^8.15.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/bcryptjs": "3.0.0",
     "@types/uuid": "11.0.0",
-    "@types/node": "25.9.3",
+    "@types/node": "25.9.4",
     "@types/node-cron": "^3.0.11",
     "typescript": "^5.9.3",
     "vitest": "4.1.9",

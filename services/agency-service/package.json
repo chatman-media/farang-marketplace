@@ -49,11 +49,11 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "25.9.3",
+    "@types/node": "25.9.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/bcryptjs": "3.0.0",
     "@types/uuid": "11.0.0",
-    "@types/multer": "2.0.0",
+    "@types/multer": "2.1.0",
     "drizzle-kit": "^0.31.6",
     "typescript": "^6.0.3",
     "vitest": "4.1.9",
