@@ -24,7 +24,7 @@
     "@fastify/helmet": "^13.0.2",
     "@fastify/multipart": "^9.3.0",
     "@fastify/rate-limit": "^11.0.0",
-    "@fastify/static": "^9.1.1",
+    "@fastify/static": "^10.1.2",
     "@thailand-marketplace/agency-service": "workspace:*",
     "@marketplace/auth": "workspace:*",
     "@marketplace/booking-service": "workspace:*",
